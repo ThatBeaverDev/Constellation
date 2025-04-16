@@ -34,7 +34,78 @@ async function loader() {
 		startTime: Date.now()
 	}
 
+	let bootedPercentage
+	const booted = {
+		"": false,
+		logs: false,
+		keyListeners: false,
+		textPrototype: false,
+		uriParameters: false,
+		compatibility: false,
+		fetchURL: false,
+		processes: false,
+		vfs: false,
+		fs: false,
+		cryptography: false,
+		localFS: false,
+		bootloader: false
+	}
+	const bootables = Object.keys(booted)
+	const totalToBoot = bootables.length
+
+	function markAsBooted(name) {
+		if (booted[name] !== false) {
+			throw new Error("Segment " + name + " cannot be marked as booted when it does not exist")
+		}
+		booted[name] = true
+
+		let done = 0
+		for (const i in booted) {
+			if (booted[i] == true) {
+				done += 1
+			}
+		}
+		bootedPercentage = done / totalToBoot
+		const percentText = Math.round(bootedPercentage * 10000) / 100 + "%"
+		try {
+			system.log(Name, name + " booted. " + percentText + " Booted!")
+		} catch(e) {}
+
+		const index = bootables.indexOf(name)
+		const text = index == bootables.length - 1 ? "Finalising..." : bootables[index + 1]
+
+		document.getElementById("logsBox").innerHTML = `<p style="text-align: center;">${percentText} booted.<br>Current Stage: ${text}</p>`
+	}
+
+	markAsBooted("")
+
 	system.baseURI = "."
+
+	system.license = "GPL-3.0 License"
+
+	system.cast = {}
+	system.cast.Objectify = function Objectify(obj) {
+		if (typeof obj === "object") {
+			return obj;
+		}
+		try {
+			return (JSON.parse(obj))
+		} catch (e) { }
+		try {
+			return (obj)
+		} catch (e) { }
+	}
+
+	system.cast.Stringify = function Stringify(str, beautify) {
+		if (typeof str === "object") {
+			if (beautify) {
+				return JSON.stringify(str, null, 4);
+			} else {
+				return JSON.stringify(str);
+			}
+		}
+		return (String(str))
+	}
 
 	system.safe = true
 	system.forceSystemLog = true
@@ -104,7 +175,6 @@ async function loader() {
 		const obj = {
 			type: "warn",
 			origin: origin,
-			content: origin + ": " + system.cast.Stringify(str)
 		}
 		system.logs.push(obj)
 		console.warn(str)
@@ -121,6 +191,8 @@ async function loader() {
 		system.logs.push(obj)
 		system.refreshLogsPanel()
 	}
+
+	markAsBooted("logs")
 
 	// INPUT
 	system.keys = {}
@@ -147,6 +219,8 @@ async function loader() {
 	document.addEventListener('keyup', (e) => {
 		system.keys[e.key] = false
 	})
+
+	markAsBooted("keyListeners")
 
 	String.prototype.textAfter = function (after) {
 		let res = ""
@@ -175,29 +249,7 @@ async function loader() {
 		return res.split("").reverse().join("").textBefore(after).split("").reverse().join("")
 	}
 
-	system.cast = {}
-	system.cast.Objectify = function Objectify(obj) {
-		if (typeof obj === "object") {
-			return obj;
-		}
-		try {
-			return (JSON.parse(obj))
-		} catch (e) { }
-		try {
-			return (obj)
-		} catch (e) { }
-	}
-
-	system.cast.Stringify = function Stringify(str, beautify) {
-		if (typeof str === "object") {
-			if (beautify) {
-				return JSON.stringify(str, null, 4);
-			} else {
-				return JSON.stringify(str);
-			}
-		}
-		return (String(str))
-	}
+	markAsBooted("textPrototype")
 
 	system.setParam = function (name, value) {
 		var s = new URLSearchParams(location.search);
@@ -209,6 +261,8 @@ async function loader() {
 		return new URLSearchParams(location.search).get(String(name))
 	}
 
+	markAsBooted("uriParameters")
+
 	obj = checkIfCompatible()
 
 	if (!obj.isCompatible) {
@@ -218,6 +272,8 @@ async function loader() {
 		document.getElementById("preInput").innerText = ""
 		return
 	}
+
+	markAsBooted("compatibility")
 
 	system.fsAPI = true
 
@@ -242,7 +298,7 @@ async function loader() {
 	delete obj
 
 	system.fetchURL = async function fetchURL(url) {
-		console.log("fetchURL request to " + url)
+		system.log(Name, "fetchURL request to " + url)
 		const response = await fetch(url);
 		const data = await response.text();
 		if (response.ok) {
@@ -253,7 +309,10 @@ async function loader() {
 		}
 	}
 
+	markAsBooted("fetchURL")
+
 	system.asciiName = await system.fetchURL('./nameAscii.txt')
+
 	document.getElementById("logoBox").innerHTML = system.asciiName
 
 
@@ -302,6 +361,8 @@ async function loader() {
 	const processes = system.processes
 
 	processes[PID] = proc
+
+	markAsBooted("processes")
 
 
 
@@ -813,7 +874,7 @@ async function loader() {
 
 	system.newVFS = (PID, directory, keyname = "fs", link = true) => {
 
-		console.log(`VFS in ${directory} has been created and mounted.`)
+		system.log(Name, `VFS in ${directory} has been created and mounted.`)
 
 		if (link == true) {
 			const vfs = getVFS(directory)
@@ -850,6 +911,8 @@ async function loader() {
 		delete system.vfs[directory]
 	}
 
+	markAsBooted("vfs")
+
 	// REMOVE! // why? this is how the filesystem gets created? I think we need the filesystem.
 	system.processes[-1].variables.fs = system.newVFS(-1, "/", "fs", false)
 
@@ -866,7 +929,7 @@ async function loader() {
 		return new Error(`Operation Failed: Parent directory of ${directory} does not exist.`)
 	}
 
-
+	markAsBooted("fs")
 
 
 
@@ -888,6 +951,8 @@ async function loader() {
 
 	const crypt = await system.fetchURL(system.baseURI + '/boot/cryptography.js') // cryptoFetch
 	eval(crypt)
+
+	markAsBooted("cryptography")
 
 	system.localFS = {}
 
@@ -934,6 +999,8 @@ async function loader() {
 		system.localFS.commit = async function () { }
 	}
 
+	markAsBooted("localFS")
+
 	const handle = (e) => {
 		switch (e.key) {
 			case "Enter":
@@ -952,6 +1019,7 @@ async function loader() {
 	}
 
 	if (!system.fsAPI) {
+		markAsBooted("bootloader")
 		bootOS("New", system)
 		return
 	}
@@ -965,9 +1033,13 @@ async function loader() {
 
 
 	system.post("", "")
+
+	markAsBooted("bootSelection")
+
 	const loop = setInterval(function () {
 		if (system.progress) {
 			try {
+				markAsBooted("bootloader")
 				bootOS(system.options[system.selection], system)
 				document.removeEventListener('keydown', handle)
 			} catch (e) {
@@ -994,8 +1066,12 @@ async function loader() {
 }
 
 async function bootOS(osName, ssm) {
+	if (ssm.getParam("noBoot") == "true") {
+		return
+	}
 
 	console.debug("Loading Filesystem...")
+
 
 	const system = ssm;
 	// delete bootloader keys
