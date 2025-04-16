@@ -154,12 +154,13 @@ async function loader() {
 		const obj = {
 			type: "log",
 			origin: origin,
-			content: origin + ": " + system.cast.Stringify(str)
+			content: "[" + String(Date.now() - system.startTime).padStart(7, 0) + "] INFO  {" + origin + "} - " + system.cast.Stringify(str)
 		}
 		system.logs.push(obj)
-		console.log(str)
+		console.log(obj.content)
 		system.refreshLogsPanel()
 	}
+
 	system.post = function (origin, str) {
 		const obj = {
 			type: "post",
@@ -175,20 +176,20 @@ async function loader() {
 		const obj = {
 			type: "warn",
 			origin: origin,
+			content: "[" + String(Date.now() - system.startTime).padStart(7, 0) + "] WARN  {" + origin + "} - " + system.cast.Stringify(str)
 		}
 		system.logs.push(obj)
-		console.warn(str)
+		console.warn(obj.content)
 		system.refreshLogsPanel()
 	}
 	system.error = function (origin = Name, str) {
-		console.error(`Error in ${origin}:`)
-		console.error(str)
 		const obj = {
 			type: "error",
 			origin: origin,
-			content: origin + ": " + system.cast.Stringify(str)
+			content: "[" + String(Date.now() - system.startTime).padStart(7, 0) + "] ERROR {" + origin + "} - " + system.cast.Stringify(str)
 		}
 		system.logs.push(obj)
+		console.error(obj.content)
 		system.refreshLogsPanel()
 	}
 
