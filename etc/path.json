@@ -2,6 +2,7 @@
     "/bin",
     "/sbin",
     "/usr/bin",
+    "/usr/sbin",
     "/usr/games",
     "/boot"
 ]
