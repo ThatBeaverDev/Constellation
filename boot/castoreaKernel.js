@@ -328,26 +328,6 @@ async function init() {
 			system.index = JSON.parse(packages).packages
 		}
 
-		system.csw = new Function("system", system.fs.readFile("/boot/csw.js"))
-		system.csw(system)
-
-		// source the repo for installs
-		await system.startProcess(PID, "/bin/aurora.js", ["source", "../aurora/pkgs", "as", "default"], true)
-
-		if (system.isNew) {
-			// install
-			await system.startProcess(PID, "/bin/aurora.js", ["install", system.index, "-s"], true)
-
-			delete system.index // remove the index from memory
-
-			system.log(Name, "System successfully Installed!")
-		}
-
-		// source local for devs
-		await system.startProcess(PID, "/bin/aurora.js", ["source", "http://localhost:555/aurora/pkgs", "as", "local"], true)
-
-		document.title = system.fs.readFile('/etc/hostname')
-
 		// start user system
 		system.user = "root"
 		system.users = system.fs.readFile("/etc/passwd")
@@ -355,7 +335,21 @@ async function init() {
 		// function to register users
 		system.users.register = function (name, object) {
 
-			const obj = JSON.parse(JSON.stringify(object))
+			const deflt = {
+				userID: 0,
+				groupID: 0,
+				otherInfo: {},
+				baseDir: "/",
+				shell: "/bin/aquila.js",
+				permissions: {
+					all: false,
+					read: false,
+					write: false,
+					delete: false
+				}
+			}
+
+			const obj = {...object, ...deflt}
 
 			if (system.users[name] !== undefined) {
 				throw new Error("user named " + name + " already exists!")
@@ -409,6 +403,26 @@ async function init() {
 				}
 			})
 		}
+
+		system.csw = new Function("system", system.fs.readFile("/boot/csw.js"))
+		system.csw(system)
+
+		// source the repo for installs
+		await system.startProcess(PID, "/bin/aurora.js", ["source", "../aurora/pkgs", "as", "default"], true)
+
+		if (system.isNew) {
+			// install
+			await system.startProcess(PID, "/bin/aurora.js", ["install", system.index, "-s"], true)
+
+			delete system.index // remove the index from memory
+
+			system.log(Name, "System successfully Installed!")
+		}
+
+		// source local for devs
+		await system.startProcess(PID, "/bin/aurora.js", ["source", "http://localhost:555/aurora/pkgs", "as", "local"], true)
+
+		document.title = system.fs.readFile('/etc/hostname')
 
 		system.focus = []
 		system.fcs = undefined
