@@ -349,7 +349,8 @@ async function loader() {
 		isUnsafe: true,
 		args: [],
 		token: {
-			user: "root"
+			user: "root",
+			root: "/"
 		},
 		variables: {
 			shared: {
