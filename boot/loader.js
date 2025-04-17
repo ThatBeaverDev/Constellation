@@ -193,6 +193,13 @@ async function loader() {
 		system.refreshLogsPanel()
 	}
 
+	window.log = system.log;
+	window.post = system.post;
+	window.warn = system.warn;
+	window.error = system.error;
+
+	log(Name, "This system and codebase is under the " + system.license + ".")
+
 	markAsBooted("logs")
 
 	// INPUT
