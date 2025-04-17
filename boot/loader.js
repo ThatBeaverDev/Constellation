@@ -210,8 +210,7 @@ async function loader() {
 			e.preventDefault();
 		}
 		let cmdKey = "Control"
-		console.log(navigator.platform) // can't use navigator.userAgentData.platform
-		if (navigator.platform == "macIntel") {
+		if (navigator.platform == "macIntel") { // can't use navigator.userAgentData.platform
 			cmdKey = "Meta"
 		}
 
