@@ -65,7 +65,10 @@ async function init() {
 
 		system.asyncFunction = Object.getPrototypeOf(async function () { }).constructor;
 
-		system.startProcess = async function (parentPID, dir, args = [], isUnsafe = false, stdin = null, usr) {
+		system.startProcess = async function (parentPID, dir, args = [], unsafe = false, stdin = null, usr) {
+
+			const isUnsafe = unsafe
+
 			if (system.fs.readFile(dir) == undefined) {
 				return
 			}
@@ -130,7 +133,8 @@ async function init() {
 			obj.isUnsafe = isUnsafe
 			obj.args = args
 			obj.token = {
-				user: user
+				user: user,
+				root: system.processes[parentPID].token.root
 			}
 			obj.tokenID = tokenID
 			obj.variables = {
@@ -349,7 +353,7 @@ async function init() {
 				}
 			}
 
-			const obj = {...object, ...deflt}
+			const obj = {...deflt, ...object}
 
 			if (system.users[name] !== undefined) {
 				throw new Error("user named " + name + " already exists!")
