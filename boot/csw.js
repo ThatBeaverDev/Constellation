@@ -11,6 +11,7 @@ class token {
     constructor(PID, user) {
         this.PID = PID
         this.user = user
+        this.permissions = JSON.parse(JSON.stringify(system.users[user].permissions))
     }
 
     checkPermission(permission) {
@@ -18,15 +19,31 @@ class token {
     }
 }
 
+function applyRootPoint(dr, tokenID) {
+    let dir = String(dr).split("")
+    const rootpoint = system.processes[tokeninf(tokenID).PID].token.root
+    if (rootpoint !== "/") {
+        if (dr == "/") {
+            dir[0] = rootpoint
+        } else {
+            dir[0] = rootpoint + "/"
+        }
+    }
+    return dir.join("")
+}
+
 csw = {}
 
 // files functions
 csw.fs = {}
 // files
-csw.fs.read = function (tokenID, directory, attribute) {
-    if (directory == undefined) {
+csw.fs.read = function (tokenID, dr, attribute) {
+    if (dr == undefined) {
         throw new Error("directory must be defined!")
     }
+
+    const directory = applyRootPoint(dr, tokenID);
+
     if (directory == "/proc") {
         return system.processes
     }
@@ -35,19 +52,23 @@ csw.fs.read = function (tokenID, directory, attribute) {
 
     return system.fs.readFile(directory, attribute, token.user)
 }
-csw.fs.write = function (tokenID, directory, contents) {
-    if (directory == undefined || contents == undefined) {
+csw.fs.write = function (tokenID, dr, contents) {
+    if (dr == undefined || contents == undefined) {
         throw new Error("directory AND contents must be defined!")
     }
+
+    const directory = applyRootPoint(dr, tokenID);
 
     const token = tokeninf(tokenID)
 
     return system.fs.writeFile(directory, contents, token.user)
 }
-csw.fs.delete = function (tokenID, directory) {
-    if (directory == undefined) {
+csw.fs.delete = function (tokenID, dr) {
+    if (dr == undefined) {
         throw new Error("directory must be defined!")
     }
+
+    const directory = applyRootPoint(dr, tokenID);
 
     const token = tokeninf(tokenID)
 
@@ -55,44 +76,57 @@ csw.fs.delete = function (tokenID, directory) {
 }
 
 // folders
-csw.fs.createDir = function (token, directory) {
-    if (directory == undefined) {
+csw.fs.createDir = function (token, dr) {
+    if (dr == undefined) {
         throw new Error("directory must be defined!")
     }
+
+    const directory = applyRootPoint(dr, tokenID);
 
     return system.fs.writeFolder(directory)
 }
-csw.fs.deleteDir = function (token, directory, recursive, verbose) {
-    if (directory == undefined) {
+csw.fs.deleteDir = function (tokenID, dr, recursive, verbose) {
+    if (dr == undefined) {
         throw new Error("directory must be defined!")
     }
 
+    const directory = applyRootPoint(dr, tokenID);
+
     return system.fs.deleteFolder(directory, recursive, verbose)
 }
-csw.fs.listDir = function (token, directory) {
-    if (directory == undefined) {
+csw.fs.listDir = function (tokenID, dr) {
+    if (dr == undefined) {
         throw new Error("directory must be defined!")
     }
+
+    const directory = applyRootPoint(dr, tokenID);
 
     return system.fs.listFolder(directory)
 }
 
-csw.fs.isDirectory = function (token, directory) {
-    if (directory == undefined) {
+csw.fs.isDirectory = function (tokenID, dr) {
+    if (dr == undefined) {
         throw new Error("directory must be defined!")
     }
+
+    const directory = applyRootPoint(dr, tokenID);
 
     return system.fs.isFolder(directory)
 }
 
-csw.fs.toDirectory = function (token, directory, baseDir) {
+csw.fs.toDirectory = function (tokenID, dr, baseDir) {
+
+    const directory = applyRootPoint(dr, tokenID);
+
     return system.toDir(directory, baseDir)
 }
 
-csw.fs.createVFS = function (token, directory, keyname = "fs") {
-    if (directory == undefined) {
+csw.fs.createVFS = function (token, dr, keyname = "fs") {
+    if (dr == undefined) {
         throw new Error("directory must be defined!")
     }
+
+    const directory = applyRootPoint(dr, tokenID);
 
     const tkn = tokeninf(token);
 
@@ -125,6 +159,17 @@ csw.processes.execute = function (token, directory, args, isUnsafe) {
 csw.processes.terminate = function (token, PID) {
     return system.stopProcess(PID)
 }
+csw.processes.chroot = function (token, PID, root) {
+    const perms = tokeninf(token)
+
+    const allowed = perms.checkPermission("all")
+
+    if (allowed == true) {
+        system.processes[PID].token.root = root
+    } else {
+        throw new Error("Process lacks 'all' permission for chroot")
+    }
+}
 
 
 // terminal CLI features
@@ -153,6 +198,8 @@ csw.display.visible = function (token, PID) {
             throw new Error(`Unknown type of system.fcs: ${typeof system.fcs}`)
     }
 }
+csw.display.focused = function (token, PID) {
+}
 csw.display.registerAsDesktop = function (token, PID) {
     system.displayManager = PID
 }
@@ -179,9 +226,6 @@ function tokeninf(token) {
 // TEMPORARY ELEVATION FUNCTION
 csw.permissions = {}
 csw.permissions.changeUser = function (token, PID, username, password) {
-
-    const tokenInfo = tokeninf(token)
-
     const user = system.fs.readFile("/etc/passwd")[username]
     if (user == undefined) {
         return {
