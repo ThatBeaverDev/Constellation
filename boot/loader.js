@@ -998,6 +998,12 @@ async function loader() {
 		system.localFS.commit = async function () { }
 	}
 
+	if (system.development == false) {
+		window.onbeforeunload = () => {
+			return true;
+		};
+	}
+
 	markAsBooted("localFS")
 
 	const handle = (e) => {
