@@ -24,33 +24,33 @@ function applyRootPoint(dr, tokenID) {
     const rootpoint = system.processes[tokeninf(tokenID).PID].token.root
     if (rootpoint !== "/") {
         if (dr == "/") {
-            dir[0] = rootpoint
+            dir[0] = rootpoint;
         } else {
-            dir[0] = rootpoint + "/"
+            dir[0] = rootpoint + "/";
         }
     }
-    return dir.join("")
+    return dir.join("");
 }
 
-csw = {}
+csw = {};
 
 // files functions
-csw.fs = {}
+csw.fs = {};
 // files
 csw.fs.read = function (tokenID, dr, attribute) {
     if (dr == undefined) {
-        throw new Error("directory must be defined!")
+        throw new Error("directory must be defined!");
     }
 
     const directory = applyRootPoint(dr, tokenID);
 
     if (directory == "/proc") {
-        return system.processes
+        return system.processes;
     }
 
-    const token = tokeninf(tokenID)
+    const token = tokeninf(tokenID);
 
-    return system.fs.readFile(directory, attribute, token.user)
+    return system.fs.readFile(directory, attribute, token.user);
 }
 csw.fs.write = function (tokenID, dr, contents) {
     if (dr == undefined || contents == undefined) {
