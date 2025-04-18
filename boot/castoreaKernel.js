@@ -430,6 +430,7 @@ async function init() {
 
 		system.focus = []
 		system.fcs = undefined
+		system.mainFcs = undefined
 		system.displayManager = false
 
 		system.display = document.getElementById("display");
@@ -440,7 +441,7 @@ async function init() {
 			}
 
 			if (system.focus.length !== 0) {
-				system.display.innerHTML = processes[system.fcs].display
+				system.display.innerHTML = processes[system.mainFcs].display
 			} else {
 				system.display.innerHTML = "No Application is outputting display information. Sorry, You'll have to restart the system, there is no real way to access a CLI from here."
 			}
@@ -467,6 +468,7 @@ async function init() {
 
 				if (system.displayManager == false) {
 					system.fcs = system.focus[system.focus.length - 1]
+					system.mainFcs = system.fcs
 				}
 
 				if (processes == undefined) {
