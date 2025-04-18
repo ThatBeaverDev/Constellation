@@ -69,7 +69,7 @@ async function loader() {
 		const percentText = Math.round(bootedPercentage * 10000) / 100 + "%"
 		try {
 			system.log(Name, name + " booted. " + percentText + " Booted!")
-		} catch(e) {}
+		} catch (e) { }
 
 		const index = bootables.indexOf(name)
 		const text = index == bootables.length - 1 ? "Finalising..." : bootables[index + 1]
@@ -203,7 +203,7 @@ async function loader() {
 	markAsBooted("logs")
 
 	// INPUT
-	system.keys = {}
+	system.keys = {};
 	document.addEventListener('keydown', (e) => {
 		system.keys[e.key] = true
 		if (e.keyCode == 32 && e.target == document.body) {
