@@ -206,23 +206,13 @@ async function loader() {
 	system.keys = {};
 	document.addEventListener('keydown', (e) => {
 		system.keys[e.key] = true
-		if (e.keyCode == 32 && e.target == document.body) {
-			e.preventDefault();
-		}
-		let cmdKey = "Control"
-		if (navigator.platform == "macIntel") { // can't use navigator.userAgentData.platform
-			cmdKey = "Meta"
-		}
-
-		if (system.keys[cmdKey]) {
-			switch (e.key) {
-				//case "r":
-				//	e.preventDefault();
-				//	break;
-			}
-			return
-		}
 	});
+
+	system.modifier = "Control"
+	if (navigator.platform == "MacIntel") { // can't use navigator.userAgentData.platform
+		system.modifier = "Meta"
+	}
+	system.modifier = "Control";
 
 	document.addEventListener('keyup', (e) => {
 		system.keys[e.key] = false
