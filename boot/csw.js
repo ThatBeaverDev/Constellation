@@ -199,6 +199,7 @@ csw.display.visible = function (token, PID) {
     }
 }
 csw.display.focused = function (token, PID) {
+    return Number(PID) == Number(system.mainFcs);
 }
 csw.display.registerAsDesktop = function (token, PID) {
     system.displayManager = PID
