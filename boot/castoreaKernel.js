@@ -1,4 +1,4 @@
-async function init() {
+async function start_kernel() {
 	const Name = "/boot/castoreaKernel.js"
 	const PID = -1
 
@@ -649,4 +649,4 @@ system.kernelPanic = function (e, when = "When not provided.") {
 }
 
 //return
-init()
+return start_kernel
