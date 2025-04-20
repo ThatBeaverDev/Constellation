@@ -28,7 +28,7 @@ function mustBootWithoutFSAPI() {
 async function loader() {
 
 	const Name = "/boot/loader.js"
-	const PID = -1
+	const PID = 0
 
 	const system = {
 		startTime: Date.now()
@@ -48,7 +48,8 @@ async function loader() {
 		fs: false,
 		cryptography: false,
 		localFS: false,
-		bootloader: false
+		bootloader: false,
+		bootSelection: false
 	}
 	const bootables = Object.keys(booted)
 	const totalToBoot = bootables.length
@@ -109,7 +110,7 @@ async function loader() {
 
 	system.safe = true
 	system.forceSystemLog = true
-	system.maxPID = 0
+	system.maxPID = 1
 
 	system.inputText = ""
 	system.versions = {
@@ -332,8 +333,8 @@ async function loader() {
 
 	// Processes (for the VFS system)
 	const proc = {
-		PID: -1,
-		parent: -1,
+		PID: 0,
+		parent: 0,
 		children: [],
 		name: "/boot/castoreaKernel.js",
 		isUnsafe: true,
@@ -384,7 +385,7 @@ async function loader() {
 
 	// START FILESYSTEM
 	system.fs = {}
-	system.kernelVFS = system.processes[-1].variables.fs
+	system.kernelVFS = system.processes[0].variables.fs
 	system.vfs = {}
 	system.vfsMan = {}
 
@@ -913,10 +914,10 @@ async function loader() {
 	markAsBooted("vfs")
 
 	// REMOVE! // why? this is how the filesystem gets created? I think we need the filesystem.
-	system.processes[-1].variables.fs = system.newVFS(-1, "/", "fs", false)
+	system.processes[0].variables.fs = system.newVFS(0, "/", "fs", false)
 
 	// temp directory
-	system.processes[-1].variables.tmp = system.newVFS(-1, "/tmp", "tmp", true)
+	system.processes[0].variables.tmp = system.newVFS(0, "/tmp", "tmp", true)
 
 	// FILESYSTEM ERRORS
 
@@ -982,7 +983,7 @@ async function loader() {
 
 		// build data to commit to file
 		const data = {}
-		data.fs = system.processes[-1].variables.fs
+		data.fs = system.processes[0].variables.fs
 		data.version = "v0.4.0"
 		const writeData = JSON.stringify(data, null, 4)
 
@@ -1025,7 +1026,7 @@ async function loader() {
 
 	if (!system.fsAPI) {
 		markAsBooted("bootloader")
-		bootOS("New", system)
+		await bootOS("New", system)
 		return
 	}
 
@@ -1040,7 +1041,6 @@ async function loader() {
 	system.post("", "")
 
 	markAsBooted("bootSelection")
-
 	const loop = setInterval(function () {
 		if (system.progress) {
 			try {
@@ -1067,6 +1067,14 @@ async function loader() {
 			system.logsBox.innerText = system.logs[0].content
 		}
 	}, 100)
+
+	await new Promise(function (resolve) {
+		setInterval(function () {
+			if (system.progress) {
+				setTimeout(resolve, 250)
+			}
+		}, 100)
+	})
 
 }
 
@@ -1099,10 +1107,10 @@ async function bootOS(osName, ssm) {
 
 			switch (data.version) {
 				case "v0.3.0":
-					system.processes[-1].variables.fs = data.fs
+					system.processes[0].variables.fs = data.fs
 					break;
 				case "v0.4.0":
-					system.processes[-1].variables.fs = data.fs
+					system.processes[0].variables.fs = data.fs
 					break;
 				default:
 					throw new Error("Filesystem file not supported.");
@@ -1139,7 +1147,9 @@ async function bootOS(osName, ssm) {
 	console.debug("Running Kernel")
 
 	castoreaKernel = new Function("ssm", castoreaKernel);
-	castoreaKernel(system);
+	const sys = castoreaKernel(system);
+
+	sys() // run the kernel!
 }
 
 try {

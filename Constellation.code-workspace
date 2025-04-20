@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "../aurora"
+		},
+		{
+			"path": "../Aurora/pkgs/skylight"
 		}
 	]
 }

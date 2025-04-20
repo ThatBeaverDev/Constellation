@@ -81,7 +81,7 @@ csw.fs.createDir = function (token, dr) {
         throw new Error("directory must be defined!")
     }
 
-    const directory = applyRootPoint(dr, tokenID);
+    const directory = applyRootPoint(dr, token);
 
     return system.fs.writeFolder(directory)
 }
@@ -152,9 +152,10 @@ csw.lib = function (token, name, dir = "/lib") {
 
 // process management
 csw.processes = {}
-csw.processes.execute = function (token, directory, args, isUnsafe) {
+csw.processes.execute = async function (token, directory, args, isUnsafe) {
+    const tkn = tokeninf(token)
     // please make sure only admin processes can start unsafe processes!
-    return system.startProcess(directory, args, isUnsafe)
+    return await system.startProcess(tkn.PID, directory, args, isUnsafe)
 }
 csw.processes.terminate = function (token, PID) {
     return system.stopProcess(PID)
@@ -171,6 +172,66 @@ csw.processes.chroot = function (token, PID, root) {
     }
 }
 
+csw.keydown = function (keyname) {
+    switch (keyname) {
+        case "modifier":
+            return system.keys[system.modifier] == true
+            break;
+        default:
+            return system.keys[keyname] == true;
+    }
+}
+
+const msgs = {};
+const PIDs = {};
+csw.PIDs = PIDs
+csw.msgs = {};
+csw.msgs.send = function (token, target, content) {
+    if (msgs[target] == undefined) {
+        msgs[target] = [];
+    }
+
+    const tkn = tokeninf(token);
+
+    msgs[target].push({
+        origin: tkn.PID,
+        content: structuredClone(content),
+        sent: Date.now()
+    });
+}
+csw.msgs.read = function (token, deleteAfterRead) {
+    const tkn = tokeninf(token);
+
+    if (msgs[tkn.PID] == undefined) {
+        msgs[tkn.PID] = [];
+    }
+
+    const data = structuredClone(msgs[tkn.PID]);
+
+    if (deleteAfterRead == true) {
+        msgs[tkn.PID] = [];
+    }
+
+    return data
+}
+csw.msgs.shout = function (token, name) {
+    const tkn = tokeninf(token);
+    PIDs[tkn.PID] = name;
+}
+csw.msgs.pidOfName = function (token, name) {
+    const keys = Object.keys(PIDs);
+    const values = Object.values(PIDs);
+
+    const valuesIndex = values.indexOf(name);
+
+    return Number(keys[valuesIndex]);    
+}
+csw.msgs.debug = () => {
+    return {
+        msgs: msgs,
+        pids: PIDs
+    }
+}
 
 // terminal CLI features
 csw.display = {}
@@ -226,7 +287,7 @@ function tokeninf(token) {
 
 // TEMPORARY ELEVATION FUNCTION
 csw.permissions = {}
-csw.permissions.changeUser = function (token, PID, username, password) {
+csw.permissions.changeUser = async function (token, PID, username, password) {
     const user = system.fs.readFile("/etc/passwd")[username]
     if (user == undefined) {
         return {
@@ -235,9 +296,10 @@ csw.permissions.changeUser = function (token, PID, username, password) {
         }
     }
 
-    const passwd = user.password
+    const passwd = user.password;
+    console.debug(user.password)
 
-    const passHash = window.cryptography.sha_256(password)
+    const passHash = await system.userPasswordHash(password);
 
     if (passwd == passHash) {
         // correct password!
@@ -248,10 +310,7 @@ csw.permissions.changeUser = function (token, PID, username, password) {
             ok: true
         }
     } else {
-        return {
-            ok: false,
-            reason: `Password is incorrect for user '${username}'!`
-        }
+        throw new Error("Incorrect password")
     }
 }
 
