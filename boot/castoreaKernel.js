@@ -1,6 +1,6 @@
 async function start_kernel() {
 	const Name = "/boot/castoreaKernel.js"
-	const PID = -1
+	const PID = 0
 
 	system.name = "Constellation"
 
