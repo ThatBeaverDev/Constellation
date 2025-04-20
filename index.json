@@ -70,6 +70,10 @@
     "sudo",
     "setup",
     "pgext",
-    "yak"
+    "yak",
+    "zip",
+    "pebble",
+    "textedit",
+    "tests"
   ]
 }

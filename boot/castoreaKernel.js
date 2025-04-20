@@ -1,5 +1,3 @@
-// kernel sanders was not harmed in the writing of this code
-
 async function init() {
 	const Name = "/boot/castoreaKernel.js"
 	const PID = -1
@@ -66,23 +64,20 @@ async function init() {
 		system.asyncFunction = Object.getPrototypeOf(async function () { }).constructor;
 
 		system.startProcess = async function (parentPID, dir, args = [], unsafe = false, stdin = null, usr) {
-
-			const isUnsafe = unsafe
-
+			system.task = "startProcess"
+			system.maxPID++
+			const isUnsafe = unsafe;
 			if (system.fs.readFile(dir) == undefined) {
 				return
 			}
-
-			let user = usr
+			let user = usr;
 			if (user == undefined) {
 				user = system.processes[parentPID].token.user
 			}
+			const PID = system.maxPID;
+			const tokenID = csw.permissions.newToken(PID, user);
 
-			const PID = system.maxPID
-
-			const tokenID = csw.permissions.newToken(PID, user)
-
-			// code ran internally before the actual process
+			// code ran internally before the actual process's code
 			let preScript = "const PID = " + system.maxPID + ";"
 			preScript += "const Name = '" + dir + "';"
 			preScript += "const args = " + JSON.stringify((args || [])) + ";"
@@ -96,7 +91,7 @@ async function init() {
 			}
 
 			// code ran AFTER the process
-			const afterCode = "\nreturn std"
+			const afterCode = `\n\ntry {\n\treturn {\n\t\tstd: std,\n\t\tframe: frame\n\t}\n} catch (e) {\n\treturn {\n\n\t\tstd: std,\n\t\tframe: undefined\n\t}\n}`
 
 			let code
 			let type = "js"
@@ -159,52 +154,55 @@ async function init() {
 
 			let frame = ""
 
-			if (isUnsafe) {
-				if (system.safe && system.systemWrapper) {
-					// safe mode, unsafe and systemWrapper
-					frame = new Function("lcl", "prn", "stud", "ssm", obj.code + "\ntry {  frame(args) } catch(e) {  console.error(token, Name, e)  };" + afterCode)
-					obj.init = new AsyncFunction("lcl", "prn", "stud", "ssm", obj.code + "\ntry {  await init(args) } catch(e) {  console.error(token, Name, e)  };" + afterCode)
-				}
+				if (isUnsafe) {
+					if (system.safe && system.systemWrapper) {
+						// safe mode, unsafe and systemWrapper
+						frame = new Function("lcl", "prn", "stud", "ssm", obj.code + "\ntry {  frame(args) } catch(e) {  console.error(token, Name, e)  };" + afterCode)
+						obj.init = new AsyncFunction("lcl", "prn", "stud", "ssm", obj.code + "\ntry {  await init(args) } catch(e) {  console.error(token, Name, e)  };" + afterCode)
+					}
 
-				if (!system.safe) {
-					// no safe mode, unsafe
-					frame = new Function("lcl", "prn", "stud", "ssm", obj.code + "\nframe(args);" + afterCode)
-					obj.init = new AsyncFunction("lcl", "prn", "stud", "ssm", obj.code + "\nawait init(args);" + afterCode)
-				}
-			} else {
-				if (system.safe) {
-					// safe mode, not unsafe
-					frame = new Function("lcl", "prn", "stud", obj.code + "\ntry {  frame(args) } catch(e) {  console.error(Name, e)  };" + afterCode)
-					obj.init = new AsyncFunction("lcl", "prn", "stud", obj.code + "\ntry {  await init(args) } catch(e) {  console.error(Name, e)  };" + afterCode)
-				}
+					if (!system.safe) {
+						// no safe mode, unsafe
+						frame = new Function("lcl", "prn", "stud", "ssm", obj.code + "\nframe(args);" + afterCode)
+						obj.init = new AsyncFunction("lcl", "prn", "stud", "ssm", obj.code + "\nawait init(args);" + afterCode)
+					}
+				} else {
+					if (system.safe) {
+						// safe mode, not unsafe
+						frame = new Function("lcl", "prn", "stud", obj.code + "\ntry {  frame(args) } catch(e) {  console.error(Name, e)  };" + afterCode)
+						obj.init = new AsyncFunction("lcl", "prn", "stud", obj.code + "\ntry {  await init(args) } catch(e) {  console.error(Name, e)  };" + afterCode)
+					}
 
-				if (!system.safe) {
-					// no safe mode, not unsafe
-					frame = new Function("lcl", "prn", "stud", obj.code + "\nframe(args);" + afterCode)
-					obj.init = new AsyncFunction("lcl", "prn", "stud", obj.code + "\nawait init(args);" + afterCode)
+					if (!system.safe) {
+						// no safe mode, not unsafe
+						frame = new Function("lcl", "prn", "stud", obj.code + "\nframe(args);" + afterCode)
+						obj.init = new AsyncFunction("lcl", "prn", "stud", obj.code + "\nawait init(args);" + afterCode)
+					}
 				}
-			}
 
 			processes[obj.PID] = obj
 			processes[obj.parent].children.push(obj.PID)
-			system.maxPID++
 
-			const count = system.maxPID - 1
+			const count = PID
+			let initResult = {}
 			try {
 				if (isUnsafe) {
-					await obj.init(processes[count].variables, processes[obj.parent].variables.shared, processes[count].std, system)
+					initResult = await obj.init(processes[count].variables, processes[obj.parent].variables.shared, processes[count].std, system)
 				} else {
-					await obj.init(processes[count].variables, processes[obj.parent].variables.shared, processes[count].std)
+					initResult = await obj.init(processes[count].variables, processes[obj.parent].variables.shared, processes[count].std)
 				}
 			} catch (e) {
 				console.error(e)
-				try {
-					processes[obj.parent].variables.shared.error(obj.name, e)
-				} catch (e) { }
+				obj.std.out = "[ERR]" + e
+			}
+
+			if (initResult.frame == undefined) {
+				frame = "noFrame"
 			}
 
 			obj.frame = frame
-
+			
+			system.task = undefined
 			return {
 				PID: count,
 				process: obj,
@@ -213,8 +211,9 @@ async function init() {
 		}
 
 		system.stopProcess = function (PID) {
+			system.task = "stopProcess"
 			if (Number(PID) < 0) return
-
+			
 			const obj = processes[Number(PID)]
 
 			if (PID == system.displayManager) {
@@ -241,6 +240,8 @@ async function init() {
 
 			delete system.csw.tokens[obj.tokenID]
 			delete processes[Number(PID)]
+
+			system.task = undefined
 		}
 
 		function getParentOfDir(dir) {
@@ -336,8 +337,16 @@ async function init() {
 		system.user = "root"
 		system.users = system.fs.readFile("/etc/passwd")
 
+		system.userPasswordHash = async function (text) {
+			const sha512 = await window.cryptography.sha512(text)
+
+			const base64 = btoa(sha512)
+
+			return base64
+		}
+
 		// function to register users
-		system.users.register = function (name, object) {
+		system.users.register = async function (name, object) {
 
 			const deflt = {
 				userID: 0,
@@ -353,7 +362,7 @@ async function init() {
 				}
 			}
 
-			const obj = {...deflt, ...object}
+			const obj = { ...deflt, ...object }
 
 			if (system.users[name] !== undefined) {
 				throw new Error("user named " + name + " already exists!")
@@ -364,7 +373,8 @@ async function init() {
 				system.warn(Name, "User password was not defined: it is set to 'default'")
 				obj.password = "default"
 			}
-			obj.password = cryptography.sha_256(obj.password)
+			obj.password = await system.userPasswordHash(obj.password);
+			console.debug(obj.password)
 
 			if (obj.permissions == undefined) {
 				obj.permissions = {}
@@ -390,7 +400,7 @@ async function init() {
 
 		if (system.isNew) {
 			system.log(Name, "Creating root user...")
-			system.users.register('root', {
+			await system.users.register('root', {
 				password: "admin",
 				userID: 0,
 				groupID: 0,
@@ -478,37 +488,38 @@ async function init() {
 				for (const i in processes) {
 					const obj = processes[i]
 					// only run if defined and not the kernel
-					if (obj !== undefined && obj.PID > 0) {
+					if (obj !== undefined && obj.PID !== 0) {
 						// check if the process is properly built, if not ignore it since init is still running
 						if (obj.frame == "initRunning") {
 							break;
 						}
 
-
-						// run if there's a frame, if not terminate.
-						if (String(obj.code).includes("frame()")) {
-							const startTime = Date.now()
-							// catch errors so one program can't crash them all
-							try {
-								const parent = processes[obj.parent]
-								const sharedVariables = parent.variables["shared"]
-
-								// run it
-								if (obj.isUnsafe) {
-									obj.frame(obj.variables, sharedVariables, obj.std, system)
-								} else {
-									obj.frame(obj.variables, sharedVariables, obj.std)
-								}
-
-							} catch (e) {
-								console.error(Name + ": processRunner running " + obj.name, e)
-							}
-							const endTime = Date.now()
-							const time = endTime - startTime
-							obj.time = time
-						} else {
-							system.stopProcess(i)
+						// terminate if the process doesn't have a frame
+						if (String(obj.frame) == "noFrame") {
+							system.stopProcess(i);
+							break;
 						}
+
+						const startTime = Date.now()
+						// catch errors so one program can't crash them all
+						try {
+							const parent = processes[obj.parent]
+							const sharedVariables = parent.variables["shared"]
+
+							// run it
+							if (obj.isUnsafe) {
+								obj.frame(obj.variables, sharedVariables, obj.std, system)
+							} else {
+								obj.frame(obj.variables, sharedVariables, obj.std)
+							}
+							// no support for std sadly
+
+						} catch (e) {
+							console.error(Name + ": processRunner running " + obj.name, e)
+						}
+						const endTime = Date.now()
+						const time = endTime - startTime
+						obj.time = time
 					}
 				}
 				const runnerEnd = Date.now()
@@ -570,7 +581,7 @@ system.kernelPanic = function (e, when = "When not provided.") {
 	try {
 		systemPurged.processes = Object.keys(csw.fs.read("/proc")).length
 	} catch (e) {
-		systemPurged.processes = "Error reading process count. /proc may have been deleted."
+		systemPurged.processes = "Error reading process count. /proc may have been deleted or never created."
 	}
 
 	try {
@@ -611,7 +622,7 @@ system.kernelPanic = function (e, when = "When not provided.") {
 		systemPurged.fsSize = "Error reading filesystem size."
 	}
 
-	const panic = `Kernel Panic - A Low Level Critical Error has been hit. ${snappyMessages[Math.floor(Math.random() * snappyMessages.length)]}\nTYPE: ${e.name}\nWHEN: ${when}\nTIME: ${new Date(Date.now())}\nSTACK TRACE:\n${e.stack}`;
+	const panic = `Kernel Panic - A Low Level Critical Error has been hit. ${snappyMessages[Math.floor(Math.random() * snappyMessages.length)]}\nTYPE: ${e.name}\nTASK: ${system.task}\nTIME: ${new Date(Date.now())}\nSTACK TRACE:\n${e.stack}`;
 
 	const reportIssue = document.createElement("a")
 
@@ -633,7 +644,8 @@ system.kernelPanic = function (e, when = "When not provided.") {
 	</div>
 	</p>`
 
-	throw new Error(panic)
+	console.error(panic)
+	console.debug("nothing after this is my fault. Kernel is bailing out.")
 }
 
 //return
