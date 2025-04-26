@@ -85,7 +85,7 @@ async function loader() {
 	system.license = "GPL-3.0 License"
 
 	system.cast = {}
-	system.cast.Objectify = function Objectify(obj) {
+	window.objectify = function Objectify(obj) {
 		if (typeof obj === "object") {
 			return obj;
 		}
@@ -97,7 +97,7 @@ async function loader() {
 		} catch (e) { }
 	}
 
-	system.cast.Stringify = function Stringify(str, beautify) {
+	window.stringify = function Stringify(str, beautify) {
 		if (typeof str === "object") {
 			if (beautify) {
 				return JSON.stringify(str, null, 4);
@@ -155,7 +155,7 @@ async function loader() {
 		const obj = {
 			type: "log",
 			origin: origin,
-			content: "[" + String(Date.now() - system.startTime).padStart(7, 0) + "] INFO  {" + origin + "} - " + system.cast.Stringify(str)
+			content: "[" + String(Date.now() - system.startTime).padStart(7, 0) + "] INFO  {" + origin + "} - " + window.stringify(str)
 		}
 		system.logs.push(obj)
 		console.log(obj.content)
@@ -166,7 +166,7 @@ async function loader() {
 		const obj = {
 			type: "post",
 			origin: origin,
-			content: system.cast.Stringify(str)
+			content: window.stringify(str)
 		}
 		system.logs.push(obj)
 		console.log(str)
@@ -177,7 +177,7 @@ async function loader() {
 		const obj = {
 			type: "warn",
 			origin: origin,
-			content: "[" + String(Date.now() - system.startTime).padStart(7, 0) + "] WARN  {" + origin + "} - " + system.cast.Stringify(str)
+			content: "[" + String(Date.now() - system.startTime).padStart(7, 0) + "] WARN  {" + origin + "} - " + window.stringify(str)
 		}
 		system.logs.push(obj)
 		console.warn(obj.content)
@@ -187,7 +187,7 @@ async function loader() {
 		const obj = {
 			type: "error",
 			origin: origin,
-			content: "[" + String(Date.now() - system.startTime).padStart(7, 0) + "] ERROR {" + origin + "} - " + system.cast.Stringify(str)
+			content: "[" + String(Date.now() - system.startTime).padStart(7, 0) + "] ERROR {" + origin + "} - " + window.stringify(str)
 		}
 		system.logs.push(obj)
 		console.error(obj.content)
