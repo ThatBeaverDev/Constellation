@@ -17,7 +17,7 @@ async function start_kernel() {
 		system.post("", " ")
 		//document.getElementById('preInput').innerText = "Please wait..."
 
-		system.temp = await system.fetchURL("https://thatbeaverdev.github.io/beaverUtils.js")
+		system.temp = await system.fetchURL("/beaverUtils.js")
 		eval(system.temp)
 		delete system.temp
 
