@@ -493,6 +493,9 @@ async function start_kernel() {
 		system.lib = new Function("system", system.fs.readFile("/boot/lib.js"))
 		system.lib(system)
 
+		const clock = system.fs.readFile("/etc/sysconfig/clock");
+		clock.ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone
+
 		// source the repo for installs
 		await system.startProcess(PID, "/bin/aurora.js", ["source", "../aurora/pkgs", "as", "default"], true)
 

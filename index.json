@@ -18,7 +18,11 @@
     },
     "/dev/null",
     "/dev/urandom",
-    "/etc/hostname"
+    "/etc/hostname",
+    {
+      "dir": "/etc/sysconfig/clock",
+      "parse": true
+    }
   ],
   "folders": [
     "/bin",
