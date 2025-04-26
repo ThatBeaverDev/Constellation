@@ -2,15 +2,15 @@ async function start_kernel() {
 	const Name = "/boot/castoreaKernel.js"
 	const PID = 0
 
-	system.name = "Constellation"
+	system.name = "Constellation - v0.5.0 (Dabli)"
 
 	const processes = system.processes
 
 	try {
 		system.logs = []
 
-		system.versions.castoreaKernel = "v0.3.0"
-		system.versions.terminal = system.versions.castoreaKernel
+		system.versions.castoreaKernel = "v0.5.0";
+		system.versions.terminal = system.versions.castoreaKernel;
 
 		// https://patorjk.com/software/taag/#p=display&h=0&f=Doom&t=Constellation 
 		system.post("", system.asciiName)
