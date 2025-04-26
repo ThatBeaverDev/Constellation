@@ -108,16 +108,16 @@ async function loader() {
 		return (String(str))
 	}
 
-	system.safe = true
-	system.forceSystemLog = true
-	system.maxPID = 1
+	system.safe = false;
+	system.forceSystemLog = true;
+	system.maxPID = 1;
 
-	system.inputText = ""
+	system.inputText = "";
 	system.versions = {
 		loader: "v0.3.0"
-	}
-	system.logsBox = document.getElementById("logsBox")
-	system.logs = []
+	};
+	system.logsBox = document.getElementById("logsBox");
+	system.logs = [];
 
 	document.body.click() // so that things that need user interaction can run
 
@@ -297,9 +297,19 @@ async function loader() {
 	delete obj
 
 	system.fetchURL = async function fetchURL(url) {
+		const oldTask = String(system.task)
+		system.task = "fetchURL"
 		system.log(Name, "fetchURL request to " + url)
-		const response = await fetch(url);
-		const data = await response.text();
+		let response
+		let data
+		try {
+			response = await fetch(url);
+			data = await response.text();
+		} catch (e) {
+			console.warn(e)
+			return undefined
+		}
+		system.task = oldTask
 		if (response.ok) {
 			return data;
 		} else {
@@ -310,7 +320,7 @@ async function loader() {
 
 	markAsBooted("fetchURL")
 
-	system.asciiName = await system.fetchURL('./nameAscii.txt')
+	system.asciiName = await system.fetchURL(system.baseURI + '/nameAscii.txt')
 
 	document.getElementById("logoBox").innerHTML = system.asciiName
 
@@ -355,8 +365,12 @@ async function loader() {
 		}
 	}
 
-	//system.fs["/"].children.proc.contents = {}
-	//const processes = system.fs.readFile("/proc")
+	system.memory = {
+		processes: {
+			0: {}
+		},
+		kernel: {}
+	};
 	system.processes = {}
 	const processes = system.processes
 
@@ -385,7 +399,6 @@ async function loader() {
 
 	// START FILESYSTEM
 	system.fs = {}
-	system.kernelVFS = system.processes[0].variables.fs
 	system.vfs = {}
 	system.vfsMan = {}
 
@@ -484,9 +497,8 @@ async function loader() {
 		obj.dir = dir
 
 		const vfs = []
-		const ssmvfs = system.vfs
 
-		for (const i in ssmvfs) {
+		for (const i in system.vfs) {
 			if (dirOld.startsWith(i)) {
 				vfs.push(i)
 			}
@@ -676,6 +688,10 @@ async function loader() {
 	}
 
 	system.vfsMan.listFolder = function (directory, username = "root", fs) {
+		if (fs == undefined) {
+			console.debug(fs)
+			throw new Error("SYSERROR: VFS DOES NOT EXIST [UNDEFINED]")
+		}
 		if (fs[directory] == undefined) {
 			console.debug(fs)
 			throw new Error(`Directory '${directory}' does not exist.`)
@@ -685,7 +701,7 @@ async function loader() {
 		permissionsCheck(directory, username, "read", true, fs)
 
 		try {
-			return Object.keys(system.vfsMan.rawFolder(directory, fs).children)
+			return Object.keys(system.vfsMan.rawFolder(directory, username, fs).children)
 		} catch (e) {
 			return {
 				result: false,
@@ -705,7 +721,7 @@ async function loader() {
 		try {
 			const obj = getDirInfo(directory)
 
-			const list = system.vfsMan.listFolder
+			const list = system.vfsMan.listFolder(directory, username, fs)
 
 			if (list.length !== 0) {
 				return {
@@ -733,13 +749,13 @@ async function loader() {
 		}
 	}
 
-	system.vfsMan.folderPermissions = function (directory, fs) {
+	system.vfsMan.folderPermissions = function (directory, username = "root", fs) {
 		try {
 			if (directory == "/") {
-				return system.vfsMan.rawFolder("/", fs).permissions
+				return system.vfsMan.rawFolder("/", username, fs).permissions
 			}
 
-			let perms = system.vfsMan.rawFolder(directory, fs).permissions
+			let perms = system.vfsMan.rawFolder(directory, username, fs).permissions
 			return perms
 		} catch (e) {
 			system.fsErrors.push({
@@ -753,7 +769,10 @@ async function loader() {
 		}
 	}
 
-	system.vfsMan.rawFolder = function (directory, fs) {
+	system.vfsMan.rawFolder = function (directory, username, fs) {
+
+		permissionsCheck(directory, username, "read", true, fs)
+
 		return fs[directory]
 	}
 
@@ -789,11 +808,6 @@ async function loader() {
 		try {
 			const obj = getDirInfo(directory)
 
-			const vfsInf = obj.vfsInf
-
-			const process = processes[vfsInf.PID]
-
-			const vfs = process.variables[vfsInf.KEY]
 			let vfsDir = directory.textAfter(obj.vfs)
 
 			if (vfsDir[0] !== "/") {
@@ -805,10 +819,11 @@ async function loader() {
 			}
 
 			return {
-				vfs: vfs,
+				vfs: obj.vfsInf,
 				vfsDir: vfsDir
 			}
 		} catch (e) {
+			console.warn(e)
 			return {
 				vfs: undefined,
 				vfsDir: "/"
@@ -850,9 +865,9 @@ async function loader() {
 		return system.vfsMan.deleteFolder(obj.vfsDir, username, obj.vfs)
 	}
 
-	system.fs.rawFolder = (directory) => {
+	system.fs.rawFolder = (directory, username = "root") => {
 		const obj = getVFS(directory)
-		return system.vfsMan.rawFolder(obj.vfsDir, obj.vfs)
+		return system.vfsMan.rawFolder(obj.vfsDir, username, obj.vfs)
 	}
 
 	system.fs.isFolder = (directory) => {
@@ -860,9 +875,9 @@ async function loader() {
 		return system.vfsMan.isFolder(obj.vfsDir, obj.vfs)
 	}
 
-	system.fs.folderPermissions = (directory) => {
+	system.fs.folderPermissions = (directory, username = "root") => {
 		const obj = getVFS(directory)
-		return system.vfsMan.folderPermissions(obj.vfsDir, obj.vfs)
+		return system.vfsMan.folderPermissions(obj.vfsDir, username, obj.vfs)
 	}
 
 
@@ -872,27 +887,26 @@ async function loader() {
 		return system.vfsMan.exists(obj.vfsDir, obj.vfs)
 	}
 
-	system.newVFS = (PID, directory, keyname = "fs", link = true) => {
+	system.blankVFS = () => {
+		return {
+			"/": system.fs.directory()
+		};
+	};
+
+	system.newVFS = (directory, vfsVar, link = true) => {
 
 		system.log(Name, `VFS in ${directory} has been created and mounted.`)
 
 		if (link == true) {
 			const vfs = getVFS(directory)
-			const obj = getDirInfo(directory)
+			const obj = getDirInfo(vfs.vfsDir)
 
 			const link = system.fs.link(obj.dir)
 
 			vfs.vfs[obj.location].children[obj.filename] = link
 		}
 
-		system.vfs[directory] = {
-			PID: PID,
-			KEY: keyname
-		}
-
-		return {
-			"/": system.fs.directory()
-		}
+		system.vfs[directory] = vfsVar;
 	}
 
 	system.delVFS = (directory, link = true) => {
@@ -913,11 +927,17 @@ async function loader() {
 
 	markAsBooted("vfs")
 
-	// REMOVE! // why? this is how the filesystem gets created? I think we need the filesystem.
-	system.processes[0].variables.fs = system.newVFS(0, "/", "fs", false)
+	// REMOVE! // why? this is how the filesystem gets created? I think we need the filesystem to work.
+	system.memory.kernel.rootFS = system.blankVFS()
+	system.newVFS("/", system.memory.kernel.rootFS, false)
 
 	// temp directory
-	system.processes[0].variables.tmp = system.newVFS(0, "/tmp", "tmp", true)
+	system.memory.kernel.tmpVFS = system.blankVFS()
+	system.newVFS("/tmp", system.memory.kernel.tmpVFS, true)
+
+	// processes directory
+	system.memory.kernel.procVFS = system.blankVFS()
+	system.newVFS("/proc", system.memory.kernel.procVFS, true)
 
 	// FILESYSTEM ERRORS
 
@@ -983,7 +1003,7 @@ async function loader() {
 
 		// build data to commit to file
 		const data = {}
-		data.fs = system.processes[0].variables.fs
+		data.fs = system.memory.processes[0].fs
 		data.version = "v0.4.0"
 		const writeData = JSON.stringify(data, null, 4)
 
@@ -1107,10 +1127,10 @@ async function bootOS(osName, ssm) {
 
 			switch (data.version) {
 				case "v0.3.0":
-					system.processes[0].variables.fs = data.fs
+					system.memory.processes[0].fs = data.fs
 					break;
 				case "v0.4.0":
-					system.processes[0].variables.fs = data.fs
+					system.memory.processes[0].fs = data.fs
 					break;
 				default:
 					throw new Error("Filesystem file not supported.");
