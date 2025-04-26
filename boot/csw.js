@@ -44,9 +44,9 @@ csw.fs.read = function (tokenID, dr, attribute) {
 
     const directory = applyRootPoint(dr, tokenID);
 
-    if (directory == "/proc") {
-        return system.processes;
-    }
+    //if (directory == "/proc") {
+    //    return system.processes;
+    //}
 
     const token = tokeninf(tokenID);
 
@@ -152,10 +152,10 @@ csw.lib = function (token, name, dir = "/lib") {
 
 // process management
 csw.processes = {}
-csw.processes.execute = async function (token, directory, args, isUnsafe) {
+csw.processes.execute = async function (token, directory, args, isUnsafe, stdin, sharedMemory = false) {
     const tkn = tokeninf(token)
     // please make sure only admin processes can start unsafe processes!
-    return await system.startProcess(tkn.PID, directory, args, isUnsafe)
+    return await system.startProcess(tkn.PID, directory, args, isUnsafe, stdin, undefined, sharedMemory)
 }
 csw.processes.terminate = function (token, PID) {
     return system.stopProcess(PID)
@@ -216,6 +216,7 @@ csw.msgs.read = function (token, deleteAfterRead) {
 }
 csw.msgs.shout = function (token, name) {
     const tkn = tokeninf(token);
+    console.debug(`Process ${tkn.PID} has shouted as ${name}`)
     PIDs[tkn.PID] = name;
 }
 csw.msgs.pidOfName = function (token, name) {
@@ -288,34 +289,39 @@ function tokeninf(token) {
 // TEMPORARY ELEVATION FUNCTION
 csw.permissions = {}
 csw.permissions.changeUser = async function (token, PID, username, password) {
-    const user = system.fs.readFile("/etc/passwd")[username]
+    const user = system.fs.readFile("/etc/passwd")[username];
     if (user == undefined) {
         return {
             ok: false,
             reason: `User '${username}' does not exist!`
-        }
+        };
     }
 
     const passwd = user.password;
-    console.debug(user.password)
 
     const passHash = await system.userPasswordHash(password);
 
     if (passwd == passHash) {
         // correct password!
         //const proc = system.fs.readFile("/proc")
-        const proc = system.processes
-        proc[PID].token.user = username
+        const proc = system.processes;
+        proc[PID].token.user = username;
+        system.csw.tokens[token].user = username;
         return {
             ok: true
-        }
+        };
     } else {
-        throw new Error("Incorrect password")
+        throw new Error("Incorrect password");
     }
 }
+csw.permissions.getUser = function (token) {
+    const tkn = tokeninf(token);
+
+    return structuredClone(system.processes[tkn.PID].token.user);
+};
 
 function newTokenID() {
-    let id
+    let id;
 
     while (id == undefined || system.csw.tokens[id] !== undefined) {
         id = Math.floor(Math.random() * 18446744073709551615)
@@ -339,6 +345,37 @@ csw.permissions.newToken = function (PID, user = "root") {
 csw.permissions.elevate = function (token) {
     return system
 }
+
+
+csw.log = function (token, str) {
+    const tkn = tokeninf(token);
+
+    const name = system.processes[tkn.PID].name
+
+    system.log(name, str)
+};
+csw.post = function (token, str) {
+    const tkn = tokeninf(token);
+
+    const name = system.processes[tkn.PID].name
+
+    system.log(name, str)
+};
+csw.warn = function (token, str) {
+    const tkn = tokeninf(token);
+
+    const name = system.processes[tkn.PID].name
+
+    system.warn(name, str)
+};
+csw.error = function (token, str) {
+    const tkn = tokeninf(token);
+
+    const name = system.processes[tkn.PID].name
+
+    system.error(name, str)
+};
+
 
 // Work out what functions we have so we can replace them all to include the accessToken
 const functions = []
