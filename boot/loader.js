@@ -213,7 +213,7 @@ async function loader() {
 	if (navigator.platform == "MacIntel") { // can't use navigator.userAgentData.platform
 		system.modifier = "Meta"
 	}
-	system.modifier = "Control";
+	system.modifier = "Alt";
 
 	document.addEventListener('keyup', (e) => {
 		system.keys[e.key] = false
