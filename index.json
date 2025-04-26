@@ -3,6 +3,7 @@
     "/boot/castoreaKernel.js",
     "/boot/loader.js",
     "/boot/csw.js",
+    "/boot/lib.js",
     {
       "dir": "/etc/path.json",
       "parse": true
@@ -25,19 +26,20 @@
     "/boot",
     "/dev",
     "/etc",
+    "/etc/sysconfig",
     "/home",
     "/lib",
     "/mnt",
     "/opt",
     "/usr",
     "/usr/bin",
-    "/usr/bin/aurora",
     "/usr/lib",
     "/usr/include",
     "/usr/libexec",
     "/usr/local",
     "/usr/sbin",
     "/usr/share",
+    "/usr/share/aurora",
     "/var",
     "/var/crash",
     "/var/lib",
@@ -75,5 +77,6 @@
     "pebble",
     "textedit",
     "tests"
+    "systemfonts"
   ]
 }
