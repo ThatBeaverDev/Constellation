@@ -222,30 +222,15 @@ async function loader() {
 	markAsBooted("keyListeners")
 
 	String.prototype.textAfter = function (after) {
-		let res = ""
-		for (let i = 0; i < this.length; i++) {
-			res += this[i]
-		}
-
-		return res.substring(res.indexOf(after) + after.length)
+		return this.substring(this.indexOf(after) + after.length)
 	}
 
 	String.prototype.textBefore = function (before) {
-		let res = ""
-		for (let i = 0; i < this.length; i++) {
-			res += this[i]
-		}
-
-		return res.substring(0, res.indexOf(before))
+		return this.substring(0, this.indexOf(before))
 	}
 
 	String.prototype.textAfterAll = function (after) {
-		let res = ""
-		for (let i = 0; i < this.length; i++) {
-			res += this[i]
-		}
-
-		return res.split("").reverse().join("").textBefore(after).split("").reverse().join("")
+		return this.split("").reverse().join("").textBefore(after).split("").reverse().join("")
 	}
 
 	markAsBooted("textPrototype")
