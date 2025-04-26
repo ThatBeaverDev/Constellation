@@ -114,68 +114,85 @@ async function start_kernel() {
 				}
 			}
 
+			system.memory.processes[PID] = {
+				shared: {
+					name: dir
+				},
+				std: {
+					in: structuredClone(stdin),
+					out: ""
+				}
+			}
+
+			const procVFS = system.memory.kernel.procVFS
+
+			const procDir = "/" + PID
+
+			system.vfsMan.writeFolder(procDir, "root", procVFS);
+			system.vfsMan.writeFile(procDir + "/cmdline", `${dir} ${args.join(" ")}`, "root", procVFS);
+			system.vfsMan.writeFile(procDir + "/exe", `${dir}`, "root", procVFS);
+			system.vfsMan.writeFile(procDir + "/args", `${args}`, "root", procVFS);
+
 
 			const obj = {}
 
-			obj.name = dir
-			obj.PID = PID
-			obj.children = []
-			obj.std = {
-				in: stdin,
-				out: ""
-			}
-			obj.parent = parentPID
-			obj.isUnsafe = isUnsafe
-			obj.args = args
+			obj.name = dir;
+			obj.PID = PID;
+			obj.children = [];
+			obj.parent = parentPID;
+			obj.isUnsafe = isUnsafe;
+			obj.args = args;
+			obj.cwd = "/";
+			obj.useSharedMemory = useSharedMemory;
 			obj.token = {
 				user: user,
 				root: system.processes[parentPID].token.root
-			}
-			obj.tokenID = tokenID
-			obj.variables = {
-				shared: {
-					name: dir.textAfterAll("/")
-				}
-			}
-			obj.frame = "initRunning"
+			};
+			obj.tokenID = tokenID;
+			obj.frame = "initRunning";
 
 
-			code = preScript + code
-			obj.code = code
+			code = preScript + code;
+			obj.code = code;
 
-			obj.hasFrame = obj.code.includes("frame()")
+			obj.hasFrame = obj.code.includes("frame()");
 
-			obj.display = `<p>Application ${dir}, PID ${PID} has no display output.</p>`
+			obj.display = `<p>Application ${dir}, PID ${PID} has no display output.</p>`;
 
-			system.systemWrapper = Boolean(system.systemWrapper)
+			system.systemWrapper = Boolean(system.systemWrapper);
 
 			// so we can make an Async function for init
-			const AsyncFunction = system.asyncFunction
+			const AsyncFunction = system.asyncFunction;
 
-			let frame = ""
+			let frame;
+			let terminate;
 
 				if (isUnsafe) {
 					if (system.safe && system.systemWrapper) {
 						// safe mode, unsafe and systemWrapper
 						frame = new Function("lcl", "prn", "stud", "ssm", obj.code + "\ntry {  frame(args) } catch(e) {  console.error(token, Name, e)  };" + afterCode)
+						terminate = new Function("lcl", "prn", "stud", "ssm", obj.code + "\ntry {  terminate(args) } catch(e) {  console.error(token, Name, e)  };" + afterCode)
 						obj.init = new AsyncFunction("lcl", "prn", "stud", "ssm", obj.code + "\ntry {  await init(args) } catch(e) {  console.error(token, Name, e)  };" + afterCode)
 					}
 
 					if (!system.safe) {
 						// no safe mode, unsafe
 						frame = new Function("lcl", "prn", "stud", "ssm", obj.code + "\nframe(args);" + afterCode)
+						terminate = new Function("lcl", "prn", "stud", "ssm", obj.code + "\nterminate(args);" + afterCode)
 						obj.init = new AsyncFunction("lcl", "prn", "stud", "ssm", obj.code + "\nawait init(args);" + afterCode)
 					}
 				} else {
 					if (system.safe) {
 						// safe mode, not unsafe
 						frame = new Function("lcl", "prn", "stud", obj.code + "\ntry {  frame(args) } catch(e) {  console.error(Name, e)  };" + afterCode)
+						terminate = new Function("lcl", "prn", "stud", obj.code + "\ntry {  terminate(args) } catch(e) {  console.error(Name, e)  };" + afterCode)
 						obj.init = new AsyncFunction("lcl", "prn", "stud", obj.code + "\ntry {  await init(args) } catch(e) {  console.error(Name, e)  };" + afterCode)
 					}
 
 					if (!system.safe) {
 						// no safe mode, not unsafe
 						frame = new Function("lcl", "prn", "stud", obj.code + "\nframe(args);" + afterCode)
+						terminate = new Function("lcl", "prn", "stud", obj.code + "\nterminate(args);" + afterCode)
 						obj.init = new AsyncFunction("lcl", "prn", "stud", obj.code + "\nawait init(args);" + afterCode)
 					}
 				}
@@ -185,63 +202,115 @@ async function start_kernel() {
 
 			const count = PID
 			let initResult = {}
+			const mem = system.memory.processes[count]
+			let parentinf = {
+				PID: obj.PID,
+				name: system.processes[obj.parent].name
+			}
+			if (obj.useSharedMemory) {
+				parentinf = system.memory.processes[obj.parent].shared
+			}
+			const oldRunningPID = Number(system.runningPID)
+			system.runningPID = PID
 			try {
 				if (isUnsafe) {
-					initResult = await obj.init(processes[count].variables, processes[obj.parent].variables.shared, processes[count].std, system)
+					initResult = await obj.init(mem, parentinf, mem.std, system)
 				} else {
-					initResult = await obj.init(processes[count].variables, processes[obj.parent].variables.shared, processes[count].std)
+					initResult = await obj.init(mem, parentinf, mem.std)
 				}
 			} catch (e) {
-				console.error(e)
-				obj.std.out = "[ERR]" + e
+				console.error(Name + ": startProcess running " + obj.name, e)
+				mem.std.out += "\n[ERR]" + e
 			}
+			system.runningPID = Number(oldRunningPID)
 
 			if (initResult.frame == undefined) {
 				frame = "noFrame"
 			}
 
+			if (initResult.frame == undefined) {
+				terminate = "noTerminate"
+			}
+
 			obj.frame = frame
+			obj.terminate = terminate
 			
 			system.task = undefined
 			return {
 				PID: count,
 				process: obj,
-				stdout: obj.std.out
+				stdout: mem.std.out
 			}
 		}
 
-		system.stopProcess = function (PID) {
-			system.task = "stopProcess"
-			if (Number(PID) < 0) return
+		system.stopProcess = async function (PID, doNotStopIfHasChildren = false) {
+			system.task = "stopProcess";
+			if (Number(PID) < 0) return;
+
+			if (doNotStopIfHasChildren) {
+				if (processes[Number(PID)].children.length !== 0) {
+					return false;
+				}
+			}
 			
-			const obj = processes[Number(PID)]
+			const obj = processes[Number(PID)];
+
+			if (obj.terminate !== "noTerminate") {
+
+				const mem = system.memory.processes[PID]
+
+				let parentinf = {
+					PID: obj.PID,
+					name: system.processes[obj.parent].name
+				}
+				if (obj.useSharedMemory) {
+					parentinf = system.memory.processes[obj.parent].shared
+				}
+				const oldRunningPID = Number(system.runningPID)
+				system.runningPID = Number(obj.PID)
+				const result = await obj.terminate(mem, parentinf, mem.std);
+				system.runningPID = Number(oldRunningPID)
+
+			};
 
 			if (PID == system.displayManager) {
-				system.displayManager = false
+				system.displayManager = false;
 			}
 
-			if (obj == undefined) return
+			if (obj == undefined) return;
 
 			if (system.focus.includes(Number(PID))) {
-				console.log(`Process ${PID} has display focus. Removing.`)
-				system.focus = system.focus.filter(item => Number(item) !== Number(PID))
+				console.log(`Process ${PID} has display focus. Removing.`);
+				system.focus = system.focus.filter(item => Number(item) !== Number(PID));
 
 				// refresh the display.
-				system.refreshDisplay()
-			}
+				system.refreshDisplay();
+			};
 
 			for (const i in obj.children) {
-				system.stopProcess(obj.children[i])
+				const stop = system.stopProcess(obj.children[i], true);
+				if (stop == true) {
+					console.debug(system.proceseses[i])
+					system.processes[i].parent = 1
+				}
+			};
+
+			const parentChildren = processes[obj.parent].children;
+			const index = parentChildren.indexOf(PID);
+			parentChildren.splice(index, 1);
+
+			delete system.csw.tokens[obj.tokenID];
+			delete processes[Number(PID)];
+
+			const procFiles = system.fs.listFolder("/proc/" + PID)
+			for (const i in procFiles) {
+				await system.fs.deleteFile("/proc/" + PID + "/" + procFiles[i])
 			}
 
-			const parentChildren = processes[obj.parent].children
-			const index = parentChildren.indexOf(PID)
-			parentChildren.splice(index, 1)
+			system.fs.deleteFolder("/proc/" + PID)
 
-			delete system.csw.tokens[obj.tokenID]
-			delete processes[Number(PID)]
-
-			system.task = undefined
+			system.task = undefined;
+			return true
 		}
 
 		function getParentOfDir(dir) {
@@ -421,6 +490,9 @@ async function start_kernel() {
 		system.csw = new Function("system", system.fs.readFile("/boot/csw.js"))
 		system.csw(system)
 
+		system.lib = new Function("system", system.fs.readFile("/boot/lib.js"))
+		system.lib(system)
+
 		// source the repo for installs
 		await system.startProcess(PID, "/bin/aurora.js", ["source", "../aurora/pkgs", "as", "default"], true)
 
@@ -467,7 +539,11 @@ async function start_kernel() {
 
 		system.log(Name, "Beginning to run processes...")
 
-		system.runProcesses = function () {
+		system.manageProcVFS = () => {
+
+		}
+
+		system.runProcesses = () => {
 			try {
 
 				system.isLooping = true
@@ -482,7 +558,7 @@ async function start_kernel() {
 				}
 
 				if (processes == undefined) {
-					throw new Error("/proc is empty.")
+					throw new Error("Processes is empty.")
 				}
 
 				for (const i in processes) {
@@ -503,19 +579,29 @@ async function start_kernel() {
 						const startTime = Date.now()
 						// catch errors so one program can't crash them all
 						try {
-							const parent = processes[obj.parent]
-							const sharedVariables = parent.variables["shared"]
+							const sharedVariables = system.memory.processes[obj.parent].shared
+
+							const mem = system.memory.processes[i]
+							let parentinf = {
+								PID: obj.PID,
+								name: system.processes[obj.parent].name
+							}
+							if (obj.useSharedMemory) {
+								parentinf = system.memory.processes[obj.parent].shared
+							}
+
+							system.runningPID = Number(i)
 
 							// run it
 							if (obj.isUnsafe) {
-								obj.frame(obj.variables, sharedVariables, obj.std, system)
+								obj.frame(mem, parentinf, mem.std, system)
 							} else {
-								obj.frame(obj.variables, sharedVariables, obj.std)
+								obj.frame(mem, parentinf, mem.std)
 							}
 							// no support for std sadly
 
 						} catch (e) {
-							console.error(Name + ": processRunner running " + obj.name, e)
+							console.error(Name + ": processRunner running " + obj.name, e.stack)
 						}
 						const endTime = Date.now()
 						const time = endTime - startTime
@@ -532,6 +618,7 @@ async function start_kernel() {
 
 		system.runtime = setInterval(function () {
 			try {
+				system.manageProcVFS()
 				system.runProcesses()
 			} catch (e) {
 				system.kernelPanic(e, "PROCESS RUNNER")
