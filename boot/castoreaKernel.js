@@ -63,7 +63,7 @@ async function start_kernel() {
 
 		system.asyncFunction = Object.getPrototypeOf(async function () { }).constructor;
 
-		system.startProcess = async function (parentPID, dir, args = [], unsafe = false, stdin = null, usr) {
+		system.startProcess = async function (parentPID, dir, args = [], unsafe = false, stdin = null, usr, useSharedMemory = false) {
 			system.task = "startProcess"
 			system.maxPID++
 			const isUnsafe = unsafe;
@@ -91,7 +91,7 @@ async function start_kernel() {
 			}
 
 			// code ran AFTER the process
-			const afterCode = `\n\ntry {\n\treturn {\n\t\tstd: std,\n\t\tframe: frame\n\t}\n} catch (e) {\n\treturn {\n\n\t\tstd: std,\n\t\tframe: undefined\n\t}\n}`
+			const afterCode = `\nlet SYS_FRAME_EXPORT;\nlet SYS_TERMINATE_EXPORT;\ntry {\n\tSYS_FRAME_EXPORT = frame;\n} catch (e) {};\ntry {\n\tSYS_TERMINATE_EXPORT = terminate;\n} catch (e) {};\n\nreturn {\n\tstd: std,\n\tframe: SYS_FRAME_EXPORT,\n\tterminate: SYS_TERMINATE_EXPORT\n};`
 
 			let code
 			let type = "js"
