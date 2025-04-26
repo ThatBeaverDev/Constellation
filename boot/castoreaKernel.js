@@ -532,7 +532,7 @@ async function start_kernel() {
 		system.maxPID = 0
 
 		system.log(Name, "Starting init system...")
-		await system.startProcess(PID, "/sbin/init.js", {}, true)
+		await system.startProcess(PID, "/sbin/init.js", [], true)
 		if (!system.systemC) {
 			system.error(Name, "systemC not running! System may Behave Weirdly!")
 		}
@@ -666,9 +666,9 @@ system.kernelPanic = function (e, when = "When not provided.") {
 	}
 
 	try {
-		systemPurged.processes = Object.keys(csw.fs.read("/proc")).length
+		systemPurged.processes = Object.keys(system.processes).length
 	} catch (e) {
-		systemPurged.processes = "Error reading process count. /proc may have been deleted or never created."
+		systemPurged.processes = "Error reading process count."
 	}
 
 	try {
