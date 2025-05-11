@@ -1,19 +1,7 @@
 // bootloader for Constellation / Constellation Based Systems.
 
-function checkIfCompatible() {
-	let obj = {
-		isCompatible: true
-	}
-	if ((crypto || {}).subtle == undefined) {
-		obj.isCompatible = false
-		obj.reason = "Crypto/subtle"
-		obj.showReason = "crypto.subtle"
-	}
-	return obj
-}
-
 function mustBootWithoutFSAPI() {
-	obj = {
+	let obj = {
 		noFS: false
 	}
 	if (window.showSaveFilePicker == undefined) {
@@ -30,243 +18,27 @@ async function loader() {
 	const Name = "/boot/loader.js"
 	const PID = 0
 
-	const system = {
-		startTime: Date.now()
-	}
+	system.startTime = Date.now()
+	document.getElementById("display").innerHTML = `<div id="logoBox" style="display: flex; justify-content: space-around"></div>
+		<div id="logsBox" style="display: flex; justify-content: space-around"></div>
+		<div style="display: flex; justify-content: space-around">
+			<p id="preInput">system is loading. if this text persists with no logs, the system may have crashed.</p>
+			<!--<input type="text" id="input" onkeypress="search(event)">-->
+		</div>`
 
 	let bootedPercentage
-	const booted = {
-		"": false,
-		logs: false,
-		keyListeners: false,
-		textPrototype: false,
-		uriParameters: false,
-		compatibility: false,
-		fetchURL: false,
-		processes: false,
-		vfs: false,
-		fs: false,
-		cryptography: false,
-		localFS: false,
-		bootloader: false,
-		bootSelection: false
+
+	system.baseURI = window.location.protocol + "//" + window.location.host + window.location.pathname
+
+	if (system.baseURI.at(-1) == "/") {
+		system.baseURI = system.baseURI.substring(0, system.baseURI.length - 1)
 	}
-	const bootables = Object.keys(booted)
-	const totalToBoot = bootables.length
-
-	function markAsBooted(name) {
-		if (booted[name] !== false) {
-			throw new Error("Segment " + name + " cannot be marked as booted when it does not exist")
-		}
-		booted[name] = true
-
-		let done = 0
-		for (const i in booted) {
-			if (booted[i] == true) {
-				done += 1
-			}
-		}
-		bootedPercentage = done / totalToBoot
-		const percentText = Math.round(bootedPercentage * 10000) / 100 + "%"
-		try {
-			system.log(Name, name + " booted. " + percentText + " Booted!")
-		} catch (e) { }
-
-		const index = bootables.indexOf(name)
-		const text = index == bootables.length - 1 ? "Finalising..." : bootables[index + 1]
-
-		document.getElementById("logsBox").innerHTML = `<p style="text-align: center;">${percentText} booted.<br>Current Stage: ${text}</p>`
-	}
-
-	markAsBooted("")
-
-	system.baseURI = "."
 
 	system.license = "GPL-3.0 License"
 
-	system.cast = {}
-	window.objectify = function Objectify(obj) {
-		if (typeof obj === "object") {
-			return obj;
-		}
-		try {
-			return (JSON.parse(obj))
-		} catch (e) { }
-		try {
-			return (obj)
-		} catch (e) { }
-	}
-
-	window.stringify = function Stringify(str, beautify) {
-		if (typeof str === "object") {
-			if (beautify) {
-				return JSON.stringify(str, null, 4);
-			} else {
-				return JSON.stringify(str);
-			}
-		}
-		return (String(str))
-	}
-
-	system.safe = false;
-	system.forceSystemLog = true;
-	system.maxPID = 1;
-
-	system.inputText = "";
 	system.versions = {
 		loader: "v0.3.0"
 	};
-	system.logsBox = document.getElementById("logsBox");
-	system.logs = [];
-
-	document.body.click() // so that things that need user interaction can run
-
-	system.refreshLogsPanel = function (text) {
-		if (system.logsFocus == undefined) {
-			let data = ""
-
-			for (const i in system.logs) {
-				let temp = "<p id='" + system.logs[i].type + "'>"
-				temp += system.logs[i].content
-				temp += "</p>"
-				data += temp
-			}
-
-			//system.logsBox.innerHTML = data // comment out to remove the logsbox
-			return data
-		} else {
-			if (typeof system.fs.readFile("/proc")[system.logsFocus] !== "object") {
-				delete system.logsFocus
-				system.refreshLogsPanel()
-			}
-
-			if (text == undefined) return
-			//system.logsBox.innerHTML = text // also comment out to remove the logsbox
-			try {
-				system.preInput.innerHTML = ""
-			} catch (e) {
-				// this is going to error, let's embrace it
-			}
-			return text
-		}
-	}
-
-	system.log = function (origin = Name, str) {
-		const obj = {
-			type: "log",
-			origin: origin,
-			content: "[" + String(Date.now() - system.startTime).padStart(7, 0) + "] INFO  {" + origin + "} - " + window.stringify(str)
-		}
-		system.logs.push(obj)
-		console.log(obj.content)
-		system.refreshLogsPanel()
-	}
-
-	system.post = function (origin, str) {
-		const obj = {
-			type: "post",
-			origin: origin,
-			content: window.stringify(str)
-		}
-		system.logs.push(obj)
-		console.log(str)
-		system.refreshLogsPanel()
-	}
-
-	system.warn = function (origin = Name, str) {
-		const obj = {
-			type: "warn",
-			origin: origin,
-			content: "[" + String(Date.now() - system.startTime).padStart(7, 0) + "] WARN  {" + origin + "} - " + window.stringify(str)
-		}
-		system.logs.push(obj)
-		console.warn(obj.content)
-		system.refreshLogsPanel()
-	}
-	system.error = function (origin = Name, str) {
-		const obj = {
-			type: "error",
-			origin: origin,
-			content: "[" + String(Date.now() - system.startTime).padStart(7, 0) + "] ERROR {" + origin + "} - " + window.stringify(str)
-		}
-		system.logs.push(obj)
-		console.error(obj.content)
-		system.refreshLogsPanel()
-	}
-
-	window.log = system.log;
-	window.post = system.post;
-	window.warn = system.warn;
-	window.error = system.error;
-
-	log(Name, "This system and codebase is under the " + system.license + ".")
-
-	markAsBooted("logs")
-
-	// INPUT
-	system.keys = {};
-	document.addEventListener('keydown', (e) => {
-		system.keys[e.key] = true
-	});
-
-	system.modifier = "Control"
-	if (navigator.platform == "MacIntel") { // can't use navigator.userAgentData.platform
-		system.modifier = "Meta"
-	}
-	system.modifier = "Alt";
-
-	document.addEventListener('keyup', (e) => {
-		system.keys[e.key] = false
-	})
-
-	markAsBooted("keyListeners")
-
-	String.prototype.textAfter = function (after) {
-		return this.substring(this.indexOf(after) + after.length)
-	}
-
-	String.prototype.textBefore = function (before) {
-		return this.substring(0, this.indexOf(before))
-	}
-
-	String.prototype.textAfterAll = function (after) {
-		return this.split("").reverse().join("").textBefore(after).split("").reverse().join("")
-	}
-
-	markAsBooted("textPrototype")
-
-	system.setParam = function (name, value) {
-		var s = new URLSearchParams(location.search);
-		s.set(String(name), String(value));
-		history.replaceState("", "", "?" + s.toString());
-	}
-
-	system.getParam = function (name) {
-		return new URLSearchParams(location.search).get(String(name))
-	}
-
-	markAsBooted("uriParameters")
-
-	obj = checkIfCompatible()
-
-	if (!obj.isCompatible) {
-		system.error(Name, "Sorry, but your browser is not compatible with This System.")
-		if (obj.showReason == undefined) obj.Showreason = obj.reason
-		system.error(Name, 'Reason is your browser does not support <a href="https://developer.mozilla.org/en-US/docs/Web/API/' + obj.reason + '">' + obj.showReason + '</a>')
-		document.getElementById("preInput").innerText = ""
-		return
-	}
-
-	markAsBooted("compatibility")
-
-	system.fsAPI = true
-
-	system.development = Boolean(system.getParam("dev"))
-	system.fastBoot = Boolean(system.getParam("fastBoot"))
-
-	if (system.development) {
-		window.sse = system // security be damned
-	}
 
 	if (system.fastBoot) {
 		system.fsAPI = false // so I don't have to constantly make a new system to update it
@@ -278,8 +50,6 @@ async function loader() {
 		system.warn(Name, "Attempting to boot without the filesystem API, things might get a bit rocky...")
 		system.fsAPI = false
 	}
-
-	delete obj
 
 	system.fetchURL = async function fetchURL(url) {
 		const oldTask = String(system.task)
@@ -326,42 +96,6 @@ async function loader() {
 
 
 
-	// Processes (for the VFS system)
-	const proc = {
-		PID: 0,
-		parent: 0,
-		children: [],
-		name: "/boot/castoreaKernel.js",
-		isUnsafe: true,
-		args: [],
-		token: {
-			user: "root",
-			root: "/"
-		},
-		variables: {
-			shared: {
-				log: system.log,
-				warn: system.warn,
-				error: system.error,
-				post: system.post,
-				editLog: system.editLog
-			},
-			fs: {}
-		}
-	}
-
-	system.memory = {
-		processes: {
-			0: {}
-		},
-		kernel: {}
-	};
-	system.processes = {}
-	const processes = system.processes
-
-	processes[PID] = proc
-
-	markAsBooted("processes")
 
 
 
@@ -418,7 +152,7 @@ async function loader() {
 
 	system.fs.file = (ext, content, safeMode) => {
 
-		if (ext == undefined || content == undefined) {
+		if (ext == undefined) {
 			throw new Error("extension and content MUST be defined when creating a file.")
 		}
 
@@ -470,30 +204,37 @@ async function loader() {
 	}
 
 	function getDirInfo(dirOld) {
-		const obj = {}
-		let dir = String(dirOld) // use to replace ~ with home dir in future
-		let location = dir.substring(0, dir.lastIndexOf("/"))
-		if (location == "") {
-			location = "/"
-		}
-		obj.location = location
-		obj.filename = dir.substring(dir.lastIndexOf("/") + 1)
-		obj.ext = obj.filename.substring(obj.filename.lastIndexOf(".") + 1)
-		obj.dir = dir
+		try {
+			const obj = {}
+			let dir = String(dirOld) // use to replace ~ with home dir in future
+			let location = dir.substring(0, dir.lastIndexOf("/"))
+			if (location == "") {
+				location = "/"
+			}
+			obj.location = location
+			obj.filename = dir.substring(dir.lastIndexOf("/") + 1)
+			obj.ext = obj.filename.substring(obj.filename.lastIndexOf(".") + 1)
+			obj.dir = dir
 
-		const vfs = []
+			const vfs = []
 
-		for (const i in system.vfs) {
-			if (dirOld.startsWith(i)) {
-				vfs.push(i)
+			for (const i in system.vfs) {
+				if (dirOld.startsWith(i)) {
+					vfs.push(i)
+				}
+			}
+
+			obj.vfs = longestStringInArray(vfs)
+
+			obj.vfsInf = system.vfs[obj.vfs]
+
+			return obj
+		} catch (e) {
+			throw {
+				error: e,
+				directory: dirOld
 			}
 		}
-
-		obj.vfs = longestStringInArray(vfs)
-
-		obj.vfsInf = system.vfs[obj.vfs]
-
-		return obj
 	}
 
 	system.vfsMan.rawFile = (directory, fs) => {
@@ -543,7 +284,7 @@ async function loader() {
 
 				permissionsCheck(directory, username, "write", true, fs)
 
-				const file = system.vfsMan.rawFile(directory)
+				const file = system.vfsMan.rawFile(directory, fs)
 				file.contents = content
 				return {
 					result: true
@@ -556,6 +297,8 @@ async function loader() {
 				result: true,
 			}
 		} catch (e) {
+			console.warn(e);
+
 			system.fsErrors.push({
 				origin: "writeFile",
 				error: e
@@ -661,6 +404,8 @@ async function loader() {
 				result: true
 			}
 		} catch (e) {
+			console.warn(e);
+
 			system.fsErrors.push({
 				origin: "writeFolder",
 				error: e
@@ -743,6 +488,8 @@ async function loader() {
 			let perms = system.vfsMan.rawFolder(directory, username, fs).permissions
 			return perms
 		} catch (e) {
+			console.warn(e);
+
 			system.fsErrors.push({
 				origin: "folderPermissions",
 				error: e,
@@ -790,30 +537,26 @@ async function loader() {
 	// newFS
 
 	const getVFS = (directory) => {
-		try {
-			const obj = getDirInfo(directory)
+		//try {
+		const obj = getDirInfo(directory)
 
-			let vfsDir = directory.textAfter(obj.vfs)
+		let vfsDir = directory.textAfter(obj.vfs)
 
-			if (vfsDir[0] !== "/") {
-				vfsDir = "/" + vfsDir
-			}
-
-			if (directory.substring(0, 9) == "/mnt/usb0") {
-				console.debug(obj.vfsInf)
-			}
-
-			return {
-				vfs: obj.vfsInf,
-				vfsDir: vfsDir
-			}
-		} catch (e) {
-			console.warn(e)
-			return {
-				vfs: undefined,
-				vfsDir: "/"
-			}
+		if (vfsDir[0] !== "/") {
+			vfsDir = "/" + vfsDir
 		}
+
+		return {
+			vfs: obj.vfsInf,
+			vfsDir: vfsDir
+		}
+		//} catch (e) {
+		//	console.warn(e)
+		//	return {
+		//		vfs: undefined,
+		//		vfsDir: "/"
+		//	}
+		//}
 	}
 	system.fs.getVFS = getVFS
 
@@ -866,7 +609,7 @@ async function loader() {
 	}
 
 
-	// Typeless operations (files AND folderes)
+	// Typeless operations (files AND folders)
 	system.fs.exists = (directory) => {
 		const obj = getVFS(directory)
 		return system.vfsMan.exists(obj.vfsDir, obj.vfs)
@@ -946,65 +689,9 @@ async function loader() {
 
 
 
-
-
-
-
-
-
 	// run cryptography so we can do user login stuff
 
-	const crypt = await system.fetchURL(system.baseURI + '/boot/cryptography.js') // cryptoFetch
-	eval(crypt)
-
-	markAsBooted("cryptography")
-
-	system.localFS = {}
-
-	system.localFS.options = {
-		startIn: 'documents',
-		suggestedName: 'Constellation System.cfsv2',
-		types: [{
-			description: "Constellation File System (v2)",
-			accept: {
-				"text/plain": [".cfsv2"],
-			},
-		},],
-		excludeAcceptAllOption: true,
-		multiple: false,
-	};
-
-	// function to write to file
-	system.localFS.commit = async function () {
-		// check we have a filehandle, if not get one
-
-		if (system.fileHandle == undefined) {
-			system.fileHandle = await window.showSaveFilePicker()
-		}
-
-
-		// create a FileSystemWritableFileStream to write to
-		const writableStream = await system.fileHandle.createWritable();
-
-		// build data to commit to file
-		const data = {}
-		data.fs = system.memory.processes[0].fs
-		data.version = "v0.4.0"
-		const writeData = JSON.stringify(data, null, 4)
-
-		// write our file
-		await writableStream.write(writeData);
-
-		// close the file and write the contents to disk.
-		await writableStream.close();
-		console.log("Filesystem commited to hostOS")
-	}
-
-	if (!system.fsAPI) {
-		system.localFS.commit = async function () { }
-	}
-
-	if (system.development == false) {
+	if (system.fsAPI == true) {
 		window.onbeforeunload = () => {
 			return true;
 		};
@@ -1080,7 +767,6 @@ async function loader() {
 			}
 		}, 100)
 	})
-
 }
 
 async function bootOS(osName, ssm) {
@@ -1097,6 +783,8 @@ async function bootOS(osName, ssm) {
 	delete system.selection;
 	delete system.options;
 	let castoreaKernel;
+
+	const kernelDir = "/boot/castoreaKernel.js";
 
 	switch (String(osName).toLowerCase()) {
 		case "open":
@@ -1125,7 +813,7 @@ async function bootOS(osName, ssm) {
 
 
 			// run kernel
-			castoreaKernel = system.fs.readFile("/boot/castoreaKernel.js");
+			castoreaKernel = system.fs.readFile(kernelDir);
 			break;
 		case "new":
 			if (system.fsAPI) {
@@ -1135,9 +823,9 @@ async function bootOS(osName, ssm) {
 
 			// fetch kernel since it's not present yet to be ran
 			system.fs.writeFolder("/boot");
-			const kern = await system.fetchURL(system.baseURI + "/boot/castoreaKernel.js"); // kernel download
-			system.fs.writeFile("/boot/castoreaKernel.js", kern);
-			castoreaKernel = system.fs.readFile("/boot/castoreaKernel.js");
+			const kern = await system.fetchURL(system.baseURI + kernelDir); // kernel download
+			system.fs.writeFile(kernelDir, kern);
+			castoreaKernel = system.fs.readFile(kernelDir);
 
 			break;
 		default:
@@ -1151,10 +839,10 @@ async function bootOS(osName, ssm) {
 
 	console.debug("Running Kernel")
 
-	castoreaKernel = new Function("ssm", castoreaKernel);
-	const sys = castoreaKernel(system);
+	const getKernel = new Function(castoreaKernel);
+	const kernel = getKernel();
 
-	sys() // run the kernel!
+	kernel(system, kernelDir, 0, []) // run the kernel!
 }
 
 try {
