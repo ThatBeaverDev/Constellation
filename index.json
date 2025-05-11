@@ -2,8 +2,6 @@
   "files": [
     "/boot/castoreaKernel.js",
     "/boot/loader.js",
-    "/boot/csw.js",
-    "/boot/lib.js",
     {
       "dir": "/boot/quark/quark.json",
       "parse": true
@@ -22,6 +20,8 @@
     },
     "/dev/null",
     "/dev/urandom",
+    "/dev/display",
+    "/dev/eth0",
     "/etc/hostname",
     {
       "dir": "/etc/sysconfig/clock",
@@ -38,6 +38,7 @@
     "/etc/sysconfig",
     "/home",
     "/lib",
+    "/lib/modules",
     "/mnt",
     "/opt",
     "/usr",
@@ -57,19 +58,15 @@
     "/var/tmp"
   ],
   "packages": [
-    "systemC",
+    "sysd",
     "core",
     "node",
     "man",
     "reboot",
-    "js",
-    "crl",
     "wget",
     "ps",
     "sysinfo",
-    "rn",
     "kill",
-    "killall",
     "build",
     "upgrade",
     "import-export",
@@ -83,9 +80,9 @@
     "pgext",
     "yak",
     "zip",
-    "pebble",
+    "nimbus",
     "textedit",
-    "tests"
+    "tests",
     "systemfonts"
   ]
 }
