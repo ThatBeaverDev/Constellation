@@ -208,7 +208,7 @@ async function start_kernel() {
 
 
 	if (system.isNew) {
-		await system.startProcess(PID, "/bin/aurora.js", ["update"], true) // update package repositories
+		await system.startProcess(PID, "/bin/aurora.js", ["index"], true) // update package repositories
 
 		await system.startProcess(PID, "/bin/aurora.js", ["install", "aurora", "-s"], true)
 
