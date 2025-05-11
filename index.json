@@ -5,6 +5,10 @@
     "/boot/csw.js",
     "/boot/lib.js",
     {
+      "dir": "/boot/quark/quark.json",
+      "parse": true
+    },
+    {
       "dir": "/etc/path.json",
       "parse": true
     },
@@ -28,6 +32,7 @@
     "/bin",
     "/sbin",
     "/boot",
+    "/boot/quark",
     "/dev",
     "/etc",
     "/etc/sysconfig",
