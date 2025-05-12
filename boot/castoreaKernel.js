@@ -258,7 +258,7 @@ async function start_kernel() {
 	}, 0);
 
 	setTimeout(system.localFS.commit, 1000)
-	system.commit = setInterval(system.localFS.commit, 5000)
+	system.commit = setInterval(system.localFS.commit, 10000)
 	//} catch (e) {
 	//	system.kernelPanic(e, "UNKNOWN")
 	//}
