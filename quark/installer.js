@@ -61,6 +61,17 @@
         }
     }
 
+    let auroraFiles = list.auroraFiles
+    for (const loc in auroraFiles) {
+        const targetDir = auroraFiles[loc]
+        const uri = new URL("../aurora" + loc, window.location.href)
+
+        const item = await fetchURL(uri)
+
+        await d.writeFile(targetDir, item, "root", fs)
+
+    }
+
     await d.writeFile("/bin/aurora.js", aurora, "root", fs)
 
     await d.writeFile("/sysState.json", {
