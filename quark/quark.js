@@ -162,9 +162,25 @@ async function init() {
         // oop, recovery is needed
         await recoveryMode();
     } else {
-        let volume = await selectionPanel("", bootablesNames, bootables);
+
+        const backendList = structuredClone(bootables)
+        backendList.push(
+            "newsystem"
+        )
+        const nameList = structuredClone(bootablesNames)
+        nameList.push(
+            "New System"
+        )
+
+        let volume = await selectionPanel("", nameList, backendList);
 
         console.log(volume + " is target to boot.")
+
+        if (volume == "newsystem") {
+            await recoveryMode()
+            return
+        }
+
         const vol = system.fsBackend.partitions.volumes[volume]
 
         const cfgLocation = vol.metadata.quarkCfg // get the config directory
@@ -215,7 +231,8 @@ async function init() {
         try {
             kernel()
         } catch(e) {
-            init()
+            console.error(e)
+            system.reboot()
         }
     }
 }
