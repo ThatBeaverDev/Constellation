@@ -2,8 +2,6 @@
 
 // network system
 
-console.debug("hi")
-
 async function fetchURL(url, type, body, headers) {
     let response
     let data
