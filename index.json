@@ -1,7 +1,5 @@
 {
   "files": [
-    "/boot/castoreaKernel.js",
-    "/boot/loader.js",
     {
       "dir": "/boot/quark/quark.json",
       "parse": true
@@ -28,6 +26,9 @@
       "parse": true
     }
   ],
+  "auroraFiles": {
+    "/kpkgs/castoreaKernel/castoreaKernel.js": "/boot/castoreaKernel.js"
+  },
   "folders": [
     "/bin",
     "/sbin",
@@ -58,6 +59,7 @@
     "/var/tmp"
   ],
   "packages": [
+    "castoreaKernel",
     "sysd",
     "core",
     "node",
@@ -82,7 +84,6 @@
     "zip",
     "nimbus",
     "textedit",
-    "tests",
     "systemfonts"
   ]
 }
