@@ -1,7 +1,11 @@
     async function install() {
 
+    const guid = await system.fsBackend.mkvol("Constellation Disk", "bootable", "localcfs", {
+        quarkCfg: "/boot/quark/quark.json"
+    })
+
     const auroraLocation = new URL("../aurora/pkgs/aurora/src.js", window.location.href)
-    const cfsDriverLocation = new URL("./lib/modules/fs/cfs.js", window.location.href)
+    const cfsDriverLocation = new URL("./lib/modules/fs/localcfs.js", window.location.href)
 
     console.debug("Installing Constellation[Aurora] from " + auroraLocation)
     const aurora = await (await fetch(auroraLocation)).text()
@@ -12,12 +16,12 @@
 
     system.drivers = {
         fs: {
-            cfs: await cfsDriverFnc(system)
+            localcfs: await cfsDriverFnc(system)
         }
     }
-    const d = system.drivers.fs.cfs
+    const d = system.drivers.fs.localcfs
 
-    const fs = d.newFS()
+    const fs = await d.newFS(guid)
 
     async function fetchURL(URL, parse = false) {
         const data = await fetch(URL)
@@ -39,7 +43,7 @@
     console.warn(list)
     folders = list.folders
     for (const item in folders) {
-        await d.writeFolder(folders[item], "root", fs)
+        await d.writeFolder(folders[item], "root", fs, guid)
     }
 
     console.log("Writing Default Files...")
@@ -54,10 +58,12 @@
                 obj = JSON.parse(obj)
             }
 
-            await d.writeFile(files[item].dir, obj, "root", fs)
+            console.debug(obj)
+
+            await d.writeFile(files[item].dir, obj, "root", fs, guid)
         } else {
             obj = await fetchURL(system.baseURI + files[item])
-            await d.writeFile(files[item], obj, "root", fs)
+            await d.writeFile(files[item], obj, "root", fs, guid)
         }
     }
 
@@ -68,20 +74,17 @@
 
         const item = await fetchURL(uri)
 
-        await d.writeFile(targetDir, item, "root", fs)
+        await d.writeFile(targetDir, item, "root", fs, guid)
 
     }
 
-    await d.writeFile("/bin/aurora.js", aurora, "root", fs)
+    await d.writeFile("/bin/aurora.js", aurora, "root", fs, guid)
 
     await d.writeFile("/sysState.json", {
         isNew: true
-    }, "root", fs)
+    }, "root", fs, guid)
     
-    const guid = await system.fsBackend.mkvol("Constellation Disk", "bootable", "cfs", {
-        quarkCfg: "/boot/quark/quark.json"
-    })
-    await system.fsBackend.writeVol(guid, "cfsData.json", fs, true)
+    await d.onUpdate(guid, fs)
 
 
     system.reboot()

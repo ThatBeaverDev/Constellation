@@ -14,7 +14,7 @@ async function driver(name) {
 
     const module = new Function("system", moduleCode)
 
-    const out = await  module(system)
+    const out = await module(system)
 
     quark.drivers[name] = out
 }
@@ -193,16 +193,18 @@ async function init() {
         // get the driver
         const fsType = vol.metadata.fsType
         await driver(fsType)
+        await driver("memcfs")
+        await driver("localcfs")
         const d = quark.drivers[fsType]
 
         // i got the drivers
         // good.
         
         const fs = await d.readFS(volume)
-        const cfg = await d.readFile(cfgLocation, "contents", "root", fs)
+        const cfg = await d.readFile(cfgLocation, "contents", "root", fs, volume)
 
         const kernelDir = cfg.params.pos + "/" + cfg.cmd
-        const kernelsrc = d.readFile(kernelDir, "contents", "root", fs)
+        const kernelsrc = await d.readFile(kernelDir, "contents", "root", fs, volume)
 
         system.memory = {
             kernel: {
