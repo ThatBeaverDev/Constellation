@@ -142,6 +142,25 @@
 
             return file.text()
         };
+
+        async function uwriteVol(GUID, entry) {
+            const backend = system.fsBackend;
+
+            const volume = backend.partitions.volumes[GUID];
+
+            if (volume == undefined) {
+                throw new Error("Volume " + GUID + " does not exist.");
+            };
+
+            const dirhandle = volume.directoryHandle
+
+            dirhandle.removeEntry(entry, { recursive: true })            
+        }
+
+
+
+
+
         system.fsBackend.readVol = readVol;
 
         async function getHDD() {
