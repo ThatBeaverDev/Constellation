@@ -1,6 +1,5 @@
 body {
     width: 90vw;
-    overflow-x: hidden;
 }
 
 #display {
@@ -11,5 +10,6 @@ body {
     font-size: 16px;
     white-space: pre;
     width: 100vw;
+    position: fixed;
     height: calc(100vh - 50px);
 }
