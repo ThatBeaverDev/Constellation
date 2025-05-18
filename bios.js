@@ -123,45 +123,46 @@
 
             await stream.close()
         };
-        system.fsBackend.writeVol = writeVol;
-
+        
         async function readVol(GUID, entry) {
             const backend = system.fsBackend;
-
+            
             const volume = backend.partitions.volumes[GUID];
-
+            
             if (volume == undefined) {
                 throw new Error("Volume " + GUID + " does not exist.");
             };
-
+            
             const dirhandle = volume.directoryHandle;
-
+            
             const handle = await dirhandle.getFileHandle(entry)
-
+            
             const file = await handle.getFile()
-
+            
             return file.text()
         };
-
+        
         async function uwriteVol(GUID, entry) {
             const backend = system.fsBackend;
-
+            
             const volume = backend.partitions.volumes[GUID];
-
+            
             if (volume == undefined) {
                 throw new Error("Volume " + GUID + " does not exist.");
             };
-
+            
             const dirhandle = volume.directoryHandle
-
+            
             dirhandle.removeEntry(entry, { recursive: true })            
         }
-
-
-
-
-
+        
+        
+        
+        
+        
         system.fsBackend.readVol = readVol;
+        system.fsBackend.writeVol = writeVol;
+        system.fsBackend.uwriteVol = uwriteVol
 
         async function getHDD() {
             const backend = system.fsBackend
