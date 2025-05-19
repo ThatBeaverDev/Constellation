@@ -1,4 +1,4 @@
-#! /boot/loader.js:initDevice
+#! /System/kernel/castoreaKernel.js:initDevice
 
 // network system
 
@@ -36,12 +36,12 @@ async function fetchURL(url, type, body, headers) {
 
 const ropes = {
     get: async (url, body, headers) => {
-        system.debug("/dev/eth0", "fetchURL:get request sent to " + url)
+        system.debug("/System/peripherals/eth0", "fetchURL:get request sent to " + url)
 
         return fetchURL(url, "GET", body, headers)
     },
     post: async (url, body, headers) => {
-        system.debug("/dev/eth0", "fetchURL:post request sent to " + url)
+        system.debug("/System/peripherals/eth0", "fetchURL:post request sent to " + url)
 
         return fetchURL(url, "POST", body, headers)
     }

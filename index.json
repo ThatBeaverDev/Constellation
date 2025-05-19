@@ -1,62 +1,53 @@
 {
   "files": [
     {
-      "dir": "/boot/quark/quark.json",
+      "dir": "/System/bootloader/quark.json",
       "parse": true
     },
     {
-      "dir": "/etc/path.json",
+      "dir": "/System/users.json",
       "parse": true
     },
     {
-      "dir": "/etc/passwd",
+      "dir": "/System/groups.json",
       "parse": true
     },
-    {
-      "dir": "/etc/group.json",
-      "parse": true
-    },
-    "/dev/null",
-    "/dev/urandom",
-    "/dev/display",
-    "/dev/eth0",
-    "/etc/hostname",
-    {
-      "dir": "/etc/sysconfig/clock",
-      "parse": true
-    }
+    "/System/peripherals/null",
+    "/System/peripherals/urandom",
+    "/System/peripherals/display",
+    "/System/peripherals/eth0",
+    "/System/info/hostname"
   ],
   "auroraFiles": {
-    "/kpkgs/castoreaKernel/castoreaKernel.js": "/boot/castoreaKernel.js"
+    "/kpkgs/castoreaKernel/castoreaKernel.js": "/System/kernel/castoreaKernel.js"
   },
   "folders": [
-    "/bin",
-    "/sbin",
     "/boot",
-    "/boot/quark",
-    "/dev",
-    "/etc",
-    "/etc/sysconfig",
-    "/home",
-    "/lib",
-    "/lib/modules",
-    "/mnt",
-    "/opt",
-    "/usr",
-    "/usr/bin",
-    "/usr/lib",
-    "/usr/include",
-    "/usr/libexec",
-    "/usr/local",
-    "/usr/sbin",
-    "/usr/share",
-    "/usr/share/aurora",
-    "/var",
-    "/var/crash",
-    "/var/lib",
-    "/var/mail",
-    "/var/src",
-    "/var/tmp"
+
+
+    "/System",
+    "/System/apps",
+    "/System/apps/background",
+    "/System/apps/compilers",
+    "/System/apps/gui",
+    "/System/apps/libraries",
+    "/System/apps/utils",
+    "/System/bootloader",
+    "/System/config",
+    "/System/services",
+    "/System/fonts",
+    "/System/icons",
+    "/System/info",
+    "/System/kernel",
+    "/System/kernel/modules",
+    "/System/logs",
+    "/System/peripherals",
+    "/System/processes",
+    "/System/temp",
+    "/System/wallpapers",
+
+    "/Users",
+    "/Users/Global"
   ],
   "packages": [
     "castoreaKernel",

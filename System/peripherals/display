@@ -1,4 +1,4 @@
-#! /boot/loader.js:initDevice
+#! /System/kernel/castoreaKernel.js:initDevice
 
 // display device
 
