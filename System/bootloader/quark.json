@@ -2,6 +2,6 @@
     "cmd": "castoreaKernel.js",
     "params": {
         "root": "/",
-        "pos": "/boot"
+        "pos": "/System/kernel"
     }
 }

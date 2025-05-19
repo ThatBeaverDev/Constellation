@@ -204,8 +204,8 @@
                 const volguid = await mkvol("boot", "bootloader", "raw")
 
                 const loader = await (await fetch("./quark/quark.js")).text()
-                const localCfsDriver = await (await fetch("./lib/modules/fs/localcfs.js")).text()
-                const memCfsDriver = await (await fetch("./lib/modules/fs/memcfs.js")).text()
+                const localCfsDriver = await (await fetch("./System/drivers/fs/localcfs.js")).text()
+                const memCfsDriver = await (await fetch("./System/drivers/fs/memcfs.js")).text()
 
                 await writeVol(volguid, "main", loader, true)
                 await writeVol(volguid, "localcfs.js", localCfsDriver, true)

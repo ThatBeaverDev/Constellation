@@ -1,11 +1,11 @@
     async function install() {
 
     const guid = await system.fsBackend.mkvol("Constellation Disk", "bootable", "localcfs", {
-        quarkCfg: "/boot/quark/quark.json"
+        quarkCfg: "/System/bootloader/quark.json"
     })
 
     const auroraLocation = new URL("../aurora/pkgs/aurora/src.js", window.location.href)
-    const cfsDriverLocation = new URL("./lib/modules/fs/localcfs.js", window.location.href)
+    const cfsDriverLocation = new URL("./System/drivers/fs/localcfs.js", window.location.href)
 
     console.debug("Installing Constellation[Aurora] from " + auroraLocation)
     const aurora = await (await fetch(auroraLocation)).text()
@@ -78,7 +78,7 @@
 
     }
 
-    await d.writeFile("/bin/aurora.js", aurora, "root", fs, guid)
+    await d.writeFile("/System/apps/utils/aurora.js", aurora, "root", fs, guid)
 
     await d.writeFile("/sysState.json", {
         isNew: true
