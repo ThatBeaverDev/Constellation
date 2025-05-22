@@ -276,7 +276,7 @@ class localCFS {
 			const parentPermissions = await this.folderPermissions(obj.location, "root", fs)
 
 			const permissions = structuredClone(parentPermissions);
-			permissions.owner.user = username≠usr
+			permissions.owner.user = username
 
 			const link = templates.link(obj.dir)
 			const dir = templates.directory(usr, permissions)
