@@ -176,9 +176,10 @@ async function init() {
 
         console.log(volume + " is target to boot.")
 
-        if (volume == "newsystem") {
-            await recoveryMode()
-            return
+        switch(volume) {
+            case "newsystem":
+                await recoveryMode();
+                return;
         }
 
         const vol = system.fsBackend.partitions.volumes[volume]
