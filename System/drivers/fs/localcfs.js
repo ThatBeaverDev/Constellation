@@ -1,24 +1,26 @@
-const templates = {
-	directory: (user = "root", permissions = {
-		"owner": {
-			"user": user,
-			"read": true,
-			"write": true,
-			"execute": true
+const defaultFolderPermissions = {
+		owner: {
+			user: "root",
+			read: true,
+			write: true,
+			execute: true
 		},
-		"group": {
-			"group": "root",
-			"read": true,
-			"write": true,
-			"execute": false
+		group: {
+			group: "root",
+			read: true,
+			write: true,
+			execute: false
 		},
-		"others": {
-			"read": true,
-			"write": false,
-			"execute": false
+		others: {
+			read: true,
+			write: false,
+			execute: false
 		}
-	}) => {
+	}
 
+
+const templates = {
+	directory: (user = "root", permissions = structuredClone(defaultFolderPermissions)) => {
 		const obj = {
 			permissions: permissions,
 			children: {}
@@ -78,7 +80,7 @@ const templates = {
 
 
 
-class fsDriver {
+class localCFS {
 	constructor() {
 
 	}
@@ -120,7 +122,7 @@ class fsDriver {
 
 			const access = permissions[key][permission]
 			if (access !== true) {
-				throw new Error("User " + username + " lacks permission for this action")
+				throw new Error(`User ${username} lacks permission for this action ('${permission}' at '${directory})`)
 			}
 		}
 	}
@@ -196,63 +198,54 @@ class fsDriver {
 
 
 	async writeFile(directory, content, username = "root", fs, volGUID) {
+		const obj = getDirInfo(directory)
+
+		if (fs[obj.location] == undefined) {
+			throw new Error(`Parent directory ${obj.location} does not exist.`)
+		}
+
+		await this.permissionsCheck(directory, username, "write", true, fs)
 		try {
-			const obj = getDirInfo(directory)
 
-			if (fs[obj.location] == undefined) {
-				throw new Error(`Parent directory ${obj.location} does not exist.`)
-			}
+			if (fs[obj.location].children[obj.filename] !== undefined) {
 
-			try {
 
-				if (fs[obj.location].children[obj.filename] !== undefined) {
-
-					await this.permissionsCheck(directory, username, "write", true, fs)
-
-					const file = await this.rawFile(directory, fs)
-					await system.fsBackend.writeVol(volGUID, file.id + ".json", JSON.stringify({
-						contents: content
-					}), true)
-
-					this.markFilesystemChange("file_" + directory, fs)
-
-					return {
-						result: true
-					}
-				}
-
-				const file = templates.file(obj.ext, content, false, fs)
-
-				fs[obj.location].children[obj.filename] = file
-
+				const file = await this.rawFile(directory, fs)
 				await system.fsBackend.writeVol(volGUID, file.id + ".json", JSON.stringify({
 					contents: content
 				}), true)
 
 				this.markFilesystemChange("file_" + directory, fs)
-				this.markFilesystemChange("directory_" + obj.location, fs)
-			} catch (e) {
-				if (String(e).startsWith("TypeError: Cannot read properties of undefined")) {
-					return undefined
+
+				return {
+					result: true
 				}
-				console.warn("writeFile: " + e + " writing " + directory)
+			}
+
+			const file = templates.file(obj.ext, content, false, fs)
+
+			fs[obj.location].children[obj.filename] = file
+
+			await system.fsBackend.writeVol(volGUID, file.id + ".json", JSON.stringify({
+				contents: content
+			}), true)
+
+			this.markFilesystemChange("file_" + directory, fs)
+			this.markFilesystemChange("directory_" + obj.location, fs)
+		} catch (e) {
+			if (String(e).startsWith("TypeError: Cannot read properties of undefined")) {
 				return undefined
 			}
-
-			return {
-				result: true,
-			}
-		} catch (e) {
-			console.warn(e);
-
 			system.fsErrors.push({
 				origin: "writeFile",
 				error: e
 			})
-			return {
-				result: false,
-				error: e
-			}
+			console.warn("writeFile: " + e + " writing " + directory)
+			return undefined
+		}
+
+		return {
+			result: true,
 		}
 	}
 
@@ -279,8 +272,14 @@ class fsDriver {
 		await this.permissionsCheck(directory, username, "write", true, fs)
 
 		try {
+
+			const parentPermissions = await this.folderPermissions(obj.location, "root", fs)
+
+			const permissions = structuredClone(parentPermissions);
+			permissions.owner.user = username≠usr
+
 			const link = templates.link(obj.dir)
-			const dir = templates.directory(usr)
+			const dir = templates.directory(usr, permissions)
 
 			fs[obj.dir] = dir
 			fs[obj.location].children[obj.filename] = link
@@ -403,6 +402,10 @@ class fsDriver {
 		try {
 			const file = fs[obj.location].children[obj.filename]
 
+			if (file.id == undefined) {
+				return
+			}
+
 			if (attribute == "contents") {
 
 				const data = await system.fsBackend.readVol(volGUID, file.id + ".json");
@@ -486,6 +489,25 @@ class fsDriver {
 		}
 	}
 
+	async updateFolderPermissions(directory, permissions, username = "root", fs, volGUID) {
+		try {
+			const folder = await this.rawFolder(directory, username, fs)
+
+			folder.permissions = {...defaultFolderPermissions, ...permissions}
+		} catch (e) {
+			console.warn(e);
+
+			system.fsErrors.push({
+				origin: "updateFolderPermissions",
+				error: e,
+				args: [
+					directory
+				]
+			})
+			return undefined
+		}
+	}
+
 
 
 
@@ -546,4 +568,4 @@ function getDirInfo(dirOld) {
 	}
 }
 
-return new fsDriver()
+return new localCFS()

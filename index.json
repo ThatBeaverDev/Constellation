@@ -27,6 +27,7 @@
 
     "/System",
     "/System/apps",
+    "/System/apps/data",
     "/System/apps/background",
     "/System/apps/compilers",
     "/System/apps/gui",
@@ -61,7 +62,6 @@
     "sysinfo",
     "kill",
     "build",
-    "upgrade",
     "import-export",
     "aquila",
     "useradd",
@@ -69,7 +69,6 @@
     "yes",
     "su",
     "sudo",
-    "setup",
     "pgext",
     "yak",
     "zip",
