@@ -16,7 +16,8 @@
     "/System/peripherals/urandom",
     "/System/peripherals/display",
     "/System/peripherals/eth0",
-    "/System/info/hostname"
+    "/System/info/hostname",
+    "/System/icons/.favicon.svg"
   ],
   "auroraFiles": {
     "/kpkgs/castoreaKernel/castoreaKernel.js": "/System/kernel/castoreaKernel.js"
@@ -43,7 +44,7 @@
     "/System/kernel/modules",
     "/System/logs",
     "/System/peripherals",
-    "/System/processes",
+    "/proc",
     "/System/temp",
     "/System/wallpapers",
 
