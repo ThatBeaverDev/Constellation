@@ -146,51 +146,6 @@ class localCFS {
 	async onUpdate(GUID, fs) {
 		const b = system.fsBackend
 		await b.writeVol(GUID, "cfsData.json", JSON.stringify(fs), true)
-
-		return
-
-		let dirUpd
-		let waiting = []
-
-		for (const i in fs.changes) {
-			const dat = fs.changes[i]
-			const type = dat.textBefore("_")
-			const dir = dat.textAfter("_")
-
-			if (type == "file") {
-			} else if (type == "directory") {
-				dirUpd = true
-				continue;
-			} else {
-				console.error("Unknown commit type: " + type)
-				continue;
-			}
-
-			try {
-
-				const file = await this.rawFile(dir, fs)
-
-				waiting.push(
-					b.writeVol(GUID, file.id + ".json", JSON.stringify(file), true)
-				)
-
-				console.debug(file)
-
-			} catch (e) {
-				console.warn(e)
-				console.log(dat)
-			}
-		}
-
-		fs.changes = []
-
-		for (const i in waiting) {
-			await waiting[i]
-		}
-
-		if (dirUpd == true) {
-			await b.writeVol(GUID, "dirTable.json", JSON.stringify({}), true)
-		}
 	}
 
 
@@ -260,7 +215,7 @@ class localCFS {
 		const obj = getDirInfo(directory)
 
 		if (fs[obj.location] == undefined) {
-			throw system.fs.errors.parentNotReal(directory)
+			throw new Error("Parent directory at " + obj.location + " does not exist.")
 		}
 
 		let username = usr

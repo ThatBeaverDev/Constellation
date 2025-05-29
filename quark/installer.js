@@ -4,9 +4,16 @@
         quarkCfg: "/System/bootloader/quark.json"
     })
 
-    const auroraLocation = new URL("../aurora/pkgs/aurora/src.js", window.location.href)
-    const cfsDriverLocation = new URL("./System/drivers/fs/localcfs.js", window.location.href)
+    let aurURI = "https://aurora-pkgs.vercel.app";
+    if (new URL(window.location.href).searchParams.get("auroraLocal") === "true") {
+        aurURI = "http://localhost:5079"
+    }
 
+    console.log(aurURI)
+
+    const auroraLocation = new URL("pkgs/aurora/src.js", aurURI)
+    const cfsDriverLocation = new URL("./System/drivers/fs/localcfs.js", window.location.href)
+    
     console.debug("Installing Constellation[Aurora] from " + auroraLocation)
     const aurora = await (await fetch(auroraLocation)).text()
 
@@ -70,7 +77,7 @@
     let auroraFiles = list.auroraFiles
     for (const loc in auroraFiles) {
         const targetDir = auroraFiles[loc]
-        const uri = new URL("../aurora" + loc, window.location.href)
+        const uri = new URL(loc, aurURI)
 
         const item = await fetchURL(uri)
 

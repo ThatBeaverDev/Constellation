@@ -1,24 +1,25 @@
-const templates = {
-	directory: (permissions = {
-		"owner": {
-			"user": "root",
-			"read": true,
-			"write": true,
-			"execute": true
+const defaultFolderPermissions = {
+		owner: {
+			user: "root",
+			read: true,
+			write: true,
+			execute: true
 		},
-		"group": {
-			"group": "root",
-			"read": true,
-			"write": true,
-			"execute": false
+		group: {
+			group: "root",
+			read: true,
+			write: true,
+			execute: false
 		},
-		"others": {
-			"read": true,
-			"write": false,
-			"execute": false
+		others: {
+			read: true,
+			write: false,
+			execute: false
 		}
-	}) => {
+	}
 
+const templates = {
+	directory: (user = "root", permissions = structuredClone(defaultFolderPermissions)) => {
 		const obj = {
 			permissions: permissions,
 			children: {}
@@ -35,12 +36,9 @@ const templates = {
 
 		const byteSize = str => new Blob([str]).size;
 
-		fs.ids++
-
 		const obj = {
 			type: `.${ext}`,
 			contents: content,
-			id: fs.ids,
 			created: Date.now(),
 			edited: Date.now()
 		}
@@ -79,7 +77,7 @@ const templates = {
 
 
 
-class fsDriver {
+class memcfsDriver {
 	constructor() {
 
 	}
@@ -99,7 +97,7 @@ class fsDriver {
 		fs.changes.push(directory)
 	};
 
-	permissionsCheck(directory, username, permission, rootOverride = true, fs) {
+	async permissionsCheck(directory, username, permission, rootOverride = true, fs) {
 		const obj = getDirInfo(directory)
 
 		try {
@@ -113,7 +111,7 @@ class fsDriver {
 		if (username == "root" && rootOverride) {
 			// root is genuinely god here
 		} else {
-			const permissions = system.fs.folderPermissions(obj.location)
+			const permissions = await system.fs.folderPermissions(obj.location)
 			let key = "others"
 			if (permissions.owner.user == username) {
 				key = "owner"
@@ -121,7 +119,7 @@ class fsDriver {
 
 			const access = permissions[key][permission]
 			if (access !== true) {
-				throw system.fs.errors.noPermission(username)
+				throw new Error(`User ${username} lacks permission for this action ('${permission}' at '${directory})`)
 			}
 		}
 	}
@@ -136,108 +134,55 @@ class fsDriver {
 		}
 	}
 	async readFS(GUID) {
-		const vol = await system.fsBackend.readVol(GUID, "cfsData.json")
-
-		const data = JSON.parse(vol)
-
-		return data
+		return {}
 	}
-	async onUpdate(GUID, fs) {
-		const b = system.fsBackend
-		await b.writeVol(GUID, "cfsData.json", JSON.stringify(fs), false)
+	async onUpdate() {}
 
-		return
 
-		let dirUpd
-		let waiting = []
 
-		for (const i in fs.changes) {
-			const dat = fs.changes[i]
-			const type = dat.textBefore("_")
-			const dir = dat.textAfter("_")
 
-			if (type == "file") {
-			} else if (type == "directory") {
-				dirUpd = true
-				continue;
-			} else {
-				console.error("Unknown commit type: " + type)
-				continue;
-			}
 
-			try {
+	async writeFile(directory, content, username = "root", fs, volGUID) {
+		const obj = getDirInfo(directory)
 
-				const file = await this.rawFile(dir, fs)
-
-				waiting.push(
-					b.writeVol(GUID, file.id + ".json", JSON.stringify(file), true)
-				)
-
-				console.debug(file)
-
-			} catch (e) {
-				console.warn(e)
-				console.log(dat)
-			}
+		if (fs[obj.location] == undefined) {
+			throw new Error(`Parent directory ${obj.location} does not exist.`)
 		}
 
-		fs.changes = []
-
-		for (const i in waiting) {
-			await waiting[i]
-		}
-
-		if (dirUpd == true) {
-			await b.writeVol(GUID, "dirTable.json", JSON.stringify({}), true)
-		}
-	}
-
-
-
-
-
-	writeFile(directory, content, username = "root", fs, volGUID) {
+		await this.permissionsCheck(directory, username, "write", true, fs)
 		try {
-			const obj = getDirInfo(directory)
-
-			if (fs[obj.location] == undefined) {
-				throw new Error(`Parent directory ${obj.location} does not exist.`)
-			}
 
 			if (fs[obj.location].children[obj.filename] !== undefined) {
 
-				this.permissionsCheck(directory, username, "write", true, fs)
 
-				const file = this.rawFile(directory, fs)
-				file.contents = content
-
-				this.markFilesystemChange("file_" + directory, fs)
-
+				const file = await this.rawFile(directory, fs)
+				file.contents = structuredClone(content)
+				
 				return {
 					result: true
 				}
 			}
-
+			
 			const file = templates.file(obj.ext, content, false, fs)
+			
 			fs[obj.location].children[obj.filename] = file
+			
+			file.contents = structuredClone(content)
 
-			this.markFilesystemChange("file_" + directory, fs)
-			this.markFilesystemChange("directory_" + obj.location, fs)
-
-			return {
-				result: true,
-			}
 		} catch (e) {
-			console.warn(e);
-
+			if (String(e).startsWith("TypeError: Cannot read properties of undefined")) {
+				return undefined
+			}
 			system.fsErrors.push({
 				origin: "writeFile",
 				error: e
 			})
-			return {
-				result: false,
-				error: e
-			}
+			console.warn("writeFile: " + e + " writing " + directory)
+			return undefined
+		}
+
+		return {
+			result: true,
 		}
 	}
 
@@ -252,7 +197,7 @@ class fsDriver {
 		const obj = getDirInfo(directory)
 
 		if (fs[obj.location] == undefined) {
-			throw system.fs.errors.parentNotReal(directory)
+			throw new Error("Parent directory at " + obj.location + " does not exist.")
 		}
 
 		let username = usr
@@ -520,4 +465,4 @@ function getDirInfo(dirOld) {
 	}
 }
 
-return new fsDriver()
+return new memcfsDriver()
