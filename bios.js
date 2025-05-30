@@ -166,7 +166,16 @@
 
         async function getHDD() {
             const backend = system.fsBackend
-            backend.fsHandle = await window.showDirectoryPicker();
+
+            try {
+                backend.fsHandle = await window.showDirectoryPicker();
+            } catch(e) {
+                const disp = document.getElementById("display")
+                disp.innerHTML = disp.innerHTML.replaceAll("Press ENTER on your computer to select a volume directory.", `This browser is not supported as it does not provide the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker">Filesystem API</a>.<br><br>Please use a browser like <a href="https://chrome.google.com">Google Chrome</a>, which is based on <a href="https://chromium.org">Chromium</a>, which is guaranteed to support this, Sorry.<br><br>A Workaround for this issue is currently in development.`)
+                clearInterval(system.interval)
+                return
+            }
+
             const fsHandle = backend.fsHandle
 
             const uri = new URL(window.location.href);
