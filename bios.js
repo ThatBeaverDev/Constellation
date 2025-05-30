@@ -1,4 +1,5 @@
-// protostar bootloader
+// cBIOS bios for initialising the system
+
 {
     let init = async function biosinit(fsBackend = {}, isReboot = false) {
         const system = {
@@ -159,7 +160,6 @@
         
         
         
-        
         system.fsBackend.readVol = readVol;
         system.fsBackend.writeVol = writeVol;
         system.fsBackend.uwriteVol = uwriteVol
@@ -168,7 +168,11 @@
             const backend = system.fsBackend
 
             try {
-                backend.fsHandle = await window.showDirectoryPicker();
+                if (window.showDirectoryPicker == undefined) {
+                    backend.fsHandle = await window.navigator.storage.getDirectory()
+                } else {
+                    backend.fsHandle = await window.showDirectoryPicker()
+                }
             } catch(e) {
                 const disp = document.getElementById("display")
                 disp.innerHTML = disp.innerHTML.replaceAll("Press ENTER on your computer to select a volume directory.", `This browser is not supported as it does not provide the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker">Filesystem API</a>.<br><br>Please use a browser like <a href="https://chrome.google.com">Google Chrome</a>, which is based on <a href="https://chromium.org">Chromium</a>, which is guaranteed to support this, Sorry.<br><br>A Workaround for this issue is currently in development.`)
