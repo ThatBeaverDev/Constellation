@@ -147,6 +147,22 @@ async function recoveryMode() {
     }
 }
 
+async function eraseAll() {
+    const listItems = async (dirHandle) => {
+        for await (const entry of dirHandle.values()) {
+            dirHandle.removeEntry(entry.name)
+        }
+    }
+
+    const wipeFolder = async (dirHandle) => {
+        for await (const entry of dirHandle.values()) {
+            dirHandle.removeEntry(entry.name, { recursive: true })
+        }
+    }
+
+    await wipeFolder(system.fsBackend.fsHandle)
+}
+
 async function init() {
     document.title = "Quark Bootloader"
 
@@ -158,86 +174,98 @@ async function init() {
     const bootables = Object.keys(bootablesOBJ)
     const bootablesNames = Object.values(bootablesOBJ)
 
-    if (bootables.length == 0) {
-        // oop, recovery is needed
-        await recoveryMode();
-    } else {
 
-        const backendList = structuredClone(bootables)
-        backendList.push(
-            "newsystem"
-        )
-        const nameList = structuredClone(bootablesNames)
-        nameList.push(
-            "New System"
-        )
+    const backendList = structuredClone(bootables)
+    backendList.push(
+        "newsystem"
+    )
+    backendList.push(
+        "eraseall"
+    )
 
-        let volume = await selectionPanel("", nameList, backendList);
+    const nameList = structuredClone(bootablesNames)
+    nameList.push(
+        "New System"
+    )
+    nameList.push(
+        "Erase Disk"
+    )
 
-        console.log(volume + " is target to boot.")
+    console.warn(backendList)
+    console.warn(nameList)
 
-        switch(volume) {
-            case "newsystem":
-                await recoveryMode();
-                return;
-        }
+    let volume = await selectionPanel("", nameList, backendList);
 
-        const vol = system.fsBackend.partitions.volumes[volume]
+    console.log(volume + " is target to boot.")
 
-        const cfgLocation = vol.metadata.quarkCfg // get the config directory
-
-        // how to read fs?
-        // need drivers silly
-        // how to store them?
-        // on the volume obviously
-        
-        // get the driver
-        const fsType = vol.metadata.fsType
-        await driver(fsType)
-        await driver("memcfs")
-        await driver("localcfs")
-        const d = quark.drivers[fsType]
-
-        // i got the drivers
-        // good.
-        
-        const fs = await d.readFS(volume)
-        const cfg = await d.readFile(cfgLocation, "contents", "root", fs, volume)
-
-        const kernelDir = cfg.params.pos + "/" + cfg.cmd
-        const kernelsrc = await d.readFile(kernelDir, "contents", "root", fs, volume)
-
-        system.memory = {
-            kernel: {
-                rootFS: fs
+    switch (volume) {
+        case "newsystem":
+            await recoveryMode();
+            return;
+        case "eraseall":
+            const ok = window.confirm("Are you sure you want to wipe EVERYTHING?")
+            if (ok == true) {
+                await eraseAll();
             }
-        }
+            window.location.reload()
+    }
 
-        if (kernelsrc == undefined) {
-            throw new Error("no kernel?")
-        }
+    const vol = system.fsBackend.partitions.volumes[volume]
 
-        const initram = {
-            drivers: quark.drivers,
-            volumeGUID: volume
-        }
+    const cfgLocation = vol.metadata.quarkCfg // get the config directory
 
-        system.display.innerText = ""
+    // how to read fs?
+    // need drivers silly
+    // how to store them?
+    // on the volume obviously
 
-        const get_kernel = new Function("system", "initram", kernelsrc)
-        const kernel = await get_kernel(system, initram)
+    // get the driver
+    const fsType = vol.metadata.fsType
+    await driver(fsType)
+    await driver("memcfs")
+    await driver("localcfs")
+    const d = quark.drivers[fsType]
 
-        system.display.style.textAlign = ""
-        system.display.style.lineHeight = ""
-        system.display.style.fontSize = ""
+    // i got the drivers
+    // good.
 
-        try {
-            kernel()
-        } catch(e) {
-            console.error(e)
-            system.reboot()
+    const fs = await d.readFS(volume)
+    const cfg = await d.readFile(cfgLocation, "contents", "root", fs, volume)
+
+    const kernelDir = cfg.params.pos + "/" + cfg.cmd
+    const kernelsrc = await d.readFile(kernelDir, "contents", "root", fs, volume)
+
+    system.memory = {
+        kernel: {
+            rootFS: fs
         }
     }
+
+    if (kernelsrc == undefined) {
+        throw new Error("no kernel?")
+    }
+
+    const initram = {
+        drivers: quark.drivers,
+        volumeGUID: volume
+    }
+
+    system.display.innerText = ""
+
+    const get_kernel = new Function("system", "initram", kernelsrc)
+    const kernel = await get_kernel(system, initram)
+
+    system.display.style.textAlign = ""
+    system.display.style.lineHeight = ""
+    system.display.style.fontSize = ""
+
+    try {
+        kernel()
+    } catch (e) {
+        console.error(e)
+        system.reboot()
+    }
+
 }
 
 return init
