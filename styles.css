@@ -149,22 +149,25 @@ h1 {
 }
 
 
-/* width */
+/* === Chromium / Webkit === */
 ::-webkit-scrollbar {
     width: 10px;
 }
 
-/* Track */
 ::-webkit-scrollbar-track {
     background-color: rgb(55, 40, 47);
 }
 
-/* Handle */
 ::-webkit-scrollbar-thumb {
     background: rgb(37, 27, 32);
 }
 
-/* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
     background: rgb(86, 55, 71);
+}
+
+/* === Gecko === */
+* {
+    scrollbar-width: thin; /* auto | thin | none */
+    scrollbar-color: rgb(37, 27, 32) rgb(55, 40, 47); /* thumb color, track color */
 }
