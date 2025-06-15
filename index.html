@@ -1,27 +1,24 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 
 <head>
-  <title>Constellation</title>
-
-  <link id="pg_favicon" rel="icon" href="./System/icons/.favicon.svg" type="image/svg" sizes="32x32">
-
-  <link href="./styles.css" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <!--<link rel="icon" type="image/svg" href="/icons/icons/square-terminal.svg" />-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Constellation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Source+Code+Pro:ital@0;1&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+        <div id="cssVariableContainer"></div>
 </head>
-<div id="mainHeader"></div>
 
 <body>
-  <div id="display">
-    <div id="logoBox" style="display: flex; justify-content: space-around"></div>
-    <div id="logsBox" style="display: flex; justify-content: space-around"></div>
-    <div style="display: flex; justify-content: space-around">
-      <p id="preInput">system is loading. if this text persists with no logs for an extended period, the system may have
-        crashed.</p>
-      <!--<input type="text" id="input" onkeypress="search(event)">-->
-    </div>
-  </div>
+    <div class="wallpaper"></div>
+    <script src="/src/lib/browserfs.js"></script>
+    <script type="module" src="/src/main.js"></script>
 </body>
-<script src="./bios.js"></script>
-<!--bios-->
 
 </html>

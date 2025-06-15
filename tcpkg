@@ -1,0 +1,80 @@
+#!/usr/bin/env node
+
+import fs from "node:fs/promises"
+import path from "node:path"
+
+const params = {}
+const args = process.argv.splice(2, Infinity).map(item => {
+    if (item[0] == "-") {
+        // it's a parameter
+        const name = item.substring(1, Infinity).split("=")[0]
+        const value = item.substring(item.indexOf("=") + 1, Infinity)
+
+        params[name] = value
+        
+        return undefined
+    }
+
+    return item
+}).filter(item => item !== undefined)
+
+if (args.length == 0) {
+    console.log("\x1b[31mYou need to provide a directory to package!\x1b[0m")
+    process.exit()
+}
+
+const input = path.resolve(process.cwd(), args[0])
+const output = path.resolve(process.cwd(), args[1] || "./app.czip")
+
+async function checkOutput() {
+    let content
+    try {
+        content = await fs.readFile(output, {encoding: "utf8"})
+    } catch(e) {}
+
+    if (content !== undefined) {
+        console.error("\x1b[31mOutput directory isn't empty!\x1b[0m")
+        process.exit()
+    }
+}
+
+if (Boolean(params.override) !== true) {
+    await checkOutput()
+}
+
+const pkg = {
+    files: {},
+    directories: []
+}
+
+async function walk(directory) {
+    const ls = await fs.readdir(directory)
+
+    for (const item of ls) {
+        const dir = path.resolve(directory, item)
+
+        const stat = await fs.stat(dir)
+        const isDir = stat.isDirectory()
+        
+        const relative = path.relative(input, dir)
+
+        if (isDir) {
+            // folder
+            pkg.directories.push(relative)
+            await walk(dir)
+        } else {
+            // file
+            pkg.files[relative] = await fs.readFile(dir, {encoding: "utf8"})
+        }
+
+
+    }
+}
+
+await walk(input)
+
+const result = JSON.stringify(pkg, null, 4)
+
+await fs.writeFile(output, result)
+
+console.log("App Packaged to '\x1b[32m" + output + "\x1b[0m' successfully!")

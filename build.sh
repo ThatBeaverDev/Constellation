@@ -1,0 +1,32 @@
+#!/bin/bash
+
+compile() {
+    # Build the context bar
+./tcpkg src/apps/code/context src/apps/build/com.constellation.context.idx -override=true
+
+# Build the search UI
+./tcpkg src/apps/code/search src/apps/build/com.constellation.search.idx -override=true
+}
+
+daemon() {
+    chsum1=""
+
+    while [[ true ]]
+    do
+        chsum2=`find src/apps/code -type f -exec md5 {} \;`
+        if [[ $chsum1 != $chsum2 ]] ; then           
+            if [ -n "$chsum1" ]; then
+                compile
+            fi
+            chsum1=$chsum2
+        fi
+        sleep 2
+    done
+}
+
+compile
+
+if [ $1 == "--watch" ]
+then
+    daemon
+fi

@@ -1,0 +1,30 @@
+/* uiKit styling */
+
+@media (prefers-color-scheme: dark) {
+	.uikitIcon {
+		filter: invert(100%) brightness(10000%);
+	}
+}
+
+.uikitIcon {
+	position: absolute;
+
+	width: 24px;
+	height: 24px;
+}
+
+.uikitText {
+	padding: 0px;
+	margin: 0px;
+	font-family: Arial, Helvetica, sans-serif, monospace;
+	font-size: 15px;
+
+	position: absolute;
+}
+
+.uikitButton {
+	padding: 0px;
+	margin: 0px;
+
+	position: absolute;
+}
