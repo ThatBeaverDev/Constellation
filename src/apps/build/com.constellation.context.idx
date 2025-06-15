@@ -1,0 +1,10 @@
+{
+    "files": {
+        "config.js": "export default {\n\tname: \"Context Bar\",\n\tdescription: \"The Top bar for Constellation, used to manage apps and the system in general.\",\n\tcategory: \"Productivity\",\n\tauthor: \"ThatBeaverDev\",\n\tversion: 1\n};\n",
+        "tcpsys/app.sjs": "export default class context_bar extends Process {\n\tinit() {\n\t\tthis.padding = 10;\n\t}\n\n\tresize(width, height) {\n\t\tif (this.renderer.window.width !== width || this.renderer.window.height !== height) {\n\t\t\tthis.renderer.window.move(-1, -25);\n\t\t\tthis.renderer.window.resize(width, height);\n\t\t}\n\t}\n\n\tkeydown(key, cmd, opt, ctrl) {\n\t\tif (key == \"ArrowDown\") {\n\t\t\tif (opt) {\n\t\t\t\t// summon search bar\n\t\t\t\tthis.os.exec(\"/System/CoreExecutables/com.constellation.search\");\n\t\t\t}\n\t\t}\n\t}\n\n\tkeyup(key) {}\n\n\ttextWidth(text) {\n\t\tconst charWidth = 15 * 0.6;\n\t\tconst textWidth = text.length * charWidth;\n\n\t\treturn textWidth;\n\t}\n\n\twriteText(text) {\n\t\tthis.renderer.text(this.x, 3, text);\n\n\t\t// padding\n\t\tthis.x += this.textWidth(text);\n\t\tthis.x += this.padding;\n\t}\n\n\tdrawIcon(name) {\n\t\tthis.renderer.icon(this.x, 0, name);\n\n\t\t// padding\n\t\tthis.x += 24;\n\t\tthis.x += this.padding;\n\t}\n\n\tframe() {\n\t\tthis.resize(window.innerWidth + 2, 50);\n\n\t\tthis.renderer.clear();\n\n\t\tconst isDev = window.location.hostname == \"localhost\";\n\n\t\tthis.x = Number(this.padding);\n\t\tif (isDev) {\n\t\t\tthis.drawIcon(\"circuit-board\");\n\t\t} else {\n\t\t\tthis.drawIcon(\"telescope\");\n\t\t}\n\n\t\tthis.writeText(\"Apps\");\n\t\tthis.writeText(\"File\");\n\t\tthis.writeText(\"Edit\");\n\t\tthis.writeText(\"View\");\n\t\tthis.writeText(\"Help\");\n\n\t\tthis.renderer.commit();\n\t}\n\n\tterminate() {}\n}\n"
+    },
+    "directories": [
+        "resources",
+        "tcpsys"
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "files": {
+        "config.js": "export default {\n\tname: \"Search Utility\",\n\tdescription: \"Constellation's Search Utility\",\n\tcategory: \"Productivity\",\n\tauthor: \"ThatBeaverDev\",\n\tversion: 1\n};\n",
+        "tcpsys/app.sjs": "export default class search extends Process {\n\tinit() {}\n\n\tframe() {\n\t\tthis.renderer.clear();\n\t\tthis.renderer.text(0, 0, \"Hello, World!\");\n\t\tthis.renderer.commit();\n\t}\n}\n"
+    },
+    "directories": [
+        "resources",
+        "tcpsys"
+    ]
+}
