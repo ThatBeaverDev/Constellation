@@ -1,4 +1,4 @@
-import fs from "/src/fs.js";
+import fs from "/../lib/fs.js";
 
 export default class Login extends window.Process {
 	constructor() {

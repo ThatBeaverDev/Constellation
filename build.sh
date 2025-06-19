@@ -6,6 +6,9 @@ compile() {
 
 # Build the search UI
 ./tcpkg src/apps/code/search src/apps/build/com.constellation.search.idx -override=true
+
+# Build the files explorer
+./tcpkg src/apps/code/finder src/apps/build/com.constellation.finder.idx -override=true
 }
 
 daemon() {
@@ -20,13 +23,13 @@ daemon() {
             fi
             chsum1=$chsum2
         fi
-        sleep 2
+        sleep 0
     done
 }
 
 compile
 
-if [ $1 == "--watch" ]
+if [[ $1 == "--watch" ]]
 then
     daemon
 fi

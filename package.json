@@ -5,14 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "python3 -m http.server 5173",
-    "build": "/bin/bash build.sh",
-    "watch": "/bin/bash build.sh --watch",
-    "fix": "cd src; npx eslint . --fix && prettier . --write"
+    "build": "npx eslint ./src --fix && prettier ./src --write && /bin/bash build.sh && npx tsc",
+    "watch:apps": "/bin/bash build.sh --watch",
+    "watch:ts": "npx tsc --watch",
+    "watch": "npm run watch:ts & npm run watch:apps"
   },
   "devDependencies": {
     "@eslint/js": "9.28.0",
-    "@stylistic/eslint-plugin": "^4.4.1",
+    "@stylistic/eslint-plugin": "4.4.1",
     "eslint": "9.28.0",
-    "prettier": "3.5.3"
+    "prettier": "3.5.3",
+    "typescript": "5.8.3"
   }
 }

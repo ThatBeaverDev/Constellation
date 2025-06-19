@@ -1,14 +1,20 @@
 export const files = {
 	// search app
-	"/src/apps/build/com.constellation.search.idx": {
+	"/build/apps/build/com.constellation.search.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreExecutables/com.constellation.search"
 	},
 
 	// context app
-	"/src/apps/build/com.constellation.context.idx": {
+	"/build/apps/build/com.constellation.context.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreExecutables/com.constellation.context"
+	},
+
+	// finder app
+	"/build/apps/build/com.constellation.finder.idx": {
+		type: "jsonFilesIndex",
+		directory: "/System/CoreExecutables/com.constellation.finder"
 	}
 };
 

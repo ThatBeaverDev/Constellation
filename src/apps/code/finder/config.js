@@ -1,0 +1,7 @@
+export default {
+	name: "Finder",
+	description: "Constellation's Default Files Explorer",
+	category: "Productivity",
+	author: "ThatBeaverDev",
+	version: 1
+};
