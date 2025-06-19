@@ -1,6 +1,7 @@
-import { Process } from "./Process.js";
+import conf from "../constellation.config.js";
+import { Application, BackgroundProcess } from "./processes.js";
 import fs from "../fs.js";
-import * as uikit from "../uiKit/uiKit.js";
+import * as uikit from "../lib/uiKit/uiKit.js";
 
 export const processes = [];
 window.processes = processes;
@@ -9,7 +10,8 @@ window.renderID = 0;
 await uikit.init();
 
 // allow processes to access this
-window.Process = Process;
+window.Application = Application;
+window.BackgroundProcess = BackgroundProcess;
 
 function blobify(text, mime = "text/plain") {
 	const blob = new Blob([text], {
@@ -19,6 +21,25 @@ function blobify(text, mime = "text/plain") {
 
 	return location;
 }
+
+window.sysimport = async (directory) => {
+	let url;
+	if (conf.importOverrides[directory] !== undefined) {
+		url = conf.importOverrides[directory];
+	} else {
+		const content = await fs.readFile(directory);
+
+		if (content == undefined) {
+			throw new Error("Import source is empty!");
+		}
+
+		url = blobify(content, "text/javascript");
+	}
+
+	const exports = await import(url);
+
+	return exports;
+};
 
 export async function execute(directory) {
 	const get = async (dir) => {
@@ -39,8 +60,10 @@ export async function execute(directory) {
 		throw new Error(fs.relative(directory, "tcpsys/app.sjs") + " is empty and cannot be executed");
 	}
 
+	const data = content.replaceAll("import(", "sysimport(");
+
 	// create a blob of the content
-	const blob = blobify(content, "text/javascript");
+	const blob = blobify(data, "text/javascript");
 
 	// import from the script BLOB
 	const exports = await import(blob);

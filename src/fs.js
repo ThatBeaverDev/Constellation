@@ -46,8 +46,6 @@ const writeFile = async (directory, content) => {
 		written = true;
 	});
 
-	console.log(directory, content.split("\n")[0]);
-
 	return new Promise((resolve) => {
 		const interval = setInterval(() => {
 			if (written == true) {

@@ -1,0 +1,61 @@
+/* uiKit styling */
+
+@media (prefers-color-scheme: dark) {
+	.uikitIcon {
+		filter: invert(100%) brightness(10000%);
+	}
+}
+
+* {
+	font-size: 15px;
+	font-family: "Arial";
+}
+
+.uikitIcon {
+	position: absolute;
+
+	width: 24px;
+	height: 24px;
+}
+
+.uikitText,
+.uikitButton {
+	padding: 0px;
+	margin: 0px;
+
+	position: absolute;
+}
+
+.uikitButton:hover {
+	background-color: var(--main-theme-tertiary);
+}
+
+.uikitVerticalLine {
+	border-left: var(--main-theme-quaternary) 3px solid;
+	width: 0px;
+
+	position: absolute;
+}
+
+.uikitHorizontalLine {
+	border-top: var(--main-theme-quaternary) 3px solid;
+	height: 0px;
+
+	position: absolute;
+}
+
+/* brick elements */
+.uikitButton,
+.uikitTextbox {
+	padding: 1px;
+	padding-left: 3px;
+	padding-right: 3px;
+
+	border: 0px;
+	border-radius: 3px;
+
+	position: absolute;
+
+	background-color: var(--main-theme-secondary);
+	color: var(--main-text-color);
+}

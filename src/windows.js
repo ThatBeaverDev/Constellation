@@ -1,5 +1,5 @@
 import { getIcon } from "./lib/lucide.js";
-import conf from "../constellation.config.js";
+import conf from "./constellation.config.js";
 
 // variables
 const vars = {
@@ -22,7 +22,6 @@ style.textContent = css;
 document.body.appendChild(style);
 
 // windowing
-
 export const EDGE_THRESHOLD = 8;
 
 export const minHeight = 25;
@@ -34,7 +33,11 @@ export let focus;
 export function init() {}
 
 export function newWindow(name, options = {}) {
-	const id = windows.push(new Window(name, options));
+	const win = new Window(name, options);
+
+	const id = windows.push(win);
+	win.winID = id - 1;
+
 	return {
 		id,
 		data: windows.at(-1)
@@ -52,11 +55,8 @@ let msX = 0;
 let msY = 0;
 let xDiff = 0;
 let yDiff = 0;
-window.addEventListener("mousemove", (event) => {
-	//if (xDiff !== 0 || yDiff !== 0) {
-	//	return;
-	//}
 
+window.addEventListener("mousemove", (event) => {
 	oldmsX = Number(msX);
 	oldmsY = Number(msY);
 
@@ -80,9 +80,12 @@ function windowButton(elem, svg) {
 	return elem;
 }
 
+let winID = 0;
 export class Window {
 	constructor(name, options) {
 		this.name = name;
+		this.winID = winID++;
+		focus = this.winID;
 
 		// position windows where requested or at the default location
 		const width = options.width == undefined ? 500 : options.width;
@@ -134,6 +137,9 @@ export class Window {
 			const width = c.dataset.width + "px";
 			const height = c.dataset.height + "px";
 
+			this.dimensions.width = Number(c.dataset.width);
+			this.dimensions.height = Number(c.dataset.height);
+
 			const left = c.dataset.left + "px";
 			const top = c.dataset.top + "px";
 
@@ -177,6 +183,7 @@ export class Window {
 		this.mouseState = undefined;
 
 		this.container.addEventListener("mousedown", () => {
+			focus = this.winID;
 			if (this.mouseState !== undefined) {
 				// the mouse is in a drag location
 				action = "resize";
@@ -187,8 +194,8 @@ export class Window {
 	}
 
 	move(x = 0, y = 0) {
-		this.container.dataset.left = x;
-		this.container.dataset.top = y;
+		this.container.dataset.left = String(x);
+		this.container.dataset.top = String(y);
 		this.reposition();
 	}
 
@@ -207,8 +214,35 @@ export class Window {
 		height: 0
 	};
 
+	rename(name) {
+		this.name = name;
+		if (this.title.innerText !== name) {
+			this.title.innerText = name;
+		}
+	}
+
 	remove() {
-		this.container.remove();
+		// animate the window's removal
+		this.container.animate(
+			[
+				{},
+				{
+					// to
+					transform: "scale(0.5)",
+					filter: "blur(5px) opacity(0)"
+				}
+			],
+			{
+				duration: 200,
+				easing: "cubic-bezier(0.67, 0.2, 0.58, 1.2)"
+			}
+		);
+
+		const del = () => {
+			this.container.remove();
+		};
+
+		setTimeout(del, 150);
 	}
 }
 
