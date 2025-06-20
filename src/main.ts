@@ -5,6 +5,7 @@ import fs from "./fs.js";
 
 import * as apps from "./apps/apps.js";
 import * as windows from "./windows.js";
+import * as users from "./lib/users.js";
 
 declare global {
 	interface String {
