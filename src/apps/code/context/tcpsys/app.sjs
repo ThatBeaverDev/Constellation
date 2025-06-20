@@ -2,13 +2,16 @@ const apps = await import("/System/apps.js");
 const windows = await import("/System/windows.js");
 
 export default class context_bar extends Application {
-	init() {
+	async init() {
 		this.padding = 10;
 		this.isDev = window.location.hostname == "localhost";
 		if (this.isDev) {
 			const elements = document.getElementsByClassName("bootCover");
 			const array = [].slice.call(elements);
 			array.forEach((item) => item.remove());
+
+			// fetch when the system was last recompiled
+			this.compiled = await (await fetch("/build/date.txt")).text();
 		}
 	}
 
@@ -86,6 +89,11 @@ export default class context_bar extends Application {
 		this.drawButton("Edit");
 		this.drawButton("View");
 		this.drawButton("Help");
+
+		if (this.isDev) {
+			const ago = (Date.now() - this.compiled) / 1000;
+			this.writeText("           Last Build was " + Math.floor(ago) + " Seconds ago.");
+		}
 
 		this.renderer.commit();
 	}
