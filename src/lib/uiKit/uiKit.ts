@@ -1,12 +1,13 @@
-import { newWindow } from "../../windows.js";
+import { newWindow, Window } from "../../windows.js";
 import "./favicon.js";
 import { getIcon } from "../lucide.js";
 import { getTextWidth } from "./calcWidth.js";
+import { Process } from "../../apps/processes.js";
 
 export const font = "Arial";
 
 export async function init() {
-	const styles = await (await fetch("/build/lib/uiKit/styles.css")).text();
+	const styles = await (await fetch("/src/lib/uiKit/styles.css")).text();
 
 	const style = document.createElement("style");
 	style.textContent = styles;
@@ -23,11 +24,19 @@ window.oncontextmenu = (e) => {
 	}
 };
 
+type uikitCreatorName = keyof Renderer["creators"];
+interface step {
+	type: uikitCreatorName;
+	args: any[];
+}
+
+interface textboxCallbackObject {}
+
 export class Renderer {
-	constructor(process) {
+	constructor(process: Process) {
 		this.process = process;
 
-		this.window = newWindow(this.process.directory).data;
+		this.window = newWindow(this.process.directory).data!;
 
 		this.window.buttons.close.addEventListener("click", async (event) => {
 			await this.process.terminate();
@@ -35,67 +44,77 @@ export class Renderer {
 		});
 	}
 
+	process: Process;
+	window: Window;
+
 	clear = () => {
 		this.steps = [];
 	};
 
-	steps = [];
-	displayedSteps = [];
+	steps: step[] = [];
+	displayedSteps: step[] = [];
 
-	icon = (x = 0, y = 0, name = "circle-help") => {
-		this.steps.push({
+	icon = (x: number = 0, y: number = 0, name: string = "circle-help") => {
+		const obj: step = {
 			type: "uikitIcon",
 			args: [x, y, name]
-		});
+		};
+		this.steps.push(obj);
 	};
 
-	text = (x, y, string) => {
-		this.steps.push({
+	text = (x: number, y: number, string: string) => {
+		const obj: step = {
 			type: "uikitText",
 			args: [x, y, string]
-		});
+		};
+		this.steps.push(obj);
 	};
-	button = (x, y, string, leftClickCallback, rightClickCallback) => {
-		this.steps.push({
+	button = (x: number, y: number, string: string, leftClickCallback: Function, rightClickCallback: Function) => {
+		const obj: step = {
 			type: "uikitButton",
 			args: [x, y, string, leftClickCallback, rightClickCallback]
-		});
+		};
+		this.steps.push(obj);
 	};
-	textbox = (x, y, backtext, callbacks) => {
-		this.steps.push({
+	textbox = (x: number, y: number, backtext: string, callbacks: textboxCallbackObject) => {
+		const obj: step = {
 			type: "uikitTextbox",
 			args: [x, y, backtext, callbacks]
-		});
+		};
+		this.steps.push(obj);
 	};
 
-	verticalLine = (x, y, height) => {
-		this.steps.push({
+	verticalLine = (x: number, y: number, height: number) => {
+		const obj: step = {
 			type: "uikitVerticalLine",
 			args: [x, y, height]
-		});
+		};
+		this.steps.push(obj);
 	};
 
-	horizontalLine = (x, y, width) => {
-		this.steps.push({
+	horizontalLine = (x: number, y: number, width: number) => {
+		const obj: step = {
 			type: "uikitHorizontalLine",
 			args: [x, y, width]
-		});
+		};
+		this.steps.push(obj);
 	};
 
-	table = (x, y, items) => {
-		this.steps.push({
+	table = (x: number, y: number, items: any) => {
+		const obj: step = {
 			type: "uikitTable",
 			args: [x, y, items]
-		});
+		};
+		this.steps.push(obj);
 	};
 
 	getTextWidth = getTextWidth;
 
 	creators = {
 		uikitIcon: (x = 0, y = 0, name = "circle-help") => {
-			const icon = getIcon(name).cloneNode();
+			const icon = getIcon(name);
 
-			icon.id = window.renderID++;
+			icon.id = String(window.renderID++);
 			icon.style.cssText = `left: ${x}px; top: ${y}px;`;
 
 			this.window.body.appendChild(icon);
@@ -108,7 +127,7 @@ export class Renderer {
 			const text = document.createElement("p");
 			text.className = "uikitText";
 
-			text.id = window.renderID++;
+			text.id = String(window.renderID++);
 			text.innerText = string;
 			text.style.cssText = `left: ${x}px; top: ${y}px;`;
 
@@ -128,12 +147,13 @@ export class Renderer {
 			const button = document.createElement("button");
 			button.className = "uikitButton";
 
-			button.id = window.renderID++;
+			button.id = String(window.renderID++);
 			button.innerText = string;
 			button.style.cssText = `left: ${x}px; top: ${y}px;`;
 
 			this.window.body.appendChild(button);
-			const live = document.getElementById(button.id);
+			// @ts-ignore // query selector doesn't work for this since we have numbers in the ID
+			const live: HTMLButtonElement = document.getElementById(button.id)!;
 
 			live.addEventListener(
 				"mousedown",
@@ -165,20 +185,21 @@ export class Renderer {
 			y = 0,
 			backtext = "Lorum Ipsum",
 			callbacks = {
-				update: () => {},
-				enter: () => {}
+				update: (key: string, value: string) => {},
+				enter: (value: string) => {}
 			}
 		) => {
 			const textbox = document.createElement("input");
 			textbox.type = "text";
 			textbox.className = "uikitTextbox";
 
-			textbox.id = window.renderID++;
+			textbox.id = String(window.renderID++);
 			textbox.placeholder = backtext;
 			textbox.style.cssText = `left: ${x}px; top: ${y}px;`;
 
 			this.window.body.appendChild(textbox);
-			const live = document.getElementById(textbox.id);
+			// @ts-ignore // query selector doesn't work for this since we have numbers in the ID
+			const live: HTMLInputElement = document.getElementById(textbox.id)!;
 
 			live.addEventListener(
 				"keyup",
@@ -195,11 +216,11 @@ export class Renderer {
 			return live;
 		},
 
-		uikitVerticalLine: (x, y, height) => {
+		uikitVerticalLine: (x: number, y: number, height: number) => {
 			const line = document.createElement("div");
 			line.className = "uikitVerticalLine";
 
-			line.id = window.renderID++;
+			line.id = String(window.renderID++);
 			line.style.cssText = `left: ${x}px; top: ${y}px; height: ${height}px;`;
 
 			this.window.body.appendChild(line);
@@ -208,24 +229,26 @@ export class Renderer {
 			return live;
 		},
 
-		uikitHorizontalLine: (x, y, width) => {
+		uikitHorizontalLine: (x: number, y: number, width: number) => {
 			const line = document.createElement("div");
 			line.className = "uikitHorizontalLine";
 
-			line.id = window.renderID++;
+			line.id = String(window.renderID++);
 			line.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px;`;
 
 			this.window.body.appendChild(line);
 			const live = document.getElementById(line.id);
 
 			return live;
-		}
+		},
+
+		uikitTable: () => {}
 	};
 
 	controller = new AbortController();
 	signal = this.controller.signal;
 
-	items = [];
+	items: any[] = [];
 	commit = () => {
 		// don't render if the content is the same
 		if (this.steps.length == this.displayedSteps.length) {
@@ -245,6 +268,7 @@ export class Renderer {
 
 		for (const i in this.items) {
 			this.items[i].remove();
+			// @ts-ignore
 			this.items.splice(i, 1);
 		}
 		this.window.body.innerHTML = "";
@@ -257,6 +281,7 @@ export class Renderer {
 				throw new Error("Creator is not defined for uikit Type " + item.type);
 			}
 
+			// @ts-ignore (it dislikes the destructuring operation on item.args, no idea how to fix it.)
 			const live = creator(...item.args);
 
 			this.items.push(live);
