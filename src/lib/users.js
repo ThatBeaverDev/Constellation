@@ -11,6 +11,7 @@ function commit() {
 }
 
 if (users == undefined) {
+	console.debug("<users> - initialising user system.");
 	users = {
 		_adminpass: "admin"
 	};
