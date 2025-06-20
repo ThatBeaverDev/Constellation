@@ -13,12 +13,12 @@
     "sourceMap": true              // helpful for browser dev tools
   },
   "include": ["src"],
-  "exclude": ["build"],
+  "exclude": ["build", "src/apps/code/*"],
   "watchOptions": {
     "watchFile": "useFsEvents",
     "watchDirectory": "useFsEvents",
     "fallbackPolling": "dynamicPriority",
     "synchronousWatchDirectory": true,
-    "excludeDirectories": ["**/node_modules", "build"]
+    "excludeDirectories": ["**/node_modules", "build", "src/apps/code/*", "src/apps/build/*"]
   }
 }
