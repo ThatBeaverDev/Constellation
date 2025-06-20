@@ -1,4 +1,14 @@
-export default {
+type constellationConfiguration = {
+	version: string;
+	keyword: string;
+	wallpaper: string;
+	importOverrides: Object;
+	devApp: string | undefined;
+	userfile: string;
+	userDirectories: string[];
+};
+
+const obj: constellationConfiguration = {
 	version: "25.6.1a",
 	keyword: "Sahara",
 	wallpaper: "/pics/Sahara Night Sky.jpg",
@@ -19,3 +29,5 @@ export default {
 		"Media/Videos"
 	]
 };
+
+export default obj;
