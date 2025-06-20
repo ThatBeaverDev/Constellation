@@ -145,6 +145,7 @@ body {
 
 * {
 	font-family: Arial;
+	white-space: pre;
 }
 
 @keyframes bootImage {
@@ -212,8 +213,8 @@ body {
 	transition-timing-function: cubic-bezier(1.000, 0.000, 1.000, 0.000); 
 }
 
-#hiddenCanvas {
-	display: none;
+.hidden {
+	display: None;
 }
 
 .windowContainer {
