@@ -3,7 +3,7 @@ import fs from "../fs.js";
 import { execute } from "./apps.js";
 
 export class Process {
-	constructor(directory) {
+	constructor(directory: string) {
 		this.directory = directory;
 		this.os = {
 			fs,
@@ -11,17 +11,38 @@ export class Process {
 		};
 	}
 
+	directory: string;
+	os: Object;
+
+	executing: boolean = false;
+
 	// program flow
-	init() {}
-	frame() {}
-	terminate() {}
+	init(...any: any) {
+		any;
+	}
+	frame(...any: any) {
+		any;
+	}
+	terminate(...any: any) {
+		any;
+	}
+
+	// events
+	keydown(...any: any) {
+		any;
+	}
+	keyup(...any: any) {
+		any;
+	}
 }
 
 export class Application extends Process {
-	constructor(directory) {
+	constructor(directory: string) {
 		super(directory);
 		this.renderer = new Renderer(this);
 	}
+
+	renderer: Renderer;
 
 	// events
 	keydown() {}
