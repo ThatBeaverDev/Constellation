@@ -1,14 +1,16 @@
 #!/bin/bash
 
 compile() {
+    mkdir - build/apps/build
+
     # Build the context bar
-./tcpkg src/apps/code/context src/apps/build/com.constellation.context.idx -override=true
+    ./tcpkg src/apps/code/context build/apps/build/com.constellation.context.idx -override=true
 
-# Build the search UI
-./tcpkg src/apps/code/search src/apps/build/com.constellation.search.idx -override=true
+    # Build the search UI
+    ./tcpkg src/apps/code/search build/apps/build/com.constellation.search.idx -override=true
 
-# Build the files explorer
-./tcpkg src/apps/code/finder src/apps/build/com.constellation.finder.idx -override=true
+    # Build the files explorer
+    ./tcpkg src/apps/code/finder build/apps/build/com.constellation.finder.idx -override=true
 }
 
 daemon() {

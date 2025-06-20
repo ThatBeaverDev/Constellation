@@ -5,10 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "python3 -m http.server 5173",
-    "build": "npx eslint ./src --fix && prettier ./src --write && /bin/bash build.sh && npx tsc",
-    "watch:apps": "/bin/bash build.sh --watch",
-    "watch:ts": "npx tsc --watch",
-    "watch": "npm run watch:ts & npm run watch:apps"
+    "fix": "npx eslint ./src --fix && prettier ./src --write",
+    "build": "npm run fix && npm run build-nofix",
+    "build-nofix": "rm -rf build/* && npx tsc && /bin/bash build_apps.sh && node -e \"console.log(Date.now())\" > build/date.txt"
   },
   "devDependencies": {
     "@eslint/js": "9.28.0",
