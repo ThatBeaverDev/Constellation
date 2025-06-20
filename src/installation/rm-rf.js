@@ -22,6 +22,8 @@ async function rmdir(dir) {
 			await fs.unlink(relative);
 		}
 	}
+
+	await fs.rmdir(dir);
 }
 
 export async function rm_rf() {
