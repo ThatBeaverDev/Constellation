@@ -1,10 +1,21 @@
 import conf from "../constellation.config.js";
-import { Application, BackgroundProcess } from "./processes.js";
+import { Application, BackgroundProcess, Process } from "./processes.js";
 import fs from "../fs.js";
 import * as uikit from "../lib/uiKit/uiKit.js";
 
-export const processes = [];
+declare global {
+	interface Window {
+		renderID: number;
+		Application: any;
+		BackgroundProcess: any;
+		sysimport: any;
+		processes: Process[];
+	}
+}
+
+export const processes: Process[] = [];
 window.processes = processes;
+
 window.renderID = 0;
 
 await uikit.init();
@@ -13,7 +24,7 @@ await uikit.init();
 window.Application = Application;
 window.BackgroundProcess = BackgroundProcess;
 
-function blobify(text, mime = "text/plain") {
+function blobify(text: string, mime = "text/plain") {
 	const blob = new Blob([text], {
 		type: mime
 	});
@@ -22,9 +33,11 @@ function blobify(text, mime = "text/plain") {
 	return location;
 }
 
-window.sysimport = async (directory) => {
+window.sysimport = async function (directory: string) {
 	let url;
+	// @ts-ignore // no idea why these throw errors?
 	if (conf.importOverrides[directory] !== undefined) {
+		// @ts-ignore
 		url = conf.importOverrides[directory];
 	} else {
 		const content = await fs.readFile(directory);
@@ -41,8 +54,8 @@ window.sysimport = async (directory) => {
 	return exports;
 };
 
-export async function execute(directory) {
-	const get = async (dir) => {
+export async function execute(directory: string) {
+	const get = async (dir: string) => {
 		const rel = fs.relative(directory, dir);
 
 		return await fs.readFile(rel);
@@ -80,7 +93,7 @@ export async function execute(directory) {
 	await live.init();
 }
 
-async function procExec(proc) {
+async function procExec(proc: Process) {
 	try {
 		if (proc.executing == true) {
 			return;
