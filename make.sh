@@ -16,7 +16,7 @@ daemon() {
             fi
             chsum1=$chsum2
         fi
-        sleep 0
+        sleep 3
     done
 }
 
