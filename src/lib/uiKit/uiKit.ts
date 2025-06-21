@@ -36,12 +36,8 @@ export class Renderer {
 	constructor(process: Process) {
 		this.process = process;
 
-		this.window = newWindow(this.process.directory).data!;
-
-		this.window.buttons.close.addEventListener("click", async (event) => {
-			await this.process.terminate();
-			this.window.remove();
-		});
+		// @ts-ignore
+		this.window = newWindow(this.process.directory, process).data!;
 	}
 
 	process: Process;
