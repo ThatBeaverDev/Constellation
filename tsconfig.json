@@ -3,22 +3,36 @@
     "allowJs": true,
     "checkJs": false,
     "esModuleInterop": true,
-    "target": "ES2022",            // modern JS for browsers
-    "module": "ES2022",            // modules supported by browsers
-    "moduleResolution": "bundler", // resolves imports like browsers do
-    "rootDir": "src",              // your TypeScript source code
-    "outDir": "build",             // output JS will go here
-    "strict": true,                // enables full type checking
-    "lib": ["ES2022", "DOM"],      // include DOM + Promise, etc.
-    "sourceMap": true              // helpful for browser dev tools
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "rootDir": "src",
+    "outDir": "build",
+    "strict": true,
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "sourceMap": true
   },
-  "include": ["src"],
-  "exclude": ["build", "src/apps/code/*"],
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "build",
+    "src/apps/code/*"
+  ],
   "watchOptions": {
     "watchFile": "useFsEvents",
     "watchDirectory": "useFsEvents",
     "fallbackPolling": "dynamicPriority",
     "synchronousWatchDirectory": true,
-    "excludeDirectories": ["**/node_modules", "build", "src/apps/code/*", "src/apps/build/*"]
+    "excludeDirectories": [
+      "**/node_modules",
+      "build",
+      "src/apps/code/*",
+      "src/apps/build/*"
+    ]
   }
 }
