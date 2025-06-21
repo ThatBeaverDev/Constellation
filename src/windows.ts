@@ -1,18 +1,7 @@
+import fs from "./fs.js";
 import { getIcon } from "./lib/lucide.js";
 import conf from "./constellation.config.js";
-
-type windowButtons = {
-	div: HTMLElement;
-	close: HTMLElement;
-	fullscreen: HTMLElement;
-};
-
-type windowOptions = {
-	width: number | undefined;
-	height: number | undefined;
-	left: number | undefined;
-	top: number | undefined;
-};
+import { Application } from "./apps/processes.js";
 
 // variables
 const vars = {
@@ -44,65 +33,19 @@ export let focus: any;
 
 export function init() {}
 
-export let action: any = undefined; // move or resize
-export let target: any = undefined;
-export let actionInfo: any = undefined;
-export const targetingDrag: Boolean = false;
-
-let oldmsX = 0;
-let oldmsY = 0;
-let msX = 0;
-let msY = 0;
-let xDiff = 0;
-let yDiff = 0;
-
-window.addEventListener("mousemove", (event) => {
-	oldmsX = Number(msX);
-	oldmsY = Number(msY);
-
-	msX = Number(event.clientX);
-	msY = Number(event.clientY);
-
-	xDiff = Number(msX) - Number(oldmsX);
-	yDiff = Number(oldmsY) - Number(msY);
-});
-
-function windowButton(elem: HTMLElement, svg: string) {
-	elem.className = "windowButton";
-
-	const icon = getIcon(svg);
-	icon.style.width = "100%";
-	icon.style.height = "100%";
-
-	elem.innerHTML = icon.outerHTML;
-	elem.id = String(window.renderID++);
-
-	return elem;
-}
-
 let winID = 0;
 export class Window {
-	constructor(name: string, options: windowOptions) {
+	constructor(name: string, Application: Application) {
 		this.name = name;
 		this.winID = winID++;
-		focus = this.winID;
+		this.Application = Application;
 
 		// position windows where requested or at the default location
-		const width: number = options.width == undefined ? 500 : options.width;
-		const height: number = options.height == undefined ? 300 : options.height;
+		const width: number = 500;
+		const height: number = 300;
 
-		const left = options.left == undefined ? (window.innerWidth - width) / 2 : options.left;
-		const top = options.top == undefined ? (window.innerHeight - height) / 2 : options.top;
-
-		this.buttons = {
-			div: document.createElement("div"),
-			fullscreen: windowButton(document.createElement("div"), "maximize"),
-			close: windowButton(document.createElement("div"), "x")
-		};
-
-		this.buttons.div.className = "windowButtons";
-		this.buttons.div.id = String(window.renderID++);
-		this.buttons.div.innerHTML = this.buttons.close.outerHTML + this.buttons.fullscreen.outerHTML;
+		const left = (window.innerWidth - width) / 2;
+		const top = (window.innerHeight - height) / 2;
 
 		this.title = document.createElement("p");
 		const t = this.title;
@@ -110,11 +53,19 @@ export class Window {
 		t.id = String(window.renderID++);
 		t.innerText = name;
 
+		// window icon
+		this.icon = getIcon("app-window");
+		const i = this.icon;
+		i.classList.add("windowIcon");
+		i.classList.add("uikitIcon");
+		i.id = String(window.renderID++);
+		i.style.position = "static";
+
 		this.header = document.createElement("div");
 		const h = this.header;
 		h.className = "windowHeader";
 		h.id = String(window.renderID++);
-		h.innerHTML = this.title.outerHTML + this.buttons.div.outerHTML;
+		h.innerHTML = this.icon.outerHTML + this.title.outerHTML;
 
 		this.body = document.createElement("div");
 		const b = this.body;
@@ -140,32 +91,6 @@ export class Window {
 		this.body = document.getElementById(this.body.id)!;
 		this.header = document.getElementById(this.header.id)!;
 		this.title = document.getElementById(this.title.id)!;
-		this.buttons = {
-			div: document.getElementById(this.buttons.div.id)!,
-			close: document.getElementById(this.buttons.close.id)!,
-			fullscreen: document.getElementById(this.buttons.fullscreen.id)!
-		};
-
-		this.header.addEventListener("mousedown", (event) => {
-			if (event.button == 0) {
-				if (targetingDrag == false) {
-					target = this;
-					action = "move";
-				}
-			}
-		});
-
-		this.mouseState = undefined;
-
-		this.container.addEventListener("mousedown", () => {
-			focus = this.winID;
-			if (this.mouseState !== undefined) {
-				// the mouse is in a drag location
-				action = "resize";
-				actionInfo = this.mouseState;
-				target = this;
-			}
-		});
 	}
 
 	name: string;
@@ -173,9 +98,10 @@ export class Window {
 	body: HTMLElement;
 	header: HTMLElement;
 	title: HTMLElement;
-	buttons: windowButtons;
+	icon: HTMLElement;
 	mouseState: any;
 	winID: number;
+	Application: Application;
 
 	reposition() {
 		const c = this.container;
@@ -232,13 +158,19 @@ export class Window {
 		}
 	}
 
+	async setIcon(svg: string) {
+		const content = await fs.readFile(svg);
+
+		this.icon.innerHTML = content;
+	}
+
+	// Modify Window.remove() to trigger layout update:
 	remove() {
 		// animate the window's removal
 		this.container.animate(
 			[
 				{},
 				{
-					// to
 					transform: "scale(0.5)",
 					filter: "blur(5px) opacity(0)"
 				}
@@ -251,95 +183,97 @@ export class Window {
 
 		const del = () => {
 			this.container.remove();
+			windows.splice(this.winID, 1);
+
+			// Reassign winIDs
+			windows.forEach((win, i) => (win.winID = i));
+
+			layoutTiling();
 		};
 
 		setTimeout(del, 150);
 	}
 }
 
-const resize = (dragger = actionInfo) => {
-	switch (dragger) {
-		case "top":
-			target.container.dataset.height = Number(target.container.dataset.height) + yDiff;
-			target.container.dataset.top = Number(target.container.dataset.top) - yDiff;
-			break;
-		case "bottom":
-			target.container.dataset.height = Number(target.container.dataset.height) - yDiff;
-			break;
-		case "left":
-			target.container.dataset.left = Number(target.container.dataset.left) + xDiff;
-			target.container.dataset.width = Number(target.container.dataset.width) - xDiff;
-			break;
-		case "right":
-			target.container.dataset.width = Number(target.container.dataset.width) + xDiff;
-			break;
-		case "bottomRight":
-			resize("bottom");
-			resize("right");
-			break;
-		case "bottomLeft":
-			resize("bottom");
-			resize("left");
-			break;
-		case "topRight":
-			resize("top");
-			resize("right");
-			break;
-		case "topLeft":
-			resize("top");
-			resize("left");
-			break;
-		default:
-			throw new Error("Unknown dragger: " + dragger);
-	}
-};
-
 export const windows: Window[] = [];
 
-export function newWindow(
-	name: string,
-	options: windowOptions = { width: undefined, height: undefined, left: undefined, top: undefined }
-) {
-	const win: Window = new Window(name, options);
+export let focusKey: string = "altKey";
 
-	const id = windows.push(win);
-	win.winID = id - 1;
-
-	return {
-		id,
-		data: windows.at(-1)
-	};
-}
-
-setInterval(() => {
-	if (target == undefined) {
-		document.body.style.cursor = "";
+document.addEventListener("keydown", (e) => {
+	// @ts-expect-error
+	if (e[focusKey] !== true) {
 		return;
 	}
 
-	target.container.dataset.left = Number(target.container.dataset.left);
-	target.container.dataset.top = Number(target.container.dataset.top);
-	target.container.dataset.width = Number(target.container.dataset.width);
-	target.container.dataset.height = Number(target.container.dataset.height);
-
-	switch (action) {
-		case "move":
-			target.container.dataset.left = Number(target.container.dataset.left) + xDiff;
-			target.container.dataset.top = Number(target.container.dataset.top) - yDiff;
-
+	switch (e.code) {
+		case "ArrowLeft":
+			// Left!
+			focusWindow(focus - 1);
 			break;
-		case "resize":
-			resize(actionInfo);
+		case "ArrowRight":
+			// Right!
+			focusWindow(focus + 1);
 			break;
+		case "KeyW":
+			// Close!
+			const win = windows[focus];
+			console.log(win);
+	}
+});
+
+function focusWindow(id: number) {
+	if (windows[id] == undefined) {
+		// that window doesn't exist!
+		return undefined;
 	}
 
-	xDiff = 0;
-	yDiff = 0;
-	target.reposition();
-});
+	const supposedlyFocusedWindows = document.querySelectorAll(".focused");
 
-document.addEventListener("mouseup", () => {
-	target = undefined;
-	action = undefined;
-	actionInfo = undefined;
-});
+	// remove focus from all windows
+	for (const elem of supposedlyFocusedWindows) {
+		elem.classList.remove("focused");
+	}
+
+	// focus our window
+	focus = id;
+	const win = windows[id];
+	win.container.classList.add("focused");
+}
+
+// Add this function anywhere appropriate (e.g., near `newWindow`)
+function layoutTiling() {
+	const cols = Math.ceil(Math.sqrt(windows.length));
+	const rows = Math.ceil(windows.length / cols);
+
+	const cellWidth = Math.floor(window.innerWidth / cols);
+	const cellHeight = Math.floor(window.innerHeight / rows);
+
+	windows.forEach((win, index) => {
+		const col = index % cols;
+		const row = Math.floor(index / cols);
+
+		const left = col * cellWidth;
+		const top = row * cellHeight;
+
+		win.move(left, top);
+		win.resize(cellWidth, cellHeight);
+	});
+}
+
+window.addEventListener("resize", layoutTiling);
+
+export function newWindow(name: string, Application: Application) {
+	const win = new Window(name, Application);
+
+	win.winID = windows.length; // assign ID before push
+	windows.push(win);
+
+	focusWindow(win.winID);
+
+	layoutTiling();
+
+	return {
+		id: win.winID,
+		data: win
+	};
+}

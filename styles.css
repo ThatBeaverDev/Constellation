@@ -2,6 +2,27 @@
 	--window-header-height: 25px;
 	--window-buttons-padding: 3.75px;
 	--window-border-radius: 5px;
+
+	--window-transition-duration: 0.15s;
+}
+
+@media (prefers-reduced-transparency: no-preference) {
+	:root {
+		--window-unfocused-opacity: 0.75;
+		--window-unfocused-filters: '';
+		
+		--window-focused-opacity: 1;
+		--window-unfocused-filters: '';
+	}
+}
+@media (prefers-reduced-transparency: reduce) {
+	:root {
+		--window-unfocused-opacity: 1;
+		--window-unfocused-filters: brightness(0.25);
+		
+		--window-focused-opacity: 1;
+		--window-unfocused-filters: '';
+	}
 }
 
 @media (prefers-color-scheme: light) {
@@ -144,7 +165,7 @@ body {
 }
 
 * {
-	font-family: Arial;
+	font-family: monospace;
 	white-space: pre;
 }
 
@@ -183,7 +204,7 @@ body {
 .bootCover {
 	position: absolute;
 	left: 0px;
-	right: 0px;
+	top: 0px;
 	z-index: 100000;
 
 	width: 100%;
@@ -210,7 +231,7 @@ body {
 	animation-name: bootImage;
 	animation-duration: 1s;
 	animation-fill-mode: forwards;
-	transition-timing-function: cubic-bezier(1.000, 0.000, 1.000, 0.000); 
+	animation-timing-function: cubic-bezier(1.000, 0.000, 1.000, 0.000); 
 }
 
 .hidden {
@@ -232,6 +253,21 @@ body {
 
 	/* box shadow */
 	box-shadow: 0 5px 10px #000000;
+
+	opacity: var(--window-unfocused-opacity);
+	filter: var(--window-unfocused-filters);
+
+	transition:
+		left var(--window-transition-duration) ease-in-out,
+		top var(--window-transition-duration) ease-in-out,
+		width var(--window-transition-duration) ease-in-out,
+		height var(--window-transition-duration) ease-in-out,
+		opacity var(--window-transition-duration) ease-in-out;
+}
+
+.windowContainer.focused {
+	opacity: var(--window-focused-opacity) !important;
+	filter: var(--window-focused-filters) !important;
 }
 
 .windowHeader {
@@ -260,7 +296,6 @@ body {
 	margin: 0px;
 	margin-left: 5px;
 
-	width: 50%;
 	height: 100%;
 
 	line-height: var(--window-header-height);
