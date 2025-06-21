@@ -24,7 +24,7 @@ if (args.length == 0) {
 }
 
 const input = path.resolve(process.cwd(), args[0])
-const output = path.resolve(process.cwd(), args[1] || "./app.czip")
+const output = path.resolve(process.cwd(), args[1] || "./app.idx")
 
 async function checkOutput() {
     let content
