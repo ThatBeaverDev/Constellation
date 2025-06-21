@@ -1,4 +1,4 @@
-export default class search extends Process {
+export default class search extends Application {
 	init() {}
 
 	frame() {
