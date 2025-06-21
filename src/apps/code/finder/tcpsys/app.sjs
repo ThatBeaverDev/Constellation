@@ -42,12 +42,20 @@ export default class finder extends Application {
 	}
 
 	keydown(key, cmd, opt, ctrl) {
-		switch (key) {
-			case "KeyG":
-				if (opt) {
+		if (opt) {
+			switch (key) {
+				case "KeyG":
 					// select directory prompt
 					this.cd(prompt("Select a directory"));
-				}
+					break;
+			}
+			return;
+		}
+
+		// simple keypresse
+		switch (key) {
+			case "ArrowUp":
+				break;
 		}
 	}
 
@@ -172,7 +180,7 @@ export default class finder extends Application {
 			case "deb":
 			// debian packaging format
 			case "idx":
-			// constellation buildin package format
+			// constellation builtin package format
 			case "zip":
 			case "gz":
 			case "tar":
