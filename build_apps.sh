@@ -1,7 +1,7 @@
 #!/bin/bash
 
 compile() {
-    mkdir - build/apps/build
+    mkdir -p build/apps/build
 
     # Build the search UI
     ./tcpkg src/apps/code/search build/apps/build/com.constellation.search.idx -override=true
