@@ -3,7 +3,6 @@ type constellationConfiguration = {
 	keyword: string;
 	wallpaper: string;
 	importOverrides: Object;
-	devApp: string | undefined;
 	userfile: string;
 	userDirectories: string[];
 };
@@ -14,9 +13,9 @@ const obj: constellationConfiguration = {
 	wallpaper: "/pics/Sahara Night Sky.jpg",
 	importOverrides: {
 		"/System/apps.js": "/build/apps/apps.js",
-		"/System/windows.js": "/build/windows.js"
+		"/System/windows.js": "/build/windows.js",
+		"/System/uiKit.js": "/build/lib/uiKit.js"
 	},
-	devApp: "/System/CoreExecutables/com.constellation.finder",
 	userfile: "/System/users.json",
 	userDirectories: [
 		"Desktop",
