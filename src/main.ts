@@ -40,15 +40,11 @@ async function main() {
 		await installer.install();
 	}
 
-	await apps.execute("/System/CoreExecutables/com.constellation.context");
-
-	if (conf.devApp !== undefined) {
-		await apps.execute(conf.devApp);
-	}
+	await apps.execute("/System/CoreExecutables/com.constellation.CoreExecutable");
 
 	setInterval(async () => {
 		await apps.run();
-	}, 5);
+	}, 50);
 }
 
 main();

@@ -3,14 +3,17 @@
 compile() {
     mkdir - build/apps/build
 
-    # Build the context bar
-    ./tcpkg src/apps/code/context build/apps/build/com.constellation.context.idx -override=true
-
     # Build the search UI
     ./tcpkg src/apps/code/search build/apps/build/com.constellation.search.idx -override=true
 
     # Build the files explorer
     ./tcpkg src/apps/code/finder build/apps/build/com.constellation.finder.idx -override=true
+
+    # Build the demo app
+    ./tcpkg src/apps/ApplicationFoundation demoApp.idx -override=true
+
+    # Build the CoreExecutable
+    ./tcpkg src/apps/code/CoreExecutable build/apps/build/com.constellation.CoreExecutable.idx -override=true
 }
 
 daemon() {
