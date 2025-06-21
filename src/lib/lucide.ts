@@ -7,36 +7,30 @@ document.getElementsByClassName("hidden")[0].appendChild(div);
 
 const cache: any = {};
 
-async function initIcon(name: string) {
-	cache[name] = false;
+function initIcon(name: string) {
+	const icon = document.createElement("img");
+	icon.dataset.type = name;
+	icon.className = "uikitIcon";
+	icon.src = "/icons/icons/" + name + ".svg";
+	icon.id = String(window.renderID++);
 
-	const req = await fetch("/icons/icons/" + name + ".svg");
+	div.appendChild(icon);
 
-	const svg = await req.text();
-
-	console.log(svg);
-
-	cache[name] = svg;
+	cache[name] = document.getElementById(icon.id)!;
 }
 
 export function getIcon(name: string): HTMLElement {
-	if (typeof cache[name] !== "string") {
-		// if it's false, it's being loaded.
-		if (cache[name] !== false) {
-			cache[name] = initIcon(name);
-		}
-
-		return document.createElement("svg");
+	if (cache[name] == undefined) {
+		initIcon(name);
 	}
 
 	// @ts-ignore
-	const inner = cache[name];
+	const linked: HTMLElement = cache[name];
 
-	const icon: HTMLElement = document.createElement("svg");
-	icon.innerHTML = inner;
+	// @ts-ignore
+	const icon: HTMLElement = linked.cloneNode(true);
 
 	icon.id = String(window.renderID++);
-	icon.className = "uikitIcon";
 
 	return icon;
 }
