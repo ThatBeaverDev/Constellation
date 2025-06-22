@@ -139,7 +139,8 @@
 		--main-accent-tertiary: rgb(var(--main-accent-tertiary-val), 0, var(--main-accent-tertiary-val));
 	}
 
-	.windowButtonIcon, .bootImage {
+	.windowButtonIcon,
+	.bootImage {
 		filter: invert(100%) brightness(10000%);
 	}
 }
@@ -173,32 +174,38 @@ body {
 	0% {
 		opacity: 0;
 	}
+
 	20% {
 		opacity: 1;
 	}
+
 	80% {
 		opacity: 1;
 	}
-	100% {
+
+	/*100% {
 		opacity: 0;
 	}
 	to {
 		display: None;
-	}
+	}*/
 }
+
 @keyframes bootCover {
 	0% {
 		opacity: 1;
 	}
+
 	90% {
 		opacity: 1;
 	}
-	100% {
+
+	/*100% {
 		opacity: 0;
 	}
 	to {
 		display: None;
-	}
+	}*/
 }
 
 .bootCover {
@@ -213,25 +220,96 @@ body {
 	background: var(--main-theme-primary);
 
 	animation-name: bootCover;
-	animation-duration: 1.25s;
+	animation-duration: 1s;
 	animation-fill-mode: forwards;
-	transition-timing-function: cubic-bezier(1.000, 0.000, 1.000, 0.000); 
+	transition-timing-function: cubic-bezier(1.000, 0.000, 1.000, 0.000);
 }
 
 .bootImage {
 	position: absolute;
-	left: calc((100vw - 10vw) / 2);
-	top: calc((100vh - 20vh) / 2);
-	
+	left: 45vw;
+	top: 40vw;
+
 	user-select: none;
-	
+
 	width: 10vw;
 	height: 10vh;
 
 	animation-name: bootImage;
 	animation-duration: 1s;
 	animation-fill-mode: forwards;
-	animation-timing-function: cubic-bezier(1.000, 0.000, 1.000, 0.000); 
+	animation-timing-function: cubic-bezier(1.000, 0.000, 1.000, 0.000);
+}
+
+.bootStatus {
+	position: absolute;
+	left: 40vw;
+	top: 50vw;
+
+	width: 20vw;
+}
+
+.loader {
+	position: absolute;
+	left: calc(50vw - 8px);
+	top: 35vw;
+
+	width: 20px;
+	height: 20px;
+
+	display: block;
+	border-radius: 50%;
+	background: #FFFFFF;
+	position: relative;
+}
+
+.loader:before, .loader:after {
+	/* first planet */
+	width: 10px;
+	height: 10px;
+
+	position: absolute;
+
+	content: "";
+	border-radius: 50%;
+	inset: 0;
+	background: #fff;
+
+	animation-name: rotate-primary;
+	animation-duration: 1s;
+	animation-timing-function: linear;
+	animation-iteration-count: infinite;
+}
+
+.loader:before {
+	/* second planet */
+	width: 15px;
+	height: 15px;
+
+	animation-name: rotate-secondary;
+	animation-duration: 3s;
+	animation-timing-function: linear;
+	animation-iteration-count: infinite
+}
+
+@keyframes rotate-primary {
+	from {
+		transform: rotate(0deg) translate(40px)
+	}
+
+	100% {
+		transform: rotate(360deg) translate(40px)
+	}
+}
+
+@keyframes rotate-secondary {
+	from {
+		transform: rotate(360deg) translate(80px)
+	}
+
+	100% {
+		transform: rotate(0deg) translate(80px)
+	}
 }
 
 .hidden {
