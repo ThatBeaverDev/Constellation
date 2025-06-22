@@ -1,8 +1,10 @@
 import conf from "../constellation.config.js";
-import { Application, BackgroundProcess, Process } from "./processes.js";
+import { Application, BackgroundProcess, Process } from "./executables.js";
 import fs from "../fs.js";
 import * as uikit from "../lib/uiKit/uiKit.js";
+import { blobify } from "../lib/blobify.js";
 import * as env from "./api.js";
+import { focus, windows } from "../windows.js";
 
 declare global {
 	interface Window {
@@ -12,6 +14,7 @@ declare global {
 		sysimport: any;
 		processes: Process[];
 		env: Object;
+		windows: Window[];
 	}
 }
 window.env = env;
@@ -26,15 +29,6 @@ await uikit.init();
 // allow processes to access this
 window.Application = Application;
 window.BackgroundProcess = BackgroundProcess;
-
-function blobify(text: string, mime = "text/plain") {
-	const blob = new Blob([text], {
-		type: mime
-	});
-	const location = URL.createObjectURL(blob);
-
-	return location;
-}
 
 window.sysimport = async function (directory: string) {
 	let url;
@@ -76,7 +70,7 @@ export async function execute(directory: string) {
 		throw new Error(fs.relative(directory, "tcpsys/app.sjs") + " is empty and cannot be executed");
 	}
 
-	const data = content.replaceAll("import(", "sysimport(");
+	const data = content; // use replaceAll to overrite things if needed.
 
 	// create a blob of the content
 	const blob = blobify(data, "text/javascript");
@@ -114,27 +108,29 @@ async function procExec(proc: Process) {
 document.addEventListener("keydown", (event) => {
 	//event.preventDefault()
 
-	if (event.repeat) {
-		return;
-	}
+	const proc = windows[focus].Application;
 
-	for (const pid in processes) {
-		const process = processes[pid];
+	// @ts-expect-error
+	proc.keydown(event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
 
-		process.keydown(event.code, event.metaKey, event.altKey, event.ctrlKey);
+	for (const proc of processes) {
+		if (proc instanceof BackgroundProcess) {
+			proc.keydown(event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
+		}
 	}
 });
 document.addEventListener("keyup", (event) => {
 	//event.preventDefault()
 
-	if (event.repeat) {
-		return;
-	}
+	const proc = windows[focus].Application;
 
-	for (const pid in processes) {
-		const process = processes[pid];
+	// @ts-expect-error
+	proc.keyup(event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
 
-		process.keyup(event.code, event.metaKey, event.altKey, event.ctrlKey);
+	for (const proc of processes) {
+		if (proc instanceof BackgroundProcess) {
+			proc.keyup(event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
+		}
 	}
 });
 

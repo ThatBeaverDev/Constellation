@@ -2,17 +2,19 @@ import { Renderer } from "../lib/uiKit/uiKit.js";
 import fs from "../fs.js";
 import { execute } from "./apps.js";
 
+export class OsAPI {
+	fs = fs;
+	exec = execute;
+}
+
 export class Process {
 	constructor(directory: string) {
 		this.directory = directory;
-		this.os = {
-			fs,
-			exec: execute
-		};
+		this.os = new OsAPI();
 	}
 
 	directory: string;
-	os: Object;
+	os: OsAPI;
 
 	executing: boolean = false;
 
@@ -50,3 +52,18 @@ export class Application extends Process {
 }
 
 export class BackgroundProcess extends Process {}
+
+const selfURI = new URL("/build/apps/executables.js", window.location.href).href;
+const fsURI = new URL("/build/fs.js", window.location.href).href;
+
+export const modulePreScript = `// module prescript inserted by the runner - this allows your module to function!
+import { OsAPI } from "${selfURI}";
+import fs from "${fsURI}";
+
+const module = {};
+module.os = new OsAPI();
+module.fs = fs
+
+// end of prescript!
+
+`;
