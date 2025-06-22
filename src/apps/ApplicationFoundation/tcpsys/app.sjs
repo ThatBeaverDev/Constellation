@@ -7,8 +7,10 @@ export default class ApplicationFoundation extends Application {
 		this.renderer.window.rename("ApplicationFoundation!");
 
 		// change the icon to the app svg
-		const directoryIcon = this.os.fs.relative(this.directory, "./resources/icon.svg");
-		await this.renderer.window.setIcon(directoryIcon);
+		//const directoryIcon = env.fs.relative(this.directory, "./resources/icon.svg");
+		//await this.renderer.window.setIcon(directoryIcon);
+		// currently the only way to set an app icon is from the icon set
+		await this.renderer.setWindowIcon("party-popper");
 	}
 
 	// runs every frame (duh)
