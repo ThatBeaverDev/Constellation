@@ -63,7 +63,7 @@ export default class finder extends Application {
 		}, 500);
 	}
 
-	keydown(key, cmd, opt, ctrl, shift, isRepeat) {
+	async keydown(key, cmd, opt, ctrl, shift, isRepeat) {
 		if (opt) {
 			switch (key) {
 				case "KeyG":
@@ -80,16 +80,33 @@ export default class finder extends Application {
 			speed++;
 		}
 		switch (key) {
-			case "ArrowUp":
-				this.selector = clamp(this.selector - speed, 0, this.listing.length);
-				break;
 			case "ArrowDown":
-				this.selector = clamp(this.selector + speed, 0, this.listing.length);
+				if (cmd) {
+					const obj = this.listing[this.selector];
+					this.cd(obj.path);
+					this.selector = undefined;
+				} else {
+					this.selector = clamp(this.selector + speed, 0, this.listing.length - 1);
+				}
 				break;
-			case "Enter":
-				const obj = this.listing[this.selector];
-				this.cd(obj.path);
-				this.selector = undefined;
+			case "ArrowUp":
+				if (cmd) {
+					const oldDir = String(this.path);
+
+					await this.cd("..");
+					this.selector = 0;
+					for (const i in this.listing) {
+						const obj = this.listing[i];
+						console.log(obj);
+
+						if (obj.path == oldDir) {
+							this.selector = i;
+							break;
+						}
+					}
+				} else {
+					this.selector = clamp(this.selector - speed, 0, this.listing.length - 1);
+				}
 				break;
 		}
 	}
@@ -97,7 +114,7 @@ export default class finder extends Application {
 	async cd(directory) {
 		const oldDir = String(this.path);
 
-		this.path = directory;
+		this.path = env.fs.relative(this.path, directory);
 		const dir = this.path;
 		if (this.path == "/") {
 			this.location = "Constellation";
@@ -120,7 +137,7 @@ export default class finder extends Application {
 
 		this.listing.sort();
 
-		this.listing = ["..", ...this.listing].map((name) => {
+		this.listing = this.listing.map((name) => {
 			const obj = {};
 			obj.name = name;
 			obj.path = env.fs.relative(this.path, name);
