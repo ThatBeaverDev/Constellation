@@ -2,7 +2,7 @@ import { newWindow, Window } from "../../windows.js";
 import "./favicon.js";
 import { getIcon } from "../lucide.js";
 import { getTextWidth } from "./calcWidth.js";
-import { Process } from "../../apps/processes.js";
+import { Process } from "../../apps/executables.js";
 
 export const font = "Arial";
 
@@ -105,6 +105,10 @@ export class Renderer {
 	};
 
 	getTextWidth = getTextWidth;
+	setWindowIcon = (name: string) => {
+		const icon = getIcon(name);
+		this.window.setIcon(icon);
+	};
 
 	creators = {
 		uikitIcon: (x = 0, y = 0, name = "circle-help") => {
