@@ -144,6 +144,6 @@ const main = {
 	relative,
 	stat
 };
-window.fs = main;
+window.fs = fs;
 
 export default main;
