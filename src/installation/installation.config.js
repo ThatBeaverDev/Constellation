@@ -1,5 +1,5 @@
 // /Users, /System, /Applications and /Temporary are premounted and don't need to be created.
-export const folders = ["/System/CoreExecutables", "/System/CoreComponents"];
+export const folders = ["/System/CoreExecutables", "/System/CoreComponents", "/System/CoreLibraries"];
 
 export const files = {
 	// search app
@@ -22,6 +22,7 @@ export const files = {
 
 	// apps system
 	"/build/apps/apps.js": "/System/CoreComponents/apps.js",
+	"/src/syslib/pathicon.sjs": "/System/CoreLibraries/pathicon.sjs",
 
 	// init system
 	"/build/apps/build/com.constellation.CoreExecutable.idx": {
