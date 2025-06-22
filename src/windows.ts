@@ -1,7 +1,7 @@
 import fs from "./fs.js";
 import { getIcon } from "./lib/lucide.js";
 import conf from "./constellation.config.js";
-import { Application } from "./apps/processes.js";
+import { Application } from "./apps/executables.js";
 
 // variables
 const vars = {
