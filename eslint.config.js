@@ -33,7 +33,6 @@ export default defineConfig([
 
   // global ignores should be last or separate
   globalIgnores([
-    "./src/lib/browserfs.js",
-    "./src/lib/browserfs.min.js"
+    "./src/lib/external"
   ]),
 ]);
