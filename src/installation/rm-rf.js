@@ -1,4 +1,5 @@
 import fs from "../fs.js";
+import * as log from "../lib/logging.js";
 
 async function rmdir(dir) {
 	const ls = await fs.readdir(dir);
@@ -15,10 +16,10 @@ async function rmdir(dir) {
 		const isFolder = stats.isDirectory();
 
 		if (isFolder) {
-			console.log("\x1b[31m[INSTALLATION / RM-RF]: Deleting Directory at " + relative + "\x1b[0m");
+			log.warn("core:installation/rmrf", "Deleting Directory at " + relative);
 			await rmdir(relative);
 		} else {
-			console.log("\x1b[31m[INSTALLATION / RM-RF]: Deleting " + relative + "\x1b[0m");
+			log.warn("core:installation/rmrf", "Deleting " + relative);
 			await fs.unlink(relative);
 		}
 	}
