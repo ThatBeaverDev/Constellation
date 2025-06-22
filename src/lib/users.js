@@ -1,3 +1,4 @@
+import * as log from "./logging.js";
 import config from "../constellation.config.js";
 import fs from "../fs.js";
 import { sha512 } from "./crypto.js";
@@ -11,7 +12,7 @@ function commit() {
 }
 
 if (users == undefined) {
-	console.debug("<users> - initialising user system.");
+	log.debug("core:usersys", "initialising user system.");
 	users = {
 		_adminpass: "admin"
 	};
@@ -26,7 +27,7 @@ export class User {
 	}
 
 	async init(username, password) {
-		console.debug("User creation for " + username + ".");
+		log.debug("core:usersys", "User creation for " + username + ".");
 		this.username = username;
 		this.password = await sha512(password);
 
@@ -36,7 +37,7 @@ export class User {
 		for (const sub of config.userDirectories) {
 			const location = this.directory + "/" + sub;
 			await fs.mkdir(location);
-			console.debug("mkusr: mkdir at " + location);
+			log.debug("core:usersys", "mkdir at " + location);
 		}
 	}
 }

@@ -3,9 +3,11 @@ import conf from "./constellation.config.js";
 
 import fs from "./fs.js";
 
+import { isDev } from "./lib/isDev.js";
 import * as apps from "./apps/apps.js";
 import * as windows from "./windows.js";
 import * as users from "./lib/users.js";
+import * as log from "./lib/logging.js";
 
 declare global {
 	interface String {
@@ -38,6 +40,11 @@ async function main() {
 	const firstBoot = (await fs.readFile("/sysarc.json")) == undefined;
 	if (firstBoot) {
 		await installer.install();
+	}
+
+	if (isDev) {
+		log.debug("core:main", "System in devmode: registering developer user");
+		await users.mkusr("Developer", "dev");
 	}
 
 	await apps.execute("/System/CoreExecutables/com.constellation.CoreExecutable");
