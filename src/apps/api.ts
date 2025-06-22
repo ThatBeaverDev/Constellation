@@ -26,7 +26,7 @@ export const fs = {
 			};
 		}
 	},
-	listDirectory: async function (directory: string): Promise<fsResponse> {
+	listDirectory: async function (directory: string = "/"): Promise<fsResponse> {
 		try {
 			const list = await realFS.readdir(directory);
 			return { data: list, ok: true };
@@ -95,8 +95,18 @@ export const fs = {
 		}
 	},
 
-	stat: async function (directory: string): Promise<Object> {
-		return {};
+	stat: async function (directory: string): Promise<fsResponse> {
+		try {
+			return {
+				data: await realFS.stat(directory),
+				ok: true
+			};
+		} catch (error) {
+			return {
+				data: error,
+				ok: false
+			};
+		}
 	},
 	relative: realFS.relative
 };
