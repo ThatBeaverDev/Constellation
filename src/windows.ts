@@ -227,12 +227,20 @@ document.addEventListener("keydown", (e) => {
 
 			win.remove();
 
+			console.log(windows);
 			windows.splice(focus, 1);
+			console.log(windows);
 
-			focus = 0;
+			let i = Number(focus);
+			focus = undefined;
+			while (focus == undefined) {
+				i--;
+				focusWindow(i);
+			}
 	}
 });
 
+let focusTime: number = 10;
 function focusWindow(id: number) {
 	if (windows[id] == undefined) {
 		// that window doesn't exist!
@@ -250,6 +258,7 @@ function focusWindow(id: number) {
 	focus = id;
 	const win = windows[id];
 	win.container.classList.add("focused");
+	win.container.style.zIndex = String(focusTime++);
 }
 
 // Add this function anywhere appropriate (e.g., near `newWindow`)
