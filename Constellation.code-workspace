@@ -6,7 +6,8 @@
 	],
 	"settings": {
 		"files.exclude": {
-			"**/.git": false
+			"**/.git": false,
+			"**/.svn": false
 		},
 		"files.associations": {
 			"*.idx": "json",
