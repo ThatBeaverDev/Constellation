@@ -10,16 +10,17 @@
 	:root {
 		--window-unfocused-opacity: 0.75;
 		--window-unfocused-filters: '';
-		
+
 		--window-focused-opacity: 1;
 		--window-unfocused-filters: '';
 	}
 }
+
 @media (prefers-reduced-transparency: reduce) {
 	:root {
 		--window-unfocused-opacity: 1;
 		--window-unfocused-filters: brightness(0.25);
-		
+
 		--window-focused-opacity: 1;
 		--window-unfocused-filters: '';
 	}
@@ -40,36 +41,24 @@
 		--main-theme-quinary-val: calc(255 + (var(--main-theme-contrast) * 5));
 		--main-theme-senary-val: calc(255 + (var(--main-theme-contrast) * 6));
 
-		--main-theme-primary: rgb(
-			var(--main-theme-primary-val),
-			var(--main-theme-primary-val),
-			var(--main-theme-primary-val)
-		);
-		--main-theme-secondary: rgb(
-			var(--main-theme-secondary-val),
-			var(--main-theme-secondary-val),
-			var(--main-theme-secondary-val)
-		);
-		--main-theme-tertiary: rgb(
-			var(--main-theme-tertiary-val),
-			var(--main-theme-tertiary-val),
-			var(--main-theme-tertiary-val)
-		);
-		--main-theme-quaternary: rgb(
-			var(--main-theme-quaternary-val),
-			var(--main-theme-quaternary-val),
-			var(--main-theme-quaternary-val)
-		);
-		--main-theme-quinary: rgb(
-			var(--main-theme-quinary-val),
-			var(--main-theme-quinary-val),
-			var(--main-theme-quinary-val)
-		);
-		--main-theme-senary: rgb(
-			var(--main-theme-senary-val),
-			var(--main-theme-senary-val),
-			var(--main-theme-senary-val)
-		);
+		--main-theme-primary: rgb(var(--main-theme-primary-val),
+				var(--main-theme-primary-val),
+				var(--main-theme-primary-val));
+		--main-theme-secondary: rgb(var(--main-theme-secondary-val),
+				var(--main-theme-secondary-val),
+				var(--main-theme-secondary-val));
+		--main-theme-tertiary: rgb(var(--main-theme-tertiary-val),
+				var(--main-theme-tertiary-val),
+				var(--main-theme-tertiary-val));
+		--main-theme-quaternary: rgb(var(--main-theme-quaternary-val),
+				var(--main-theme-quaternary-val),
+				var(--main-theme-quaternary-val));
+		--main-theme-quinary: rgb(var(--main-theme-quinary-val),
+				var(--main-theme-quinary-val),
+				var(--main-theme-quinary-val));
+		--main-theme-senary: rgb(var(--main-theme-senary-val),
+				var(--main-theme-senary-val),
+				var(--main-theme-senary-val));
 
 		--main-text-color: rgb(0, 0, 0);
 
@@ -97,36 +86,24 @@
 		--main-theme-quinary-val: calc(var(--main-theme-contrast) * 5);
 		--main-theme-senary-val: calc(var(--main-theme-contrast) * 6);
 
-		--main-theme-primary: rgb(
-			var(--main-theme-primary-val),
-			var(--main-theme-primary-val),
-			var(--main-theme-primary-val)
-		);
-		--main-theme-secondary: rgb(
-			var(--main-theme-secondary-val),
-			var(--main-theme-secondary-val),
-			var(--main-theme-secondary-val)
-		);
-		--main-theme-tertiary: rgb(
-			var(--main-theme-tertiary-val),
-			var(--main-theme-tertiary-val),
-			var(--main-theme-tertiary-val)
-		);
-		--main-theme-quaternary: rgb(
-			var(--main-theme-quaternary-val),
-			var(--main-theme-quaternary-val),
-			var(--main-theme-quaternary-val)
-		);
-		--main-theme-quinary: rgb(
-			var(--main-theme-quinary-val),
-			var(--main-theme-quinary-val),
-			var(--main-theme-quinary-val)
-		);
-		--main-theme-senary: rgb(
-			var(--main-theme-senary-val),
-			var(--main-theme-senary-val),
-			var(--main-theme-senary-val)
-		);
+		--main-theme-primary: rgb(var(--main-theme-primary-val),
+				var(--main-theme-primary-val),
+				var(--main-theme-primary-val));
+		--main-theme-secondary: rgb(var(--main-theme-secondary-val),
+				var(--main-theme-secondary-val),
+				var(--main-theme-secondary-val));
+		--main-theme-tertiary: rgb(var(--main-theme-tertiary-val),
+				var(--main-theme-tertiary-val),
+				var(--main-theme-tertiary-val));
+		--main-theme-quaternary: rgb(var(--main-theme-quaternary-val),
+				var(--main-theme-quaternary-val),
+				var(--main-theme-quaternary-val));
+		--main-theme-quinary: rgb(var(--main-theme-quinary-val),
+				var(--main-theme-quinary-val),
+				var(--main-theme-quinary-val));
+		--main-theme-senary: rgb(var(--main-theme-senary-val),
+				var(--main-theme-senary-val),
+				var(--main-theme-senary-val));
 
 		--main-text-color: rgb(255, 255, 255);
 
@@ -363,11 +340,6 @@ body {
 	justify-content: center;
 
 	user-select: None;
-	cursor: grab;
-}
-
-.windowHeader:active {
-	cursor: grabbing;
 }
 
 .windowTitle {
