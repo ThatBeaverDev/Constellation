@@ -1,6 +1,7 @@
 import { modulePreScript } from "./executables.js";
 import { blobify } from "../lib/blobify.js";
 import realFS from "../fs.js";
+import { execute } from "./apps.js";
 
 // logging
 
@@ -120,3 +121,5 @@ export async function include(directory: string): Promise<Object> {
 
 	return await import(blob);
 }
+
+export const exec = execute;
