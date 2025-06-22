@@ -8,7 +8,8 @@
     "fix": "npx eslint ./src --fix && prettier ./src --write",
     "build": "npm run fix && npm run build-nofix",
     "build-apps": "/bin/bash build_apps.sh",
-    "build-nofix": "rm -rf build/* && npx tsc && npm run build-apps && node -e \"console.log(Date.now())\" > build/date.txt",
+    "build-d-ts": "rm -rf types/* && tsc ./src/apps/api.ts --declaration --emitDeclarationOnly --outDir types --lib ES2015",
+    "build-nofix": "rm -rf build/* && npx tsc && echo npm run build-d-ts && npm run build-apps && node -e \"console.log(Date.now())\" > build/date.txt",
     "clean": "rm -rf build/*"
   },
   "devDependencies": {
