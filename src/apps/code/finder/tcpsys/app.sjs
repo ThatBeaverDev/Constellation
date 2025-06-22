@@ -1,3 +1,21 @@
+const fsDisplayLib = await env.include("/System/CoreLibraries/pathicon.sjs");
+
+const mod = (n, modulus) => {
+	let result = n % modulus;
+	if (result / modulus < 0) result += modulus;
+	return result;
+};
+const clamp = (n, min, max) => {
+	if (n < min) {
+		return min;
+	}
+	if (max < n) {
+		return max;
+	}
+
+	return n;
+};
+
 export default class finder extends Application {
 	textWidth(text) {
 		return this.renderer.getTextWidth(text, 15, "monospace");
@@ -39,9 +57,13 @@ export default class finder extends Application {
 			System: "/System",
 			Users: "/Users"
 		};
+
+		setInterval(() => {
+			this.cd(this.path);
+		}, 500);
 	}
 
-	keydown(key, cmd, opt, ctrl) {
+	keydown(key, cmd, opt, ctrl, shift, isRepeat) {
 		if (opt) {
 			switch (key) {
 				case "KeyG":
@@ -52,228 +74,89 @@ export default class finder extends Application {
 			return;
 		}
 
-		// simple keypresse
+		// simple keypress
+		let speed = 1;
+		if (shift) {
+			speed++;
+		}
 		switch (key) {
 			case "ArrowUp":
+				this.selector = clamp(this.selector - speed, 0, this.listing.length);
+				break;
+			case "ArrowDown":
+				this.selector = clamp(this.selector + speed, 0, this.listing.length);
+				break;
+			case "Enter":
+				const obj = this.listing[this.selector];
+				this.cd(obj.path);
+				this.selector = undefined;
 				break;
 		}
 	}
 
-	async directoryIcon(directory) {
-		const stats = await this.os.fs.stat(directory);
-		const isDir = await stats.isDirectory();
-
-		if (isDir) {
-			return "folder";
-		}
-
-		if (directory.split(".").length == 1) {
-			// no file extension
-			return "file";
-		}
-
-		const extension = directory.textAfterAll(".");
-
-		switch (extension) {
-			case "asm":
-			case "s":
-			case "S":
-			case "inc":
-			case "wla":
-			case "SRC":
-			// assembly
-			case "c":
-			case "h":
-			// C
-			case "C":
-			case "cc":
-			case "cpp":
-			case "cxx":
-			case "c++":
-			case "H":
-			case "hh":
-			case "hpp":
-			case "hxx":
-			case "h++":
-			case "cppm":
-			case "ixx":
-			// C++
-			case "cs":
-			case "csx":
-			// C#
-			case "dart":
-			// dart
-			case "java":
-			case "class":
-			case "jar":
-			case "jmod":
-			case "war":
-			// java
-			case "php":
-			case "phar":
-			case "phtml":
-			case "pht":
-			case "phps":
-			// PHP
-			case "ps1":
-			case "ps1xml":
-			case "pc1c":
-			case "pds1":
-			case "pdm1":
-			case "pssc":
-			case "psrc":
-			case "cdxml":
-			// powershell
-			case "rb":
-			case "ru":
-			// ruby
-			case "rs":
-			case "rlib":
-			// rust
-			case "go":
-			// go
-			case "zig":
-			case "zir":
-			case "zigr":
-			case "zon":
-			// zig
-			case "py":
-			case "pyw":
-			case "pyz":
-			case "pyi":
-			case "pyc":
-			case "pyd":
-			// python
-			case "bat":
-			case "cmd":
-			case "btm":
-			// windows command prompt
-			case "js":
-			case "mjs":
-			case "cjs":
-			case "jsx":
-			// javascript
-			case "ts":
-			case "tsx":
-			case "mts":
-			case "cts":
-			// typescript
-			case "sh":
-			// shell
-			case "lua":
-			// lua
-			case "kt":
-			case "kts":
-			case "kexe":
-			case "klib":
-				// kotlin
-				return "file-code";
-			case "app":
-			// macOS App
-			case "exe":
-			// windows executable
-			case "ipa":
-			// iOS / iPadOS App
-			case "apk":
-				// Android App
-				return "book-x";
-			case "deb":
-			// debian packaging format
-			case "idx":
-			// constellation builtin package format
-			case "zip":
-			case "gz":
-			case "tar":
-			case "tar.gz":
-				return "package";
-			case "png":
-			case "ico":
-			case "jpg":
-			case "jpeg":
-			case "webp":
-			case "heic:":
-			case "icns":
-			case "svg":
-			case "avif":
-				return "file-image";
-			case "json":
-				return "file-json";
-			case "mp3":
-			case "ogg":
-			case "m4a":
-			case "flac":
-				return "file-audio";
-			case "mp4":
-			case "mov":
-			case "webm":
-				return "file-video";
-			default:
-				return "file";
-		}
-	}
-
 	async cd(directory) {
-		const oldDir = String(this.directory);
+		const oldDir = String(this.path);
 
-		this.directory = directory;
-		const dir = this.directory;
-		if (this.directory == "/") {
+		this.path = directory;
+		const dir = this.path;
+		if (this.path == "/") {
 			this.location = "Constellation";
 		} else {
-			this.location = "Constellation" + String(this.directory).replaceAll("/", " > ");
+			this.location = "Constellation" + String(this.path).replaceAll("/", " > ");
 		}
 
-		this.listing = await this.os.fs.readdir(dir);
-
-		if (this.listing == undefined) {
-			this.directory = oldDir;
+		const list = await env.fs.listDirectory(dir);
+		if (!list.ok) {
+			this.path = oldDir;
 			return;
 		}
+		this.listing = list.data;
+
+		const newIcon = await fsDisplayLib.pathIcon(this.path);
+		if (newIcon !== this.icon) {
+			this.icon = newIcon;
+			this.renderer.setWindowIcon(this.icon);
+		}
+
+		this.listing.sort();
 
 		this.listing = ["..", ...this.listing].map((name) => {
 			const obj = {};
 			obj.name = name;
-			obj.path = this.os.fs.relative(this.directory, name);
-			obj.icon = this.directoryIcon(obj.path);
+			obj.path = env.fs.relative(this.path, name);
+			obj.icon = fsDisplayLib.pathIcon(obj.path);
 
 			return obj;
 		});
 	}
 
 	async frame() {
+		if (this.selector == undefined) {
+			this.selector = 0;
+		}
+
 		this.renderer.clear();
 
 		if (this.listing == undefined) {
 			return;
 		}
 
-		this.renderer.text(0, 10, "Locations");
+		this.renderer.icon(20, 0, await this.icon);
+		this.renderer.text(50, 0, this.path);
+
 		let y = 30;
-		let maxWidth = 0;
-		for (const name in this.keyLocations) {
-			const textWidth = this.textWidth(name);
-			if (textWidth > maxWidth) {
-				maxWidth = textWidth;
-			}
+		for (const i in this.listing) {
+			const obj = this.listing[i];
 
-			this.renderer.button(0, y, name);
-			y += 20;
-		}
+			this.renderer.icon(20, y, await obj.icon);
 
-		const bottom = this.renderer.window.dimensions.height;
-		const right = this.renderer.window.dimensions.width;
+			const name = obj.name.padEnd(25, " ");
+			const text = this.selector == i ? "> " + name : "  " + name;
 
-		this.renderer.verticalLine(maxWidth + 10, 0, bottom);
-		this.renderer.horizontalLine(maxWidth + 10, bottom - 50, right);
-		this.renderer.text(maxWidth + 15, bottom - 45, this.location);
-
-		y = 10;
-		for (const obj of this.listing) {
-			this.renderer.icon(maxWidth + 20, y, await obj.icon);
 			this.renderer.button(
-				maxWidth + 50,
+				50,
 				y,
-				obj.name,
+				text,
 				async () => {
 					// right click
 					await this.cd(obj.path);
