@@ -2,6 +2,7 @@ import conf from "../constellation.config.js";
 import { Application, BackgroundProcess, Process } from "./processes.js";
 import fs from "../fs.js";
 import * as uikit from "../lib/uiKit/uiKit.js";
+import * as env from "./api.js";
 
 declare global {
 	interface Window {
@@ -10,8 +11,10 @@ declare global {
 		BackgroundProcess: any;
 		sysimport: any;
 		processes: Process[];
+		env: Object;
 	}
 }
+window.env = env;
 
 export const processes: Process[] = [];
 window.processes = processes;
