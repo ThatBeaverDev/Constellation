@@ -54,18 +54,18 @@ export class Window {
 		t.innerText = name;
 
 		// window icon
-		this.icon = getIcon("app-window");
-		const i = this.icon;
-		i.classList.add("windowIcon");
-		i.classList.add("uikitIcon");
-		i.id = String(window.renderID++);
-		i.style.position = "static";
+
+		this.iconDiv = document.createElement("div");
+		this.iconDiv.id = String(window.renderID++);
+		this.iconDiv.style.position = "static";
+		this.iconDiv.style.width = "25px";
+		this.iconDiv.style.height = "25px";
 
 		this.header = document.createElement("div");
 		const h = this.header;
 		h.className = "windowHeader";
 		h.id = String(window.renderID++);
-		h.innerHTML = this.icon.outerHTML + this.title.outerHTML;
+		h.innerHTML = this.iconDiv.outerHTML + this.title.outerHTML;
 
 		this.body = document.createElement("div");
 		const b = this.body;
@@ -91,6 +91,10 @@ export class Window {
 		this.body = document.getElementById(this.body.id)!;
 		this.header = document.getElementById(this.header.id)!;
 		this.title = document.getElementById(this.title.id)!;
+		this.iconDiv = document.getElementById(this.iconDiv.id)!;
+
+		const icon = getIcon("app-window-mac");
+		this.setIcon(icon);
 	}
 
 	name: string;
@@ -98,7 +102,7 @@ export class Window {
 	body: HTMLElement;
 	header: HTMLElement;
 	title: HTMLElement;
-	icon: HTMLElement;
+	iconDiv: HTMLElement;
 	mouseState: any;
 	winID: number;
 	Application: Application;
@@ -158,10 +162,8 @@ export class Window {
 		}
 	}
 
-	async setIcon(svg: string) {
-		const content = await fs.readFile(svg);
-
-		this.icon.innerHTML = content;
+	async setIcon(element: HTMLElement) {
+		this.iconDiv.innerHTML = element.outerHTML;
 	}
 
 	// Modify Window.remove() to trigger layout update:
@@ -196,6 +198,8 @@ export class Window {
 }
 
 export const windows: Window[] = [];
+// @ts-expect-error
+window.windows = windows;
 
 export let focusKey: string = "altKey";
 
@@ -216,8 +220,16 @@ document.addEventListener("keydown", (e) => {
 			break;
 		case "KeyW":
 			// Close!
+			if (windows.length == 1) {
+				return; // can't close the last window, sorry
+			}
 			const win = windows[focus];
-			console.log(win);
+
+			win.remove();
+
+			windows.splice(focus, 1);
+
+			focus = 0;
 	}
 });
 
