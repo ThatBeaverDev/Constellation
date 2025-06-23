@@ -5,6 +5,7 @@ import * as uikit from "../lib/uiKit/uiKit.js";
 import { blobify } from "../lib/blobify.js";
 import * as env from "./api.js";
 import { focus, windows } from "../windows.js";
+import { AppInitialisationError, ImportError } from "../errors.js";
 
 declare global {
 	interface Window {
@@ -40,7 +41,7 @@ window.sysimport = async function (directory: string) {
 		const content = await fs.readFile(directory);
 
 		if (content == undefined) {
-			throw new Error("Import source is empty!");
+			throw new ImportError("Import source is empty!");
 		}
 
 		url = blobify(content, "text/javascript");
@@ -67,7 +68,9 @@ export async function execute(directory: string) {
 	const content = await get("tcpsys/app.sjs");
 
 	if (content == undefined) {
-		throw new Error(fs.relative(directory, "tcpsys/app.sjs") + " is empty and cannot be executed");
+		throw new AppInitialisationError(
+			fs.relative(directory, "tcpsys/app.[execType]") + " is empty and cannot be executed"
+		);
 	}
 
 	const data = content; // use replaceAll to overrite things if needed.
