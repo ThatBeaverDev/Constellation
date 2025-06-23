@@ -1,3 +1,4 @@
+import { InstallationError } from "../errors.js";
 import fs from "../fs.js";
 
 import { files } from "./installation.config.js";
@@ -16,7 +17,7 @@ export async function writeFiles() {
 				type = files[location].type;
 				break;
 			default:
-				throw new Error("Unknown typeof item: " + location);
+				throw new InstallationError("Unknown typeof item: " + location);
 		}
 
 		let content;
@@ -56,7 +57,7 @@ export async function writeFiles() {
 
 				break;
 			default:
-				throw new Error("Unknown filetype: " + type);
+				throw new InstallationError("Unknown filetype: " + type);
 		}
 	}
 }
