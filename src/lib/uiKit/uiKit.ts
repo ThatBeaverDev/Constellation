@@ -1,8 +1,9 @@
-import { newWindow, Window } from "../../windows.js";
+import { focus, newWindow, Window } from "../../windows.js";
 import "./favicon.js";
 import { getIcon } from "../lucide.js";
 import { getTextWidth } from "./calcWidth.js";
 import { Process } from "../../apps/executables.js";
+import { UIError } from "../../errors.js";
 
 export const font = "Arial";
 
@@ -14,15 +15,6 @@ export async function init() {
 
 	document.body.appendChild(style);
 }
-
-let lastContextTimestamp = 0;
-window.oncontextmenu = (e) => {
-	const since = Date.now() - lastContextTimestamp;
-	if (since > 500) {
-		lastContextTimestamp = Date.now();
-		e.preventDefault();
-	}
-};
 
 type uikitCreatorName = keyof Renderer["creators"];
 interface step {
@@ -40,15 +32,18 @@ export class Renderer {
 		this.window = newWindow(this.process.directory, process).data!;
 	}
 
-	process: Process;
+	private process: Process;
 	window: Window;
 
 	clear = () => {
+		this.textboxExists = false;
 		this.steps = [];
 	};
 
-	steps: step[] = [];
-	displayedSteps: step[] = [];
+	private steps: step[] = [];
+	private displayedSteps: step[] = [];
+	private textboxExists: Boolean = false;
+	textBoxValue: string = "";
 
 	icon = (x: number = 0, y: number = 0, name: string = "circle-help") => {
 		const obj: step = {
@@ -72,10 +67,23 @@ export class Renderer {
 		};
 		this.steps.push(obj);
 	};
-	textbox = (x: number, y: number, backtext: string, callbacks: textboxCallbackObject) => {
+	textbox = (x: number, y: number, backtext: string, callbacks: textboxCallbackObject, options = this.defaultConfig.uikitTextbox) => {
+		if (this.textboxExists == true) {
+			throw new UIError("UI cannot have more than one textbox.");
+		}
+
+		this.textboxExists = true;
+
+		const opts = {};
+
+		for (const i in this.defaultConfig.uikitTextbox) {
+			// @ts-ignore
+			opts[i] = options[i] ?? this.defaultConfig.uikitTextbox[i];
+		}
+
 		const obj: step = {
 			type: "uikitTextbox",
-			args: [x, y, backtext, callbacks]
+			args: [x, y, backtext, callbacks, opts]
 		};
 		this.steps.push(obj);
 	};
@@ -104,13 +112,30 @@ export class Renderer {
 		this.steps.push(obj);
 	};
 
+	progressBar = (x: number, y: number, width: number, height: number, progress: number | "throb") => {
+		const obj: step = {
+			type: "uikitProgressBar",
+			args: [x, y, width, height, progress]
+		};
+		this.steps.push(obj);
+	};
+
 	getTextWidth = getTextWidth;
 	setWindowIcon = (name: string) => {
 		const icon = getIcon(name);
 		this.window.setIcon(icon);
 	};
 
-	creators = {
+	defaultConfig = {
+		uikitTextbox: {
+			isInvisible: false,
+			isEmpty: false
+		}
+	};
+
+	private textboxElem: HTMLInputElement | undefined;
+	private textboxValue: string = "";
+	private creators = {
 		uikitIcon: (x = 0, y = 0, name = "circle-help") => {
 			const icon = getIcon(name);
 
@@ -137,13 +162,7 @@ export class Renderer {
 			return live;
 		},
 
-		uikitButton: (
-			x = 0,
-			y = 0,
-			string = "Lorum Ipsum",
-			leftClickCallback = () => {},
-			rightClickCallback = () => {}
-		) => {
+		uikitButton: (x = 0, y = 0, string = "Lorum Ipsum", leftClickCallback = () => {}, rightClickCallback = () => {}) => {
 			const button = document.createElement("button");
 			button.className = "uikitButton";
 
@@ -187,31 +206,40 @@ export class Renderer {
 			callbacks = {
 				update: (key: string, value: string) => {},
 				enter: (value: string) => {}
-			}
+			},
+			options = this.defaultConfig.uikitTextbox
 		) => {
 			const textbox = document.createElement("input");
 			textbox.type = "text";
-			textbox.className = "uikitTextbox";
+			textbox.classList.add("uikitTextbox");
+
+			if (options.isInvisible) textbox.classList.add("uikitTextboxInvisible");
 
 			textbox.id = String(window.renderID++);
 			textbox.placeholder = backtext;
 			textbox.style.cssText = `left: ${x}px; top: ${y}px;`;
 
 			this.window.body.appendChild(textbox);
-			// @ts-ignore // query selector doesn't work for this since we have numbers in the ID
-			const live: HTMLInputElement = document.getElementById(textbox.id)!;
+			// @ts-expect-error
+			const live: HTMLInputElement = document.getElementById(textbox.id);
 
 			live.addEventListener(
-				"keyup",
+				"keydown",
 				(event) => {
+					const val = String(live.value);
 					if (event.code == "Enter") {
-						callbacks.enter(live.value);
+						callbacks.enter(val);
 					} else {
-						callbacks.update(event.key, live.value);
+						callbacks.update(event.key, val);
 					}
 				},
 				{ signal: this.signal }
 			);
+
+			if (focus == this.window.winID) live.focus();
+
+			if (options.isEmpty == false) textbox.value = String(this.textboxElem?.value || ""); // make the value stay
+			this.textboxElem = live;
 
 			return live;
 		},
@@ -242,14 +270,41 @@ export class Renderer {
 			return live;
 		},
 
-		uikitTable: () => {}
+		uikitTable: () => {},
+
+		uikitProgressBar: (x: number, y: number, width: number, height: number, progress: number | "throb") => {
+			const bar = document.createElement("div");
+			bar.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;`;
+			bar.id = String(window.renderID++);
+			bar.className = "uikitProgressBar";
+
+			const progressor = document.createElement("div");
+
+			progressor.style.width = progress + "%";
+
+			progressor.id = String(window.renderID++);
+			progressor.className = "uikitProgressBarInner";
+
+			bar.innerHTML = progressor.outerHTML;
+
+			this.window.body.appendChild(bar);
+			const live = document.getElementById(bar.id);
+
+			return live;
+		}
 	};
 
-	controller = new AbortController();
-	signal = this.controller.signal;
+	private controller = new AbortController();
+	private signal = this.controller.signal;
 
-	items: any[] = [];
+	windowWidth: number = 0;
+	windowHeight: number = 0;
+
+	private items: any[] = [];
 	commit = () => {
+		this.windowWidth = this.window.container.clientWidth;
+		this.windowWidth = this.window.container.clientHeight;
+
 		// don't render if the content is the same
 		if (this.steps.length == this.displayedSteps.length) {
 			const steps = JSON.stringify(this.steps);
@@ -267,10 +322,13 @@ export class Renderer {
 		this.displayedSteps = [];
 
 		for (const i in this.items) {
-			this.items[i].remove();
+			const item = this.items[i];
+
+			item.remove();
 			// @ts-ignore
 			this.items.splice(i, 1);
 		}
+
 		this.window.body.innerHTML = "";
 
 		for (const item of this.steps) {
@@ -278,11 +336,11 @@ export class Renderer {
 
 			const creator = this.creators[item.type];
 			if (creator == undefined) {
-				throw new Error("Creator is not defined for uikit Type " + item.type);
+				throw new UIError("Creator is not defined for uikit Type " + item.type);
 			}
 
 			// @ts-ignore (it dislikes the destructuring operation on item.args, no idea how to fix it.)
-			const live = creator(...item.args);
+			const live = creator(...item.args)!;
 
 			this.items.push(live);
 		}
