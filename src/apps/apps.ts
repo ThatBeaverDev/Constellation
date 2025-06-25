@@ -31,26 +31,6 @@ await uikit.init();
 window.Application = Application;
 window.BackgroundProcess = BackgroundProcess;
 
-window.sysimport = async function (directory: string) {
-	let url;
-	// @ts-ignore // no idea why these throw errors?
-	if (conf.importOverrides[directory] !== undefined) {
-		// @ts-ignore
-		url = conf.importOverrides[directory];
-	} else {
-		const content = await fs.readFile(directory);
-
-		if (content == undefined) {
-			throw new ImportError("Import source is empty!");
-		}
-
-		url = blobify(content, "text/javascript");
-	}
-
-	const exports = await import(url);
-
-	return exports;
-};
 
 export async function execute(directory: string) {
 	const get = async (dir: string) => {
