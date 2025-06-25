@@ -28,5 +28,11 @@ export const files = {
 	"/build/apps/build/com.constellation.CoreExecutable.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreExecutables/com.constellation.CoreExecutable"
+	},
+
+	// terminal
+	"/build/apps/build/com.constellation.terminal.idx": {
+		type: "jsonFilesIndex",
+		directory: "/System/CoreExecutables/com.constellation.terminal"
 	}
 };
