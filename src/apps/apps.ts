@@ -117,6 +117,10 @@ document.addEventListener("keyup", (event) => {
 	}
 });
 
+window.addEventListener("mousedown", (e) => e.preventDefault());
+window.addEventListener("mouseup", (e) => e.preventDefault());
+window.addEventListener("click", (e) => e.preventDefault());
+
 export function run() {
 	for (const pid in processes) {
 		const process = processes[pid];
