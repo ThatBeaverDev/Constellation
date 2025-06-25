@@ -27,7 +27,8 @@ export default defineConfig([
       "no-var": "error",
       "prefer-const": "warn",
       "no-fallthrough": "off",
-      "no-unused-vars": "warn"
+      "no-unused-vars": "warn",
+      "max-len": ["error", { code: 200 }]
     },
   },
 
