@@ -131,7 +131,9 @@ export const fs = {
 			};
 		}
 	},
-	relative: realFS.relative
+	relative: function (base: string, child: string): string {
+		return realFS.relative(base, child);
+	}
 };
 
 export async function include(directory: string): Promise<Object> {
