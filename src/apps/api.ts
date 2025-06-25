@@ -55,7 +55,7 @@ export const fs = {
 
 	createFile: async function (directory: string): Promise<fsResponse> {
 		try {
-			await realFS.createFile(directory);
+			await realFS.writeFile(directory, "");
 			return {
 				data: true,
 				ok: true
