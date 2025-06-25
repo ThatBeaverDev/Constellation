@@ -37,9 +37,7 @@ export async function writeFiles() {
 				try {
 					json = JSON.parse(content);
 				} catch {
-					console.error(
-						"Package from URL '" + location + "' targeted for '" + directory + "' is not packaged properly."
-					);
+					console.error("Package from URL '" + location + "' targeted for '" + directory + "' is not packaged properly.");
 				}
 
 				for (const path of json.directories) {
