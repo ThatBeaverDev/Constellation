@@ -227,22 +227,27 @@ document.addEventListener("keydown", (e) => {
 
 			win.remove();
 
-			console.log(windows);
-			windows.splice(focus, 1);
-			console.log(windows);
-
-			let i = Number(focus);
-			focus = undefined;
-			while (focus == undefined) {
-				i--;
-				focusWindow(i);
-			}
+			setTimeout(() => {
+				const last = windows.length - 1;
+				focusWindow(Math.max(0, Math.min(focus, last)));
+			}, 160); // wait for animation + layoutTiling
 	}
 });
 
 let focusTime: number = 10;
+
+function getWindowOfId(id: number) {
+	for (const window of windows) {
+		if (window.winID == id) {
+			return window;
+		}
+	}
+}
+
 function focusWindow(id: number) {
-	if (windows[id] == undefined) {
+	const target = getWindowOfId(id);
+
+	if (target == undefined) {
 		// that window doesn't exist!
 		return undefined;
 	}
@@ -256,9 +261,8 @@ function focusWindow(id: number) {
 
 	// focus our window
 	focus = id;
-	const win = windows[id];
-	win.container.classList.add("focused");
-	win.container.style.zIndex = String(focusTime++);
+	target.container.classList.add("focused");
+	target.container.style.zIndex = String(focusTime++);
 }
 
 // Add this function anywhere appropriate (e.g., near `newWindow`)
