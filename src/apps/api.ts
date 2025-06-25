@@ -69,6 +69,15 @@ export const fs = {
 	},
 	updateFile: async function (directory: string, contents: string): Promise<fsResponse> {
 		try {
+			const file = await fs.stat(directory);
+
+			if (!file.ok) {
+				return {
+					data: "File at " + directory + " does not exist.",
+					ok: false
+				};
+			}
+
 			await realFS.writeFile(directory, contents);
 			return {
 				data: true,
