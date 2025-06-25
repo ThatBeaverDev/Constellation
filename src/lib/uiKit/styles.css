@@ -51,11 +51,40 @@
 	padding-left: 3px;
 	padding-right: 3px;
 
-	border: 0px;
+	border: 0;
 	border-radius: 3px;
+	outline: none;
 
 	position: absolute;
 
 	background-color: var(--main-theme-secondary);
 	color: var(--main-text-color);
+}
+
+.uikitTextbox:active {
+	border: none;
+	outline: none;
+}
+
+.uikitTextboxInvisible {
+	background-color: transparent;
+}
+
+.uikitProgressBar {
+	background-color: var(--main-theme-secondary);
+
+	overflow: hidden;
+
+	border-radius: var(--window-border-radius);
+}
+
+.uikitProgressBarInner {
+	background-color: var(--main-accent-primary);
+	background-color: var(--main-theme-tertiary) !important;
+
+	position: relative;
+	left: 0px;
+	top: 0px;
+
+	height: 100%;
 }
