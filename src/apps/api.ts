@@ -1,7 +1,9 @@
+import conf from "../constellation.config.js";
 import { modulePreScript } from "./executables.js";
 import { blobify } from "../lib/blobify.js";
 import realFS from "../fs.js";
 import { execute } from "./apps.js";
+import { ImportError } from "../errors.js";
 
 // logging
 
@@ -144,6 +146,27 @@ export async function include(directory: string): Promise<Object> {
 	const blob = blobify(data, "text/javascript");
 
 	return await import(blob);
+}
+
+export async function sysinclude(directory: string): Promise<Object> {
+	let url;
+	// @ts-ignore // no idea why these throw errors?
+	if (conf.importOverrides[directory] !== undefined) {
+		// @ts-ignore
+		url = conf.importOverrides[directory];
+	} else {
+		const content = await realFS.readFile(directory);
+
+		if (content == undefined) {
+			throw new ImportError("Import source is empty!");
+		}
+
+		url = blobify(content, "text/javascript");
+	}
+
+	const exports = await import(url);
+
+	return exports;
 }
 
 export const exec = execute;
