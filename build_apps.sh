@@ -14,6 +14,9 @@ compile() {
 
     # Build the CoreExecutable
     ./tcpkg src/apps/code/CoreExecutable build/apps/build/com.constellation.CoreExecutable.idx -override=true
+
+    # Build Terminal
+    ./tcpkg src/apps/code/terminal build/apps/build/com.constellation.terminal.idx -override=true
 }
 
 daemon() {
