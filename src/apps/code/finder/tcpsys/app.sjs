@@ -91,19 +91,8 @@ export default class finder extends Application {
 				break;
 			case "ArrowUp":
 				if (cmd) {
-					const oldDir = String(this.path);
-
 					await this.cd("..");
 					this.selector = 0;
-					for (const i in this.listing) {
-						const obj = this.listing[i];
-						console.log(obj);
-
-						if (obj.path == oldDir) {
-							this.selector = i;
-							break;
-						}
-					}
 				} else {
 					this.selector = clamp(this.selector - speed, 0, this.listing.length - 1);
 				}
@@ -148,44 +137,61 @@ export default class finder extends Application {
 	}
 
 	async frame() {
-		if (this.selector == undefined) {
-			this.selector = 0;
-		}
+		try {
+			if (this.selector == undefined) {
+				this.selector = 0;
+			}
 
-		this.renderer.clear();
+			this.renderer.clear();
 
-		if (this.listing == undefined) {
-			return;
-		}
+			if (this.listing == undefined) {
+				return;
+			}
 
-		this.renderer.icon(20, 0, await this.icon);
-		this.renderer.text(50, 0, this.path);
+			this.renderer.icon(20, 0, await this.icon);
+			this.renderer.text(50, 0, this.path);
 
-		let y = 30;
-		for (const i in this.listing) {
-			const obj = this.listing[i];
+			let y = 30;
+			for (const i in this.listing) {
+				try {
+					const obj = this.listing[i];
 
-			this.renderer.icon(20, y, await obj.icon);
+					this.renderer.icon(20, y, await obj.icon);
 
-			const name = obj.name.padEnd(25, " ");
-			const text = this.selector == i ? "> " + name : "  " + name;
+					let name;
+					try {
+						name = obj.name.padEnd(25, " ");
+					} catch (e) {
+						console.log(obj);
+						console.warn(e);
+					}
 
-			this.renderer.button(
-				50,
-				y,
-				text,
-				async () => {
-					// right click
-					await this.cd(obj.path);
-				},
-				async () => {
-					// left click
+					const text = this.selector == i ? "> " + name : "  " + name;
+
+					this.renderer.button(
+						50,
+						y,
+						text,
+						async () => {
+							// right click
+							await this.cd(obj.path);
+						},
+						async () => {
+							// left click
+						}
+					);
+				} catch (e) {
+					console.warn(e);
 				}
-			);
 
-			y += 25;
+				y += 25;
+			}
+
+			this.renderer.commit();
+		} catch (e) {
+			this.renderer.clear();
+			this.renderer.text(0, 0, e);
+			this.renderer.commit();
 		}
-
-		this.renderer.commit();
 	}
 }
