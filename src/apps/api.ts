@@ -104,6 +104,19 @@ export const fs = {
 			};
 		}
 	},
+	readFile: async function (directory: string): Promise<fsResponse> {
+		try {
+			return {
+				data: await realFS.readFile(directory),
+				ok: true
+			};
+		} catch (error) {
+			return {
+				data: error,
+				ok: false
+			};
+		}
+	},
 
 	stat: async function (directory: string): Promise<fsResponse> {
 		try {
