@@ -118,12 +118,6 @@ export default class finder extends Application {
 		}
 		this.listing = list.data;
 
-		const newIcon = await fsDisplayLib.pathIcon(this.path);
-		if (newIcon !== this.icon) {
-			this.icon = newIcon;
-			this.renderer.setWindowIcon(this.icon);
-		}
-
 		this.listing.sort();
 
 		this.listing = this.listing.map((name) => {
@@ -134,6 +128,12 @@ export default class finder extends Application {
 
 			return obj;
 		});
+
+		const newIcon = await fsDisplayLib.pathIcon(this.path);
+		if (newIcon !== this.icon) {
+			this.icon = newIcon;
+			this.renderer.setWindowIcon(this.icon);
+		}
 	}
 
 	async frame() {
