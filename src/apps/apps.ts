@@ -105,7 +105,11 @@ document.addEventListener("keydown", (event) => {
 document.addEventListener("keyup", (event) => {
 	//event.preventDefault()
 
-	const proc = windows[focus].Application;
+	const proc = windows[focus]?.Application;
+
+	if (proc == undefined) {
+		return;
+	}
 
 	// @ts-expect-error
 	proc.keyup(event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
@@ -116,10 +120,6 @@ document.addEventListener("keyup", (event) => {
 		}
 	}
 });
-
-window.addEventListener("mousedown", (e) => e.preventDefault());
-window.addEventListener("mouseup", (e) => e.preventDefault());
-window.addEventListener("click", (e) => e.preventDefault());
 
 export function run() {
 	for (const pid in processes) {
