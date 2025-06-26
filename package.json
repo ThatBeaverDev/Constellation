@@ -11,7 +11,7 @@
     "build-apps-postprettier": "/bin/bash build_apps.sh",
     "build-nofix": "rm -rf build/* && npx tsgo && echo npm run build-d-ts && npm run build-apps-postprettier && node -e \"console.log(Date.now())\" > build/date.txt",
     "clean": "rm -rf build/*",
-    "newenv": "git submodule init && npm run build"
+    "newenv": "npm install && git submodule init && npm run build"
   },
   "devDependencies": {
     "@eslint/js": "9.28.0",
