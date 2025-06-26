@@ -6,6 +6,16 @@
 	--window-transition-duration: 0.15s;
 }
 
+@media (prefers-reduced-motion: reduce) {
+	* {
+		animation-name: none !important;
+		animation-duration: 0s !important;
+
+		transition: none !important;
+		transition-duration: 0s !important;
+	}
+}
+
 @media (prefers-reduced-transparency: no-preference) {
 	:root {
 		--window-unfocused-opacity: 0.75;
