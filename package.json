@@ -9,9 +9,9 @@
     "build": "npm run fix && npm run build-nofix",
     "build-apps": "npx eslint ./src/apps/code --fix && prettier ./src/apps/code --write && npm run build-apps-postprettier",
     "build-apps-postprettier": "/bin/bash build_apps.sh",
-    "build-d-ts": "rm -rf types/* && tsgo ./src/apps/api.ts --declaration --emitDeclarationOnly --outDir types --lib ES2015",
     "build-nofix": "rm -rf build/* && npx tsgo && echo npm run build-d-ts && npm run build-apps-postprettier && node -e \"console.log(Date.now())\" > build/date.txt",
-    "clean": "rm -rf build/*"
+    "clean": "rm -rf build/*",
+    "newenv": "git submodule init && npm run build"
   },
   "devDependencies": {
     "@eslint/js": "9.28.0",
