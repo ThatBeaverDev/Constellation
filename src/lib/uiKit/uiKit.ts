@@ -53,17 +53,17 @@ export class Renderer {
 		this.steps.push(obj);
 	};
 
-	text = (x: number, y: number, string: string) => {
+	text = (x: number, y: number, string: string, size: number = 15) => {
 		const obj: step = {
 			type: "uikitText",
-			args: [x, y, string]
+			args: [x, y, string, size]
 		};
 		this.steps.push(obj);
 	};
-	button = (x: number, y: number, string: string, leftClickCallback: Function, rightClickCallback: Function) => {
+	button = (x: number, y: number, string: string, leftClickCallback: Function, rightClickCallback: Function, size: number = 15) => {
 		const obj: step = {
 			type: "uikitButton",
-			args: [x, y, string, leftClickCallback, rightClickCallback]
+			args: [x, y, string, leftClickCallback, rightClickCallback, size]
 		};
 		this.steps.push(obj);
 	};
@@ -148,13 +148,13 @@ export class Renderer {
 			return live;
 		},
 
-		uikitText: (x = 0, y = 0, string = "Lorum Ipsum") => {
+		uikitText: (x = 0, y = 0, string = "Lorum Ipsum", size: number) => {
 			const text = document.createElement("p");
 			text.className = "uikitText";
 
 			text.id = String(window.renderID++);
 			text.innerText = string;
-			text.style.cssText = `left: ${x}px; top: ${y}px;`;
+			text.style.cssText = `left: ${x}px; top: ${y}px; font-size: ${size}px;`;
 
 			this.window.body.appendChild(text);
 			const live = document.getElementById(text.id);
@@ -162,13 +162,13 @@ export class Renderer {
 			return live;
 		},
 
-		uikitButton: (x = 0, y = 0, string = "Lorum Ipsum", leftClickCallback = () => {}, rightClickCallback = () => {}) => {
+		uikitButton: (x = 0, y = 0, string = "Lorum Ipsum", leftClickCallback = () => {}, rightClickCallback = () => {}, size: number) => {
 			const button = document.createElement("button");
 			button.className = "uikitButton";
 
 			button.id = String(window.renderID++);
 			button.innerText = string;
-			button.style.cssText = `left: ${x}px; top: ${y}px;`;
+			button.style.cssText = `left: ${x}px; top: ${y}px; font-size: ${size}px;`;
 
 			this.window.body.appendChild(button);
 			// @ts-ignore // query selector doesn't work for this since we have numbers in the ID
