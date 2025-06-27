@@ -31,6 +31,8 @@ export function getIcon(name: string): HTMLElement {
 	const icon: HTMLElement = linked.cloneNode(true);
 
 	icon.id = String(window.renderID++);
+	// @ts-expect-error
+	icon.alt = name;
 
 	return icon;
 }
