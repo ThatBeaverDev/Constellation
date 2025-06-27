@@ -211,14 +211,20 @@ document.addEventListener("keydown", (e) => {
 
 	switch (e.code) {
 		case "ArrowLeft":
+			e.preventDefault();
+
 			// Left!
 			focusWindow(focus - 1);
 			break;
 		case "ArrowRight":
+			e.preventDefault();
+
 			// Right!
 			focusWindow(focus + 1);
 			break;
 		case "KeyW":
+			e.preventDefault();
+
 			// Close!
 			if (windows.length == 1) {
 				return; // can't close the last window, sorry
