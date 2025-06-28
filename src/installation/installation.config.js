@@ -2,12 +2,6 @@
 export const folders = ["/System/CoreExecutables", "/System/CoreComponents", "/System/CoreLibraries"];
 
 export const files = {
-	// search app
-	"/build/apps/build/com.constellation.search.idx": {
-		type: "jsonFilesIndex",
-		directory: "/System/CoreExecutables/com.constellation.search"
-	},
-
 	// finder app
 	"/build/apps/build/com.constellation.finder.idx": {
 		type: "jsonFilesIndex",
