@@ -1,4 +1,4 @@
-import { Process } from "./apps/executables.js";
+import { BackgroundProcess, Process } from "./apps/executables.js";
 import { focus, windows } from "./windows.js";
 import conf from "./constellation.config.js";
 import fs from "./fs.js";
@@ -57,6 +57,16 @@ document.addEventListener("keydown", (e) => {
 
 		// insure the right main key is pressed
 		if (keyCode == cut.key) {
+			// insure the process is allowed to execute shortcuts
+			const isBackground = cut?.process instanceof BackgroundProcess;
+			const isFocused = cut?.process?.renderer?.window?.winID == focus;
+
+			const allowed = isBackground || isFocused;
+
+			if (!allowed) {
+				continue;
+			}
+
 			// loop through all the necessary modifiers to insure they are all pressed
 			let ok = true;
 			for (const i in cut.modifiers) {
@@ -80,7 +90,7 @@ document.addEventListener("keydown", (e) => {
 			}
 
 			if (ok) {
-				// run the shortcut
+				// trigger the shortcut
 				cut.process.onmessage("/System/keyboardShortcuts.js", "keyboardShortcutTrigger-" + cut.name);
 			}
 		}
