@@ -1,5 +1,6 @@
 {
   "name": "constellation",
+  "license": "GPL-3.0-only",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -19,5 +20,6 @@
     "@typescript/native-preview": "^7.0.0-dev.20250624.1",
     "eslint": "9.28.0",
     "prettier": "3.5.3"
-  }
+  },
+  "os": ["darwin", "linux"]
 }
