@@ -117,12 +117,20 @@ document.addEventListener("keydown", (event) => {
 
 	const proc = windows[focus]?.Application;
 
-	// @ts-expect-error
-	proc.keydown(event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
+	const fnc = proc.keydown;
+
+	if (typeof fnc == "function") {
+		// @ts-expect-error
+		fnc.call(proc, event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
+	}
 
 	for (const proc of processes) {
 		if (proc instanceof BackgroundProcess) {
-			proc.keydown(event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
+			const fnc = proc.keydown;
+
+			if (typeof fnc == "function") {
+				fnc.call(proc, event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
+			}
 		}
 	}
 });
@@ -131,12 +139,20 @@ document.addEventListener("keyup", (event) => {
 
 	const proc = windows[focus]?.Application;
 
-	// @ts-expect-error
-	proc.keyup(event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
+	const fnc = proc.keyup;
+
+	if (typeof fnc == "function") {
+		// @ts-expect-error
+		fnc.call(proc, event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
+	}
 
 	for (const proc of processes) {
 		if (proc instanceof BackgroundProcess) {
-			proc.keyup(event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
+			const fnc = proc.keyup;
+
+			if (typeof fnc == "function") {
+				fnc.call(proc, event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
+			}
 		}
 	}
 });
