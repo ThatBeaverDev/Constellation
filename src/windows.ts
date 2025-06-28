@@ -201,45 +201,6 @@ export const windows: Window[] = [];
 // @ts-expect-error
 window.windows = windows;
 
-export let focusKey: string = "altKey";
-
-document.addEventListener("keydown", (e) => {
-	// @ts-expect-error
-	if (e[focusKey] !== true) {
-		return;
-	}
-
-	switch (e.code) {
-		case "ArrowLeft":
-			e.preventDefault();
-
-			// Left!
-			focusWindow(focus - 1);
-			break;
-		case "ArrowRight":
-			e.preventDefault();
-
-			// Right!
-			focusWindow(focus + 1);
-			break;
-		case "KeyW":
-			e.preventDefault();
-
-			// Close!
-			if (windows.length == 1) {
-				return; // can't close the last window, sorry
-			}
-			const win = windows[focus];
-
-			win.remove();
-
-			setTimeout(() => {
-				const last = windows.length - 1;
-				focusWindow(Math.max(0, Math.min(focus, last)));
-			}, 160); // wait for animation + layoutTiling
-	}
-});
-
 let focusTime: number = 10;
 
 function getWindowOfId(id: number) {
@@ -250,7 +211,7 @@ function getWindowOfId(id: number) {
 	}
 }
 
-function focusWindow(id: number) {
+export function focusWindow(id: number) {
 	const target = getWindowOfId(id);
 
 	if (target == undefined) {
