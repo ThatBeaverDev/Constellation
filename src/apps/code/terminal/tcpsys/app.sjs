@@ -30,6 +30,11 @@ export default class terminalUI extends Application {
 		this.displayedLogs = 50;
 		this.tick = 50;
 		this.tick2 = 0;
+
+		this.registerKeyboardShortcut("Scroll Down", "ArrowDown", []);
+		this.registerKeyboardShortcut("Scroll Down (Fast)", "ArrowDown", ["ShiftLeft"]);
+		this.registerKeyboardShortcut("Scroll Up", "ArrowUp", []);
+		this.registerKeyboardShortcut("Scroll Up (Fast)", "ArrowUp", ["ShiftLeft"]);
 	}
 
 	getCommand(name) {
@@ -38,6 +43,31 @@ export default class terminalUI extends Application {
 				return () => `Terminal commands are as follows:\n- ` + Object.keys(this.cmdreg).join("\n- ");
 			default:
 				return this.cmdreg[name];
+		}
+	}
+
+	onmessage(origin, intent) {
+		switch (origin) {
+			case "/System/keyboardShortcuts.js":
+				switch (intent) {
+					case "keyboardShortcutTrigger-Scroll Down":
+						this.scroll = clamp(this.scroll - 1, 0, this.logs.length - this.displayedLogs);
+						break;
+					case "keyboardShortcutTrigger-Scroll Down (Fast)":
+						this.scroll = clamp(this.scroll - 2, 0, this.logs.length - this.displayedLogs);
+						break;
+					case "keyboardShortcutTrigger-Scroll Up":
+						this.scroll = clamp(this.scroll + 1, 0, this.logs.length - this.displayedLogs);
+						break;
+					case "keyboardShortcutTrigger-Scroll Up (Fast)":
+						this.scroll = clamp(this.scroll + 2, 0, this.logs.length - this.displayedLogs);
+						break;
+					default:
+						throw new Error("Unknown keyboard shortcut name (intent): " + intent);
+				}
+				break;
+			default:
+				console.warn("Unknown message sender: " + origin);
 		}
 	}
 
@@ -50,11 +80,7 @@ export default class terminalUI extends Application {
 
 		switch (code) {
 			case "ArrowUp":
-				this.scroll = clamp(this.scroll + speed, 0, this.logs.length - this.displayedLogs);
-				break;
 			case "ArrowDown":
-				this.scroll = clamp(this.scroll - speed, 0, this.logs.length - this.displayedLogs);
-				break;
 			case "ControlLeft":
 			case "ControlRight":
 			case "ShiftLeft":
