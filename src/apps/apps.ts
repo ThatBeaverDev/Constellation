@@ -31,6 +31,7 @@ await uikit.init();
 window.Application = Application;
 window.BackgroundProcess = BackgroundProcess;
 
+type executionFiletype = "sjs" | "js";
 
 export async function execute(directory: string) {
 	const get = async (dir: string) => {
@@ -44,16 +45,39 @@ export async function execute(directory: string) {
 	const configBlob = blobify(configSrc, "text/javascript");
 	const config = (await import(configBlob)).default;
 
-	// get the script
-	const content = await get("tcpsys/app.sjs");
+	const allowedExtensions: executionFiletype[] = ["sjs", "js"];
 
-	if (content == undefined) {
-		throw new AppInitialisationError(
-			fs.relative(directory, "tcpsys/app.[execType]") + " is empty and cannot be executed"
-		);
+	let executableDirectory: string | undefined;
+	let type: executionFiletype | undefined;
+	const tcpsys = await fs.readdir(fs.relative(directory, "tcpsys"));
+
+	// get the script
+	for (const ext of allowedExtensions) {
+		if (tcpsys.includes("app." + ext)) {
+			executableDirectory = fs.relative(directory, "tcpsys/app." + ext);
+			type = ext;
+			break;
+		}
 	}
 
-	const data = content; // use replaceAll to overrite things if needed.
+	let data: string = "";
+
+	switch (type) {
+		case "js":
+		case "sjs":
+			{
+				const content = await fs.readFile(executableDirectory);
+
+				if (content == undefined) {
+					throw new AppInitialisationError(fs.relative(directory, "tcpsys/app.[js / sjs]") + " is empty and cannot be executed");
+				}
+
+				data = content;
+			}
+			break;
+		default:
+			throw new AppInitialisationError("Type '" + type + "' is not recognised.");
+	}
 
 	// create a blob of the content
 	const blob = blobify(data, "text/javascript");
@@ -91,7 +115,7 @@ async function procExec(proc: Process) {
 document.addEventListener("keydown", (event) => {
 	//event.preventDefault()
 
-	const proc = windows[focus].Application;
+	const proc = windows[focus]?.Application;
 
 	// @ts-expect-error
 	proc.keydown(event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
@@ -106,10 +130,6 @@ document.addEventListener("keyup", (event) => {
 	//event.preventDefault()
 
 	const proc = windows[focus]?.Application;
-
-	if (proc == undefined) {
-		return;
-	}
 
 	// @ts-expect-error
 	proc.keyup(event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
