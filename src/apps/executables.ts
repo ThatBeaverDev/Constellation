@@ -8,14 +8,17 @@ export class OsAPI {
 	exec = execute;
 }
 
+export let nextPID = 0;
 export class Process {
 	constructor(directory: string) {
 		this.directory = directory;
 		this.os = new OsAPI();
+		this.id = nextPID++;
 	}
 
 	directory: string;
 	os: OsAPI;
+	readonly id: number;
 
 	executing: boolean = false;
 
