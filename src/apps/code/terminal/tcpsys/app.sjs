@@ -106,7 +106,7 @@ export default class terminalUI extends Application {
 
 		for (const i of visibleLogs) {
 			this.renderer.text(0, y, i);
-			y += 15;
+			y += 18;
 		}
 
 		y += 5;
