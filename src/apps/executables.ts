@@ -1,3 +1,4 @@
+import { registerKeyboardShortcut } from "../keyboardShortcuts.js";
 import { Renderer } from "../lib/uiKit/uiKit.js";
 import fs from "../fs.js";
 import { execute } from "./apps.js";
@@ -36,6 +37,14 @@ export class Process {
 	keyup(...any: any) {
 		any;
 	}
+
+	onmessage(...any: any) {
+		any;
+	}
+
+	registerKeyboardShortcut = (name: string, key: string, modifiers: string[]) => {
+		registerKeyboardShortcut(this, name, key, modifiers);
+	};
 }
 
 export class Application extends Process {

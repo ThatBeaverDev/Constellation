@@ -23,6 +23,7 @@ export const files = {
 	// apps system
 	"/build/apps/apps.js": "/System/CoreComponents/apps.js",
 	"/src/syslib/pathicon.sjs": "/System/CoreLibraries/pathicon.sjs",
+	"/src/syslib/keyboardUtils.sjs": "/System/CoreLibraries/keyboardUtils.sjs",
 
 	// init system
 	"/build/apps/build/com.constellation.CoreExecutable.idx": {
