@@ -3,21 +3,7 @@ import { focus, windows } from "./windows.js";
 import conf from "./constellation.config.js";
 import fs from "./fs.js";
 
-const shortcutsFile = conf.shortcutsFile;
-
-async function readShortcuts(): Promise<Object> {
-	const text = await fs.readFile(shortcutsFile);
-
-	if (text == undefined) {
-		return {};
-	}
-
-	const json = JSON.parse(text);
-
-	return json;
-}
-
-export const keyboardShortcuts: any = await readShortcuts();
+export const keyboardShortcuts: any = {};
 
 declare global {
 	interface Window {
@@ -28,38 +14,15 @@ window.keyboardShortcuts = keyboardShortcuts;
 
 type modifier = "ShiftLeft" | "ShiftRight" | "MetaLeft" | "MetaRight" | "ControlLeft" | "ControlRight" | "AltLeft" | "AltRight";
 
-type reducedKeyboardShortcut = {
+interface keyboardShortcut {
 	app: string;
 	name: string;
 	key: string;
 	modifiers: modifier[] | string[];
-};
-
-interface keyboardShortcut extends reducedKeyboardShortcut {
 	process: Process;
 }
 
-// function to store shortcuts on disk
-async function commitShortcuts() {
-	const toCommit: any = {};
-
-	for (const id in keyboardShortcuts) {
-		const cut = keyboardShortcuts[id];
-
-		const obj: reducedKeyboardShortcut = {
-			app: cut.app,
-			name: cut.name,
-			key: cut.key,
-			modifiers: cut.modifiers
-		};
-
-		toCommit[id] = obj;
-	}
-
-	await fs.writeFile(shortcutsFile, JSON.stringify(toCommit));
-}
-
-export async function registerKeyboardShortcut(process: Process, name: string, key: string, modifiers: modifier[] | string[]) {
+export function registerKeyboardShortcut(process: Process, name: string, key: string, modifiers: modifier[] | string[]) {
 	const cut: keyboardShortcut = {
 		process: process,
 		app: process.directory,
@@ -69,16 +32,12 @@ export async function registerKeyboardShortcut(process: Process, name: string, k
 	};
 
 	keyboardShortcuts[process.directory + "://" + name] = cut;
-
-	await commitShortcuts();
 }
 
-export async function updateKeyboardShortcut(id: string, key: string, modifiers: string[]) {
+export function updateKeyboardShortcut(id: string, key: string, modifiers: string[]) {
 	const k = keyboardShortcuts[id];
 	k.key = key;
 	k.modifiers = modifiers;
-
-	await commitShortcuts();
 }
 
 document.addEventListener("keydown", (e) => {
