@@ -52,6 +52,14 @@ export default class finder extends Application {
 
 		this.renderer.window.rename("Finder");
 
+		this.registerKeyboardShortcut("Scroll Down", "ArrowDown", []);
+		this.registerKeyboardShortcut("Scroll Down (Fast)", "ArrowDown", ["ShiftLeft"]);
+		this.registerKeyboardShortcut("Scroll Up", "ArrowUp", []);
+		this.registerKeyboardShortcut("Scroll Up (Fast)", "ArrowUp", ["ShiftLeft"]);
+		this.registerKeyboardShortcut("Descend Directory", "Enter", []);
+		this.registerKeyboardShortcut("Ascend Directory", "Escape", []);
+		this.registerKeyboardShortcut("Select Directory", "KeyG", ["AltLeft"]);
+
 		this.keyLocations = {
 			Constellation: "/",
 			System: "/System",
@@ -63,40 +71,40 @@ export default class finder extends Application {
 		}, 500);
 	}
 
-	async keydown(key, cmd, opt, ctrl, shift, isRepeat) {
-		if (opt) {
-			switch (key) {
-				case "KeyG":
-					// select directory prompt
-					this.cd(prompt("Select a directory"));
-					break;
-			}
-			return;
-		}
-
-		// simple keypress
-		let speed = 1;
-		if (shift) {
-			speed++;
-		}
-		switch (key) {
-			case "ArrowDown":
-				if (cmd) {
-					const obj = this.listing[this.selector];
-					this.cd(obj.path);
-					this.selector = undefined;
-				} else {
-					this.selector = clamp(this.selector + speed, 0, this.listing.length - 1);
+	onmessage(origin, intent) {
+		switch (origin) {
+			case "/System/keyboardShortcuts.js":
+				switch (intent) {
+					case "keyboardShortcutTrigger-Scroll Down":
+						this.selector = clamp(this.selector + 1, 0, this.listing.length - 1);
+						break;
+					case "keyboardShortcutTrigger-Scroll Down (Fast)":
+						this.selector = clamp(this.selector + 2, 0, this.listing.length - 1);
+						break;
+					case "keyboardShortcutTrigger-Scroll Up":
+						this.selector = clamp(this.selector - 1, 0, this.listing.length - 1);
+						break;
+					case "keyboardShortcutTrigger-Scroll Up (Fast)":
+						this.selector = clamp(this.selector - 2, 0, this.listing.length - 1);
+						break;
+					case "keyboardShortcutTrigger-Descend Directory":
+						const obj = this.listing[this.selector];
+						this.cd(obj.path);
+						this.selector = undefined;
+						break;
+					case "keyboardShortcutTrigger-Ascend Directory":
+						this.selector = 0;
+						this.cd("..");
+						break;
+					case "keyboardShortcutTrigger-Select Directory":
+						this.cd(prompt("Select a directory"));
+						break;
+					default:
+						throw new Error("Unknown keyboard shortcut name (intent): " + intent);
 				}
 				break;
-			case "ArrowUp":
-				if (cmd) {
-					await this.cd("..");
-					this.selector = 0;
-				} else {
-					this.selector = clamp(this.selector - speed, 0, this.listing.length - 1);
-				}
-				break;
+			default:
+				console.warn("Unknown message sender: " + origin);
 		}
 	}
 
@@ -116,7 +124,11 @@ export default class finder extends Application {
 			this.path = oldDir;
 			return;
 		}
+
 		this.listing = list.data;
+		if (dir !== "/") {
+			this.listing = ["..", ...this.listing];
+		}
 
 		this.listing.sort();
 
