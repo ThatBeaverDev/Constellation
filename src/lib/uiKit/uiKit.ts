@@ -324,7 +324,10 @@ export class Renderer {
 		for (const i in this.items) {
 			const item = this.items[i];
 
-			item.remove();
+			// just incase
+			if (item !== null) {
+				item.remove();
+			}
 			// @ts-ignore
 			this.items.splice(i, 1);
 		}
