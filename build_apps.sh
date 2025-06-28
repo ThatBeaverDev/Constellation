@@ -17,6 +17,9 @@ compile() {
 
     # Build Terminal
     ./tcpkg src/apps/code/terminal build/apps/build/com.constellation.terminal.idx -override=true
+
+    # Build Remapper
+    ./tcpkg src/apps/code/remapper build/apps/build/com.constellation.remapper.idx -override=true
 }
 
 daemon() {

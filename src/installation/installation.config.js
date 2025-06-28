@@ -35,5 +35,11 @@ export const files = {
 	"/build/apps/build/com.constellation.terminal.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreExecutables/com.constellation.terminal"
+	},
+
+	// remapper
+	"/build/apps/build/com.constellation.remapper.idx": {
+		type: "jsonFilesIndex",
+		directory: "/System/CoreExecutables/com.constellation.remapper"
 	}
 };
