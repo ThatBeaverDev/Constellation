@@ -4,7 +4,6 @@ type constellationConfiguration = {
 	wallpaper: string;
 	importOverrides: Object;
 	userfile: string;
-	shortcutsFile: string;
 	userDirectories: string[];
 };
 
@@ -20,7 +19,6 @@ const obj: constellationConfiguration = {
 		"/System/keybindings.js": "/build/keyboardShortcuts.js"
 	},
 	userfile: "/System/users.json",
-	shortcutsFile: "/System/shortcuts.json",
 	userDirectories: ["Desktop", "Documents", "Applications", "Media", "Notes", "Media/Music", "Media/Pictures", "Media/Videos"]
 };
 
