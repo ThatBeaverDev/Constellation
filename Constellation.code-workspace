@@ -12,6 +12,9 @@
 		"files.associations": {
 			"*.idx": "json",
 			"*.sjs": "javascript"
+		},
+		"[javascript]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode"
 		}
 	}
 }

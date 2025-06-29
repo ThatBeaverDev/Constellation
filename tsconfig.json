@@ -21,7 +21,8 @@
   ],
   "exclude": [
     "build",
-    "src/apps/code/*"
+    "src/apps/code/*",
+    "src/lib/external/*"
   ],
   "watchOptions": {
     "watchFile": "useFsEvents",
@@ -32,7 +33,8 @@
       "**/node_modules",
       "build",
       "src/apps/code/*",
-      "src/apps/build/*"
+      "src/apps/build/*",
+      "src/lib/external/isomorphicgit/*"
     ]
   }
 }
