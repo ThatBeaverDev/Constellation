@@ -138,30 +138,28 @@ export const fs = {
 	}
 };
 
-export async function include(directory: string): Promise<Object> {
-	const content = await realFS.readFile(directory);
+export async function include(location: string): Promise<Object> {
+	let url = location;
 
-	const data = modulePreScript + content;
+	let type = location.includes("://") ? "URL" : "directory";
 
-	const blob = blobify(data, "text/javascript");
+	// @ts-expect-error
+	if (conf.importOverrides[location] !== undefined) {
+		type = "URL";
+		// @ts-expect-error
+		url = conf.importOverrides[location];
+	}
 
-	return await import(blob);
-}
+	switch (type) {
+		case "directory":
+			const content = await realFS.readFile(location);
 
-export async function sysinclude(directory: string): Promise<Object> {
-	let url;
-	// @ts-ignore // no idea why these throw errors?
-	if (conf.importOverrides[directory] !== undefined) {
-		// @ts-ignore
-		url = conf.importOverrides[directory];
-	} else {
-		const content = await realFS.readFile(directory);
+			if (content == undefined) {
+				throw new ImportError("Import source is empty at '" + location + "'");
+			}
 
-		if (content == undefined) {
-			throw new ImportError("Import source is empty!");
-		}
-
-		url = blobify(content, "text/javascript");
+			url = blobify(content, "text/javascript");
+			break;
 	}
 
 	const exports = await import(url);
