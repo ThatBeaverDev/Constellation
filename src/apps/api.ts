@@ -137,8 +137,14 @@ export const fs = {
 
 	stat: async function (directory: string): Promise<fsResponse> {
 		try {
+			const stat = await realFS.stat(directory);
+
+			if (stat == undefined) {
+				throw new Error(directory + " has no file and cannot be 'statted'");
+			}
+
 			return {
-				data: await realFS.stat(directory),
+				data: stat,
 				ok: true
 			};
 		} catch (error) {
