@@ -109,7 +109,7 @@ export const fs = {
 	},
 	deleteFile: async function (directory: string): Promise<fsResponse> {
 		try {
-			await realFS.deleteFile(directory);
+			await realFS.unlink(directory);
 			return {
 				data: true,
 				ok: true
