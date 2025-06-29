@@ -36,7 +36,7 @@ window.BackgroundProcess = BackgroundProcess;
 
 type executionFiletype = "sjs" | "js";
 
-export async function execute(directory: string) {
+export async function execute(directory: string, args: any[] = []) {
 	const get = async (dir: string) => {
 		const rel = fs.relative(directory, dir);
 
@@ -92,7 +92,7 @@ export async function execute(directory: string) {
 	const Application = exports.default;
 
 	// create the process
-	const live = new Application(directory);
+	const live = new Application(directory, args);
 
 	// add to the processes list
 	processes.push(live);

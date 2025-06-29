@@ -10,27 +10,29 @@ export class OsAPI {
 
 export let nextPID = 0;
 export class Process {
-	constructor(directory: string) {
+	constructor(directory: string, args: any[]) {
 		this.directory = directory;
 		this.os = new OsAPI();
 		this.id = nextPID++;
+		this.args = args;
 	}
 
 	directory: string;
 	os: OsAPI;
 	readonly id: number;
+	args: any[];
 
 	executing: boolean = false;
 
 	// program flow
-	init(...any: any) {
-		any;
+	init(...any: any): Promise<any> {
+		return any;
 	}
-	frame(...any: any) {
-		any;
+	frame(...any: any): Promise<any> {
+		return any;
 	}
-	terminate(...any: any) {
-		any;
+	terminate(...any: any): Promise<any> {
+		return any;
 	}
 
 	// events
@@ -51,8 +53,9 @@ export class Process {
 }
 
 export class Application extends Process {
-	constructor(directory: string) {
-		super(directory);
+	constructor(directory: string, args: any[]) {
+		super(directory, args);
+		console.error(args);
 		this.renderer = new Renderer(this);
 	}
 
