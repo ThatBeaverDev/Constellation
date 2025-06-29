@@ -6,10 +6,18 @@ import { ImportError } from "../errors.js";
 
 // logging
 
-export function debug(initiator: any, text: string): undefined {}
-export function log(initiator: any, text: string): undefined {}
-export function warn(initiator: any, text: string): undefined {}
-export function error(initiator: any, text: string): undefined {}
+export function debug(initiator: string, content: any): undefined {
+	console.debug("[" + initiator + "] -", content);
+}
+export function log(initiator: string, content: any): undefined {
+	console.log("[" + initiator + "] -", content);
+}
+export function warn(initiator: string, content: any): undefined {
+	console.warn("[" + initiator + "] -", content);
+}
+export function error(initiator: string, content: any): undefined {
+	console.error("[" + initiator + "] -", content);
+}
 
 type fsResponse = {
 	data: any;
