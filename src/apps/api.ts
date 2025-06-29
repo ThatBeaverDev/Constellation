@@ -70,6 +70,8 @@ export const fs = {
 
 	createFile: async function (directory: string): Promise<fsResponse> {
 		try {
+			await expectFileType(directory, undefined);
+
 			await realFS.writeFile(directory, "");
 			return {
 				data: true,
@@ -150,6 +152,60 @@ export const fs = {
 		return realFS.relative(base, child);
 	}
 };
+
+type directoryPointType = "blockDevice" | "characterDevice" | "directory" | "FIFO" | "file" | "socket" | "symbolicLink" | undefined;
+
+const typeOfFile = async (directory: string): Promise<directoryPointType> => {
+	const stat = await fs.stat(directory);
+
+	if (!stat.ok) {
+		return undefined;
+	}
+
+	const st = stat.data;
+
+	const isBlockDevice = st.isBlockDevice();
+	const isCharacterDevice = st.isCharacterDevice();
+	const isDirectory = st.isDirectory();
+	const isFIFO = st.isFIFO();
+	const isFile = st.isFile();
+	const isSocket = st.isSocket();
+	const isSymbolicLink = st.isSymbolicLink();
+
+	if (isBlockDevice) {
+		return "blockDevice";
+	}
+	if (isCharacterDevice) {
+		return "characterDevice";
+	}
+	if (isDirectory) {
+		return "directory";
+	}
+	if (isFIFO) {
+		return "FIFO";
+	}
+	if (isFile) {
+		return "file";
+	}
+	if (isSocket) {
+		return "socket";
+	}
+	if (isSymbolicLink) {
+		return "symbolicLink";
+	}
+
+	return undefined;
+};
+const expectFileType = async (directory: string, expectedType: directoryPointType) => {
+	const fileType = await typeOfFile(directory);
+
+	if (fileType !== expectedType) {
+		throw new Error("Filetype of " + directory + " (" + fileType + ") does not match expected: " + expectedType);
+	}
+};
+
+// @ts-expect-error
+setTimeout(() => (window.abab = typeOfFile("/System")), 2500);
 
 export async function include(location: string): Promise<Object> {
 	let url = location;
