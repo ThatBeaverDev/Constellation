@@ -157,10 +157,35 @@ document.addEventListener("keyup", (event) => {
 	}
 });
 
+declare global {
+	interface Window {
+		profileNextFrame: Boolean;
+	}
+}
+
+declare global {
+	interface Console {
+		profile: Function;
+		profileEnd: Function;
+	}
+}
+
+window.profileNextFrame = false;
+
 export function run() {
+	if (window.profileNextFrame) {
+		console.profile("tick");
+	}
+
 	for (const pid in processes) {
 		const process = processes[pid];
 
 		procExec(process);
+	}
+
+	if (window.profileNextFrame) {
+		console.profileEnd("tick");
+
+		window.profileNextFrame = false;
 	}
 }
