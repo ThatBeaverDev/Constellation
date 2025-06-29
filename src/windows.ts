@@ -253,8 +253,8 @@ function layoutTiling() {
 
 window.addEventListener("resize", layoutTiling);
 
-export function newWindow(name: string, Application: Application) {
-	const win = new Window(name, Application);
+export function newWindow(title: string, ApplicationObject: Application) {
+	const win = new Window(title, ApplicationObject);
 
 	win.winID = windows.length; // assign ID before push
 	windows.push(win);
