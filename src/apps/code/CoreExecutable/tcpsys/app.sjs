@@ -1,8 +1,8 @@
-const windows = await env.sysinclude("/System/windows.js");
+const windows = await env.include("/System/windows.js");
 
 export default class initialiser extends BackgroundProcess {
 	async init() {
-		const onstart = ["/System/CoreExecutables/com.constellation.remapper" /* DO NOT COMMIT! */];
+		const onstart = ["/System/CoreExecutables/com.constellation.terminal" /* DO NOT COMMIT! */];
 
 		for (const app of onstart) {
 			this.os.exec(app);
