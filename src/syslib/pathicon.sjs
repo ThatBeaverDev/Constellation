@@ -1,6 +1,11 @@
 export async function pathIcon(directory) {
-	const stats = await module.os.fs.stat(directory);
-	const isDir = await stats.isDirectory();
+	const stats = await env.fs.stat(directory);
+
+	if (!stats.ok) {
+		return;
+	}
+
+	const isDir = await stats.data.isDirectory();
 
 	if (isDir) {
 		const name = directory.split("/").pop();
