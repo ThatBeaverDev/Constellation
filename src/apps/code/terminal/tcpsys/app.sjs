@@ -17,6 +17,8 @@ const clamp = (n, min, max) => {
 
 export default class terminalUI extends Application {
 	async init() {
+		this.ok = false;
+
 		const cmdregDir = env.fs.relative(this.directory, "./lib/cmdreg.sjs");
 		this.cmdreg = await env.include(cmdregDir);
 
@@ -35,6 +37,8 @@ export default class terminalUI extends Application {
 		this.registerKeyboardShortcut("Scroll Down (Fast)", "ArrowDown", ["ShiftLeft"]);
 		this.registerKeyboardShortcut("Scroll Up", "ArrowUp", []);
 		this.registerKeyboardShortcut("Scroll Up (Fast)", "ArrowUp", ["ShiftLeft"]);
+
+		this.ok = true;
 	}
 
 	getCommand(name) {
@@ -157,6 +161,10 @@ export default class terminalUI extends Application {
 	}
 
 	frame() {
+		if (!this.ok) {
+			return;
+		}
+
 		this.render();
 	}
 }
