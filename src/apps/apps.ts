@@ -12,8 +12,8 @@ import { AppInitialisationError, ImportError } from "../errors.js";
 declare global {
 	interface Window {
 		renderID: number;
-		Application: any;
-		BackgroundProcess: any;
+		Application: new (directory: string, args: any[]) => Application;
+		BackgroundProcess: new (directory: string, args: any[]) => BackgroundProcess;
 		sysimport: any;
 		processes: Process[];
 		env: typeof env;
