@@ -1,3 +1,20 @@
+// convert anything to a string, NICELY (no [object Object] here)
+function stringify(content) {
+	const type = typeof content;
+
+	switch (type) {
+		case "object":
+		case "Object":
+			if (content instanceof HTMLElement) {
+				return content.outerHTML;
+			}
+
+			return JSON.stringify(content);
+		default:
+			return String(content);
+	}
+}
+
 const mod = (n, modulus) => {
 	let result = n % modulus;
 	if (result / modulus < 0) result += modulus;
@@ -125,19 +142,25 @@ export default class terminalUI extends Application {
 					this.hasExecutedCommand = true;
 
 					const args = text.trim().split(" ");
-
 					const cmd = args.splice(0, 1)[0].trim();
 
 					this.logs.push(text);
 
 					const bin = this.getCommand(cmd);
-
 					if (typeof bin !== "function") {
 						this.logs.push(cmd + " is not a known or found command.");
 						return;
 					}
 
-					const logs = (await bin(this, ...args)) || "";
+					let logs;
+					try {
+						logs = (await bin(this, ...args)) || "";
+					} catch (error) {
+						logs = "<red>" + error.type + ": " + error.message + "</red>";
+					}
+					if (typeof logs !== "string") {
+						logs = stringify(logs);
+					}
 
 					if ([null, undefined, ""].includes(logs)) {
 						return;
