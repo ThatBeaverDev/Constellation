@@ -5,7 +5,7 @@ export default class initialiser extends BackgroundProcess {
 		const onstart = ["/System/CoreExecutables/com.constellation.terminal" /* DO NOT COMMIT! */];
 
 		for (const app of onstart) {
-			this.os.exec(app);
+			env.exec(app);
 		}
 
 		this.registerKeyboardShortcut("Launcher", "KeyZ", ["AltLeft"]);
