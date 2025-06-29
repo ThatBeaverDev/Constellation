@@ -1,5 +1,4 @@
 import conf from "../constellation.config.js";
-import { modulePreScript } from "./executables.js";
 import { blobify } from "../lib/blobify.js";
 import realFS from "../fs.js";
 import { execute } from "./apps.js";
