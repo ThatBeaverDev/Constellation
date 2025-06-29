@@ -1,5 +1,4 @@
 import * as installer from "./installation/index.js";
-import conf from "./constellation.config.js";
 
 import fs from "./fs.js";
 
