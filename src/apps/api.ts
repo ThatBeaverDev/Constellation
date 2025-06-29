@@ -41,7 +41,21 @@ export const fs = {
 	},
 	deleteDirectory: async function (directory: string): Promise<fsResponse> {
 		try {
-			await realFS.rmdir(directory);
+			let err: Error | undefined;
+			await realFS.rmdir(directory, (e: Error) => {
+				err = e;
+			});
+
+			if (err !== undefined && err !== null) {
+				// @ts-expect-error
+				switch (err.code) {
+					case "ENOTEMPTY":
+						throw new Error("Directory is not empty!");
+					default:
+						throw err;
+				}
+			}
+
 			return {
 				data: true,
 				ok: true
