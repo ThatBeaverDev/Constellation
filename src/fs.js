@@ -38,6 +38,7 @@ BrowserFS.configure(
 );
 
 const fs = BrowserFS.BFSRequire("fs");
+window.rawFS = fs;
 
 const writeFile = async (directory, content) => {
 	let written = false;

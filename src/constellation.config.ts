@@ -16,7 +16,9 @@ const obj: constellationConfiguration = {
 		"/System/windows.js": "/build/windows.js",
 		"/System/uiKit.js": "/build/lib/uiKit/uiKit.js",
 		"/System/executables.js": "/build/apps/executables.js",
-		"/System/keybindings.js": "/build/keyboardShortcuts.js"
+		"/System/keybindings.js": "/build/keyboardShortcuts.js",
+		"/System/CoreLibraries/fs.js": "/build/fs.js",
+		"/System/CoreLibraries/srcFS.js": "/build/lib/external/browserfs.js"
 	},
 	userfile: "/System/users.json",
 	userDirectories: ["Desktop", "Documents", "Applications", "Media", "Notes", "Media/Music", "Media/Pictures", "Media/Videos"]
