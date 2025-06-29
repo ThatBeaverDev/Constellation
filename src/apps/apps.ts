@@ -7,6 +7,8 @@ import * as env from "./api.js";
 import { focus, windows } from "../windows.js";
 import { AppInitialisationError, ImportError } from "../errors.js";
 
+(globalThis as any).env = env;
+
 declare global {
 	interface Window {
 		renderID: number;
@@ -14,11 +16,12 @@ declare global {
 		BackgroundProcess: any;
 		sysimport: any;
 		processes: Process[];
-		env: Object;
+		env: typeof env;
 		windows: Window[];
 	}
 }
 window.env = env;
+(window as any).env = window.env;
 
 export const processes: Process[] = [];
 window.processes = processes;
