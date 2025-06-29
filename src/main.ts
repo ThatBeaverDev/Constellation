@@ -34,6 +34,8 @@ String.prototype.textBeforeLast = function (before) {
 };
 
 async function main() {
+	const testMode = new URL(window.location.href).searchParams.get("test") == "true";
+
 	await windows.init();
 
 	const firstBoot = (await fs.readFile("/sysarc.json")) == undefined;
@@ -44,6 +46,12 @@ async function main() {
 	if (isDev) {
 		log.debug("core:main", "System in devmode: registering developer user");
 		await users.mkusr("Developer", "dev");
+	}
+
+	if (testMode) {
+		const test = await import("./tests/index.js");
+
+		await test.default();
 	}
 
 	await apps.execute("/System/CoreExecutables/com.constellation.CoreExecutable");
