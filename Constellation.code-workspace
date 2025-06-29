@@ -16,5 +16,10 @@
 		"[javascript]": {
 			"editor.defaultFormatter": "esbenp.prettier-vscode"
 		}
+	},
+	"extensions": {
+		"recommendations": [
+			"esbenp.prettier-vscode"
+		]
 	}
 }
