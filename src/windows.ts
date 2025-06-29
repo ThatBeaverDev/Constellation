@@ -1,4 +1,3 @@
-import fs from "./fs.js";
 import { getIcon } from "./lib/lucide.js";
 import conf from "./constellation.config.js";
 import { Application } from "./apps/executables.js";
