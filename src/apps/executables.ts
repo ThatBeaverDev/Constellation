@@ -64,18 +64,3 @@ export class Application extends Process {
 }
 
 export class BackgroundProcess extends Process {}
-
-const selfURI = new URL("/build/apps/executables.js", window.location.href).href;
-const fsURI = new URL("/build/fs.js", window.location.href).href;
-
-export const modulePreScript = `// module prescript inserted by the runner - this allows your module to function!
-import { OsAPI } from "${selfURI}";
-import fs from "${fsURI}";
-
-const module = {};
-module.os = new OsAPI();
-module.fs = fs
-
-// end of prescript!
-
-`;
