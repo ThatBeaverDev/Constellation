@@ -120,6 +120,29 @@ export class Renderer {
 		this.steps.push(obj);
 	};
 
+	textarea = (
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		callbacks = {
+			edit: () => {},
+			keypresss: () => {}
+		}
+	) => {
+		if (this.textboxExists == true) {
+			throw new UIError("UI cannot have more than one textbox.");
+		}
+
+		this.textboxExists = true;
+
+		const obj: step = {
+			type: "uikitTextarea",
+			args: [x, y, width, height, callbacks]
+		};
+		this.steps.push(obj);
+	};
+
 	getTextWidth = getTextWidth;
 	setWindowIcon = (name: string) => {
 		const icon = getIcon(name);
@@ -289,6 +312,21 @@ export class Renderer {
 
 			this.window.body.appendChild(bar);
 			const live = document.getElementById(bar.id);
+
+			return live;
+		},
+
+		uikitTextarea: (x: number = 0, y: number = 0, width: number = 100, height: number = 50) => {
+			const area = document.createElement("textarea");
+			area.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;`;
+			area.id = String(window.renderID++);
+			area.className = "uikitTextarea";
+
+			this.window.body.appendChild(area);
+			// @ts-expect-error
+			const live: HTMLTextAreaElement = document.getElementById(area.id);
+
+			if (focus == this.window.winID) live.focus();
 
 			return live;
 		}
