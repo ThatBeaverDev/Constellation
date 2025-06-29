@@ -38,7 +38,7 @@ export default class remapper extends Application {
 	}
 
 	async refresh() {
-		const keys = await env.sysinclude("/System/keybindings.js");
+		const keys = await env.include("/System/keybindings.js");
 
 		this.keys = keys.keyboardShortcuts;
 		this.updateKeyboardShortcut = keys.updateKeyboardShortcut;
@@ -113,6 +113,11 @@ export default class remapper extends Application {
 	}
 
 	frame() {
+		// insure app can't break itself by not waiting
+		if (this.arr == undefined) {
+			return;
+		}
+
 		this.renderer.clear();
 		this.selector = clamp(this.selector, 0, this.arr.length);
 
