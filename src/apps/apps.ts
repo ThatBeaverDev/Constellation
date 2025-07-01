@@ -100,6 +100,26 @@ export async function execute(directory: string, args: any[] = []) {
 	await live.init();
 }
 
+async function terminate(proc: Process, isDueToCrash: Boolean = false) {
+	const idx = processes.indexOf(proc);
+
+	if (!isDueToCrash) {
+		try {
+			await proc.terminate();
+		} catch {}
+	}
+
+	// @ts-expect-error
+	if (proc.renderer !== undefined) {
+		// @ts-expect-error
+		proc.renderer.window.remove();
+	}
+
+	processes.splice(idx, 1);
+}
+
+let popupDirectory = "/System/CoreExecutables/com.constellation.popup";
+
 async function procExec(proc: Process) {
 	try {
 		if (proc.executing == true) {
@@ -111,7 +131,13 @@ async function procExec(proc: Process) {
 		proc.executing = false;
 	} catch (e) {
 		console.error(e);
-		// do something? not sure what yet.
+		const popup = await env.fs.readFile(popupDirectory + "/config.js");
+
+		if (popup.data !== undefined) {
+			await execute(popupDirectory, ["error", "Application Error", "Application at " + proc.directory + " has crashed.", e]);
+		}
+
+		await terminate(proc);
 	}
 }
 
