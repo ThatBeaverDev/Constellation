@@ -1,4 +1,4 @@
-import { focus, newWindow, Window } from "../../windows.js";
+import { focus, newWindow, Window } from "../../windows/windows.js";
 import "./favicon.js";
 import { getIcon } from "../lucide.js";
 import { getTextWidth } from "./calcWidth.js";
@@ -45,10 +45,10 @@ export class Renderer {
 	private textboxExists: Boolean = false;
 	textBoxValue: string = "";
 
-	icon = (x: number = 0, y: number = 0, name: string = "circle-help") => {
+	icon = (x: number = 0, y: number = 0, name: string = "circle-help", scale: number = 1) => {
 		const obj: step = {
 			type: "uikitIcon",
-			args: [x, y, name]
+			args: [x, y, name, scale]
 		};
 		this.steps.push(obj);
 	};
@@ -159,11 +159,11 @@ export class Renderer {
 	private textboxElem: HTMLInputElement | undefined;
 	private textboxValue: string = "";
 	private creators = {
-		uikitIcon: (x = 0, y = 0, name = "circle-help") => {
+		uikitIcon: (x = 0, y = 0, name = "circle-help", scale = 1) => {
 			const icon = getIcon(name);
 
 			icon.id = String(window.renderID++);
-			icon.style.cssText = `left: ${x}px; top: ${y}px;`;
+			icon.style.cssText = `left: ${x}px; top: ${y}px; width: ${24 * scale}px; height: ${24 * scale}px;`;
 
 			this.window.body.appendChild(icon);
 			const live = document.getElementById(icon.id);
