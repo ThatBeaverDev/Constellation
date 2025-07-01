@@ -36,4 +36,7 @@ export const files = {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreExecutables/com.constellation.remapper"
 	}
+	// windowing files
+	"/src/windows/tiling.css": "/System/windows/tiling.css",
+	"/src/windows/floating.css": "/System/windows/floating.css"
 };

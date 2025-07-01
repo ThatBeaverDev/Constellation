@@ -1,5 +1,5 @@
 import { BackgroundProcess, Process } from "./apps/executables.js";
-import { focus, windows } from "./windows.js";
+import { focus, windows } from "./windows/windows.js";
 import conf from "./constellation.config.js";
 import fs from "./fs.js";
 

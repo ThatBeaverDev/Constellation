@@ -1,0 +1,9 @@
+.windowContainer {
+	transition:
+		left var(--window-transition-duration) ease-in-out,
+		top var(--window-transition-duration) ease-in-out,
+		width var(--window-transition-duration) ease-in-out,
+		height var(--window-transition-duration) ease-in-out,
+		opacity var(--window-transition-duration) ease-in-out,
+		z-index var(--window-transition-duration) ease-in-out;
+}

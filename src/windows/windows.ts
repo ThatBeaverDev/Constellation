@@ -1,6 +1,6 @@
-import { getIcon } from "./lib/lucide.js";
-import conf from "./constellation.config.js";
-import { Application } from "./apps/executables.js";
+import { getIcon } from "../lib/lucide.js";
+import conf from "../constellation.config.js";
+import { Application } from "../apps/executables.js";
 
 // variables
 const vars = {
@@ -24,13 +24,56 @@ document.body.appendChild(style);
 
 // windowing
 export const EDGE_THRESHOLD = 8;
+export let windowTiling = false;
 
 export const minHeight = 25;
 export const minWidth = 100;
 
 export let focus: any;
+export let target: Window | undefined = undefined;
 
 export function init() {}
+
+let diffX: number = 0;
+let diffY: number = 0;
+let oldX: number;
+let oldY: number;
+
+function clamp(n: number, min: number, max: number) {
+	if (n < min) {
+		return min;
+	}
+	if (max < n) {
+		return max;
+	}
+	return n;
+}
+
+// event listeners
+window.addEventListener("mousemove", (e) => {
+	if (windowTiling) return;
+	if (diffX !== 0 && diffY !== 0) return; // insure the dragged window has recieved the movement before resetting it
+
+	const x = e.clientX;
+	const y = e.clientY;
+
+	if (oldX == undefined) oldX = x;
+	if (oldY == undefined) oldY = y;
+
+	diffX = x - oldX;
+	diffY = y - oldY;
+
+	oldX = x;
+	oldY = y;
+});
+window.addEventListener("mousedown", (e) => {
+	diffX = 0;
+	diffY = 0;
+}); // stop the first drag from snapping to the top left
+window.addEventListener("mouseup", (e) => (target = undefined)); // stop the dragging
+window.addEventListener("resize", (e) => {
+	updateWindows();
+});
 
 let winID = 0;
 export class Window {
@@ -82,7 +125,8 @@ export class Window {
 		c.dataset.top = String(top);
 		this.container.innerHTML = this.header.outerHTML + this.body.outerHTML;
 
-		this.reposition();
+		this.move(left, top);
+		this.resize(width, height);
 
 		document.body.appendChild(this.container);
 
@@ -92,8 +136,30 @@ export class Window {
 		this.title = document.getElementById(this.title.id)!;
 		this.iconDiv = document.getElementById(this.iconDiv.id)!;
 
+		this.header.addEventListener("mousedown", (e) => {
+			target = this;
+		});
+		this.container.addEventListener("mousedown", (e) => {
+			if (!windowTiling) {
+				focusWindow(this.winID);
+			}
+		});
+
 		const icon = getIcon("app-window-mac");
 		this.setIcon(icon);
+
+		this.resizeObserver = new ResizeObserver(() => {
+			const widthPx = this.container.style.width;
+			const heightPx = this.container.style.height;
+
+			const width = Number(widthPx.substring(0, widthPx.length - 2));
+			const height = Number(heightPx.substring(0, heightPx.length - 2));
+
+			this.resize(width, height);
+			this.move(this.position.left, this.position.top);
+		});
+
+		this.resizeObserver.observe(this.container);
 	}
 
 	name: string;
@@ -105,15 +171,13 @@ export class Window {
 	mouseState: any;
 	winID: number;
 	Application: Application;
+	resizeObserver: ResizeObserver;
 
 	reposition() {
 		const c = this.container;
 
 		const width = c.dataset.width + "px";
 		const height = c.dataset.height + "px";
-
-		this.dimensions.width = Number(c.dataset.width);
-		this.dimensions.height = Number(c.dataset.height);
 
 		const left = c.dataset.left + "px";
 		const top = c.dataset.top + "px";
@@ -134,14 +198,25 @@ export class Window {
 	}
 
 	move(x = 0, y = 0) {
-		this.container.dataset.left = String(x);
-		this.container.dataset.top = String(y);
+		const clamped = {
+			x: clamp(x, 0, window.innerWidth - this.dimensions.width),
+			y: clamp(y, 0, window.innerHeight - this.dimensions.height)
+		};
+
+		this.container.dataset.left = String(clamped.x);
+		this.container.dataset.top = String(clamped.y);
+
+		this.position.left = x;
+		this.position.top = y;
 		this.reposition();
 	}
 
 	resize(width = 100, height = 100) {
-		this.container.dataset.width = String(width);
-		this.container.dataset.height = String(height);
+		//const clamped_width = clamp(width, 50, window.innerWidth);
+		//const clamped_height = clamp(height, 50, window.innerHeight);
+
+		this.container.dataset.width = String(/*clamped_*/ width);
+		this.container.dataset.height = String(/*clamped_*/ height);
 
 		this.dimensions.width = width;
 		this.dimensions.height = height;
@@ -152,6 +227,10 @@ export class Window {
 	dimensions = {
 		width: 0,
 		height: 0
+	};
+	position = {
+		left: 0,
+		top: 0
 	};
 
 	rename(name: string) {
@@ -165,7 +244,6 @@ export class Window {
 		this.iconDiv.innerHTML = element.outerHTML;
 	}
 
-	// Modify Window.remove() to trigger layout update:
 	remove() {
 		// animate the window's removal
 		this.container.animate(
@@ -189,7 +267,7 @@ export class Window {
 			// Reassign winIDs
 			windows.forEach((win, i) => (win.winID = i));
 
-			layoutTiling();
+			updateWindows();
 		};
 
 		setTimeout(del, 150);
@@ -232,7 +310,16 @@ export function focusWindow(id: number) {
 }
 
 // Add this function anywhere appropriate (e.g., near `newWindow`)
-function layoutTiling() {
+function updateWindows() {
+	windows.forEach((win, index) => {
+		win.container.style.resize = windowTiling ? "none" : "both";
+
+		win.reposition();
+	});
+
+	// window tiling features
+	if (!windowTiling) return;
+
 	const cols = Math.ceil(Math.sqrt(windows.length));
 	const rows = Math.ceil(windows.length / cols);
 
@@ -251,7 +338,7 @@ function layoutTiling() {
 	});
 }
 
-window.addEventListener("resize", layoutTiling);
+window.addEventListener("resize", updateWindows);
 
 export function newWindow(title: string, ApplicationObject: Application) {
 	const win = new Window(title, ApplicationObject);
@@ -261,10 +348,64 @@ export function newWindow(title: string, ApplicationObject: Application) {
 
 	focusWindow(win.winID);
 
-	layoutTiling();
+	updateWindows();
 
 	return {
 		id: win.winID,
 		data: win
 	};
 }
+
+let lastKnownWindowMode: boolean | undefined; // undefined so that we definetly initialise the mode we are in.
+export function reapplyStyles() {
+	lastKnownWindowMode = undefined;
+}
+
+const styleElem = document.createElement("style");
+styleElem.id = String(window.renderID++);
+
+document.body.appendChild(styleElem);
+const live = document.getElementById(styleElem.id)!;
+
+async function updateLiveStyling() {
+	const styleType = windowTiling ? "tiling" : "floating";
+
+	console.debug("Loading windowing CSS for mode: " + styleType);
+
+	const css = await env.fs.readFile("/System/windows/" + styleType + ".css");
+
+	if (!css.ok) {
+		return;
+	}
+	if (css.data == undefined) {
+		return;
+	}
+
+	console.debug("CSS retrieved successfully for mode: " + styleType);
+
+	live.textContent = css.data;
+
+	updateWindows();
+}
+
+setInterval(() => {
+	// @ts-expect-error
+	windowTiling = window.tilingMode || false;
+
+	if (lastKnownWindowMode !== windowTiling) {
+		updateLiveStyling();
+		lastKnownWindowMode = windowTiling;
+	}
+
+	if (target !== undefined) {
+		const pos = structuredClone(target.position);
+
+		pos.left += diffX;
+		pos.top += diffY;
+
+		target.move(pos.left, pos.top);
+	}
+
+	diffX = 0;
+	diffY = 0;
+});

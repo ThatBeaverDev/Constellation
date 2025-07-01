@@ -4,7 +4,7 @@ import fs from "./fs.js";
 
 import { isDev } from "./lib/isDev.js";
 import * as apps from "./apps/apps.js";
-import * as windows from "./windows.js";
+import * as windows from "./windows/windows.js";
 import * as users from "./lib/users.js";
 import * as log from "./lib/logging.js";
 
