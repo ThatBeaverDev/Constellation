@@ -1,6 +1,6 @@
 export default {
 	name: "CoreExecutable",
-	description: "The Top bar for Constellation, used to manage apps and the system in general.",
+	description: "Constellation's initialisation process, used to start the system.",
 	category: "Productivity",
 	author: "ThatBeaverDev",
 	version: 1
