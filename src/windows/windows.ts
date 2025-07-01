@@ -1,6 +1,7 @@
 import { getIcon } from "../lib/lucide.js";
 import conf from "../constellation.config.js";
 import { Application } from "../apps/executables.js";
+import { terminate } from "../apps/apps.js";
 
 // variables
 const vars = {
@@ -24,7 +25,13 @@ document.body.appendChild(style);
 
 // windowing
 export const EDGE_THRESHOLD = 8;
-export let windowTiling = false;
+export let windowTiling = true;
+
+export function setWindowTilingMode(enabled: boolean) {
+	if (typeof windowTiling !== "boolean") throw new Error("input was not of type boolean.");
+
+	windowTiling = enabled;
+}
 
 export const minHeight = 25;
 export const minWidth = 100;
@@ -75,6 +82,24 @@ window.addEventListener("resize", (e) => {
 	updateWindows();
 });
 
+function windowButton(elem: HTMLElement, svg: string, scale: number = 1) {
+	elem.className = "windowButton";
+
+	const icon = getIcon(svg);
+	icon.style.width = `calc(100% * ${scale})`;
+	icon.style.height = `calc(100% * ${scale})`;
+
+	const percent = Math.abs(100 - 100 * scale) / 2;
+
+	icon.style.left = `${percent}%`;
+	icon.style.top = `${percent}%`;
+
+	elem.innerHTML = icon.outerHTML;
+	elem.id = String(window.renderID++);
+
+	return elem;
+}
+
 let winID = 0;
 export class Window {
 	constructor(name: string, Application: Application) {
@@ -103,11 +128,19 @@ export class Window {
 		this.iconDiv.style.width = "25px";
 		this.iconDiv.style.height = "25px";
 
+		this.closeButton = windowButton(document.createElement("div"), "x");
+		this.maximiseButton = windowButton(document.createElement("div"), "maximize", 0.75);
+
+		this.buttons = document.createElement("div");
+		this.buttons.id = String(window.renderID++);
+		this.buttons.className = "windowButtons";
+		this.buttons.innerHTML = this.closeButton.outerHTML + this.maximiseButton.outerHTML;
+
 		this.header = document.createElement("div");
 		const h = this.header;
 		h.className = "windowHeader";
 		h.id = String(window.renderID++);
-		h.innerHTML = this.iconDiv.outerHTML + this.title.outerHTML;
+		h.innerHTML = this.iconDiv.outerHTML + this.title.outerHTML + this.buttons.outerHTML;
 
 		this.body = document.createElement("div");
 		const b = this.body;
@@ -136,6 +169,9 @@ export class Window {
 		this.title = document.getElementById(this.title.id)!;
 		this.iconDiv = document.getElementById(this.iconDiv.id)!;
 
+		this.closeButton = document.getElementById(this.closeButton.id)!;
+		this.maximiseButton = document.getElementById(this.maximiseButton.id)!;
+
 		this.header.addEventListener("mousedown", (e) => {
 			target = this;
 		});
@@ -143,6 +179,11 @@ export class Window {
 			if (!windowTiling) {
 				focusWindow(this.winID);
 			}
+		});
+
+		// buttons
+		this.closeButton.addEventListener("mousedown", (e) => {
+			terminate(this.Application);
 		});
 
 		const icon = getIcon("app-window-mac");
@@ -166,6 +207,9 @@ export class Window {
 	container: HTMLElement;
 	body: HTMLElement;
 	header: HTMLElement;
+	buttons: HTMLElement;
+	closeButton: HTMLElement;
+	maximiseButton: HTMLElement;
 	title: HTMLElement;
 	iconDiv: HTMLElement;
 	mouseState: any;
@@ -212,11 +256,8 @@ export class Window {
 	}
 
 	resize(width = 100, height = 100) {
-		//const clamped_width = clamp(width, 50, window.innerWidth);
-		//const clamped_height = clamp(height, 50, window.innerHeight);
-
-		this.container.dataset.width = String(/*clamped_*/ width);
-		this.container.dataset.height = String(/*clamped_*/ height);
+		this.container.dataset.width = String(width);
+		this.container.dataset.height = String(height);
 
 		this.dimensions.width = width;
 		this.dimensions.height = height;
@@ -310,9 +351,22 @@ export function focusWindow(id: number) {
 }
 
 // Add this function anywhere appropriate (e.g., near `newWindow`)
-function updateWindows() {
+function updateWindows(newTilingConfig: boolean = false) {
+	let x = 0;
+	let y = 0;
 	windows.forEach((win, index) => {
 		win.container.style.resize = windowTiling ? "none" : "both";
+
+		if (newTilingConfig == true && windowTiling == false) {
+			win.move(x, y);
+			win.resize(window.innerWidth / windows.length, window.innerHeight / windows.length);
+
+			const deltaX = window.innerWidth / windows.length;
+			const deltaY = window.innerHeight / windows.length;
+
+			x += deltaX;
+			y += deltaY;
+		}
 
 		win.reposition();
 	});
@@ -338,7 +392,7 @@ function updateWindows() {
 	});
 }
 
-window.addEventListener("resize", updateWindows);
+window.addEventListener("resize", () => updateWindows());
 
 export function newWindow(title: string, ApplicationObject: Application) {
 	const win = new Window(title, ApplicationObject);
@@ -368,30 +422,35 @@ document.body.appendChild(styleElem);
 const live = document.getElementById(styleElem.id)!;
 
 async function updateLiveStyling() {
-	const styleType = windowTiling ? "tiling" : "floating";
+	const fnc = async () => {
+		const styleType = windowTiling ? "tiling" : "floating";
 
-	console.debug("Loading windowing CSS for mode: " + styleType);
+		console.debug("Loading windowing CSS for mode: " + styleType);
 
-	const css = await env.fs.readFile("/System/windows/" + styleType + ".css");
+		const css = await env.fs.readFile("/System/windows/" + styleType + ".css");
 
-	if (!css.ok) {
-		return;
+		if (!css.ok) {
+			return;
+		}
+		if (css.data == undefined) {
+			return;
+		}
+
+		console.debug("CSS retrieved successfully for mode: " + styleType);
+
+		live.textContent = css.data;
+	};
+
+	if (windowTiling) {
+		await fnc();
+	} else {
+		setTimeout(fnc, 500);
 	}
-	if (css.data == undefined) {
-		return;
-	}
 
-	console.debug("CSS retrieved successfully for mode: " + styleType);
-
-	live.textContent = css.data;
-
-	updateWindows();
+	updateWindows(true);
 }
 
 setInterval(() => {
-	// @ts-expect-error
-	windowTiling = window.tilingMode || false;
-
 	if (lastKnownWindowMode !== windowTiling) {
 		updateLiveStyling();
 		lastKnownWindowMode = windowTiling;

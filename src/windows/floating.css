@@ -1,0 +1,7 @@
+.windowHeader {
+	cursor: grab;
+}
+
+.windowHeader:active {
+	cursor: grabbing;
+}
