@@ -42,8 +42,7 @@ export default class terminalUI extends Application {
 		this.renderer.window.rename("Terminal");
 		this.renderer.setWindowIcon("square-terminal");
 		this.logs = [];
-		this.originalDirectory = String(this.directory);
-		this.directory = "/";
+		this.terminalPath = "/";
 
 		this.scroll = 0;
 		this.displayedLogs = 50;
