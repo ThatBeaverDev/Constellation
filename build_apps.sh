@@ -17,6 +17,9 @@ compile() {
 
     # Build Remapper
     ./tcpkg src/apps/code/remapper build/apps/build/com.constellation.remapper.idx -override=true
+
+    # Build Popup
+    ./tcpkg src/apps/code/popup build/apps/build/com.constellation.popup.idx -override=true
 }
 
 daemon() {
