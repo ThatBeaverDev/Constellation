@@ -16,6 +16,8 @@ export const files = {
 
 	// apps system
 	"/build/apps/apps.js": "/System/CoreComponents/apps.js",
+
+	// libraries
 	"/src/syslib/pathicon.sjs": "/System/CoreLibraries/pathicon.sjs",
 	"/src/syslib/keyboardUtils.sjs": "/System/CoreLibraries/keyboardUtils.sjs",
 
@@ -36,6 +38,12 @@ export const files = {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreExecutables/com.constellation.remapper"
 	}
+	// Popup
+	"/build/apps/build/com.constellation.popup.idx": {
+		type: "jsonFilesIndex",
+		directory: "/System/CoreExecutables/com.constellation.popup"
+	},
+
 	// windowing files
 	"/src/windows/tiling.css": "/System/windows/tiling.css",
 	"/src/windows/floating.css": "/System/windows/floating.css"
