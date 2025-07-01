@@ -217,8 +217,11 @@ body {
 }
 
 .windowButtons {
+	position: absolute;
+	left: calc(50% - var(--window-buttons-padding));
+
 	width: calc(50% - var(--window-buttons-padding));
-	height: 100%;
+	height: calc(100% - (var(--window-buttons-padding) * 2));
 
 	padding: var(--window-buttons-padding);
 }

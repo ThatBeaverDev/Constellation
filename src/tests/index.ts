@@ -1,9 +1,14 @@
 import * as fs from "./fs.js";
+import * as applications from "./applications.js";
 
 const tests: any = {
 	filesystemTests: {
 		names: fs.testNames,
 		tests: fs.default
+	},
+	applicationsTests: {
+		names: applications.testNames,
+		tests: applications.default
 	}
 };
 

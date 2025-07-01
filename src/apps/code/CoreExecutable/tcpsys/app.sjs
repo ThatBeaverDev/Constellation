@@ -14,6 +14,7 @@ export default class initialiser extends BackgroundProcess {
 		this.registerKeyboardShortcut("Focus Left (Tiling)", "ArrowLeft", ["AltLeft"]);
 		this.registerKeyboardShortcut("Focus Right (Tiling)", "ArrowRight", ["AltLeft"]);
 		this.registerKeyboardShortcut("Close Window", "KeyW", ["AltLeft"]);
+		this.registerKeyboardShortcut("Toggle Window Tiling", "KeyT", ["AltLeft", "ShiftLeft"]);
 	}
 
 	onmessage(origin, intent) {
@@ -51,6 +52,12 @@ export default class initialiser extends BackgroundProcess {
 							const last = windows.windows.length - 1;
 							windows.focusWindow(Math.max(0, Math.min(windows.focus, last)));
 						}, 160); // wait for animation + layoutTiling
+						break;
+					case "keyboardShortcutTrigger-Toggle Window Tiling":
+						// Toggle tiling
+						const tiling = windows.windowTiling;
+
+						windows.setWindowTilingMode(!tiling);
 						break;
 
 					default:
