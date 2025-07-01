@@ -100,7 +100,7 @@ export async function execute(directory: string, args: any[] = []) {
 	await live.init();
 }
 
-async function terminate(proc: Process, isDueToCrash: Boolean = false) {
+export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
 	const idx = processes.indexOf(proc);
 
 	if (!isDueToCrash) {
@@ -145,6 +145,7 @@ document.addEventListener("keydown", (event) => {
 	//event.preventDefault()
 
 	const proc = windows[focus]?.Application;
+	if (proc == undefined) return;
 
 	const fnc = proc.keydown;
 
@@ -167,6 +168,7 @@ document.addEventListener("keyup", (event) => {
 	//event.preventDefault()
 
 	const proc = windows[focus]?.Application;
+	if (proc == undefined) return;
 
 	const fnc = proc.keyup;
 
