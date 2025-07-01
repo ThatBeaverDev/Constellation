@@ -13,7 +13,7 @@ const obj: constellationConfiguration = {
 	wallpaper: "/pics/Sahara Night Sky.jpg",
 	importOverrides: {
 		"/System/apps.js": "/build/apps/apps.js",
-		"/System/windows.js": "/build/windows.js",
+		"/System/windows.js": "/build/windows/windows.js",
 		"/System/uiKit.js": "/build/lib/uiKit/uiKit.js",
 		"/System/executables.js": "/build/apps/executables.js",
 		"/System/keybindings.js": "/build/keyboardShortcuts.js",

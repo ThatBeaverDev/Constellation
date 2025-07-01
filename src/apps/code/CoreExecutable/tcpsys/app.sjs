@@ -11,8 +11,8 @@ export default class initialiser extends BackgroundProcess {
 		this.registerKeyboardShortcut("Launcher", "KeyZ", ["AltLeft"]);
 		this.registerKeyboardShortcut("Remap Shortcuts", "KeyX", ["AltLeft"]);
 		// windows
-		this.registerKeyboardShortcut("Focus Left", "ArrowLeft", ["AltLeft"]);
-		this.registerKeyboardShortcut("Focus Right", "ArrowRight", ["AltLeft"]);
+		this.registerKeyboardShortcut("Focus Left (Tiling)", "ArrowLeft", ["AltLeft"]);
+		this.registerKeyboardShortcut("Focus Right (Tiling)", "ArrowRight", ["AltLeft"]);
 		this.registerKeyboardShortcut("Close Window", "KeyW", ["AltLeft"]);
 	}
 
@@ -27,11 +27,13 @@ export default class initialiser extends BackgroundProcess {
 						env.exec("/System/CoreExecutables/com.constellation.remapper");
 						break;
 					// windows shortcuts
-					case "keyboardShortcutTrigger-Focus Left":
+					case "keyboardShortcutTrigger-Focus Left (Tiling)":
+						if (!windows.windowTiling) break;
 						// Left!
 						windows.focusWindow(windows.focus - 1);
 						break;
-					case "keyboardShortcutTrigger-Focus Right":
+					case "keyboardShortcutTrigger-Focus Right (Tiling)":
+						if (!windows.windowTiling) break;
 						// Right!
 						windows.focusWindow(windows.focus + 1);
 						break;
