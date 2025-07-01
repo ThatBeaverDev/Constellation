@@ -1,17 +1,17 @@
 export async function cd(parent, directory = "~") {
-	const target = env.fs.relative(parent.directory, directory);
+	const target = env.fs.relative(parent.terminalPath, directory);
 
 	try {
 		await ls(parent, target);
 
-		parent.directory = target;
+		parent.terminalPath = target;
 	} catch (e) {
 		return directory + " is not a valid directory!";
 	}
 }
 
 export function pwd(parent) {
-	return parent.directory;
+	return parent.terminalPath;
 }
 
 export function clear(parent) {
@@ -20,7 +20,7 @@ export function clear(parent) {
 
 // fs operations
 export async function ls(parent, directory = ".") {
-	const dir = env.fs.relative(parent.directory, directory);
+	const dir = env.fs.relative(parent.terminalPath, directory);
 
 	const list = await env.fs.listDirectory(dir);
 
@@ -35,7 +35,7 @@ export async function ls(parent, directory = ".") {
 }
 
 export async function cat(parent, directory) {
-	const rel = env.fs.relative(parent.directory, directory);
+	const rel = env.fs.relative(parent.terminalPath, directory);
 
 	const resp = await env.fs.readFile(rel);
 
@@ -49,7 +49,7 @@ export async function cat(parent, directory) {
 }
 
 export async function touch(parent, directory) {
-	const rel = env.fs.relative(parent.directory, directory);
+	const rel = env.fs.relative(parent.terminalPath, directory);
 
 	const resp = await env.fs.createFile(rel);
 
@@ -110,7 +110,7 @@ async function treeWalk(directory, prefix, maxDepth, depth, counts) {
 }
 
 export async function tree(parent, directory = ".") {
-	const dir = env.fs.relative(parent.directory, directory);
+	const dir = env.fs.relative(parent.terminalPath, directory);
 
 	let result = dir + "\n";
 
