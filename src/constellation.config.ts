@@ -7,10 +7,17 @@ type constellationConfiguration = {
 	userDirectories: string[];
 };
 
+const isLocalhost = window.location.hostname == "localhost";
+const baseWallpaperURL = isLocalhost ? "/pics/Originals/" : "/pics/";
+
+if (isLocalhost) {
+	console.log("localhost detected - using 4K wallpapers.");
+}
+
 const obj: constellationConfiguration = {
 	version: "25.6.1a",
 	keyword: "Sahara",
-	wallpaper: "/pics/Sahara Night Sky.jpg",
+	wallpaper: baseWallpaperURL + "Walid Ahmad - Desert Night.jpg",
 	importOverrides: {
 		"/System/apps.js": "/build/apps/apps.js",
 		"/System/windows.js": "/build/windows/windows.js",
