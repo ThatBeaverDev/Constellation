@@ -25,7 +25,7 @@ document.body.appendChild(style);
 
 // windowing
 export const EDGE_THRESHOLD = 8;
-export let windowTiling = true;
+export let windowTiling = false;
 
 export function setWindowTilingMode(enabled: boolean) {
 	if (typeof windowTiling !== "boolean") throw new Error("input was not of type boolean.");
