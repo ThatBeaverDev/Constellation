@@ -37,7 +37,7 @@ export const files = {
 	"/build/apps/build/com.constellation.remapper.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreExecutables/com.constellation.remapper"
-	}
+	},
 	// Popup
 	"/build/apps/build/com.constellation.popup.idx": {
 		type: "jsonFilesIndex",
