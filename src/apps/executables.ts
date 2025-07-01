@@ -55,7 +55,6 @@ export class Process {
 export class Application extends Process {
 	constructor(directory: string, args: any[]) {
 		super(directory, args);
-		console.error(args);
 		this.renderer = new Renderer(this);
 	}
 
