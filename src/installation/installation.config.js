@@ -1,5 +1,5 @@
 // /Users, /System, /Applications and /Temporary are premounted and don't need to be created.
-export const folders = ["/System/CoreExecutables", "/System/CoreComponents", "/System/CoreLibraries"];
+export const folders = ["/System/CoreExecutables", "/System/CoreComponents", "/System/CoreLibraries", "/System/CoreLibraries/gitFiles", "/System/windows"];
 
 export const files = {
 	// finder app
