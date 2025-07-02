@@ -1,7 +1,7 @@
 import conf from "../constellation.config.js";
 import { blobify } from "../lib/blobify.js";
 import realFS from "../fs.js";
-import { execute } from "./apps.js";
+import { execute, showPrompt } from "./apps.js";
 import { ImportError } from "../errors.js";
 
 // logging
@@ -23,6 +23,10 @@ type fsResponse = {
 	data: any;
 	ok: Boolean;
 };
+
+export function prompt(text: string, reason = "") {
+	showPrompt("log", text, reason);
+}
 
 export const fs = {
 	createDirectory: async function (directory: string): Promise<fsResponse> {

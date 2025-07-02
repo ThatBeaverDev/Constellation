@@ -105,7 +105,33 @@ export async function execute(directory: string, args: any[] = []) {
 	// add to the processes list
 	processes.push(live);
 
-	await live.init();
+	try {
+		live.executing = true;
+		await live.init();
+		live.executing = false;
+	} catch (e) {
+		showPrompt(
+			"error",
+			"Application Error" +
+				(live.renderer.window.name || live.directory) +
+				" has crashed.",
+			e
+		);
+
+		await terminate(live);
+	}
+}
+
+export async function showPrompt(
+	type: "error" | "warning" | "log",
+	title: string,
+	description?: any
+) {
+	const popup = await env.fs.readFile(popupDirectory + "/config.js");
+
+	if (popup.data !== undefined) {
+		await execute(popupDirectory, [type, title, title, description]);
+	}
 }
 
 export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
