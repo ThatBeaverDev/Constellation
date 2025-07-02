@@ -24,6 +24,7 @@ interface step {
 
 interface textboxCallbackObject {}
 
+// class
 export class Renderer {
 	constructor(process: Process) {
 		this.process = process;
@@ -43,7 +44,6 @@ export class Renderer {
 	private steps: step[] = [];
 	private displayedSteps: step[] = [];
 	private textboxExists: Boolean = false;
-	textBoxValue: string = "";
 
 	icon = (
 		x: number = 0,
@@ -90,10 +90,11 @@ export class Renderer {
 			throw new UIError("UI cannot have more than one textbox.");
 		}
 
+		// mark the textbox as present to prevent another from being created
 		this.textboxExists = true;
 
+		// insure all values are met. if not, apply the default
 		const opts = {};
-
 		for (const i in this.defaultConfig.uikitTextbox) {
 			// @ts-ignore
 			opts[i] = options[i] ?? this.defaultConfig.uikitTextbox[i];
@@ -149,10 +150,8 @@ export class Renderer {
 		y: number,
 		width: number,
 		height: number,
-		callbacks = {
-			edit: () => {},
-			keypresss: () => {}
-		}
+		callbacks: textboxCallbackObject,
+		options = this.defaultConfig.uikitTextarea
 	) => {
 		if (this.textboxExists == true) {
 			throw new UIError("UI cannot have more than one textbox.");
@@ -162,7 +161,7 @@ export class Renderer {
 
 		const obj: step = {
 			type: "uikitTextarea",
-			args: [x, y, width, height, callbacks]
+			args: [x, y, width, height, callbacks, options]
 		};
 		this.steps.push(obj);
 	};
@@ -177,11 +176,23 @@ export class Renderer {
 		uikitTextbox: {
 			isInvisible: false,
 			isEmpty: false
+		},
+		uikitTextarea: {
+			isInvisible: false,
+			isEmpty: false,
+			codeHighlight: undefined
 		}
 	};
 
-	private textboxElem: HTMLInputElement | undefined;
-	private textboxValue: string = "";
+	setTextboxContent(content: string) {
+		// insure there is actually a textbox
+		if (this.textboxElem !== undefined) {
+			// set the value
+			this.textboxElem.value = content;
+		}
+	}
+
+	private textboxElem: HTMLInputElement | HTMLTextAreaElement | undefined;
 	private creators = {
 		uikitIcon: (x = 0, y = 0, name = "circle-help", scale = 1) => {
 			const icon = getIcon(name);
@@ -195,7 +206,7 @@ export class Renderer {
 			return live;
 		},
 
-		uikitText: (x = 0, y = 0, string = "Lorum Ipsum", size: number) => {
+		uikitText: (x = 0, y = 0, string = "", size: number) => {
 			const text = document.createElement("p");
 			text.className = "uikitText";
 
@@ -209,7 +220,14 @@ export class Renderer {
 			return live;
 		},
 
-		uikitButton: (x = 0, y = 0, string = "Lorum Ipsum", leftClickCallback = () => {}, rightClickCallback = () => {}, size: number) => {
+		uikitButton: (
+			x = 0,
+			y = 0,
+			string = "",
+			leftClickCallback = () => {},
+			rightClickCallback = () => {},
+			size: number
+		) => {
 			const button = document.createElement("button");
 			button.className = "uikitButton";
 
@@ -249,7 +267,7 @@ export class Renderer {
 		uikitTextbox: (
 			x = 0,
 			y = 0,
-			backtext = "Lorum Ipsum",
+			backtext = "",
 			callbacks = {
 				update: (key: string, value: string) => {},
 				enter: (value: string) => {}
@@ -260,7 +278,8 @@ export class Renderer {
 			textbox.type = "text";
 			textbox.classList.add("uikitTextbox");
 
-			if (options.isInvisible) textbox.classList.add("uikitTextboxInvisible");
+			if (options.isInvisible)
+				textbox.classList.add("uikitTextboxInvisible");
 
 			textbox.id = String(window.renderID++);
 			textbox.placeholder = backtext;
@@ -275,8 +294,12 @@ export class Renderer {
 				(event) => {
 					const val = String(live.value);
 					if (event.code == "Enter") {
+						if (typeof callbacks.enter !== "function") return;
+
 						callbacks.enter(val);
 					} else {
+						if (typeof callbacks.update !== "function") return;
+
 						callbacks.update(event.key, val);
 					}
 				},
@@ -347,22 +370,54 @@ export class Renderer {
 			return live;
 		},
 
-		uikitTextarea: (x: number = 0, y: number = 0, width: number = 100, height: number = 50) => {
+		uikitTextarea: (
+			x: number = 0,
+			y: number = 0,
+			width: number = 100,
+			height: number = 50,
+			callbacks: any,
+			options = this.defaultConfig.uikitTextarea
+		) => {
 			const area = document.createElement("textarea");
 			area.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;`;
 			area.id = String(window.renderID++);
 			area.className = "uikitTextarea";
 
+			if (options.isInvisible)
+				area.classList.add("uikitTextboxInvisible");
+
 			this.window.body.appendChild(area);
 			// @ts-expect-error
 			const live: HTMLTextAreaElement = document.getElementById(area.id);
 
+			live.addEventListener(
+				"keydown",
+				(event) => {
+					const val = String(live.value);
+
+					if (event.code == "Enter") {
+						if (typeof callbacks.enter !== "function") return;
+
+						callbacks.enter(val);
+					} else {
+						if (typeof callbacks.update !== "function") return;
+
+						callbacks.update(event.key, val);
+					}
+				},
+				{ signal: this.signal }
+			);
+
 			if (focus == this.window.winID) live.focus();
+
+			area.value = String(this.textboxElem?.value || ""); // make the value stay
+			this.textboxElem = live;
 
 			return live;
 		}
 	};
 
+	// add abort controller to remove event listeners
 	private controller = new AbortController();
 	private signal = this.controller.signal;
 
@@ -370,26 +425,40 @@ export class Renderer {
 	windowHeight: number = 0;
 
 	private items: any[] = [];
+
+	private mustRedraw: boolean = false;
+	redraw = () => {
+		this.mustRedraw = true;
+	};
+
 	commit = () => {
 		this.windowWidth = this.window.container.clientWidth;
 		this.windowWidth = this.window.container.clientHeight;
 
-		// don't render if the content is the same
-		if (this.steps.length == this.displayedSteps.length) {
-			const steps = JSON.stringify(this.steps);
-			const displayedSteps = JSON.stringify(this.displayedSteps);
-			if (steps == displayedSteps) {
-				return;
+		// if the app or some other system has demanded a redraw, we don't cancel no matter that
+		if (!this.mustRedraw) {
+			// exit if the content is the same
+			if (this.steps.length == this.displayedSteps.length) {
+				const steps = JSON.stringify(this.steps);
+				const displayedSteps = JSON.stringify(this.displayedSteps);
+				if (steps == displayedSteps) {
+					return;
+				}
 			}
 		}
+		// prevent infinite redraws
+		this.mustRedraw = false;
 
+		// remove all event listeners
 		this.controller.abort();
 
+		// recreate the AbortController so the next set can be bulk removed
 		this.controller = new AbortController();
 		this.signal = this.controller.signal;
 
 		this.displayedSteps = [];
 
+		// delete all the elements
 		for (const i in this.items) {
 			const item = this.items[i];
 
@@ -401,11 +470,14 @@ export class Renderer {
 			this.items.splice(i, 1);
 		}
 
+		// just make sure everything is gone
 		this.window.body.innerHTML = "";
 
+		// add the elements
 		for (const item of this.steps) {
 			this.displayedSteps.push(item);
 
+			// get the creator
 			const creator = this.creators[item.type];
 			if (creator == undefined) {
 				throw new UIError(
@@ -413,9 +485,11 @@ export class Renderer {
 				);
 			}
 
+			// create the element
 			// @ts-ignore (it dislikes the destructuring operation on item.args, no idea how to fix it.)
 			const live = creator(...item.args)!;
 
+			// add it to the list
 			this.items.push(live);
 		}
 	};
