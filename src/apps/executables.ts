@@ -1,7 +1,7 @@
 import { registerKeyboardShortcut } from "../keyboardShortcuts.js";
 import { Renderer } from "../lib/uiKit/uiKit.js";
 import fs from "../fs.js";
-import { execute } from "./apps.js";
+import { execute, terminate } from "./apps.js";
 
 export class OsAPI {
 	fs = fs;
@@ -54,6 +54,10 @@ export class Process {
 	) => {
 		registerKeyboardShortcut(this, name, key, modifiers);
 	};
+
+	exit() {
+		terminate(this);
+	}
 }
 
 export class Application extends Process {
