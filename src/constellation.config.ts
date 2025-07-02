@@ -1,4 +1,5 @@
 type constellationConfiguration = {
+	name: string;
 	version: string;
 	keyword: string;
 	wallpaper: string;
@@ -15,6 +16,7 @@ if (isLocalhost) {
 }
 
 const obj: constellationConfiguration = {
+	name: "Constellation",
 	version: "25.6.1a",
 	keyword: "Sahara",
 	wallpaper: baseWallpaperURL + "Walid Ahmad - Desert Night.jpg",
@@ -25,7 +27,8 @@ const obj: constellationConfiguration = {
 		"/System/executables.js": "/build/apps/executables.js",
 		"/System/keybindings.js": "/build/keyboardShortcuts.js",
 		"/System/CoreLibraries/fs.js": "/build/fs.js",
-		"/System/CoreLibraries/srcFS.js": "/build/lib/external/browserfs.js"
+		"/System/CoreLibraries/srcFS.js": "/build/lib/external/browserfs.js",
+		"/System/constellation.config.js": "/build/constellation.config.js"
 	},
 	userfile: "/System/users.json",
 	userDirectories: [
