@@ -57,7 +57,7 @@
 	animation-name: bootCover;
 	animation-duration: 1s;
 	animation-fill-mode: forwards;
-	transition-timing-function: cubic-bezier(1.000, 0.000, 1.000, 0.000);
+	transition-timing-function: cubic-bezier(1, 0, 1, 0);
 }
 
 .bootImage {
@@ -73,7 +73,7 @@
 	animation-name: bootImage;
 	animation-duration: 1s;
 	animation-fill-mode: forwards;
-	animation-timing-function: cubic-bezier(1.000, 0.000, 1.000, 0.000);
+	animation-timing-function: cubic-bezier(1, 0, 1, 0);
 }
 
 .bootStatus {
@@ -86,12 +86,11 @@
 	mix-blend-mode: difference;
 
 	text-align: center;
-
 }
 
 .loader {
 	--loader-scale: 1;
-	
+
 	position: absolute;
 	left: calc(50vw - 20px);
 	top: calc(50vh - 20px);
@@ -101,7 +100,7 @@
 
 	display: block;
 	border-radius: 50%;
-	background: #FFFFFF;
+	background: #ffffff;
 	position: relative;
 }
 
@@ -121,7 +120,6 @@
 	border-radius: 50%;
 	inset: 0;
 	background: #fff;
-
 }
 
 .loader.planet#one {
@@ -156,7 +154,7 @@
 
 @keyframes rotate-one {
 	0% {
-		transform: rotate(0deg) translate(calc(40px * var(--loader-scale)))
+		transform: rotate(0deg) translate(calc(40px * var(--loader-scale)));
 	}
 
 	50% {
@@ -164,27 +162,27 @@
 	}
 
 	100% {
-		transform: rotate(360deg) translate(calc(40px * var(--loader-scale)))
+		transform: rotate(360deg) translate(calc(40px * var(--loader-scale)));
 	}
 }
 
 @keyframes rotate-two {
 	0% {
-		transform: rotate(360deg) translate(calc(70px * var(--loader-scale)))
+		transform: rotate(360deg) translate(calc(70px * var(--loader-scale)));
 	}
-	
+
 	50% {
 		transform: rotate(180deg) translate(calc(80px * var(--loader-scale)));
 	}
 
 	100% {
-		transform: rotate(0deg) translate(calc(70px * var(--loader-scale)))
+		transform: rotate(0deg) translate(calc(70px * var(--loader-scale)));
 	}
 }
 
 @keyframes rotate-three {
 	0% {
-		transform: rotate(360deg) translate(calc(110px * var(--loader-scale)))
+		transform: rotate(360deg) translate(calc(110px * var(--loader-scale)));
 	}
 
 	50% {
@@ -192,6 +190,6 @@
 	}
 
 	100% {
-		transform: rotate(0deg) translate(calc(110px * var(--loader-scale)))
+		transform: rotate(0deg) translate(calc(110px * var(--loader-scale)));
 	}
 }
