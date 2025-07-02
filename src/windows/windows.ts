@@ -28,7 +28,8 @@ export const EDGE_THRESHOLD = 8;
 export let windowTiling = false;
 
 export function setWindowTilingMode(enabled: boolean) {
-	if (typeof windowTiling !== "boolean") throw new Error("input was not of type boolean.");
+	if (typeof windowTiling !== "boolean")
+		throw new Error("input was not of type boolean.");
 
 	windowTiling = enabled;
 }
@@ -129,18 +130,26 @@ export class Window {
 		this.iconDiv.style.height = "25px";
 
 		this.closeButton = windowButton(document.createElement("div"), "x");
-		this.maximiseButton = windowButton(document.createElement("div"), "maximize", 0.75);
+		this.maximiseButton = windowButton(
+			document.createElement("div"),
+			"maximize",
+			0.75
+		);
 
 		this.buttons = document.createElement("div");
 		this.buttons.id = String(window.renderID++);
 		this.buttons.className = "windowButtons";
-		this.buttons.innerHTML = this.closeButton.outerHTML + this.maximiseButton.outerHTML;
+		this.buttons.innerHTML =
+			this.closeButton.outerHTML + this.maximiseButton.outerHTML;
 
 		this.header = document.createElement("div");
 		const h = this.header;
 		h.className = "windowHeader";
 		h.id = String(window.renderID++);
-		h.innerHTML = this.iconDiv.outerHTML + this.title.outerHTML + this.buttons.outerHTML;
+		h.innerHTML =
+			this.iconDiv.outerHTML +
+			this.title.outerHTML +
+			this.buttons.outerHTML;
 
 		this.body = document.createElement("div");
 		const b = this.body;
@@ -359,7 +368,10 @@ function updateWindows(newTilingConfig: boolean = false) {
 
 		if (newTilingConfig == true && windowTiling == false) {
 			win.move(x, y);
-			win.resize(window.innerWidth / windows.length, window.innerHeight / windows.length);
+			win.resize(
+				window.innerWidth / windows.length,
+				window.innerHeight / windows.length
+			);
 
 			const deltaX = window.innerWidth / windows.length;
 			const deltaY = window.innerHeight / windows.length;
@@ -427,7 +439,9 @@ async function updateLiveStyling() {
 
 		console.debug("Loading windowing CSS for mode: " + styleType);
 
-		const css = await env.fs.readFile("/System/windows/" + styleType + ".css");
+		const css = await env.fs.readFile(
+			"/System/windows/" + styleType + ".css"
+		);
 
 		if (!css.ok) {
 			return;

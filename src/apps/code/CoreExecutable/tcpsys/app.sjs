@@ -2,7 +2,9 @@ const windows = await env.include("/System/windows.js");
 
 export default class initialiser extends BackgroundProcess {
 	async init() {
-		const onstart = ["/System/CoreExecutables/com.constellation.terminal" /* DO NOT COMMIT! */];
+		const onstart = [
+			/*"/System/CoreExecutables/com.constellation.terminal", */ "/Applications/com.constellation.OrionIDE"
+		];
 
 		for (const app of onstart) {
 			env.exec(app);
@@ -11,10 +13,17 @@ export default class initialiser extends BackgroundProcess {
 		this.registerKeyboardShortcut("Launcher", "KeyZ", ["AltLeft"]);
 		this.registerKeyboardShortcut("Remap Shortcuts", "KeyX", ["AltLeft"]);
 		// windows
-		this.registerKeyboardShortcut("Focus Left (Tiling)", "ArrowLeft", ["AltLeft"]);
-		this.registerKeyboardShortcut("Focus Right (Tiling)", "ArrowRight", ["AltLeft"]);
+		this.registerKeyboardShortcut("Focus Left (Tiling)", "ArrowLeft", [
+			"AltLeft"
+		]);
+		this.registerKeyboardShortcut("Focus Right (Tiling)", "ArrowRight", [
+			"AltLeft"
+		]);
 		this.registerKeyboardShortcut("Close Window", "KeyW", ["AltLeft"]);
-		this.registerKeyboardShortcut("Toggle Window Tiling", "KeyT", ["AltLeft", "ShiftLeft"]);
+		this.registerKeyboardShortcut("Toggle Window Tiling", "KeyT", [
+			"AltLeft",
+			"ShiftLeft"
+		]);
 	}
 
 	onmessage(origin, intent) {
@@ -25,7 +34,9 @@ export default class initialiser extends BackgroundProcess {
 						this.search();
 						break;
 					case "keyboardShortcutTrigger-Remap Shortcuts":
-						env.exec("/System/CoreExecutables/com.constellation.remapper");
+						env.exec(
+							"/System/CoreExecutables/com.constellation.remapper"
+						);
 						break;
 					// windows shortcuts
 					case "keyboardShortcutTrigger-Focus Left (Tiling)":
@@ -50,7 +61,9 @@ export default class initialiser extends BackgroundProcess {
 
 						setTimeout(() => {
 							const last = windows.windows.length - 1;
-							windows.focusWindow(Math.max(0, Math.min(windows.focus, last)));
+							windows.focusWindow(
+								Math.max(0, Math.min(windows.focus, last))
+							);
 						}, 160); // wait for animation + layoutTiling
 						break;
 					case "keyboardShortcutTrigger-Toggle Window Tiling":
@@ -61,7 +74,9 @@ export default class initialiser extends BackgroundProcess {
 						break;
 
 					default:
-						throw new Error("Unknown keyboard shortcut name (intent): " + intent);
+						throw new Error(
+							"Unknown keyboard shortcut name (intent): " + intent
+						);
 				}
 				break;
 			default:

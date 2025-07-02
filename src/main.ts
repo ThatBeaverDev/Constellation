@@ -30,11 +30,18 @@ String.prototype.textBefore = function (before) {
 };
 
 String.prototype.textBeforeLast = function (before) {
-	return this.split("").reverse().join("").textAfter(before).split("").reverse().join("");
+	return this.split("")
+		.reverse()
+		.join("")
+		.textAfter(before)
+		.split("")
+		.reverse()
+		.join("");
 };
 
 async function main() {
-	const testMode = new URL(window.location.href).searchParams.get("test") == "true";
+	const testMode =
+		new URL(window.location.href).searchParams.get("test") == "true";
 
 	await windows.init();
 
@@ -54,7 +61,9 @@ async function main() {
 		await test.default();
 	}
 
-	await apps.execute("/System/CoreExecutables/com.constellation.CoreExecutable");
+	await apps.execute(
+		"/System/CoreExecutables/com.constellation.CoreExecutable"
+	);
 
 	setInterval(async () => {
 		await apps.run();

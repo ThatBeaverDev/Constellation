@@ -12,7 +12,9 @@ img.onload = () => {
 	ctx.filter = "invert(100%) sepia(50%)";
 	ctx.drawImage(img, 0, 0);
 
-	const favicon = document.querySelector("link[rel='icon']") || document.createElement("link");
+	const favicon =
+		document.querySelector("link[rel='icon']") ||
+		document.createElement("link");
 	favicon.rel = "icon";
 	favicon.href = canvas.toDataURL("image/svg");
 

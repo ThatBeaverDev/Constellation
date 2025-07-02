@@ -10,7 +10,9 @@ function _arrayBufferToBase64(buffer) {
 }
 
 export async function sha512(text) {
-	const Uint16 = Uint16Array.from(text.split("").map((letter) => letter.charCodeAt(0)));
+	const Uint16 = Uint16Array.from(
+		text.split("").map((letter) => letter.charCodeAt(0))
+	);
 	const hash = await window.crypto.subtle.digest("sha-256", Uint16);
 
 	return _arrayBufferToBase64(hash);

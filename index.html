@@ -1,98 +1,98 @@
 <!doctype html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<!--<link rel="icon" type="image/svg" href="/icons/icons/square-terminal.svg" />-->
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Constellation</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Source+Code+Pro:ital@0;1&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="/boot.css" />
+		<link rel="stylesheet" href="/styles.css" />
+	</head>
 
-<head>
-    <meta charset="UTF-8" />
-    <!--<link rel="icon" type="image/svg" href="/icons/icons/square-terminal.svg" />-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Constellation</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Source+Code+Pro:ital@0;1&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="/boot.css">
-    <link rel="stylesheet" href="/styles.css">
-</head>
+	<body>
+		<div class="wallpaper"></div>
+		<script src="/src/lib/external/browserfs.min.js"></script>
+		<!--minified SHOULD be smaller to import-->
+		<script type="module">
+			// importer system
+			// made to inform the user the system is not built yet and needs to be built to prevent an error.
 
-<body>
-    <div class="wallpaper"></div>
-    <script src="/src/lib/external/browserfs.min.js"></script> <!--minified SHOULD be smaller to import-->
-    <script type="module">
-        // importer system
-        // made to inform the user the system is not built yet and needs to be built to prevent an error.
+			async function check() {
+				const src = await fetch("/build/main.js");
 
-        async function check() {            
-            const src = await fetch("/build/main.js")
+				if (src.status !== 200) {
+					// system needs to be build
+					const div = document.createElement("div");
+					div.style.width = "50vw";
+					div.style.height = "50vh";
 
-            if (src.status !== 200) {
-                // system needs to be build
-                const div = document.createElement("div")
-                div.style.width = "50vw"
-                div.style.height = "50vh"
+					div.style.position = "absolute";
+					div.style.left = "25vw";
+					div.style.top = "25vh";
 
-                div.style.position = "absolute"
-                div.style.left = "25vw"
-                div.style.top = "25vh"
+					div.style.borderRadius = "15px";
+					div.style.background = "rgba(255, 0, 0, 0.5)";
+					div.style.border = "rgba(255, 0, 0, 1) solid 5px";
 
-                div.style.borderRadius = "15px"
-                div.style.background = "rgba(255, 0, 0, 0.5)"
-                div.style.border = "rgba(255, 0, 0, 1) solid 5px"
+					const title = document.createElement("h1");
+					title.innerText = "Constellation Needs to be built.";
+					title.style.width = "90%";
+					title.style.height = "50%";
 
-                const title = document.createElement("h1")
-                title.innerText = "Constellation Needs to be built."
-                title.style.width = "90%"
-                title.style.height = "50%"
+					title.style.position = "absolute";
+					title.style.left = "5%";
 
-                title.style.position = "absolute"
-                title.style.left = "5%"
+					title.style.textAlign = "center";
 
-                title.style.textAlign = "center"
-                
-                
-                const body = document.createElement("p")
-                body.innerText = "Constellation's build script needs to be ran. If you are the owner, you can run `npm run build` to do this, otherwise you can request they do this. Sorry for any inconvenience!"
-                body.style.width = "90%"
-                body.style.height = "50%"
-                
-                body.style.position = "absolute"
-                body.style.left = "5%"
-                body.style.top = "50%"
+					const body = document.createElement("p");
+					body.innerText =
+						"Constellation's build script needs to be ran. If you are the owner, you can run `npm run build` to do this, otherwise you can request they do this. Sorry for any inconvenience!";
+					body.style.width = "90%";
+					body.style.height = "50%";
 
-                body.style.textAlign = "center"
-                body.style.textWrap = "wrap"
+					body.style.position = "absolute";
+					body.style.left = "5%";
+					body.style.top = "50%";
 
-                div.innerHTML = title.outerHTML + body.outerHTML
+					body.style.textAlign = "center";
+					body.style.textWrap = "wrap";
 
-                document.body.appendChild(div)
+					div.innerHTML = title.outerHTML + body.outerHTML;
 
-                const style = document.createElement("style")
-                style.textContent = ":root {--wallpaper-url: \"/pics/Sahara Night Sky.jpg\"}"
-                document.body.appendChild(style)
-            } else {
-                const script = document.createElement("script")
-                script.type = "module"
-                script.src = "/build/main.js"
+					document.body.appendChild(div);
 
-                document.body.appendChild(script)
-            }
-        }
+					const style = document.createElement("style");
+					style.textContent =
+						':root {--wallpaper-url: "/pics/Sahara Night Sky.jpg"}';
+					document.body.appendChild(style);
+				} else {
+					const script = document.createElement("script");
+					script.type = "module";
+					script.src = "/build/main.js";
 
-        check()
+					document.body.appendChild(script);
+				}
+			}
 
-    </script>
-    
-    <div class="hidden">
-        <canvas id="hiddenCanvas"></canvas>
-    </div>
+			check();
+		</script>
 
-    <div class="bootCover">
-        <p class="bootStatus">Constellation is loading...</p>
-        <div class="loader star"></div>
-        <div class="loader planet" id="one"></div>
-        <div class="loader planet" id="two"></div>
-        <div class="loader planet" id="three"></div>
-    </div>
-</body>
+		<div class="hidden">
+			<canvas id="hiddenCanvas"></canvas>
+		</div>
 
+		<div class="bootCover">
+			<p class="bootStatus">Constellation is loading...</p>
+			<div class="loader star"></div>
+			<div class="loader planet" id="one"></div>
+			<div class="loader planet" id="two"></div>
+			<div class="loader planet" id="three"></div>
+		</div>
+	</body>
 </html>

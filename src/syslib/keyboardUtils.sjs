@@ -99,7 +99,11 @@ export function translateKeyName(key) {
 			return "z";
 
 		default:
-			console.debug("keyboardUtils.sjs : translateKeyName does not support key '" + key + "' and has been forced to fallback.");
+			console.debug(
+				"keyboardUtils.sjs : translateKeyName does not support key '" +
+					key +
+					"' and has been forced to fallback."
+			);
 	}
 
 	return key;

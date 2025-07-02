@@ -77,7 +77,8 @@ async function treeWalk(directory, prefix, maxDepth, depth, counts) {
 		let file = contents[i];
 
 		if (/*(*/ file[0] !== "." /*) || (obj.showHidden)*/) {
-			const parts = i == contents.length - 1 ? ["└── ", "    "] : ["├── ", "│   "];
+			const parts =
+				i == contents.length - 1 ? ["└── ", "    "] : ["├── ", "│   "];
 
 			let dispFile = String(file);
 
@@ -96,7 +97,13 @@ async function treeWalk(directory, prefix, maxDepth, depth, counts) {
 			if (isDir) {
 				result += prefix + parts[0] + dispFile + `\n`;
 				counts.dirs++;
-				result += await treeWalk(asDir, prefix + parts[1], maxDepth, depth + 1, counts);
+				result += await treeWalk(
+					asDir,
+					prefix + parts[1],
+					maxDepth,
+					depth + 1,
+					counts
+				);
 			} else {
 				/*if (!obj.dirOnly) {*/
 				result += prefix + parts[0] + dispFile + `\n`;

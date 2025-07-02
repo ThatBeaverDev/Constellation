@@ -13,7 +13,10 @@ declare global {
 	interface Window {
 		renderID: number;
 		Application: new (directory: string, args: any[]) => Application;
-		BackgroundProcess: new (directory: string, args: any[]) => BackgroundProcess;
+		BackgroundProcess: new (
+			directory: string,
+			args: any[]
+		) => BackgroundProcess;
 		sysimport: any;
 		processes: Process[];
 		env: typeof env;
@@ -72,14 +75,19 @@ export async function execute(directory: string, args: any[] = []) {
 				const content = await fs.readFile(executableDirectory);
 
 				if (content == undefined) {
-					throw new AppInitialisationError(fs.relative(directory, "tcpsys/app.[js / sjs]") + " is empty and cannot be executed");
+					throw new AppInitialisationError(
+						fs.relative(directory, "tcpsys/app.[js / sjs]") +
+							" is empty and cannot be executed"
+					);
 				}
 
 				data = content;
 			}
 			break;
 		default:
-			throw new AppInitialisationError("Type '" + type + "' is not recognised.");
+			throw new AppInitialisationError(
+				"Type '" + type + "' is not recognised."
+			);
 	}
 
 	// create a blob of the content
@@ -134,7 +142,12 @@ async function procExec(proc: Process) {
 		const popup = await env.fs.readFile(popupDirectory + "/config.js");
 
 		if (popup.data !== undefined) {
-			await execute(popupDirectory, ["error", "Application Error", "Application at " + proc.directory + " has crashed.", e]);
+			await execute(popupDirectory, [
+				"error",
+				"Application Error",
+				"Application at " + proc.directory + " has crashed.",
+				e
+			]);
 		}
 
 		await terminate(proc);
@@ -150,8 +163,16 @@ document.addEventListener("keydown", (event) => {
 	const fnc = proc.keydown;
 
 	if (typeof fnc == "function") {
-		// @ts-expect-error
-		fnc.call(proc, event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
+		fnc.call(
+			proc,
+			// @ts-expect-error
+			event.code,
+			event.metaKey,
+			event.altKey,
+			event.ctrlKey,
+			event.shiftKey,
+			event.repeat
+		);
 	}
 
 	for (const proc of processes) {
@@ -159,7 +180,15 @@ document.addEventListener("keydown", (event) => {
 			const fnc = proc.keydown;
 
 			if (typeof fnc == "function") {
-				fnc.call(proc, event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
+				fnc.call(
+					proc,
+					event.code,
+					event.metaKey,
+					event.altKey,
+					event.ctrlKey,
+					event.shiftKey,
+					event.repeat
+				);
 			}
 		}
 	}
@@ -173,8 +202,16 @@ document.addEventListener("keyup", (event) => {
 	const fnc = proc.keyup;
 
 	if (typeof fnc == "function") {
-		// @ts-expect-error
-		fnc.call(proc, event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
+		fnc.call(
+			proc,
+			// @ts-expect-error
+			event.code,
+			event.metaKey,
+			event.altKey,
+			event.ctrlKey,
+			event.shiftKey,
+			event.repeat
+		);
 	}
 
 	for (const proc of processes) {
@@ -182,7 +219,15 @@ document.addEventListener("keyup", (event) => {
 			const fnc = proc.keyup;
 
 			if (typeof fnc == "function") {
-				fnc.call(proc, event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
+				fnc.call(
+					proc,
+					event.code,
+					event.metaKey,
+					event.altKey,
+					event.ctrlKey,
+					event.shiftKey,
+					event.repeat
+				);
 			}
 		}
 	}

@@ -12,7 +12,15 @@ declare global {
 }
 window.keyboardShortcuts = keyboardShortcuts;
 
-type modifier = "ShiftLeft" | "ShiftRight" | "MetaLeft" | "MetaRight" | "ControlLeft" | "ControlRight" | "AltLeft" | "AltRight";
+type modifier =
+	| "ShiftLeft"
+	| "ShiftRight"
+	| "MetaLeft"
+	| "MetaRight"
+	| "ControlLeft"
+	| "ControlRight"
+	| "AltLeft"
+	| "AltRight";
 
 interface keyboardShortcut {
 	app: string;
@@ -22,7 +30,12 @@ interface keyboardShortcut {
 	process: Process;
 }
 
-export function registerKeyboardShortcut(process: Process, name: string, key: string, modifiers: modifier[] | string[]) {
+export function registerKeyboardShortcut(
+	process: Process,
+	name: string,
+	key: string,
+	modifiers: modifier[] | string[]
+) {
 	const cut: keyboardShortcut = {
 		process: process,
 		app: process.directory,
@@ -34,7 +47,11 @@ export function registerKeyboardShortcut(process: Process, name: string, key: st
 	keyboardShortcuts[process.directory + "://" + name] = cut;
 }
 
-export function updateKeyboardShortcut(id: string, key: string, modifiers: string[]) {
+export function updateKeyboardShortcut(
+	id: string,
+	key: string,
+	modifiers: string[]
+) {
 	const k = keyboardShortcuts[id];
 	k.key = key;
 	k.modifiers = modifiers;
@@ -91,7 +108,10 @@ document.addEventListener("keydown", (e) => {
 
 			if (ok) {
 				// trigger the shortcut
-				cut.process.onmessage("/System/keyboardShortcuts.js", "keyboardShortcutTrigger-" + cut.name);
+				cut.process.onmessage(
+					"/System/keyboardShortcuts.js",
+					"keyboardShortcutTrigger-" + cut.name
+				);
 			}
 		}
 	}

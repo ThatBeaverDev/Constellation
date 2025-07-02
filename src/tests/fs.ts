@@ -31,7 +31,9 @@ const tests = {
 		const isDirectory = await stats.data.isDirectory();
 
 		if (!isDirectory) {
-			throw new TestingError("Stat result states that directory is not a directory.");
+			throw new TestingError(
+				"Stat result states that directory is not a directory."
+			);
 		}
 	},
 	createFileTest: async () => {
@@ -42,7 +44,11 @@ const tests = {
 			throw content.data;
 		}
 		if (content.data !== "") {
-			throw new TestingError("File after initialisation has content other than blank (''), content is as follows: '" + content.data + "'");
+			throw new TestingError(
+				"File after initialisation has content other than blank (''), content is as follows: '" +
+					content.data +
+					"'"
+			);
 		}
 	},
 	updateFileTest: async () => {
@@ -53,7 +59,13 @@ const tests = {
 			throw content.data;
 		}
 		if (content.data !== contentToWrite) {
-			throw new TestingError("Read contents of file do not match what was written - '" + contentToWrite + "' was written, and '" + content.data + "' was read.");
+			throw new TestingError(
+				"Read contents of file do not match what was written - '" +
+					contentToWrite +
+					"' was written, and '" +
+					content.data +
+					"' was read."
+			);
 		}
 	},
 	statFileTest: async () => {
@@ -66,7 +78,9 @@ const tests = {
 		const isDirectory = await stats.data.isDirectory();
 
 		if (isDirectory) {
-			throw new TestingError("Stat result states that file is a directory.");
+			throw new TestingError(
+				"Stat result states that file is a directory."
+			);
 		}
 	},
 	deleteFileTest: async () => {
@@ -89,14 +103,21 @@ const tests = {
 		const mkfile = await env.fs.createFile(dir);
 
 		if (mkfile.ok) {
-			throw new TestingError("createFile is ok with creating a file in the location of a directory.");
+			throw new TestingError(
+				"createFile is ok with creating a file in the location of a directory."
+			);
 		}
 	},
 	attemptToModifyNonExistentFile: async () => {
-		const write = await env.fs.updateFile(dir + "/new file.txt", contentToWrite);
+		const write = await env.fs.updateFile(
+			dir + "/new file.txt",
+			contentToWrite
+		);
 
 		if (write.ok) {
-			throw new TestingError("updateFile is ok with updating a file which does not exist.");
+			throw new TestingError(
+				"updateFile is ok with updating a file which does not exist."
+			);
 		}
 	},
 	deleteEmptyDirectory: async () => {
@@ -107,7 +128,9 @@ const tests = {
 		}
 
 		if (list.data.length !== 0) {
-			throw new TestingError("Files have been left in the " + dir + " directory.");
+			throw new TestingError(
+				"Files have been left in the " + dir + " directory."
+			);
 		}
 
 		const rmdir = await env.fs.deleteDirectory(dir);
@@ -123,7 +146,9 @@ const tests = {
 		}
 
 		if (list2.data.includes(dirname)) {
-			throw new TestingError("deleteDirectory has reported ok and done nothing. (in attempt to delete an empty directory)");
+			throw new TestingError(
+				"deleteDirectory has reported ok and done nothing. (in attempt to delete an empty directory)"
+			);
 		}
 	},
 	rm_rfFilesystem: async () => {
@@ -132,11 +157,15 @@ const tests = {
 		if (rmrf.ok) {
 			const list = await env.fs.listDirectory("/");
 			if (!list.ok) {
-				throw new TestingError("deleteDirectory has deleted a directory with contents inside (deleted root)");
+				throw new TestingError(
+					"deleteDirectory has deleted a directory with contents inside (deleted root)"
+				);
 			}
 
 			if (list.data.length !== 0) {
-				throw new Error("deleteDirectory has reported ok and done nothing. (in attempt to delete root)");
+				throw new Error(
+					"deleteDirectory has reported ok and done nothing. (in attempt to delete root)"
+				);
 			}
 		}
 	}
