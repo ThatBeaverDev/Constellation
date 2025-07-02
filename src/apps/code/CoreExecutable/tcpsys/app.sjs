@@ -70,6 +70,8 @@ export default class initialiser extends BackgroundProcess {
 						// Toggle tiling
 						const tiling = windows.windowTiling;
 
+						env.debug("Toggling tiling");
+
 						windows.setWindowTilingMode(!tiling);
 						break;
 
