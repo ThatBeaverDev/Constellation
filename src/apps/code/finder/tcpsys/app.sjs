@@ -48,9 +48,21 @@ export default class finder extends Application {
 	async init() {
 		this.padding = 1;
 
-		await this.cd("/");
+		const [
+			initialDirectory = "/",
+			mode = "app",
+			recievingPipe,
+			sendingPipe
+		] = this.args;
 
-		this.renderer.window.rename("Finder");
+		await this.cd(initialDirectory);
+		this.type = mode;
+		this.pipes = {
+			recieve: recievingPipe,
+			send: sendingPipe
+		};
+
+		this.renderer.setWindowIcon("folder");
 
 		this.registerKeyboardShortcut("Scroll Down", "ArrowDown", []);
 		this.registerKeyboardShortcut("Scroll Down (Fast)", "ArrowDown", [
@@ -63,12 +75,6 @@ export default class finder extends Application {
 		this.registerKeyboardShortcut("Descend Directory", "Enter", []);
 		this.registerKeyboardShortcut("Ascend Directory", "Escape", []);
 		this.registerKeyboardShortcut("Select Directory", "KeyG", ["AltLeft"]);
-
-		this.keyLocations = {
-			Constellation: "/",
-			System: "/System",
-			Users: "/Users"
-		};
 
 		setInterval(() => {
 			this.cd(this.path);
@@ -133,6 +139,10 @@ export default class finder extends Application {
 	async cd(directory) {
 		const oldDir = String(this.path);
 
+		if (oldDir !== directory) {
+			this.selector = 0;
+		}
+
 		this.path = env.fs.relative(this.path, directory);
 		const dir = this.path;
 		if (this.path == "/") {
@@ -155,7 +165,7 @@ export default class finder extends Application {
 
 		this.listing.sort();
 
-		this.listing = this.listing.map((name) => {
+		this.listing = await this.listing.map((name) => {
 			const obj = {};
 			obj.name = name;
 			obj.path = env.fs.relative(this.path, name);
@@ -163,6 +173,10 @@ export default class finder extends Application {
 
 			return obj;
 		});
+
+		for (const obj of this.listing) {
+			obj.type = await env.fs.typeOfFile(obj.path);
+		}
 
 		const newIcon = await fsDisplayLib.pathIcon(this.path);
 		if (newIcon !== this.icon) {
@@ -172,61 +186,127 @@ export default class finder extends Application {
 	}
 
 	async frame() {
-		try {
-			if (this.selector == undefined) {
-				this.selector = 0;
+		// pipe messages (for picker)
+		if (this.pipes.recieve !== undefined) {
+			for (const i in this.pipes.recieve) {
+				const item = this.pipes.recieve[0];
+				if (typeof item !== "object") continue;
+
+				this.pipes.recieve.splice(0, 1);
 			}
-
-			this.renderer.clear();
-
-			if (this.listing == undefined) {
-				return;
-			}
-
-			this.renderer.icon(20, 0, await this.icon);
-			this.renderer.text(50, 0, this.path);
-
-			let y = 30;
-			for (const i in this.listing) {
-				try {
-					const obj = this.listing[i];
-
-					this.renderer.icon(20, y, await obj.icon);
-
-					let name;
-					try {
-						name = obj.name.padEnd(25, " ");
-					} catch (e) {
-						console.log(obj);
-						console.warn(e);
-					}
-
-					const text = this.selector == i ? "> " + name : "  " + name;
-
-					this.renderer.button(
-						50,
-						y,
-						text,
-						async () => {
-							// right click
-							await this.cd(obj.path);
-						},
-						async () => {
-							// left click
-						}
-					);
-				} catch (e) {
-					console.warn(e);
-				}
-
-				y += 25;
-			}
-
-			this.renderer.commit();
-		} catch (e) {
-			this.renderer.clear();
-			this.renderer.text(0, 0, e);
-			this.renderer.commit();
 		}
+
+		// if we're a picker, name ourselves so
+		if (this.type == "picker") {
+			this.renderer.window.rename("File Picker - " + this.path);
+		} else {
+			this.renderer.window.rename("Finder - " + this.path);
+		}
+
+		// insure this.selector is defined
+		if (this.selector == undefined) {
+			this.selector = 0;
+		}
+
+		this.renderer.clear();
+
+		// prevent execution when the listing is blank
+		if (this.listing == undefined) {
+			return;
+		}
+
+		// draw the folder name and icon at the top for the current location
+		this.renderer.icon(20, 0, await this.icon);
+		this.renderer.text(50, 0, this.path);
+
+		// draw the folder contents
+		let y = 30;
+		for (const i in this.listing) {
+			const obj = this.listing[i];
+
+			this.renderer.icon(20, y, await obj.icon);
+
+			// insure the name is the right length
+			let name = String(obj.name).padEnd(25, " ");
+
+			// add a '> ' if the item is selected, else just '  ', so everything is on the same starting point
+			const text = this.selector == i ? "> " + name : "  " + name;
+
+			// render
+			this.renderer.button(
+				50,
+				y,
+				text,
+				async () => {
+					// right click
+					if (this.selector == i) {
+						switch (obj.type) {
+							case "directory":
+								await this.cd(obj.path);
+								break;
+							case "file":
+								if (this.type == "picker") {
+									// select and submit the file
+									this.pickerSubmit();
+								} else {
+									/* TODO: OPEN THE FILE! */
+									env.prompt(
+										"Functionality not implemented: opening files",
+										"no current API for opening files in applications."
+									);
+								}
+
+								break;
+							default:
+								throw new Error(
+									"Unknown filetype cannot be handled for action: " +
+										obj.type
+								);
+						}
+					} else {
+						this.selector = i;
+					}
+				},
+				async () => {
+					// left click
+				}
+			);
+
+			y += 25;
+		}
+
+		if (this.type == "picker") {
+			// get the name
+			const itemName = this.listing[this.selector].name;
+			// get the path
+			const path =
+				itemName == ".."
+					? this.path
+					: env.fs.relative(this.path, itemName);
+
+			this.renderer.button(
+				5,
+				this.renderer.window.dimensions.height - 50,
+				"Select location (" + path + ")",
+				this.pickerSubmit
+			);
+		}
+
+		this.renderer.commit();
+	}
+
+	pickerSubmit() {
+		const itemName = this.listing[this.selector].name;
+		const path =
+			itemName == ".." ? this.path : env.fs.relative(this.path, itemName);
+
+		env.debug(
+			this.directory,
+			"Submitting '" + path + "' for file picker result."
+		);
+
+		// send it to the caller and exit
+		this.pipes.send.push({ intent: "selectionComplete", data: path });
+		this.exit();
 	}
 }
