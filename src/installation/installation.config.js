@@ -26,6 +26,8 @@ export const files = {
 	// libraries
 	"/src/syslib/pathicon.sjs": "/System/CoreLibraries/pathicon.sjs",
 	"/src/syslib/keyboardUtils.sjs": "/System/CoreLibraries/keyboardUtils.sjs",
+	"/src/syslib/userFileSelector.sjs":
+		"/System/CoreLibraries/userFileSelector.sjs",
 
 	// init system
 	"/build/apps/build/com.constellation.CoreExecutable.idx": {
