@@ -52,11 +52,16 @@ export async function writeFiles() {
 					await fs.mkdir(relative);
 				}
 
+				const awaitFiles = [];
 				for (const path in json.files) {
 					const data = json.files[path];
 					const relative = fs.relative(directory, path);
 
-					await fs.writeFile(relative, data);
+					awaitFiles.push(await fs.writeFile(relative, data));
+				}
+
+				for (const item of awaitFiles) {
+					await item;
 				}
 
 				break;
