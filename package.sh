@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# packager
+
 compile() {
     mkdir -p build/apps/build
 
