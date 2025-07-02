@@ -158,6 +158,10 @@ export default class terminalUI extends Application {
 
 		y += 5;
 
+		if (this.willCrash) {
+			throw new Error("terminalCrashRequested");
+		}
+
 		this.renderer.textbox(
 			0,
 			y,
@@ -166,6 +170,10 @@ export default class terminalUI extends Application {
 				update: () => {},
 				enter: async (text) => {
 					this.hasExecutedCommand = true;
+
+					if (text == "crash") {
+						this.willCrash = true;
+					}
 
 					const args = text.trim().split(" ");
 					const cmd = args.splice(0, 1)[0].trim();
