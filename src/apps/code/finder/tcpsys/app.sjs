@@ -53,9 +53,13 @@ export default class finder extends Application {
 		this.renderer.window.rename("Finder");
 
 		this.registerKeyboardShortcut("Scroll Down", "ArrowDown", []);
-		this.registerKeyboardShortcut("Scroll Down (Fast)", "ArrowDown", ["ShiftLeft"]);
+		this.registerKeyboardShortcut("Scroll Down (Fast)", "ArrowDown", [
+			"ShiftLeft"
+		]);
 		this.registerKeyboardShortcut("Scroll Up", "ArrowUp", []);
-		this.registerKeyboardShortcut("Scroll Up (Fast)", "ArrowUp", ["ShiftLeft"]);
+		this.registerKeyboardShortcut("Scroll Up (Fast)", "ArrowUp", [
+			"ShiftLeft"
+		]);
 		this.registerKeyboardShortcut("Descend Directory", "Enter", []);
 		this.registerKeyboardShortcut("Ascend Directory", "Escape", []);
 		this.registerKeyboardShortcut("Select Directory", "KeyG", ["AltLeft"]);
@@ -76,16 +80,32 @@ export default class finder extends Application {
 			case "/System/keyboardShortcuts.js":
 				switch (intent) {
 					case "keyboardShortcutTrigger-Scroll Down":
-						this.selector = clamp(this.selector + 1, 0, this.listing.length - 1);
+						this.selector = clamp(
+							this.selector + 1,
+							0,
+							this.listing.length - 1
+						);
 						break;
 					case "keyboardShortcutTrigger-Scroll Down (Fast)":
-						this.selector = clamp(this.selector + 2, 0, this.listing.length - 1);
+						this.selector = clamp(
+							this.selector + 2,
+							0,
+							this.listing.length - 1
+						);
 						break;
 					case "keyboardShortcutTrigger-Scroll Up":
-						this.selector = clamp(this.selector - 1, 0, this.listing.length - 1);
+						this.selector = clamp(
+							this.selector - 1,
+							0,
+							this.listing.length - 1
+						);
 						break;
 					case "keyboardShortcutTrigger-Scroll Up (Fast)":
-						this.selector = clamp(this.selector - 2, 0, this.listing.length - 1);
+						this.selector = clamp(
+							this.selector - 2,
+							0,
+							this.listing.length - 1
+						);
 						break;
 					case "keyboardShortcutTrigger-Descend Directory":
 						const obj = this.listing[this.selector];
@@ -100,7 +120,9 @@ export default class finder extends Application {
 						this.cd(prompt("Select a directory"));
 						break;
 					default:
-						throw new Error("Unknown keyboard shortcut name (intent): " + intent);
+						throw new Error(
+							"Unknown keyboard shortcut name (intent): " + intent
+						);
 				}
 				break;
 			default:
@@ -116,7 +138,8 @@ export default class finder extends Application {
 		if (this.path == "/") {
 			this.location = "Constellation";
 		} else {
-			this.location = "Constellation" + String(this.path).replaceAll("/", " > ");
+			this.location =
+				"Constellation" + String(this.path).replaceAll("/", " > ");
 		}
 
 		const list = await env.fs.listDirectory(dir);

@@ -16,10 +16,16 @@ async function rmdir(dir) {
 		const isFolder = stats.isDirectory();
 
 		if (isFolder) {
-			log.warn("core:installation/rmrf", "Deleting Directory at: " + relative);
+			log.warn(
+				"core:installation/rmrf",
+				"Deleting Directory at: " + relative
+			);
 			await rmdir(relative);
 		} else {
-			log.warn("core:installation/rmrf", "Deleting File at:      " + relative);
+			log.warn(
+				"core:installation/rmrf",
+				"Deleting File at:      " + relative
+			);
 			await fs.unlink(relative);
 		}
 	}

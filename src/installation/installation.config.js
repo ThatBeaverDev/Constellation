@@ -1,5 +1,10 @@
 // /Users, /System, /Applications and /Temporary are premounted and don't need to be created.
-export const folders = ["/System/CoreExecutables", "/System/CoreComponents", "/System/CoreLibraries", "/System/CoreLibraries/gitFiles", "/System/windows"];
+export const folders = [
+	"/System/CoreExecutables",
+	"/System/CoreComponents",
+	"/System/CoreLibraries",
+	"/System/windows"
+];
 
 export const files = {
 	// finder app
@@ -11,7 +16,8 @@ export const files = {
 	// test app
 	"/demoApp.idx": {
 		type: "jsonFilesIndex",
-		directory: "/System/CoreExecutables/com.constellation.ApplicationFoundation"
+		directory:
+			"/System/CoreExecutables/com.constellation.ApplicationFoundation"
 	},
 
 	// apps system

@@ -29,7 +29,7 @@ export async function writeFiles() {
 				await fs.writeFile(directory, content);
 
 				break;
-			case "jsonFilesIndex":
+			case "jsonFilesIndex": {
 				content = await (await fetch(location)).text();
 
 				await fs.mkdir(directory);
@@ -37,7 +37,13 @@ export async function writeFiles() {
 				try {
 					json = JSON.parse(content);
 				} catch {
-					console.error("Package from URL '" + location + "' targeted for '" + directory + "' is not packaged properly.");
+					console.error(
+						"Package from URL '" +
+							location +
+							"' targeted for '" +
+							directory +
+							"' is not packaged properly."
+					);
 				}
 
 				for (const path of json.directories) {
@@ -54,6 +60,7 @@ export async function writeFiles() {
 				}
 
 				break;
+			}
 			default:
 				throw new InstallationError("Unknown filetype: " + type);
 		}

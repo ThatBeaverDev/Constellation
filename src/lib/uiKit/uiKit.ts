@@ -45,7 +45,12 @@ export class Renderer {
 	private textboxExists: Boolean = false;
 	textBoxValue: string = "";
 
-	icon = (x: number = 0, y: number = 0, name: string = "circle-help", scale: number = 1) => {
+	icon = (
+		x: number = 0,
+		y: number = 0,
+		name: string = "circle-help",
+		scale: number = 1
+	) => {
 		const obj: step = {
 			type: "uikitIcon",
 			args: [x, y, name, scale]
@@ -60,14 +65,27 @@ export class Renderer {
 		};
 		this.steps.push(obj);
 	};
-	button = (x: number, y: number, string: string, leftClickCallback: Function, rightClickCallback: Function, size: number = 15) => {
+	button = (
+		x: number,
+		y: number,
+		string: string,
+		leftClickCallback: Function,
+		rightClickCallback: Function,
+		size: number = 15
+	) => {
 		const obj: step = {
 			type: "uikitButton",
 			args: [x, y, string, leftClickCallback, rightClickCallback, size]
 		};
 		this.steps.push(obj);
 	};
-	textbox = (x: number, y: number, backtext: string, callbacks: textboxCallbackObject, options = this.defaultConfig.uikitTextbox) => {
+	textbox = (
+		x: number,
+		y: number,
+		backtext: string,
+		callbacks: textboxCallbackObject,
+		options = this.defaultConfig.uikitTextbox
+	) => {
 		if (this.textboxExists == true) {
 			throw new UIError("UI cannot have more than one textbox.");
 		}
@@ -112,7 +130,13 @@ export class Renderer {
 		this.steps.push(obj);
 	};
 
-	progressBar = (x: number, y: number, width: number, height: number, progress: number | "throb") => {
+	progressBar = (
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		progress: number | "throb"
+	) => {
 		const obj: step = {
 			type: "uikitProgressBar",
 			args: [x, y, width, height, progress]
@@ -261,7 +285,8 @@ export class Renderer {
 
 			if (focus == this.window.winID) live.focus();
 
-			if (options.isEmpty == false) textbox.value = String(this.textboxElem?.value || ""); // make the value stay
+			if (options.isEmpty == false)
+				textbox.value = String(this.textboxElem?.value || ""); // make the value stay
 			this.textboxElem = live;
 
 			return live;
@@ -295,7 +320,13 @@ export class Renderer {
 
 		uikitTable: () => {},
 
-		uikitProgressBar: (x: number, y: number, width: number, height: number, progress: number | "throb") => {
+		uikitProgressBar: (
+			x: number,
+			y: number,
+			width: number,
+			height: number,
+			progress: number | "throb"
+		) => {
 			const bar = document.createElement("div");
 			bar.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;`;
 			bar.id = String(window.renderID++);
@@ -377,7 +408,9 @@ export class Renderer {
 
 			const creator = this.creators[item.type];
 			if (creator == undefined) {
-				throw new UIError("Creator is not defined for uikit Type " + item.type);
+				throw new UIError(
+					"Creator is not defined for uikit Type " + item.type
+				);
 			}
 
 			// @ts-ignore (it dislikes the destructuring operation on item.args, no idea how to fix it.)

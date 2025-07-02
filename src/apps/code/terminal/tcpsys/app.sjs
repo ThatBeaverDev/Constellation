@@ -50,9 +50,13 @@ export default class terminalUI extends Application {
 		this.tick2 = 0;
 
 		this.registerKeyboardShortcut("Scroll Down", "ArrowDown", []);
-		this.registerKeyboardShortcut("Scroll Down (Fast)", "ArrowDown", ["ShiftLeft"]);
+		this.registerKeyboardShortcut("Scroll Down (Fast)", "ArrowDown", [
+			"ShiftLeft"
+		]);
 		this.registerKeyboardShortcut("Scroll Up", "ArrowUp", []);
-		this.registerKeyboardShortcut("Scroll Up (Fast)", "ArrowUp", ["ShiftLeft"]);
+		this.registerKeyboardShortcut("Scroll Up (Fast)", "ArrowUp", [
+			"ShiftLeft"
+		]);
 
 		this.ok = true;
 	}
@@ -60,7 +64,9 @@ export default class terminalUI extends Application {
 	getCommand(name) {
 		switch (name) {
 			case "help":
-				return () => `Terminal commands are as follows:\n- ` + Object.keys(this.cmdreg).join("\n- ");
+				return () =>
+					`Terminal commands are as follows:\n- ` +
+					Object.keys(this.cmdreg).join("\n- ");
 			default:
 				return this.cmdreg[name];
 		}
@@ -71,19 +77,37 @@ export default class terminalUI extends Application {
 			case "/System/keyboardShortcuts.js":
 				switch (intent) {
 					case "keyboardShortcutTrigger-Scroll Down":
-						this.scroll = clamp(this.scroll - 1, 0, this.logs.length - this.displayedLogs);
+						this.scroll = clamp(
+							this.scroll - 1,
+							0,
+							this.logs.length - this.displayedLogs
+						);
 						break;
 					case "keyboardShortcutTrigger-Scroll Down (Fast)":
-						this.scroll = clamp(this.scroll - 2, 0, this.logs.length - this.displayedLogs);
+						this.scroll = clamp(
+							this.scroll - 2,
+							0,
+							this.logs.length - this.displayedLogs
+						);
 						break;
 					case "keyboardShortcutTrigger-Scroll Up":
-						this.scroll = clamp(this.scroll + 1, 0, this.logs.length - this.displayedLogs);
+						this.scroll = clamp(
+							this.scroll + 1,
+							0,
+							this.logs.length - this.displayedLogs
+						);
 						break;
 					case "keyboardShortcutTrigger-Scroll Up (Fast)":
-						this.scroll = clamp(this.scroll + 2, 0, this.logs.length - this.displayedLogs);
+						this.scroll = clamp(
+							this.scroll + 2,
+							0,
+							this.logs.length - this.displayedLogs
+						);
 						break;
 					default:
-						throw new Error("Unknown keyboard shortcut name (intent): " + intent);
+						throw new Error(
+							"Unknown keyboard shortcut name (intent): " + intent
+						);
 				}
 				break;
 			default:
@@ -122,7 +146,10 @@ export default class terminalUI extends Application {
 		this.renderer.clear();
 
 		let y = 15;
-		const visibleLogs = this.logs.slice(-50 - this.scroll, -this.scroll || undefined);
+		const visibleLogs = this.logs.slice(
+			-50 - this.scroll,
+			-this.scroll || undefined
+		);
 
 		for (const i of visibleLogs) {
 			this.renderer.text(0, y, i);
@@ -147,7 +174,9 @@ export default class terminalUI extends Application {
 
 					const bin = this.getCommand(cmd);
 					if (typeof bin !== "function") {
-						this.logs.push(cmd + " is not a known or found command.");
+						this.logs.push(
+							cmd + " is not a known or found command."
+						);
 						return;
 					}
 
@@ -155,7 +184,12 @@ export default class terminalUI extends Application {
 					try {
 						logs = (await bin(this, ...args)) || "";
 					} catch (error) {
-						logs = "<red>" + error.type + ": " + error.message + "</red>";
+						logs =
+							"<red>" +
+							error.type +
+							": " +
+							error.message +
+							"</red>";
 					}
 					if (typeof logs !== "string") {
 						logs = stringify(logs);

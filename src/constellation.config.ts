@@ -28,7 +28,16 @@ const obj: constellationConfiguration = {
 		"/System/CoreLibraries/srcFS.js": "/build/lib/external/browserfs.js"
 	},
 	userfile: "/System/users.json",
-	userDirectories: ["Desktop", "Documents", "Applications", "Media", "Notes", "Media/Music", "Media/Pictures", "Media/Videos"]
+	userDirectories: [
+		"Desktop",
+		"Documents",
+		"Applications",
+		"Media",
+		"Notes",
+		"Media/Music",
+		"Media/Pictures",
+		"Media/Videos"
+	]
 };
 
 export default obj;

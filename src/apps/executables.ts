@@ -47,7 +47,11 @@ export class Process {
 		any;
 	}
 
-	registerKeyboardShortcut = (name: string, key: string, modifiers: string[]) => {
+	registerKeyboardShortcut = (
+		name: string,
+		key: string,
+		modifiers: string[]
+	) => {
 		registerKeyboardShortcut(this, name, key, modifiers);
 	};
 }

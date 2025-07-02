@@ -20,7 +20,10 @@ interface testResult {
 export default async function test() {
 	const results: any = {};
 
-	async function executeTest(name: string, test: Function): Promise<undefined> {
+	async function executeTest(
+		name: string,
+		test: Function
+	): Promise<undefined> {
 		const obj: testResult = {
 			passed: true,
 			reason: undefined
@@ -57,7 +60,11 @@ export default async function test() {
 				}
 				break;
 			default:
-				throw new Error("Test exported type " + typeof tests[i] + " which has no execution case");
+				throw new Error(
+					"Test exported type " +
+						typeof tests[i] +
+						" which has no execution case"
+				);
 		}
 	}
 
