@@ -1,15 +1,18 @@
 export default class Popup extends Application {
 	init() {
 		this.params = {
-			type: this.args[0],
-			title: this.args[1],
-			description: this.args[2],
-			error: this.args[3]
+			type: this.args[0] || "log",
+			title: this.args[1] || "",
+			description: this.args[2] || "",
+			error: this.args[3] || ""
 		};
 
 		this.renderer.window.rename(this.args[1]);
 
 		switch (this.params.type) {
+			case "log":
+				this.icon = "scroll-text";
+				break;
 			case "warning":
 				this.icon = "message-circle-alert";
 			case "error":
