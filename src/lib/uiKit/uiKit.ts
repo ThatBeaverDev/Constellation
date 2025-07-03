@@ -192,6 +192,17 @@ export class Renderer {
 		}
 	}
 
+	getTextboxContent() {
+		// insure there is actually a textbox
+		if (this.textboxElem !== undefined) {
+			// return the value
+			return this.textboxElem.value;
+		}
+
+		// return null otherwise
+		return null;
+	}
+
 	private textboxElem: HTMLInputElement | HTMLTextAreaElement | undefined;
 	private creators = {
 		uikitIcon: (x = 0, y = 0, name = "circle-help", scale = 1) => {
