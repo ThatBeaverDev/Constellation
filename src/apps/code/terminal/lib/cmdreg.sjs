@@ -130,3 +130,10 @@ export async function tree(parent, directory = ".") {
 
 	return result;
 }
+export async function mkdir(parent, directory) {
+	const rel = env.fs.relative(parent.terminalPath, directory);
+
+	await env.fs.createDirectory(rel);
+
+	return undefined;
+}
