@@ -51,6 +51,11 @@ export const files = {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreExecutables/com.constellation.popup"
 	},
+	// Settings
+	"/build/apps/build/com.constellation.settings.idx": {
+		type: "jsonFilesIndex",
+		directory: "/Applications/com.constellation.settings"
+	},
 
 	// windowing files
 	"/src/windows/tiling.css": "/System/windows/tiling.css",

@@ -2,9 +2,7 @@ const windows = await env.include("/System/windows.js");
 
 export default class initialiser extends BackgroundProcess {
 	async init() {
-		const onstart = [
-			/*"/System/CoreExecutables/com.constellation.terminal", */ "/Applications/com.constellation.OrionIDE"
-		];
+		const onstart = ["/System/CoreExecutables/com.constellation.finder"];
 
 		for (const app of onstart) {
 			env.exec(app);
