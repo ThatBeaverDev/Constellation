@@ -235,6 +235,8 @@ export class Window {
 		const left = c.dataset.left + "px";
 		const top = c.dataset.top + "px";
 
+		const zIndex = String(c.dataset.zIndex);
+
 		if (c.style.width !== width) {
 			c.style.width = width;
 		}
@@ -248,9 +250,12 @@ export class Window {
 		if (c.style.top !== top) {
 			c.style.top = top;
 		}
+		if (c.style.zIndex !== zIndex) {
+			c.style.zIndex = zIndex;
+		}
 	}
 
-	move(x = 0, y = 0) {
+	move(x = 0, y = 0, z?: number) {
 		const clamped = {
 			x: clamp(x, 0, window.innerWidth - this.dimensions.width),
 			y: clamp(y, 0, window.innerHeight - this.dimensions.height)
@@ -258,9 +263,12 @@ export class Window {
 
 		this.container.dataset.left = String(clamped.x);
 		this.container.dataset.top = String(clamped.y);
+		if (z !== undefined) this.container.dataset.zIndex = String(z);
 
 		this.position.left = x;
 		this.position.top = y;
+		if (z !== undefined) this.position.zIndex = z;
+
 		this.reposition();
 	}
 
@@ -280,7 +288,8 @@ export class Window {
 	};
 	position = {
 		left: 0,
-		top: 0
+		top: 0,
+		zIndex: 0
 	};
 
 	rename(name: string) {
