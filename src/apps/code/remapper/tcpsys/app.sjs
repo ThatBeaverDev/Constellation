@@ -12,11 +12,6 @@ const clamp = (n, min, max) => {
 	return n;
 };
 
-const camelCaseToNormal = (text) => {
-	const result = text.replace(/([A-Z])/g, " $1");
-	return result.charAt(0).toUpperCase() + result.slice(1);
-};
-
 export default class remapper extends Application {
 	async init() {
 		this.renderer.window.rename("Keybinding Remapper");
@@ -45,7 +40,7 @@ export default class remapper extends Application {
 		this.keys = keys.keyboardShortcuts;
 		this.updateKeyboardShortcut = keys.updateKeyboardShortcut;
 
-		let arr = [];
+		const arr = [];
 		for (const i in this.keys) {
 			arr.push({
 				id: i,
@@ -83,7 +78,7 @@ export default class remapper extends Application {
 		}
 	}
 
-	keydown(key, cmd, opt, ctrl, shift, isRepeat, keyName) {
+	keydown(key, cmd, opt, ctrl, shift) {
 		if (this.mode == "enterKey") {
 			switch (key) {
 				case "ArrowUp":
@@ -91,7 +86,7 @@ export default class remapper extends Application {
 				case "Enter":
 					// insure the user can't override these keys
 					break;
-				default:
+				default: {
 					const isKey = key.startsWith("Key");
 					const isNumber = key.startsWith("Digit");
 
@@ -114,6 +109,7 @@ export default class remapper extends Application {
 					]);
 
 					this.mode = "listing";
+				}
 			}
 		}
 	}
@@ -128,7 +124,7 @@ export default class remapper extends Application {
 		this.selector = clamp(this.selector, 0, this.arr.length);
 
 		switch (this.mode) {
-			case "listing":
+			case "listing": {
 				if (this.arr == undefined) {
 					return;
 				}
@@ -160,6 +156,7 @@ export default class remapper extends Application {
 					y += 45;
 				}
 				break;
+			}
 			case "enterKey":
 				break;
 		}

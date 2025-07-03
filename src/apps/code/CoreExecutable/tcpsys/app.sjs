@@ -49,7 +49,7 @@ export default class initialiser extends BackgroundProcess {
 						// Right!
 						windows.focusWindow(windows.focus + 1);
 						break;
-					case "keyboardShortcutTrigger-Close Window":
+					case "keyboardShortcutTrigger-Close Window": {
 						// Close Window!
 
 						if (windows.windows.length == 1) {
@@ -66,7 +66,8 @@ export default class initialiser extends BackgroundProcess {
 							);
 						}, 160); // wait for animation + layoutTiling
 						break;
-					case "keyboardShortcutTrigger-Toggle Window Tiling":
+					}
+					case "keyboardShortcutTrigger-Toggle Window Tiling": {
 						// Toggle tiling
 						const tiling = windows.windowTiling;
 
@@ -74,6 +75,7 @@ export default class initialiser extends BackgroundProcess {
 
 						windows.setWindowTilingMode(!tiling);
 						break;
+					}
 
 					default:
 						throw new Error(
@@ -101,6 +103,9 @@ export default class initialiser extends BackgroundProcess {
 			}
 		};
 
+		// TODO: REAL SEARCH UI
+
+		// eslint-disable-next-line
 		const choice = prompt("Enter the application name:");
 
 		const sys = await checkDir("/System/CoreExecutables", choice);
@@ -110,6 +115,7 @@ export default class initialiser extends BackgroundProcess {
 			return;
 		}
 
+		// eslint-disable-next-line
 		alert("App " + choice + " was not found.");
 
 		//const user = await checkDir("~/Applications", choice)

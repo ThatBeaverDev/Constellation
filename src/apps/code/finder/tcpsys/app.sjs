@@ -113,16 +113,19 @@ export default class finder extends Application {
 							this.listing.length - 1
 						);
 						break;
-					case "keyboardShortcutTrigger-Descend Directory":
+					case "keyboardShortcutTrigger-Descend Directory": {
 						const obj = this.listing[this.selector];
 						this.cd(obj.path);
 						this.selector = undefined;
 						break;
+					}
 					case "keyboardShortcutTrigger-Ascend Directory":
 						this.selector = 0;
 						this.cd("..");
 						break;
 					case "keyboardShortcutTrigger-Select Directory":
+						// TODO: GRAPHICAL PROMPT
+						// eslint-disable-next-line
 						this.cd(prompt("Select a directory"));
 						break;
 					default:
@@ -227,7 +230,7 @@ export default class finder extends Application {
 			this.renderer.icon(20, y, await obj.icon);
 
 			// insure the name is the right length
-			let name = String(obj.name).padEnd(25, " ");
+			const name = String(obj.name).padEnd(25, " ");
 
 			// add a '> ' if the item is selected, else just '  ', so everything is on the same starting point
 			const text = this.selector == i ? "> " + name : "  " + name;

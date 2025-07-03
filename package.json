@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "python3 -m http.server 5173",
-    "fix": "prettier ./src --write",
+    "fix": "npx eslint src --fix && prettier ./src --write",
     "build": "npm run fix && npm run build-nofix",
     "build-apps": "prettier ./src/apps/code --write && npm run build-apps-postprettier",
     "build-apps-postprettier": "/bin/bash package.sh",
