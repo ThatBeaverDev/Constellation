@@ -101,6 +101,18 @@ document.addEventListener("keydown", (e) => {
 							ok = false;
 						}
 						break;
+					case "MetaLeft":
+					case "MetaRight":
+						if (!meta) {
+							ok = false;
+						}
+						break;
+					case "ControlLeft":
+					case "ControlRight":
+						if (!ctrl) {
+							ok = false;
+						}
+						break;
 					default:
 						console.warn("Unknown Modfier key: '" + mod + "'");
 				}
@@ -112,6 +124,8 @@ document.addEventListener("keydown", (e) => {
 					"/System/keyboardShortcuts.js",
 					"keyboardShortcutTrigger-" + cut.name
 				);
+
+				e.preventDefault();
 			}
 		}
 	}
