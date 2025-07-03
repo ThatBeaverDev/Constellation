@@ -337,8 +337,6 @@ export const windows: Window[] = [];
 // @ts-expect-error
 window.windows = windows;
 
-let focusTime: number = 10;
-
 function getWindowOfId(id: number) {
 	for (const window of windows) {
 		if (window.winID == id) {
@@ -365,28 +363,35 @@ export function focusWindow(id: number) {
 	// focus our window
 	focus = id;
 	target.container.classList.add("focused");
-	target.container.style.zIndex = String(focusTime++);
+	target.move(target.position.left, target.position.top, Date.now());
 }
 
 // Add this function anywhere appropriate (e.g., near `newWindow`)
 function updateWindows(newTilingConfig: boolean = false) {
 	let x = 0;
 	let y = 0;
+
+	const padding = 50;
+
+	const availableWidth = window.innerWidth - padding;
+	const availableHeight = window.innerHeight - padding;
+
+	const totalWindows = windows.length;
+	const windowHeaderHeight = 25;
+
+	const blankSpace = totalWindows * windowHeaderHeight;
+	const windowWidth = availableWidth - blankSpace;
+	const windowHeight = availableHeight - blankSpace;
+
 	windows.forEach((win, index) => {
 		win.container.style.resize = windowTiling ? "none" : "both";
 
 		if (newTilingConfig == true && windowTiling == false) {
-			win.move(x, y);
-			win.resize(
-				window.innerWidth / windows.length,
-				window.innerHeight / windows.length
-			);
+			win.move(padding + x, padding + y, index);
+			win.resize(windowWidth, windowHeight);
 
-			const deltaX = window.innerWidth / windows.length;
-			const deltaY = window.innerHeight / windows.length;
-
-			x += deltaX;
-			y += deltaY;
+			x += windowHeaderHeight;
+			y += windowHeaderHeight;
 		}
 
 		win.reposition();
