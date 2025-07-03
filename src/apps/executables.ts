@@ -1,4 +1,4 @@
-import { registerKeyboardShortcut } from "../keyboardShortcuts.js";
+import { registerKeyboardShortcut } from "./keyboardShortcuts.js";
 import { Renderer } from "../lib/uiKit/uiKit.js";
 import fs from "../fs.js";
 import { execute, terminate } from "./apps.js";
