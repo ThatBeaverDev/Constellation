@@ -59,6 +59,11 @@
 	color: var(--main-text-color);
 }
 
+.uikitTextbox {
+	width: 150px;
+	height: 25px;
+}
+
 .uikitTextbox:active {
 	border: none;
 	outline: none;

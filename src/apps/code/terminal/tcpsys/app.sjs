@@ -165,6 +165,8 @@ export default class terminalUI extends Application {
 		this.renderer.textbox(
 			0,
 			y,
+			1000,
+			1000,
 			"",
 			{
 				update: () => {},
