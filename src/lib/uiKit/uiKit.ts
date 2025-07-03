@@ -82,6 +82,8 @@ export class Renderer {
 	textbox = (
 		x: number,
 		y: number,
+		width: number = 200,
+		height: number = 20,
 		backtext: string,
 		callbacks: textboxCallbackObject,
 		options = this.defaultConfig.uikitTextbox
@@ -102,7 +104,7 @@ export class Renderer {
 
 		const obj: step = {
 			type: "uikitTextbox",
-			args: [x, y, backtext, callbacks, opts]
+			args: [x, y, width, height, backtext, callbacks, opts]
 		};
 		this.steps.push(obj);
 	};
@@ -175,7 +177,8 @@ export class Renderer {
 	defaultConfig = {
 		uikitTextbox: {
 			isInvisible: false,
-			isEmpty: false
+			isEmpty: false,
+			fontSize: undefined
 		},
 		uikitTextarea: {
 			isInvisible: false,
@@ -278,6 +281,8 @@ export class Renderer {
 		uikitTextbox: (
 			x = 0,
 			y = 0,
+			width = 200,
+			height = 20,
 			backtext = "",
 			callbacks = {
 				update: (key: string, value: string) => {},
@@ -294,7 +299,11 @@ export class Renderer {
 
 			textbox.id = String(window.renderID++);
 			textbox.placeholder = backtext;
-			textbox.style.cssText = `left: ${x}px; top: ${y}px;`;
+			textbox.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;`;
+
+			if (options.fontSize !== undefined) {
+				textbox.style.cssText += `font-size: ${options.fontSize}px;`;
+			}
 
 			this.window.body.appendChild(textbox);
 			// @ts-expect-error
@@ -302,18 +311,19 @@ export class Renderer {
 
 			live.addEventListener(
 				"keydown",
-				(event) => {
-					const val = String(live.value);
-					if (event.code == "Enter") {
-						if (typeof callbacks.enter !== "function") return;
+				(event) =>
+					setTimeout(() => {
+						const val = String(live.value);
+						if (event.code == "Enter") {
+							if (typeof callbacks.enter !== "function") return;
 
-						callbacks.enter(val);
-					} else {
-						if (typeof callbacks.update !== "function") return;
+							callbacks.enter(val);
+						} else {
+							if (typeof callbacks.update !== "function") return;
 
-						callbacks.update(event.key, val);
-					}
-				},
+							callbacks.update(event.key, val);
+						}
+					}, 2),
 				{ signal: this.signal }
 			);
 
