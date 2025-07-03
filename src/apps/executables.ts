@@ -1,24 +1,16 @@
 import { registerKeyboardShortcut } from "./keyboardShortcuts.js";
 import { Renderer } from "../lib/uiKit/uiKit.js";
-import fs from "../fs.js";
 import { execute, terminate } from "./apps.js";
-
-export class OsAPI {
-	fs = fs;
-	exec = execute;
-}
 
 export let nextPID = 0;
 export class Process {
 	constructor(directory: string, args: any[]) {
 		this.directory = directory;
-		this.os = new OsAPI();
 		this.id = nextPID++;
 		this.args = args;
 	}
 
 	directory: string;
-	os: OsAPI;
 	readonly id: number;
 	args: any[];
 
