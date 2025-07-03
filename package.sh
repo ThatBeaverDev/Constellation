@@ -22,6 +22,10 @@ compile() {
 
     # Build Popup
     ./tcpkg src/apps/code/popup build/apps/build/com.constellation.popup.idx -override=true
+
+    # Build System Settings
+    ./tcpkg src/apps/code/settings build/apps/build/com.constellation.settings.idx -override=true
+
 }
 
 daemon() {
