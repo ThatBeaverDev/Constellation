@@ -65,7 +65,7 @@ async function treeWalk(directory, prefix, maxDepth, depth, counts) {
 
 	let result = "";
 
-	let resp = await env.fs.listDirectory(directory);
+	const resp = await env.fs.listDirectory(directory);
 	if (!resp.ok) {
 		return;
 	}
@@ -74,13 +74,13 @@ async function treeWalk(directory, prefix, maxDepth, depth, counts) {
 	contents.sort();
 
 	for (const i in contents) {
-		let file = contents[i];
+		const file = contents[i];
 
 		if (/*(*/ file[0] !== "." /*) || (obj.showHidden)*/) {
 			const parts =
 				i == contents.length - 1 ? ["└── ", "    "] : ["├── ", "│   "];
 
-			let dispFile = String(file);
+			const dispFile = String(file);
 
 			const asDir = await env.fs.relative(directory, file);
 

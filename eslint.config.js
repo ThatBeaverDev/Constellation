@@ -5,13 +5,21 @@ import stylistic from "@stylistic/eslint-plugin";
 
 export default defineConfig([
 	{
-		files: ["**/*.{js,mjs,cjs}"],
+		files: ["**/*.{js,mjs,cjs,sjs}"],
 		plugins: {
 			js,
 			"@stylistic": stylistic
 		},
 		extends: ["js/recommended"],
-		languageOptions: { globals: globals.browser },
+		languageOptions: {
+			globals: {
+				...globals.browser,
+				env: "readonly",
+				Application: "readonly",
+				BackgroundProcess: "readonly",
+				exports: "writable"
+			}
+		},
 		rules: {
 			"no-constructor-return": "warn",
 			"no-unassigned-vars": "error",

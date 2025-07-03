@@ -10,7 +10,7 @@ export async function selectFile(initialDirectory = "/") {
 	sendingPipe.push("hk");
 
 	return new Promise((resolve) => {
-		let interval = setInterval(() => {
+		const interval = setInterval(() => {
 			// loop through messages
 
 			for (const msg of recievingPipe) {

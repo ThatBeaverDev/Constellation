@@ -116,11 +116,7 @@ export default class terminalUI extends Application {
 	}
 
 	keydown(code, cmd, opt, ctrl, shift, isRepeat) {
-		let speed = 1;
-
-		if (shift) {
-			speed += 5;
-		}
+		const speed = 1;
 
 		switch (code) {
 			case "ArrowUp":
@@ -129,8 +125,6 @@ export default class terminalUI extends Application {
 			case "ControlRight":
 			case "ShiftLeft":
 			case "ShiftRight":
-			case "ControlLeft":
-			case "ControlRight":
 			case "MetaLeft":
 			case "MetaRight":
 			case "AltLeft":

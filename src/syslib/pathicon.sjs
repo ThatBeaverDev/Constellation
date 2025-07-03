@@ -136,7 +136,6 @@ export async function pathIcon(directory) {
 		case "dart":
 		// dart
 
-		case "h":
 		case "m":
 		case "mm":
 		case "M":
@@ -251,7 +250,6 @@ export async function pathIcon(directory) {
 		case "flipchart":
 		case "fun":
 		case "gz":
-		case "jar":
 		case "lawrence":
 		case "lbr":
 		case "lzh":
@@ -290,13 +288,11 @@ export async function pathIcon(directory) {
 		case "cals":
 		case "cd5":
 		case "cit":
-		case "cpt":
 		case "clip":
 		case "cpl":
 		case "dds":
 		case "dib":
 		case "DjVu":
-		case "egt":
 		case "exif":
 		case "gif":
 		case "gifv":
@@ -316,7 +312,6 @@ export async function pathIcon(directory) {
 		case "jps":
 		case "jxl":
 		case "kra":
-		case "lbm":
 		case "max":
 		case "miff":
 		case "mng":
@@ -387,9 +382,7 @@ export async function pathIcon(directory) {
 		case "drawio":
 		case "dxf":
 		case "e2d":
-		case "egt":
 		case "eps":
-		case "fs":
 		case "gbr":
 		case "odf":
 		case "renderman":
@@ -407,7 +400,6 @@ export async function pathIcon(directory) {
 		case "vnd":
 		case "wmf":
 		case "emf":
-		case "art":
 		case "xar":
 			return "file-image";
 
@@ -418,10 +410,8 @@ export async function pathIcon(directory) {
 		case "3ds":
 		case "abc":
 		case "ac":
-		case "amf":
 		case "an8":
 		case "aoi":
-		case "asm":
 		case "b3d":
 		case "bbmodel":
 		case "blend":
@@ -442,7 +432,6 @@ export async function pathIcon(directory) {
 		case "dn":
 		case "dpm":
 		case "dts":
-		case "egg":
 		case "fact":
 		case "fbx":
 		case "g":
@@ -461,14 +450,12 @@ export async function pathIcon(directory) {
 		case "lxo":
 		case "m3d":
 		case "ma":
-		case "max":
 		case "mb":
 		case "mpd":
 		case "md2":
 		case "md3":
 		case "md5":
 		case "mdx":
-		case "mesh":
 		case "mesh":
 		case "miobject":
 		case "miparticle":
@@ -500,14 +487,12 @@ export async function pathIcon(directory) {
 		case "usda":
 		case "usdc":
 		case "usdz":
-		case "vim":
 		case "vrml97":
 		case "vue":
 		case "vwx":
 		case "wings":
 		case "w3d":
 		case "x":
-		case "x3d":
 		case "z3d":
 		case "zbmx":
 		// # SHORTCUTS
@@ -520,167 +505,7 @@ export async function pathIcon(directory) {
 		case "webloc":
 		case "sym":
 		case "desktop":
-		case "lnk":
-
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
-		case "":
+			return "file-shortcut";
 
 		case "json":
 			return "file-json";
