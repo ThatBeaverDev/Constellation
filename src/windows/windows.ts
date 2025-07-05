@@ -46,6 +46,7 @@ let diffX: number = 0;
 let diffY: number = 0;
 let oldX: number;
 let oldY: number;
+const initTime = Date.now();
 
 function clamp(n: number | undefined, min: number, max: number) {
 	if (n == undefined) {
@@ -239,7 +240,7 @@ export class Window {
 		const left = c.dataset.left + "px";
 		const top = c.dataset.top + "px";
 
-		const zIndex = String(c.dataset.zIndex);
+		const zIndex = String(Number(c.dataset.zIndex) - initTime);
 
 		if (c.style.width !== width) {
 			c.style.width = width;

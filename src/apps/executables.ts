@@ -79,7 +79,7 @@ export class Popup extends Application {
 		}, 3);
 	}
 
-	windowPositioningInterval: number;
+	private windowPositioningInterval: number;
 
 	exit() {
 		clearInterval(this.windowPositioningInterval);
