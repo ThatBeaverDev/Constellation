@@ -15,12 +15,6 @@ function stringify(content) {
 	}
 }
 
-const mod = (n, modulus) => {
-	let result = n % modulus;
-	if (result / modulus < 0) result += modulus;
-	return result;
-};
-
 const clamp = (n, min, max) => {
 	if (n < min) {
 		return min;
@@ -115,9 +109,7 @@ export default class terminalUI extends Application {
 		}
 	}
 
-	keydown(code, cmd, opt, ctrl, shift, isRepeat) {
-		const speed = 1;
-
+	keydown(code) {
 		switch (code) {
 			case "ArrowUp":
 			case "ArrowDown":
@@ -160,14 +152,14 @@ export default class terminalUI extends Application {
 			0,
 			y,
 			1000,
-			1000,
+			20,
 			"",
 			{
 				update: () => {},
 				enter: async (text) => {
 					this.hasExecutedCommand = true;
 
-					if (text == "crash") {
+					if (text.trim() == "crash") {
 						this.willCrash = true;
 					}
 
