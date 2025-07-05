@@ -1,5 +1,10 @@
 import conf from "../constellation.config.js";
-import { Application, BackgroundProcess, Process } from "./executables.js";
+import {
+	Application,
+	BackgroundProcess,
+	Popup,
+	Process
+} from "./executables.js";
 import fs from "../fs.js";
 import * as uikit from "../lib/uiKit/uiKit.js";
 import { blobify } from "../lib/blobify.js";
@@ -17,6 +22,7 @@ declare global {
 			directory: string,
 			args: any[]
 		) => BackgroundProcess;
+		Popup: new (directory: string, args: any[]) => Popup;
 		sysimport: any;
 		processes: Process[];
 		env: typeof env;
@@ -36,6 +42,7 @@ await uikit.init();
 // allow processes to access this
 window.Application = Application;
 window.BackgroundProcess = BackgroundProcess;
+window.Popup = Popup;
 
 type executionFiletype = "sjs" | "js";
 

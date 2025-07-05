@@ -1,4 +1,4 @@
-export default class Popup extends Application {
+export default class Dialogue extends Popup {
 	init() {
 		this.params = {
 			type: this.args[0] || "log",

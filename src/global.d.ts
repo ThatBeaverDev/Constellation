@@ -15,6 +15,7 @@ declare global {
 			directory: string,
 			args: any[]
 		) => executables.BackgroundProcess;
+		Popup: new (directory: string, args: any[]) => executables.Popup;
 	}
 
 	const env: typeof envType;
@@ -22,4 +23,5 @@ declare global {
 	const BackgroundProcess: new (
 		directory: string
 	) => executables.BackgroundProcess;
+	const Popup: new (directory: string) => executables.Popup;
 }
