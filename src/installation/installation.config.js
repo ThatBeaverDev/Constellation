@@ -13,13 +13,6 @@ export const files = {
 		directory: "/System/CoreExecutables/com.constellation.finder"
 	},
 
-	// test app
-	"/demoApp.idx": {
-		type: "jsonFilesIndex",
-		directory:
-			"/System/CoreExecutables/com.constellation.ApplicationFoundation"
-	},
-
 	// apps system
 	"/build/apps/apps.js": "/System/CoreComponents/apps.js",
 
