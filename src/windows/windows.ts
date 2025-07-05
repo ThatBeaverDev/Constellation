@@ -47,7 +47,11 @@ let diffY: number = 0;
 let oldX: number;
 let oldY: number;
 
-function clamp(n: number, min: number, max: number) {
+function clamp(n: number | undefined, min: number, max: number) {
+	if (n == undefined) {
+		return 0;
+	}
+
 	if (n < min) {
 		return min;
 	}
@@ -255,18 +259,18 @@ export class Window {
 		}
 	}
 
-	move(x = 0, y = 0, z?: number) {
+	move(x?: number, y?: number, z?: number) {
 		const clamped = {
 			x: clamp(x, 0, window.innerWidth - this.dimensions.width),
 			y: clamp(y, 0, window.innerHeight - this.dimensions.height)
 		};
 
-		this.container.dataset.left = String(clamped.x);
-		this.container.dataset.top = String(clamped.y);
+		if (x !== undefined) this.container.dataset.left = String(clamped.x);
+		if (y !== undefined) this.container.dataset.top = String(clamped.y);
 		if (z !== undefined) this.container.dataset.zIndex = String(z);
 
-		this.position.left = x;
-		this.position.top = y;
+		if (x !== undefined) this.position.left = x;
+		if (y !== undefined) this.position.top = y;
 		if (z !== undefined) this.position.zIndex = z;
 
 		this.reposition();
