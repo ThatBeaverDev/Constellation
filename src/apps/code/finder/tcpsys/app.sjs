@@ -1,10 +1,5 @@
 const fsDisplayLib = await env.include("/System/CoreLibraries/pathicon.sjs");
 
-const mod = (n, modulus) => {
-	let result = n % modulus;
-	if (result / modulus < 0) result += modulus;
-	return result;
-};
 const clamp = (n, min, max) => {
 	if (n < min) {
 		return min;
