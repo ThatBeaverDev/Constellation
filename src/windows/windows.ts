@@ -240,7 +240,7 @@ export class Window {
 		const left = c.dataset.left + "px";
 		const top = c.dataset.top + "px";
 
-		const zIndex = String(Number(c.dataset.zIndex) - initTime);
+		const zIndex = String(c.dataset.zIndex);
 
 		if (c.style.width !== width) {
 			c.style.width = width;
@@ -350,6 +350,7 @@ function getWindowOfId(id: number) {
 	}
 }
 
+export let windowTilingNumber = 0;
 export function focusWindow(id: number) {
 	const target = getWindowOfId(id);
 
@@ -368,7 +369,11 @@ export function focusWindow(id: number) {
 	// focus our window
 	focus = id;
 	target.container.classList.add("focused");
-	target.move(target.position.left, target.position.top, Date.now());
+	target.move(
+		target.position.left,
+		target.position.top,
+		windowTilingNumber++
+	);
 }
 
 // Add this function anywhere appropriate (e.g., near `newWindow`)

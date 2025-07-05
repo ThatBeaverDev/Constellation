@@ -67,15 +67,16 @@ export class Application extends Process {
 
 export class BackgroundProcess extends Process {}
 
+let popupNo = 25000;
 export class Popup extends Application {
 	constructor(directory: string, args: any[]) {
 		super(directory, args);
 
 		const startTime = Date.now();
-		this.renderer.window.move(undefined, undefined, startTime * 5);
+		this.renderer.window.move(undefined, undefined, popupNo++);
 
 		this.windowPositioningInterval = setInterval(() => {
-			this.renderer.window.move(undefined, undefined, startTime * 5);
+			this.renderer.window.move(undefined, undefined, popupNo++);
 		}, 3);
 	}
 
