@@ -1,4 +1,4 @@
-const fsDisplayLib = await env.include("/System/CoreLibraries/pathicon.sjs");
+const pathinf = await env.include("/System/CoreLibraries/pathinf.sjs");
 
 const clamp = (n, min, max) => {
 	if (n < min) {
@@ -167,7 +167,7 @@ export default class finder extends Application {
 			const obj = {};
 			obj.name = name;
 			obj.path = env.fs.relative(this.path, name);
-			obj.icon = fsDisplayLib.pathIcon(obj.path);
+			obj.icon = pathinf.pathIcon(obj.path);
 
 			return obj;
 		});
@@ -176,7 +176,7 @@ export default class finder extends Application {
 			obj.type = await env.fs.typeOfFile(obj.path);
 		}
 
-		const newIcon = await fsDisplayLib.pathIcon(this.path);
+		const newIcon = await pathinf.pathIcon(this.path);
 		if (newIcon !== this.icon) {
 			this.icon = newIcon;
 			this.renderer.setWindowIcon(this.icon);

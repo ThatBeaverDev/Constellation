@@ -1,3 +1,6 @@
+// libraries
+const windowsAPI = await env.include("/System/windows.js");
+
 export async function cd(parent, directory = "~") {
 	const target = env.fs.relative(parent.terminalPath, directory);
 
@@ -5,7 +8,7 @@ export async function cd(parent, directory = "~") {
 		await ls(parent, target);
 
 		parent.terminalPath = target;
-	} catch (e) {
+	} catch {
 		return directory + " is not a valid directory!";
 	}
 }
@@ -137,8 +140,6 @@ export async function mkdir(parent, directory) {
 
 	return undefined;
 }
-
-const windowsAPI = await env.include("/System/windows.js");
 
 export function windows(parent, intent) {
 	switch (intent) {

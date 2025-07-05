@@ -17,10 +17,11 @@ export const files = {
 	"/build/apps/apps.js": "/System/CoreComponents/apps.js",
 
 	// libraries
-	"/src/syslib/pathicon.sjs": "/System/CoreLibraries/pathicon.sjs",
+	"/src/syslib/pathinf.sjs": "/System/CoreLibraries/pathinf.sjs",
 	"/src/syslib/keyboardUtils.sjs": "/System/CoreLibraries/keyboardUtils.sjs",
 	"/src/syslib/userFileSelector.sjs":
 		"/System/CoreLibraries/userFileSelector.sjs",
+	"/src/syslib/blob.sjs": "/System/CoreLibraries/blob.sjs",
 
 	// init system
 	"/build/apps/build/com.constellation.CoreExecutable.idx": {

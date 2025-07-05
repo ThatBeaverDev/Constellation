@@ -43,8 +43,6 @@ async function main() {
 	const testMode =
 		new URL(window.location.href).searchParams.get("test") == "true";
 
-	await windows.init();
-
 	const firstBoot = (await fs.readFile("/sysarc.json")) == undefined;
 	if (firstBoot) {
 		await installer.install();
