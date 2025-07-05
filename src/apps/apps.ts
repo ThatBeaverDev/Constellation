@@ -118,10 +118,9 @@ export async function execute(directory: string, args: any[] = []) {
 		live.executing = false;
 	} catch (e) {
 		showPrompt(
-			"error",
-			"Application Error" +
-				(live.renderer.window.name || live.directory) +
-				" has crashed.",
+			"warning",
+			(live.renderer.window.name || live.directory) +
+				" quit unexpectedly.",
 			e
 		);
 
