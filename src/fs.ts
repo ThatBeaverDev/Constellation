@@ -1,3 +1,4 @@
+// @ts-expect-error
 const BrowserFS = window.BrowserFS;
 
 BrowserFS.configure(
@@ -30,7 +31,7 @@ BrowserFS.configure(
 			}
 		}
 	},
-	(e) => {
+	(e: Error) => {
 		if (e) {
 			console.error(e);
 		}
@@ -38,9 +39,15 @@ BrowserFS.configure(
 );
 
 const fs = BrowserFS.BFSRequire("fs");
+
+declare global {
+	interface Window {
+		rawFS: any;
+	}
+}
 window.rawFS = fs;
 
-const writeFile = async (directory, content) => {
+const writeFile = async (directory: string, content: string) => {
 	let written = false;
 
 	await fs.writeFile(directory, content, () => {
@@ -51,18 +58,18 @@ const writeFile = async (directory, content) => {
 		const interval = setInterval(() => {
 			if (written == true) {
 				clearInterval(interval);
-				resolve();
+				resolve(undefined);
 				return;
 			}
 		});
 	});
 };
 
-const readFile = async (directory) => {
+const readFile = async (directory: string): Promise<string | undefined> => {
 	let read = false;
-	let content = undefined;
+	let content: string;
 
-	fs.readFile(directory, "utf8", (_, data) => {
+	fs.readFile(directory, "utf8", (_: any, data: string, _2: any) => {
 		read = true;
 		content = data;
 	});
@@ -78,11 +85,11 @@ const readFile = async (directory) => {
 	});
 };
 
-const readdir = async (directory) => {
-	let ls = undefined;
+const readdir = async (directory: string) => {
+	let ls: string[];
 	let listed = false;
 
-	fs.readdir(directory, (_, data) => {
+	fs.readdir(directory, (_: any, data: string[]) => {
 		ls = data;
 		listed = true;
 	});
@@ -98,11 +105,11 @@ const readdir = async (directory) => {
 	});
 };
 
-const stat = async (directory) => {
-	let stats = undefined;
+const stat = async (directory: string) => {
+	let stats: any;
 	let ok = false;
 
-	fs.stat(directory, (_, data) => {
+	fs.stat(directory, (_: any, data: any) => {
 		stats = data;
 		ok = true;
 	});
@@ -118,7 +125,7 @@ const stat = async (directory) => {
 	});
 };
 
-export const relative = (base = "/", target) => {
+export const relative = (base = "/", target: string) => {
 	if (target.startsWith("/")) return target;
 
 	const baseParts = base.split("/").filter(Boolean);
@@ -145,6 +152,5 @@ const main = {
 	relative,
 	stat
 };
-window.fs = fs;
 
 export default main;
