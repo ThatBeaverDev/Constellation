@@ -17,6 +17,7 @@ export default defineConfig([
 				env: "readonly",
 				Application: "readonly",
 				BackgroundProcess: "readonly",
+				Popup: "readonly",
 				exports: "writable"
 			}
 		},

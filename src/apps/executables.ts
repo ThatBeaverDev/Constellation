@@ -66,3 +66,24 @@ export class Application extends Process {
 }
 
 export class BackgroundProcess extends Process {}
+
+export class Popup extends Application {
+	constructor(directory: string, args: any[]) {
+		super(directory, args);
+
+		const startTime = Date.now();
+		this.renderer.window.move(undefined, undefined, startTime * 5);
+
+		this.windowPositioningInterval = setInterval(() => {
+			this.renderer.window.move(undefined, undefined, startTime * 5);
+		}, 3);
+	}
+
+	windowPositioningInterval: number;
+
+	exit() {
+		clearInterval(this.windowPositioningInterval);
+
+		super.exit();
+	}
+}
