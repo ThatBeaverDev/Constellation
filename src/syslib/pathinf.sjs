@@ -525,3 +525,99 @@ export async function pathIcon(directory) {
 			return "file";
 	}
 }
+
+export async function pathMime(directory) {
+	const stats = await env.fs.stat(directory);
+
+	if (!stats.ok) {
+		return;
+	}
+
+	const isDir = await stats.data.isDirectory();
+
+	if (isDir) {
+		throw new Error("Folders cannot have a MIME type.");
+	}
+
+	if (directory.split(".").length == 1) {
+		// no file extension
+		return "application/octet-stream";
+	}
+
+	const extension = directory.textAfterAll(".");
+
+	switch (extension) {
+		case "png":
+			return "image/png";
+		case "jpg":
+		case "jpeg":
+			return "image/jpeg";
+		case "js":
+		case "mjs":
+		case "cjs":
+		case "sjs":
+			return "text/javascript";
+		case "json":
+			return "application/json";
+	}
+
+	return "text/plain";
+}
+
+export async function pathSize(directory) {
+	const stat = await env.fs.stat(directory);
+
+	const original = Number(stat.data.size) / 8;
+	let size = Number(original);
+	let unit = 0;
+
+	while (size > 1024) {
+		size /= 1024;
+		unit++;
+	}
+
+	switch (unit) {
+		case 0:
+			return {
+				bytes: original,
+				value: size,
+				units: "bytes"
+			};
+		case 1:
+			return {
+				bytes: original,
+				value: size,
+				units: "kibibytes"
+			};
+		case 2:
+			return {
+				bytes: original,
+				value: size,
+				units: "mebibytes"
+			};
+		case 3:
+			return {
+				bytes: original,
+				value: size,
+				units: "gibibytes"
+			};
+		case 4:
+			return {
+				bytes: original,
+				value: size,
+				units: "tebibytes"
+			};
+		case 5:
+			return {
+				bytes: original,
+				value: size,
+				units: "pebibytes"
+			};
+		default:
+			return {
+				bytes: original,
+				value: original,
+				units: "bytes"
+			};
+	}
+}
