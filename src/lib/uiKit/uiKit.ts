@@ -210,7 +210,6 @@ export class Renderer {
 		uikitIcon: (x = 0, y = 0, name = "circle-help", scale = 1) => {
 			const icon = getIcon(name);
 
-			icon.id = String(window.renderID++);
 			icon.style.cssText = `left: ${x}px; top: ${y}px; width: ${24 * scale}px; height: ${24 * scale}px;`;
 
 			this.window.body.appendChild(icon);
