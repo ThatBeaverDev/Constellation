@@ -1,5 +1,4 @@
 import { focus, newWindow, Window } from "../../windows/windows.js";
-import "./favicon.js";
 import { getIcon } from "../lucide.js";
 import { getTextWidth } from "./calcWidth.js";
 import { Process } from "../../apps/executables.js";
