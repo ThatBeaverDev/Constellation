@@ -24,7 +24,7 @@ type constellationConfiguration = {
 };
 
 const isLocalhost = window.location.hostname == "localhost";
-const baseWallpaperURL = isLocalhost ? "/pics/Originals/" : "/pics/";
+const baseWallpaperURL = isLocalhost ? "/wallpapers/Originals/" : "/wallpapers/";
 
 if (isLocalhost) {
 	console.log("localhost detected - using 4K wallpapers.");
