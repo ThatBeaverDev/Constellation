@@ -451,24 +451,7 @@ export class Renderer {
 		this.mustRedraw = true;
 	};
 
-	commit = () => {
-		this.windowWidth = this.window.container.clientWidth;
-		this.windowWidth = this.window.container.clientHeight;
-
-		// if the app or some other system has demanded a redraw, we don't cancel no matter that
-		if (!this.mustRedraw) {
-			// exit if the content is the same
-			if (this.steps.length == this.displayedSteps.length) {
-				const steps = JSON.stringify(this.steps);
-				const displayedSteps = JSON.stringify(this.displayedSteps);
-				if (steps == displayedSteps) {
-					return;
-				}
-			}
-		}
-		// prevent infinite redraws
-		this.mustRedraw = false;
-
+	private deleteElements() {
 		// remove all event listeners
 		this.controller.abort();
 
@@ -492,6 +475,27 @@ export class Renderer {
 
 		// just make sure everything is gone
 		this.window.body.innerHTML = "";
+	}
+
+	commit = () => {
+		this.windowWidth = this.window.container.clientWidth;
+		this.windowWidth = this.window.container.clientHeight;
+
+		// if the app or some other system has demanded a redraw, we don't cancel no matter that
+		if (!this.mustRedraw) {
+			// exit if the content is the same
+			if (this.steps.length == this.displayedSteps.length) {
+				const steps = JSON.stringify(this.steps);
+				const displayedSteps = JSON.stringify(this.displayedSteps);
+				if (steps == displayedSteps) {
+					return;
+				}
+			}
+		}
+		// prevent infinite redraws
+		this.mustRedraw = false;
+
+		this.deleteElements();
 
 		// add the elements
 		for (const item of this.steps) {
@@ -513,4 +517,10 @@ export class Renderer {
 			this.items.push(live);
 		}
 	};
+
+	terminate() {
+		this.deleteElements();
+
+		this.window.remove();
+	}
 }
