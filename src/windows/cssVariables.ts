@@ -4,7 +4,8 @@ let live: HTMLElement;
 
 // default variables
 const vars: any = {
-	"wallpaper-url": `url("${conf.wallpaper}")`
+	"wallpaper-url": `url("${conf.wallpaper}")`,
+	"wallpaper-position": conf.wallpaperPosition
 };
 
 export function initialiseStyles() {
@@ -26,9 +27,9 @@ export function setCSSVariable(key: string, value: string) {
 
 function refreshCSS() {
 	// construct css
-	let css = ":root {";
+	let css = ":root {\n";
 	for (const [key, value] of Object.entries(vars)) {
-		const t = "--" + key + ": " + value + ";";
+		const t = "\t--" + key + ": " + value + ";\n";
 		css += t;
 	}
 	css += "}";
