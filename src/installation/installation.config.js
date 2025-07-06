@@ -10,7 +10,7 @@ export const files = {
 	// finder app
 	"/build/apps/build/com.constellation.finder.idx": {
 		type: "jsonFilesIndex",
-		directory: "/System/CoreExecutables/com.constellation.finder"
+		directory: "/System/CoreExecutables/Finder.appl"
 	},
 
 	// apps system
@@ -26,13 +26,13 @@ export const files = {
 	// init system
 	"/build/apps/build/com.constellation.CoreExecutable.idx": {
 		type: "jsonFilesIndex",
-		directory: "/System/CoreExecutables/com.constellation.CoreExecutable"
+		directory: "/System/CoreExecutables/Launch.backgr"
 	},
 
 	// terminal
 	"/build/apps/build/com.constellation.terminal.idx": {
 		type: "jsonFilesIndex",
-		directory: "/System/CoreExecutables/com.constellation.terminal"
+		directory: "/System/CoreExecutables/Terminal.appl"
 	},
 
 	// remapper
@@ -43,12 +43,12 @@ export const files = {
 	// Popup
 	"/build/apps/build/com.constellation.popup.idx": {
 		type: "jsonFilesIndex",
-		directory: "/System/CoreExecutables/com.constellation.popup"
+		directory: "/System/CoreExecutables/Popup.appl"
 	},
 	// Settings
 	"/build/apps/build/com.constellation.settings.idx": {
 		type: "jsonFilesIndex",
-		directory: "/Applications/com.constellation.settings"
+		directory: "/Applications/Settings.appl"
 	},
 
 	// windowing files
