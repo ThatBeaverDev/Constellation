@@ -10,11 +10,11 @@ export class Process {
 		this.args = args;
 	}
 
-	directory: string;
+	readonly directory: string;
 	readonly id: number;
-	args: any[];
+	readonly args: any[];
 	data: any;
-	startTime: number = Date.now();
+	readonly startTime: number = Date.now();
 
 	executing: boolean = false;
 
