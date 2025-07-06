@@ -137,7 +137,6 @@ export async function showPrompt(
 	if (popup.data == undefined) {
 		throw new Error("Popupapp at " + popupDirectory + " does not exist?");
 	} else {
-		console.log(popup);
 		await execute(popupDirectory, [type, title, title, description]);
 	}
 }
