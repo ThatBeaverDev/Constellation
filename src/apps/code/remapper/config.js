@@ -3,5 +3,6 @@ export default {
 	description: "The keyboard remapping tool for Constellation",
 	category: "Productivity",
 	author: "ThatBeaverDev",
-	version: 1
+	version: 1,
+	icon: "keyboard"
 };

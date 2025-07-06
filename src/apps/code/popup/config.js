@@ -3,5 +3,6 @@ export default {
 	description: "a GUI Popup",
 	category: "Developer",
 	author: "ThatBeaverDev",
-	version: 1
+	version: 1,
+	icon: "scroll-text"
 };

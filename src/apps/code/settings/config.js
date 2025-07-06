@@ -3,5 +3,6 @@ export default {
 	description: "System Configuration Settings",
 	category: "System",
 	author: "ThatBeaverDev",
-	version: 1
+	version: 1,
+	icon: "cog"
 };

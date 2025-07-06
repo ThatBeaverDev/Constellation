@@ -4,5 +4,6 @@ export default {
 		"Constellation's initialisation process, used to start the system.",
 	category: "Productivity",
 	author: "ThatBeaverDev",
-	version: 1
+	version: 1,
+	icon: "binary"
 };
