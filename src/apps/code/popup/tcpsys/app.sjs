@@ -1,5 +1,12 @@
 export default class Dialogue extends Popup {
 	init() {
+		this.renderer.window.rename(this.args[1] || "Popup");
+		this.renderer.setWindowIcon("scroll-text");
+
+		if (this.args.length == 0) {
+			throw new Error("Popup initialised with no params.");
+		}
+
 		this.params = {
 			type: this.args[0] || "log",
 			title: this.args[1] || "",
@@ -7,16 +14,14 @@ export default class Dialogue extends Popup {
 			error: this.args[3] || ""
 		};
 
-		this.renderer.window.rename(this.args[1]);
-
 		switch (this.params.type) {
 			case "log":
 				this.icon = "scroll-text";
 				break;
 			case "warning":
-				this.icon = "message-circle-alert";
+				this.icon = "triangle-alert";
 			case "error":
-				this.icon = "message-circle-warning";
+				this.icon = "octagon-x";
 				break;
 			default:
 				this.icon = "circle-question-mark";
@@ -28,9 +33,9 @@ export default class Dialogue extends Popup {
 	frame() {
 		this.renderer.clear();
 
-		this.renderer.text(60, 12, this.params.description, 20);
-		this.renderer.text(0, 60, this.params.error.stack);
-		this.renderer.icon(0, 0, this.icon, 2);
+		this.renderer.text(85, 37, this.params.description, 20);
+		this.renderer.text(85, 85, String(this.params.error));
+		this.renderer.icon(25, 25, this.icon, 2);
 
 		this.renderer.commit();
 	}
