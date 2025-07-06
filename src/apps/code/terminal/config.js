@@ -3,5 +3,6 @@ export default {
 	description: "Constellation's builtin Terminal",
 	category: "Productivity",
 	author: "ThatBeaverDev",
-	version: 1
+	version: 1,
+	icon: "square-terminal"
 };

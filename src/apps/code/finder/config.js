@@ -3,5 +3,6 @@ export default {
 	description: "Constellation's Default Files Explorer",
 	category: "Productivity",
 	author: "ThatBeaverDev",
-	version: 1
+	version: 1,
+	icon: "folder-open"
 };
