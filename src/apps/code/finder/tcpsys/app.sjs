@@ -185,12 +185,16 @@ export default class finder extends Application {
 
 	async frame() {
 		// pipe messages (for picker)
-		if (this.pipes.recieve !== undefined) {
-			for (const i in this.pipes.recieve) {
-				const item = this.pipes.recieve[0];
-				if (typeof item !== "object") continue;
+		if (this.pipes !== undefined) {
+			// only check this if we have a pipes value
+			if (this.pipes.recieve !== undefined) {
+				// loop through messages
+				for (const i in this.pipes.recieve) {
+					const item = this.pipes.recieve[0];
+					if (typeof item !== "object") continue;
 
-				this.pipes.recieve.splice(0, 1);
+					this.pipes.recieve.splice(0, 1);
+				}
 			}
 		}
 
