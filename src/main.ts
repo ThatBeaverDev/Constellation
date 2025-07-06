@@ -59,9 +59,7 @@ async function main() {
 		await test.default();
 	}
 
-	await apps.execute(
-		"/System/CoreExecutables/com.constellation.CoreExecutable"
-	);
+	await apps.execute("/System/CoreExecutables/Launch.backgr");
 
 	setInterval(async () => {
 		await apps.run();
