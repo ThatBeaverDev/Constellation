@@ -1,7 +1,5 @@
-import { BackgroundProcess, Process } from "./executables.js";
+import { BackgroundProcess, Process } from "../apps/executables.js";
 import { focus, windows } from "../windows/windows.js";
-import conf from "../constellation.config.js";
-import fs from "../fs.js";
 
 export const keyboardShortcuts: any = {};
 
