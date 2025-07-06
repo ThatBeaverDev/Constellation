@@ -52,27 +52,49 @@ const pkg = {
 	directories: []
 };
 
-if (params.incrementor !== undefined) {
-	const incrementDir = path.resolve(process.cwd(), args[0], "packages.json");
+async function incrementor(result) {
+	if (params.incrementor !== undefined) {
+		const incrementDir = path.resolve(
+			process.cwd(),
+			args[0],
+			"packages.json"
+		);
 
-	let content;
+		let content;
 
-	try {
-		content = JSON.parse((await fs.readFile(incrementDir)).toString());
-	} catch {
-		content = { packages: 0 };
+		try {
+			content = JSON.parse((await fs.readFile(incrementDir)).toString());
+
+			// check if the indexes are the same
+			try {
+				const oldIndex = (await fs.readFile(output)).toString();
+
+				// if they are the same, don't increment
+				if (oldIndex == result) {
+					return;
+				}
+			} catch {}
+
+		} catch {
+			content = { packages: 0 };
+		}
+
+		content.packages++;
+
+		await fs.writeFile(incrementDir, JSON.stringify(content, null, 4));
 	}
-
-	content.packages++;
-
-	await fs.writeFile(incrementDir, JSON.stringify(content, null, 4));
 }
 
 // walk the folder
-async function walk(directory) {
+async function walk(directory, isRoot = false) {
 	const ls = await fs.readdir(directory);
 
 	for (const item of ls) {
+		if (item == "package.json") {
+			if (isRoot) {
+				continue;
+			}
+		}
 		const dir = path.resolve(directory, item);
 
 		const stat = await fs.stat(dir);
@@ -83,7 +105,7 @@ async function walk(directory) {
 		if (isDir) {
 			// folder
 			pkg.directories.push(relative);
-			await walk(dir);
+			await walk(dir, false);
 		} else {
 			// file
 			pkg.files[relative] = await fs.readFile(dir, { encoding: "utf8" });
@@ -91,10 +113,12 @@ async function walk(directory) {
 	}
 }
 
-await walk(input);
+await walk(input, true);
 
 // stringify it
-const result = JSON.stringify(pkg, null, 4);
+const result = JSON.stringify(pkg, null, 8);
+
+incrementor(result);
 
 await fs.writeFile(output, result);
 console.log("App packaged to '\x1b[32m" + output + "\x1b[0m' successfully!");
