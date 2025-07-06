@@ -33,11 +33,16 @@ export default class terminalUI extends Application {
 		const cmdregDir = env.fs.relative(this.directory, "./lib/cmdreg.sjs");
 		this.cmdreg = await env.include(cmdregDir);
 
-		this.renderer.window.rename("Terminal");
-		this.renderer.setWindowIcon("square-terminal");
 		this.logs = [];
 		this.terminalPath = "/";
 
+		if (this.args.length !== 0) {
+			this.exit(await this.execute(this.args[0]));
+			return;
+		}
+
+		this.renderer.window.rename("Terminal");
+		this.renderer.setWindowIcon("square-terminal");
 		this.scroll = 0;
 		this.displayedLogs = 50;
 		this.tick = 50;
