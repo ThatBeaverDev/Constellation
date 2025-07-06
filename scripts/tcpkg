@@ -52,49 +52,11 @@ const pkg = {
 	directories: []
 };
 
-async function incrementor(result) {
-	if (params.incrementor !== undefined) {
-		const incrementDir = path.resolve(
-			process.cwd(),
-			args[0],
-			"packages.json"
-		);
-
-		let content;
-
-		try {
-			content = JSON.parse((await fs.readFile(incrementDir)).toString());
-
-			// check if the indexes are the same
-			try {
-				const oldIndex = (await fs.readFile(output)).toString();
-
-				// if they are the same, don't increment
-				if (oldIndex == result) {
-					return;
-				}
-			} catch {}
-
-		} catch {
-			content = { packages: 0 };
-		}
-
-		content.packages++;
-
-		await fs.writeFile(incrementDir, JSON.stringify(content, null, 4));
-	}
-}
-
 // walk the folder
-async function walk(directory, isRoot = false) {
+async function walk(directory) {
 	const ls = await fs.readdir(directory);
 
 	for (const item of ls) {
-		if (item == "package.json") {
-			if (isRoot) {
-				continue;
-			}
-		}
 		const dir = path.resolve(directory, item);
 
 		const stat = await fs.stat(dir);
@@ -113,12 +75,10 @@ async function walk(directory, isRoot = false) {
 	}
 }
 
-await walk(input, true);
+await walk(input);
 
 // stringify it
 const result = JSON.stringify(pkg, null, 8);
-
-incrementor(result);
 
 await fs.writeFile(output, result);
 console.log("App packaged to '\x1b[32m" + output + "\x1b[0m' successfully!");
