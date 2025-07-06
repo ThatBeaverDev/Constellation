@@ -1,38 +1,11 @@
 import { getIcon } from "../lib/lucide.js";
-import conf from "../constellation.config.js";
 import { Application } from "../apps/executables.js";
 import { terminate } from "../apps/apps.js";
+import * as css from "./cssVariables.js";
 
-// variables
-const vars = {
-	"wallpaper-url": `url("${conf.wallpaper}")`
-};
-
-// construct css
-let css = ":root {";
-for (const [key, value] of Object.entries(vars)) {
-	const t = "--" + key + ": " + value + ";";
-	css += t;
-}
-css += "}";
-
-// construct style element
-const style = document.createElement("style");
-style.textContent = css;
-
-// add to body
-document.body.appendChild(style);
-
-// windowing
+// constants
 export const EDGE_THRESHOLD = 8;
 export let windowTiling = false;
-
-export function setWindowTilingMode(enabled: boolean) {
-	if (typeof windowTiling !== "boolean")
-		throw new Error("input was not of type boolean.");
-
-	windowTiling = enabled;
-}
 
 export const minHeight = 25;
 export const minWidth = 100;
@@ -40,13 +13,30 @@ export const minWidth = 100;
 export let focus: any;
 export let target: Window | undefined = undefined;
 
-export function init() {}
+export const windows: Window[] = [];
+// @ts-expect-error
+window.windows = windows;
 
+// others
 let diffX: number = 0;
 let diffY: number = 0;
 let oldX: number;
 let oldY: number;
-const initTime = Date.now();
+
+let winID = 0;
+
+export let windowTilingNumber = 0;
+
+// init css styles
+css.initialiseStyles();
+export const setCSSVariable = css.setCSSVariable;
+
+export function setWindowTilingMode(enabled: boolean) {
+	if (typeof windowTiling !== "boolean")
+		throw new Error("input was not of type boolean.");
+
+	windowTiling = enabled;
+}
 
 function clamp(n: number | undefined, min: number, max: number) {
 	if (n == undefined) {
@@ -106,7 +96,6 @@ function windowButton(elem: HTMLElement, svg: string, scale: number = 1) {
 	return elem;
 }
 
-let winID = 0;
 export class Window {
 	constructor(name: string, Application: Application) {
 		this.name = name;
@@ -338,10 +327,6 @@ export class Window {
 	}
 }
 
-export const windows: Window[] = [];
-// @ts-expect-error
-window.windows = windows;
-
 function getWindowOfId(id: number) {
 	for (const window of windows) {
 		if (window.winID == id) {
@@ -350,7 +335,6 @@ function getWindowOfId(id: number) {
 	}
 }
 
-export let windowTilingNumber = 0;
 export function focusWindow(id: number) {
 	const target = getWindowOfId(id);
 
@@ -446,7 +430,7 @@ export function newWindow(title: string, ApplicationObject: Application) {
 	};
 }
 
-let lastKnownWindowMode: boolean | undefined; // undefined so that we definetly initialise the mode we are in.
+let lastKnownWindowMode: boolean | undefined; // undefined so that we definitely initialise the mode we are in.
 export function reapplyStyles() {
 	lastKnownWindowMode = undefined;
 }
