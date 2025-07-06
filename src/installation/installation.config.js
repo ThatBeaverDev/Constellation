@@ -50,6 +50,11 @@ export const files = {
 		type: "jsonFilesIndex",
 		directory: "/Applications/Settings.appl"
 	},
+	// Search
+	"/build/apps/build/com.constellation.search.idx": {
+		type: "jsonFilesIndex",
+		directory: "/Applications/Search.appl"
+	},
 
 	// windowing files
 	"/src/windows/tiling.css": "/System/windows/tiling.css",

@@ -24,6 +24,8 @@ compile() {
     # Build System Settings
     ./scripts/tcpkg src/apps/code/settings build/apps/build/com.constellation.settings.idx -override=true
 
+    # Build keystone search
+    ./scripts/tcpkg src/apps/code/keystone build/apps/build/com.constellation.search.idx -override=true
 }
 
 daemon() {
