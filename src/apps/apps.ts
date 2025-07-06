@@ -48,10 +48,16 @@ window.Popup = Popup;
 type executionFiletype = "sjs" | "js";
 
 export async function execute(directory: string, args: any[] = []) {
-	const get = async (dir: string) => {
+	const get = async (dir: string, throwIfEmpty: Boolean = true) => {
 		const rel = fs.relative(directory, dir);
 
-		return await fs.readFile(rel);
+		const content = await fs.readFile(rel);
+
+		if (throwIfEmpty && content == undefined) {
+			throw new Error(rel + " is empty!");
+		}
+
+		return content;
 	};
 
 	// get the app config
@@ -127,7 +133,10 @@ export async function showPrompt(
 ) {
 	const popup = await env.fs.readFile(popupDirectory + "/config.js");
 
-	if (popup.data !== undefined) {
+	if (popup.data == undefined) {
+		throw new Error("Popupapp at " + popupDirectory + " does not exist?");
+	} else {
+		console.log(popup);
 		await execute(popupDirectory, [type, title, title, description]);
 	}
 }
