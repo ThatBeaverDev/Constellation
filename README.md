@@ -1,5 +1,9 @@
 # Constellation
 
+<img src="https://raw.githubusercontent.com/ThatBeaverDev/Constellation/refs/heads/dev/logos/Banner.png" alt="Constellation banner logo" width="100%"/>
+<br>
+<br>
+
 [![GitHub release](https://img.shields.io/github/release/ThatBeaverDev/Constellation.svg)](https://github.com/ThatBeaverDev/Constellation/releases)
 [![License](https://img.shields.io/github/license/ThatBeaverDev/Constellation)](https://github.com/ThatBeaverDev/Constellation/blob/main/LICENSE)
 [![Latest Version](https://img.shields.io/github/package-json/v/ThatBeaverDev/Constellation)](https://github.com/ThatBeaverDev/Constellation)
