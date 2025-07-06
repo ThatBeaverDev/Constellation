@@ -91,8 +91,6 @@ export async function writeFiles() {
 			case "binary": {
 				content = await downloadAndConvert(location);
 
-				console.log(content);
-
 				await fs.writeFile(directory, content);
 
 				break;

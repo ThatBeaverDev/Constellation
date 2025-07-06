@@ -2,7 +2,7 @@ const windows = await env.include("/System/windows.js");
 
 export default class initialiser extends BackgroundProcess {
 	async init() {
-		const onstart = ["/System/CoreExecutables/com.constellation.finder"];
+		const onstart = ["/System/CoreExecutables/Finder.appl"];
 
 		for (const app of onstart) {
 			env.exec(app);

@@ -22,6 +22,7 @@ export const files = {
 	"/src/syslib/userFileSelector.sjs":
 		"/System/CoreLibraries/userFileSelector.sjs",
 	"/src/syslib/blob.sjs": "/System/CoreLibraries/blob.sjs",
+	"/src/lib/external/fzf.js": "/System/CoreLibraries/fzf.sjs",
 
 	// init system
 	"/build/apps/build/com.constellation.CoreExecutable.idx": {
@@ -38,7 +39,7 @@ export const files = {
 	// remapper
 	"/build/apps/build/com.constellation.remapper.idx": {
 		type: "jsonFilesIndex",
-		directory: "/System/CoreExecutables/com.constellation.remapper"
+		directory: "/System/CoreExecutables/Remapper.appl"
 	},
 	// Popup
 	"/build/apps/build/com.constellation.popup.idx": {
