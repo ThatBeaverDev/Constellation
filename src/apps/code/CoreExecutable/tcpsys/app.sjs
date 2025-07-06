@@ -87,39 +87,6 @@ export default class initialiser extends BackgroundProcess {
 	}
 
 	async search() {
-		const checkDir = async (directory, name) => {
-			const list = (await env.fs.listDirectory(directory)).data;
-
-			if (list.includes(name)) {
-				return env.fs.relative(directory, name);
-			}
-
-			for (const item of list) {
-				if (item.endsWith("." + name)) {
-					return env.fs.relative(directory, item);
-				}
-			}
-		};
-
-		// TODO: REAL SEARCH UI
-
-		// eslint-disable-next-line
-		const choice = prompt("Enter the application name:");
-
-		const sys = await checkDir("/System/CoreExecutables", choice);
-
-		if (sys !== undefined) {
-			env.exec(sys);
-			return;
-		}
-
-		// eslint-disable-next-line
-		alert("App " + choice + " was not found.");
-
-		//const user = await checkDir("~/Applications", choice)
-		//
-		//if (sys !== undefined) {
-		//	env.exec(sys)
-		//}
+		await env.exec("/Applications/Search.appl");
 	}
 }
