@@ -112,20 +112,11 @@ export async function execute(directory: string, args: any[] = []) {
 	// add to the processes list
 	processes.push(live);
 
-	try {
-		live.executing = true;
-		await live.init();
-		live.executing = false;
-	} catch (e) {
-		showPrompt(
-			"warning",
-			(live.renderer.window.name || live.directory) +
-				" quit unexpectedly.",
-			e
-		);
+	await procExec(live, "init");
 
-		await terminate(live);
-	}
+	return {
+		promise: AppWaitingObject(live)
+	};
 }
 
 export async function showPrompt(
@@ -160,27 +151,24 @@ export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
 
 let popupDirectory = "/System/CoreExecutables/com.constellation.popup";
 
-async function procExec(proc: Process) {
+async function procExec(
+	proc: Process,
+	subset: "init" | "frame" | "terminate" = "frame"
+) {
 	try {
-		if (proc.executing == true) {
-			return;
-		}
-
 		proc.executing = true;
-		await proc.frame();
+		await proc[subset]();
 		proc.executing = false;
 	} catch (e) {
-		console.error(e);
-		const popup = await env.fs.readFile(popupDirectory + "/config.js");
+		console.warn(e);
 
-		if (popup.data !== undefined) {
-			await execute(popupDirectory, [
-				"error",
-				"Application Error",
-				"Application at " + proc.directory + " has crashed.",
-				e
-			]);
-		}
+		let name =
+			proc?.directory ||
+			// @ts-expect-error
+			proc?.renderer?.window?.name ||
+			Object.getPrototypeOf(proc).constructor.name;
+
+		showPrompt("warning", `${name} quit unexpectedly.`, e);
 
 		await terminate(proc);
 	}
