@@ -171,10 +171,10 @@ async function procExec(
 		console.warn(e);
 
 		let name =
-			proc?.directory ||
 			// @ts-expect-error
 			proc?.renderer?.window?.name ||
-			Object.getPrototypeOf(proc).constructor.name;
+			Object.getPrototypeOf(proc).constructor.name ||
+			proc?.directory;
 
 		showPrompt("warning", `${name} quit unexpectedly.`, e.stack);
 
