@@ -16,7 +16,7 @@ export default class KeystoneSearch extends Popup {
 		this.searchInterval = setInterval(async () => {
 			const query = this.renderer.getTextboxContent();
 
-			this.search(query)
+			this.search(query);
 		}, 500);
 
 		this.ok = true;
@@ -82,10 +82,10 @@ export default class KeystoneSearch extends Popup {
 						this.selector--;
 						break;
 					case "keyboardShortcutTrigger-Open": {
-						const item = this.rendering[this.selector]
+						const item = this.rendering[this.selector];
 
-						env.exec(item.directory)
-						this.exit()
+						env.exec(item.directory);
+						this.exit();
 						break;
 					}
 					default:
@@ -128,7 +128,7 @@ export default class KeystoneSearch extends Popup {
 
 			this.renderer.icon(0, y, itm.icon);
 
-			const pre = this.selector == idx ? "> " : "  "
+			const pre = this.selector == idx ? "> " : "  ";
 
 			this.renderer.button(30, y, pre + (itm.name || itm.directory));
 			y += 27.5;
@@ -138,6 +138,6 @@ export default class KeystoneSearch extends Popup {
 	}
 
 	terminate() {
-		clearInterval(this.searchInterval)
+		clearInterval(this.searchInterval);
 	}
 }
