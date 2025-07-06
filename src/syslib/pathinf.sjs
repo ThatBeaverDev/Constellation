@@ -1,9 +1,19 @@
+const applicationExtensions = ["appl", "backgr"];
+
+async function getAppConfig(directory) {
+	const appConf = await env.include(env.fs.relative(directory, "config.js"));
+	// get the real data
+	return appConf?.default;
+}
+
 export async function pathIcon(directory) {
 	const stats = await env.fs.stat(directory);
 
 	if (!stats.ok) {
 		return;
 	}
+
+	const extension = directory.textAfterAll(".");
 
 	const isDir = await stats.data.isDirectory();
 
@@ -12,8 +22,32 @@ export async function pathIcon(directory) {
 		switch (name) {
 			case ".git":
 				return "folder-git-2";
-			default:
+			default: {
+				if (applicationExtensions.includes(extension)) {
+					// let's try and extract the app's own icon
+
+					try {
+						const config = await getAppConfig(directory);
+						// get the icon
+						const icon = config?.icon;
+
+						if (icon !== undefined) {
+							return icon;
+						}
+					} catch {
+						// return a default
+						return "app-window-mac";
+					}
+					// return a default
+					return "app-window-mac";
+				}
+
+				if (name.endsWith(".backgr")) {
+					return "file-terminal";
+				}
+
 				return "folder";
+			}
 		}
 	}
 
@@ -21,8 +55,6 @@ export async function pathIcon(directory) {
 		// no file extension
 		return "file";
 	}
-
-	const extension = directory.textAfterAll(".");
 
 	switch (extension) {
 		case "py":
@@ -524,6 +556,22 @@ export async function pathIcon(directory) {
 		default:
 			return "file";
 	}
+}
+
+export async function pathName(directory) {
+	const ext = directory.textAfterAll(".");
+
+	if (applicationExtensions.includes(ext)) {
+		// app
+		const config = await getAppConfig(directory);
+		const name = config?.name;
+
+		if (name !== undefined) {
+			return name;
+		}
+	}
+
+	return directory.textBeforeLast(".");
 }
 
 export async function pathMime(directory) {
