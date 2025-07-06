@@ -1,5 +1,6 @@
 // libraries
 const windowsAPI = await env.include("/System/windows.js");
+const pathinf = await env.include("/System/CoreLibraries/pathinf.sjs");
 
 export async function cd(parent, directory = "~") {
 	const target = env.fs.relative(parent.terminalPath, directory);
@@ -154,4 +155,34 @@ export function windows(parent, intent) {
 	}
 
 	return "Successfully updated window tiling format";
+}
+
+export async function wallpaper(parent, intent, ...args) {
+	switch (intent) {
+		case "set": {
+			const dir = env.fs.relative(parent.path, args[0]);
+
+			const content = await env.fs.readFile(dir);
+
+			const val = `url('${content.data}')`;
+
+			windowsAPI.setCSSVariable("wallpaper-url", val);
+
+			return;
+		}
+		default:
+			return "Wallpaper intents:\n  set - Sets the wallpaper\n  get - Gets the wallpaper";
+	}
+}
+
+export async function size(parent, directory) {
+	const dir = env.fs.relative(parent.path, directory);
+
+	const inf = await pathinf.pathSize(dir);
+
+	return Math.round(inf.value * 100) / 100 + " " + inf.units;
+}
+
+export function location(parent) {
+	return parent.directory;
 }
