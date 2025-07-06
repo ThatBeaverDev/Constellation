@@ -11,6 +11,7 @@ import { blobify } from "../lib/blobify.js";
 import * as env from "./api.js";
 import { focus, windows } from "../windows/windows.js";
 import { AppInitialisationError, ImportError } from "../errors.js";
+import AppWaitingObject from "./appWaitingObject.js";
 
 (globalThis as any).env = env;
 
