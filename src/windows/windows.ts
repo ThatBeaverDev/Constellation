@@ -1,4 +1,4 @@
-import { getIcon } from "../lib/lucide.js";
+import { getIcon } from "../lib/icons.js";
 import { Application } from "../apps/executables.js";
 import { terminate } from "../apps/apps.js";
 import * as css from "./cssVariables.js";
