@@ -52,6 +52,22 @@ const pkg = {
 	directories: []
 };
 
+if (params.incrementor !== undefined) {
+	const incrementDir = path.resolve(process.cwd(), args[0], "packages.json");
+
+	let content;
+
+	try {
+		content = JSON.parse((await fs.readFile(incrementDir)).toString());
+	} catch {
+		content = { packages: 0 };
+	}
+
+	content.packages++;
+
+	await fs.writeFile(incrementDir, JSON.stringify(content, null, 4));
+}
+
 // walk the folder
 async function walk(directory) {
 	const ls = await fs.readdir(directory);
