@@ -126,6 +126,7 @@ export async function execute(directory: string, args: any[] = []) {
 	};
 }
 
+let popupDirectory = "/System/CoreExecutables/Popup.appl";
 export async function showPrompt(
 	type: "error" | "warning" | "log",
 	title: string,
@@ -159,8 +160,6 @@ export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
 	processes.splice(idx, 1);
 }
 
-let popupDirectory = "/System/CoreExecutables/com.constellation.popup";
-
 async function procExec(
 	proc: Process,
 	subset: "init" | "frame" | "terminate" = "frame"
@@ -169,7 +168,7 @@ async function procExec(
 		proc.executing = true;
 		await proc[subset]();
 		proc.executing = false;
-	} catch (e) {
+	} catch (e: any) {
 		console.warn(e);
 
 		let name =
@@ -178,7 +177,7 @@ async function procExec(
 			proc?.renderer?.window?.name ||
 			Object.getPrototypeOf(proc).constructor.name;
 
-		showPrompt("warning", `${name} quit unexpectedly.`, e);
+		showPrompt("warning", `${name} quit unexpectedly.`, e.stack);
 
 		await terminate(proc);
 	}
