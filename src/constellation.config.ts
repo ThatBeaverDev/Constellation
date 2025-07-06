@@ -41,7 +41,7 @@ const obj: constellationConfiguration = {
 		"/System/windows.js": "/build/windows/windows.js",
 		"/System/uiKit.js": "/build/lib/uiKit/uiKit.js",
 		"/System/executables.js": "/build/apps/executables.js",
-		"/System/keybindings.js": "/build/apps/keyboardShortcuts.js",
+		"/System/keybindings.js": "/build/io/keyboardShortcuts.js",
 		"/System/CoreLibraries/fs.js": "/build/fs.js",
 		"/System/CoreLibraries/srcFS.js": "/build/lib/external/browserfs.js",
 		"/System/constellation.config.js": "/build/constellation.config.js"
