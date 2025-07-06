@@ -128,6 +128,45 @@ export default class terminalUI extends Application {
 		}
 	}
 
+	async execute(text) {
+		this.hasExecutedCommand = true;
+
+		if (text == "crash") {
+			this.willCrash = true;
+		}
+
+		const args = text.trim().split(" ");
+		const cmd = args.splice(0, 1)[0].trim();
+
+		this.logs.push(text);
+
+		const bin = this.getCommand(cmd);
+		if (typeof bin !== "function") {
+			this.logs.push(cmd + " is not a known or found command.");
+			return;
+		}
+
+		let logs;
+		try {
+			logs = (await bin(this, ...args)) || "";
+		} catch (error) {
+			logs = "<red>" + error.type + ": " + error.message + "</red>";
+		}
+		if (typeof logs !== "string") {
+			logs = stringify(logs);
+		}
+
+		if ([null, undefined, ""].includes(logs)) {
+			return;
+		}
+
+		for (const line of logs.split("\n")) {
+			this.logs.push(line);
+		}
+
+		this.render();
+	}
+
 	render() {
 		this.renderer.clear();
 
@@ -154,58 +193,8 @@ export default class terminalUI extends Application {
 			1000,
 			20,
 			"",
-			{
-				update: () => {},
-				enter: async (text) => {
-					this.hasExecutedCommand = true;
-
-					if (text.trim() == "crash") {
-						this.willCrash = true;
-					}
-
-					const args = text.trim().split(" ");
-					const cmd = args.splice(0, 1)[0].trim();
-
-					this.logs.push(text);
-
-					const bin = this.getCommand(cmd);
-					if (typeof bin !== "function") {
-						this.logs.push(
-							cmd + " is not a known or found command."
-						);
-						return;
-					}
-
-					let logs;
-					try {
-						logs = (await bin(this, ...args)) || "";
-					} catch (error) {
-						logs =
-							"<red>" +
-							error.type +
-							": " +
-							error.message +
-							"</red>";
-					}
-					if (typeof logs !== "string") {
-						logs = stringify(logs);
-					}
-
-					if ([null, undefined, ""].includes(logs)) {
-						return;
-					}
-
-					for (const line of logs.split("\n")) {
-						this.logs.push(line);
-					}
-
-					this.render();
-				}
-			},
-			{
-				isInvisible: true,
-				isEmpty: this.hasExecutedCommand
-			}
+			{ update: () => {}, enter: (text) => this.execute(text) },
+			{ isInvisible: true, isEmpty: this.hasExecutedCommand }
 		);
 
 		this.renderer.commit();
