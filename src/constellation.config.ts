@@ -3,6 +3,21 @@ type constellationConfiguration = {
 	version: string;
 	keyword: string;
 	wallpaper: string;
+	wallpaperPosition:
+		| "left top"
+		| "left center"
+		| "left bottom"
+		| "right top"
+		| "right center"
+		| "right bottom"
+		| "center top"
+		| "center center"
+		| "center bottom"
+		| "bottom"
+		| "center"
+		| "top"
+		| "left"
+		| "right";
 	importOverrides: Object;
 	userfile: string;
 	userDirectories: string[];
@@ -20,6 +35,7 @@ const obj: constellationConfiguration = {
 	version: "25.6.1a",
 	keyword: "Sahara",
 	wallpaper: baseWallpaperURL + "Walid Ahmad - Desert Night.jpg",
+	wallpaperPosition: "center",
 	importOverrides: {
 		"/System/apps.js": "/build/apps/apps.js",
 		"/System/windows.js": "/build/windows/windows.js",
