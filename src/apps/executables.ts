@@ -13,6 +13,8 @@ export class Process {
 	directory: string;
 	readonly id: number;
 	args: any[];
+	data: any;
+	startTime: number = Date.now();
 
 	executing: boolean = false;
 
@@ -47,8 +49,14 @@ export class Process {
 		registerKeyboardShortcut(this, name, key, modifiers);
 	};
 
-	exit() {
+	exit(value?: any) {
 		terminate(this);
+
+		for (const i in this) {
+			delete this[i];
+		}
+
+		this.data = value;
 	}
 }
 
@@ -63,6 +71,12 @@ export class Application extends Process {
 	// events
 	keydown() {}
 	keyup() {}
+
+	exit() {
+		this.renderer.terminate();
+
+		super.exit();
+	}
 }
 
 export class BackgroundProcess extends Process {}
