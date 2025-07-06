@@ -3,6 +3,32 @@ import fs from "../fs.js";
 
 import { files } from "./installation.config.js";
 
+function blobToDataURL(blob) {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+		reader.onload = () => resolve(reader.result);
+		reader.onerror = () => reject(reader.error);
+		reader.onabort = () => reject(new Error("Read aborted"));
+		reader.readAsDataURL(blob);
+	});
+}
+
+async function downloadAndConvert(URL) {
+	try {
+		const response = await fetch(URL);
+		console.log("fetchURL:get[URI] request sent to " + URL);
+		if (!response.ok) {
+			throw new Error("Failed to download the file.");
+		}
+		const blob = await response.blob();
+		const dataURL = await blobToDataURL(blob);
+		return dataURL;
+	} catch (error) {
+		console.warn(error);
+		return null;
+	}
+}
+
 export async function writeFiles() {
 	for (const location in files) {
 		let directory;
@@ -59,6 +85,15 @@ export async function writeFiles() {
 				for (const item of awaitFiles) {
 					await item;
 				}
+
+				break;
+			}
+			case "binary": {
+				content = await downloadAndConvert(location);
+
+				console.log(content);
+
+				await fs.writeFile(directory, content);
 
 				break;
 			}
