@@ -16,7 +16,6 @@ function blobToDataURL(blob) {
 async function downloadAndConvert(URL) {
 	try {
 		const response = await fetch(URL);
-		console.log("fetchURL:get[URI] request sent to " + URL);
 		if (!response.ok) {
 			throw new Error("Failed to download the file.");
 		}
@@ -79,7 +78,22 @@ export async function writeFiles() {
 					const data = json.files[path];
 					const relative = fs.relative(directory, path);
 
-					awaitFiles.push(await fs.writeFile(relative, data));
+					const type = data.type == undefined ? "string" : data.type;
+
+					switch (type) {
+						case "string":
+							awaitFiles.push(fs.writeFile(relative, data));
+							break;
+						case "binary":
+							awaitFiles.push(fs.writeFile(relative, data.data));
+							break;
+						default:
+							throw new Error(
+								"Unknown key type within files object: '" +
+									type +
+									"'"
+							);
+					}
 				}
 
 				for (const item of awaitFiles) {
