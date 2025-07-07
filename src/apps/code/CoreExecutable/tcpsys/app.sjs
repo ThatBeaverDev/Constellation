@@ -4,7 +4,7 @@ export default class initialiser extends BackgroundProcess {
 	async init() {
 		const onstart = [
 			"/System/CoreExecutables/Dock.appl",
-			"/System/CoreExecutables/Finder.appl"
+			"/Applications/Finder.appl"
 		];
 
 		for (const app of onstart) {

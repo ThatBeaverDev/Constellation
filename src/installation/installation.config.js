@@ -10,7 +10,7 @@ export const files = {
 	// finder app
 	"/build/apps/build/com.constellation.finder.idx": {
 		type: "jsonFilesIndex",
-		directory: "/System/CoreExecutables/Finder.appl"
+		directory: "/Applications/Finder.appl"
 	},
 
 	// apps system
@@ -27,13 +27,13 @@ export const files = {
 	// init system
 	"/build/apps/build/com.constellation.CoreExecutable.idx": {
 		type: "jsonFilesIndex",
-		directory: "/System/CoreExecutables/Launch.backgr"
+		directory: "/System/CoreExecutables/launchd.backgr"
 	},
 
 	// terminal
 	"/build/apps/build/com.constellation.terminal.idx": {
 		type: "jsonFilesIndex",
-		directory: "/System/CoreExecutables/Terminal.appl"
+		directory: "/Applications/Terminal.appl"
 	},
 
 	// remapper
