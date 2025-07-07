@@ -42,6 +42,7 @@ export default class finder extends Application {
 
 	async init() {
 		this.padding = 1;
+		this.name = "Finder";
 
 		const [
 			initialDirectory = "/",
