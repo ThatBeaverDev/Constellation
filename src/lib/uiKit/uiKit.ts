@@ -124,14 +124,6 @@ export class Renderer {
 		this.steps.push(obj);
 	};
 
-	table = (x: number, y: number, items: any) => {
-		const obj: step = {
-			type: "uikitTable",
-			args: [x, y, items]
-		};
-		this.steps.push(obj);
-	};
-
 	progressBar = (
 		x: number,
 		y: number,
@@ -359,8 +351,6 @@ export class Renderer {
 
 			return live;
 		},
-
-		uikitTable: () => {},
 
 		uikitProgressBar: (
 			x: number,
