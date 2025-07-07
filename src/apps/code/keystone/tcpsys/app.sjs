@@ -126,11 +126,18 @@ export default class KeystoneSearch extends Popup {
 		for (const idx in this.rendering) {
 			const itm = this.rendering[idx];
 
-			this.renderer.icon(0, y, itm.icon);
+			this.renderer.icon(10, y, itm.icon);
 
 			const pre = this.selector == idx ? "> " : "  ";
 
-			this.renderer.button(30, y, pre + (itm.name || itm.directory));
+			this.renderer.button(
+				40,
+				y,
+				pre + (itm.name || itm.directory),
+				async () => {
+					await env.exec(itm.directory);
+				}
+			);
 			y += 27.5;
 		}
 
