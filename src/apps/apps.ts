@@ -171,6 +171,7 @@ async function procExec(
 		console.warn(e);
 
 		let name =
+			proc?.name ||
 			// @ts-expect-error
 			proc?.renderer?.window?.name ||
 			Object.getPrototypeOf(proc).constructor.name ||
