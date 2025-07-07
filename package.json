@@ -8,21 +8,26 @@
 		"dev": "python3 -m http.server 5173",
 		"fix": "npx eslint src --fix && prettier src --write",
 		"build": "npm run fix && npm run build-nofix",
-		"build-apps": "prettier ./src/apps/code --write && npm run build-apps-postprettier",
+		"build-apps": "npm run clean-dsstore && prettier ./src/apps/code --write && npm run build-apps-postprettier",
 		"build-apps-postprettier": "/bin/bash scripts/package.sh",
 		"build-nofix": "npm run clean && npx tsgo && npm run build-apps-postprettier && node -e \"console.log(Date.now())\" > build/date.txt",
-		"clean": "rm -rf build/*",
+		"clean": "npm run clean-build && npm run clean-dsstore",
+		"clean-build": "rm -rf build/*",
+		"clean-dsstore": "find . -name .DS_Store -exec rm {} +",
 		"newenv": "npm install && git submodule update && npm run build && echo \"Open http://localhost:5173 to use Constellation!\" && npm run dev"
 	},
 	"devDependencies": {
 		"@eslint/js": "9.28.0",
 		"@stylistic/eslint-plugin": "4.4.1",
-		"@typescript/native-preview": "^7.0.0-dev.20250624.1",
+		"@typescript/native-preview": "7.0.0-dev.20250624.1",
 		"eslint": "9.28.0",
 		"prettier": "3.5.3"
 	},
 	"os": [
 		"darwin",
 		"linux"
-	]
+	],
+	"dependencies": {
+		"mime": "4.0.7"
+	}
 }
