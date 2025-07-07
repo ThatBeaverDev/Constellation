@@ -11,6 +11,7 @@ export class Process {
 	}
 
 	readonly directory: string;
+	name: string | undefined; // use to name an app without including a temporary window header
 	readonly id: number;
 	readonly args: any[];
 	data: any;
@@ -86,12 +87,13 @@ export class Popup extends Application {
 	constructor(directory: string, args: any[]) {
 		super(directory, args);
 
-		const startTime = Date.now();
-		this.renderer.window.move(undefined, undefined, popupNo++);
+		const no = popupNo++;
+
+		this.renderer.window.move(undefined, undefined, no);
 
 		this.windowPositioningInterval = setInterval(() => {
-			this.renderer.window.move(undefined, undefined, popupNo++);
-		}, 3);
+			this.renderer.window.move(undefined, undefined, no);
+		}, 500);
 	}
 
 	private windowPositioningInterval: number;
