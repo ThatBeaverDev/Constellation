@@ -32,7 +32,14 @@ export async function pathIcon(directory) {
 						const icon = config?.icon;
 
 						if (icon !== undefined) {
-							return icon;
+							const isDir = [".", "/"].includes(icon[0]);
+
+							if (isDir) {
+								const dir = env.fs.relative(directory, icon);
+								return dir;
+							} else {
+								return icon;
+							}
 						}
 					} catch {
 						// return a default

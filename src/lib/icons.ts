@@ -28,6 +28,8 @@ export function getIcon(name: string): HTMLElement {
 		icon = document.createElement("img");
 		icon.dataset.directory = name;
 		icon.className = "uikitIcon";
+		icon.width = 24;
+		icon.height = 24;
 
 		// async function called in a syncronous function, this continues after the initial call.
 		applySource(id, name);
@@ -53,12 +55,23 @@ async function applySource(id: string, directory: string) {
 		throw content.data;
 	}
 
-	const base64 = btoa(content.data);
-
-	const dataURI = "data:image/svg+xml;base64," + base64;
+	const type = directory.textAfterAll(".");
 
 	// @ts-expect-error // this will return an image element, trust me.
 	const icon: HTMLImageElement = document.getElementById(id);
+
+	let dataURI;
+	switch (type) {
+		case "svg":
+			// base64 it
+			const base64 = btoa(content.data);
+			// make the uri
+			dataURI = `data:image/svg+xml;base64,${base64}`;
+			break;
+		default:
+			dataURI = content.data;
+			icon.classList.add("nonSvgIcon");
+	}
 
 	try {
 		icon.src = dataURI;
