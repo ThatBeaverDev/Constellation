@@ -1,7 +1,9 @@
 /* uiKit styling */
 
 @media (prefers-color-scheme: dark) {
-	.uikitIcon {
+	img[src$=".svg"],
+	img[type^="data:image/svg+xml;base64,"],
+	img[src^="/icons/icons"] {
 		filter: invert(100%) brightness(10000%);
 	}
 }
