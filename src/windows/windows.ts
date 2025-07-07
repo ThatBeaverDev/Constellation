@@ -229,7 +229,8 @@ export class Window {
 		const left = c.dataset.left + "px";
 		const top = c.dataset.top + "px";
 
-		const zIndex = String(c.dataset.zIndex);
+		// go to the back if invisible window
+		const zIndex = this.visible ? String(c.dataset.zIndex) : "-1000";
 
 		if (c.style.width !== width) {
 			c.style.width = width;
@@ -275,6 +276,25 @@ export class Window {
 
 		this.reposition();
 	}
+
+	show() {
+		this.container.classList.remove("invisible");
+		this.visible = true;
+	}
+
+	hide() {
+		this.container.classList.add("invisible");
+		this.visible = false;
+	}
+
+	showHeader() {
+		this.header.style.height = "";
+	}
+	hideHeader() {
+		this.header.style.height = "0px";
+	}
+
+	visible: boolean = true;
 
 	dimensions = {
 		width: 0,
@@ -370,7 +390,14 @@ function updateWindows(newTilingConfig: boolean = false) {
 	const availableWidth = window.innerWidth - padding;
 	const availableHeight = window.innerHeight - padding;
 
-	const totalWindows = windows.length;
+	// get amount of windows which are visible.
+	let totalWindows = 0;
+	for (const win of windows) {
+		if (win.visible) {
+			totalWindows++;
+		}
+	}
+
 	const windowHeaderHeight = 25;
 
 	const blankSpace = totalWindows * windowHeaderHeight;
@@ -380,7 +407,7 @@ function updateWindows(newTilingConfig: boolean = false) {
 	windows.forEach((win, index) => {
 		win.container.style.resize = windowTiling ? "none" : "both";
 
-		if (newTilingConfig == true && windowTiling == false) {
+		if (newTilingConfig == true && windowTiling == false && win.visible) {
 			win.move(padding + x, padding + y, index);
 			win.resize(windowWidth, windowHeight);
 
@@ -394,13 +421,16 @@ function updateWindows(newTilingConfig: boolean = false) {
 	// window tiling features
 	if (!windowTiling) return;
 
-	const cols = Math.ceil(Math.sqrt(windows.length));
-	const rows = Math.ceil(windows.length / cols);
+	const cols = Math.ceil(Math.sqrt(totalWindows));
+	const rows = Math.ceil(totalWindows / cols);
 
 	const cellWidth = Math.floor(window.innerWidth / cols);
 	const cellHeight = Math.floor(window.innerHeight / rows);
 
 	windows.forEach((win, index) => {
+		// don't tile invisible windows.
+		if (!win.visible) return;
+
 		const col = index % cols;
 		const row = Math.floor(index / cols);
 

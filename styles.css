@@ -234,15 +234,15 @@ body {
 	border-radius: var(--window-border-radius);
 	overflow: hidden;
 
+	display: flex;
+	flex-direction: column;
+
 	animation-name: spawnWindow;
 	animation-timing-function: cubic-bezier(0.67, 0.2, 0.59, 1.2);
 	animation-duration: 0.2s;
 
 	/* box shadow */
 	box-shadow: 0 5px 10px #000000;
-
-	opacity: var(--window-unfocused-opacity);
-	filter: var(--window-unfocused-filters);
 
 	transition:
 		opacity var(--window-transition-duration) ease-in-out,
@@ -254,11 +254,31 @@ body {
 	filter: var(--window-focused-filters) !important;
 }
 
+.windowContainer:not(.invisible) {
+	opacity: var(--window-unfocused-opacity);
+	filter: var(--window-unfocused-filters);
+}
+
+.windowContainer.invisible {
+	background: none;
+	border: none;
+	padding: 0;
+	margin: 0;
+	box-shadow: none;
+	resize: none !important;
+	pointer-events: none;
+}
+
+.invisible > .windowHeader {
+	opacity: 0%;
+}
+
 .windowHeader {
 	background-color: var(--main-theme-secondary);
 
 	width: 100%;
 	height: var(--window-header-height);
+	overflow: hidden;
 
 	position: relative;
 	top: 0px;
@@ -325,6 +345,7 @@ body {
 	top: 0px;
 	width: 100vw;
 	height: 100vh;
+	z-index: -250000;
 
 	background-image: var(--wallpaper-url);
 	background-repeat: no-repeat;
@@ -338,7 +359,7 @@ body {
 	left: 0px;
 
 	width: 100%;
-	height: calc(100% - var(--window-header-height));
+	flex: 1 1 auto;
 
 	overflow: hidden;
 }
