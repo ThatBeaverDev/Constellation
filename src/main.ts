@@ -59,7 +59,7 @@ async function main() {
 		await test.default();
 	}
 
-	await apps.execute("/System/CoreExecutables/Launch.backgr");
+	await apps.execute("/System/CoreExecutables/launchd.backgr");
 
 	setInterval(async () => {
 		await apps.run();
