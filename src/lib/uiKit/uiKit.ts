@@ -159,6 +159,20 @@ export class Renderer {
 		this.steps.push(obj);
 	};
 
+	box = (
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		colour: string = "rgb(255, 255, 255)"
+	) => {
+		const obj: step = {
+			type: "uikitBox",
+			args: [x, y, width, height, colour]
+		};
+		this.steps.push(obj);
+	};
+
 	getTextWidth = getTextWidth;
 	setWindowIcon = (name: string) => {
 		const icon = getIcon(name);
@@ -421,6 +435,24 @@ export class Renderer {
 
 			area.value = String(this.textboxElem?.value || ""); // make the value stay
 			this.textboxElem = live;
+
+			return live;
+		},
+
+		uikitBox: (
+			x: number = 100,
+			y: number = 100,
+			width: number = 100,
+			height: number = 100,
+			colour: string = "rgb(255, 255, 255)"
+		) => {
+			const box = document.createElement("div");
+			box.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px; background-color: ${colour};`;
+			box.id = String(window.renderID++);
+			box.className = "uikitBox";
+
+			this.window.body.appendChild(box);
+			const live = document.getElementById(box.id);
 
 			return live;
 		}
