@@ -90,6 +90,7 @@ export class Popup extends Application {
 		const no = popupNo++;
 
 		this.renderer.window.move(undefined, undefined, no);
+		this.renderer.window.resizable = false;
 
 		this.windowPositioningInterval = setInterval(() => {
 			this.renderer.window.move(undefined, undefined, no);
