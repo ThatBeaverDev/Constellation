@@ -54,7 +54,6 @@ function clamp(n: number | undefined, min: number, max: number) {
 
 // event listeners
 window.addEventListener("mousemove", (e) => {
-	if (windowTiling) return;
 	if (diffX !== 0 && diffY !== 0) return; // insure the dragged window has recieved the movement before resetting it
 
 	const x = e.clientX;
@@ -179,9 +178,7 @@ export class Window {
 			target = this;
 		});
 		this.container.addEventListener("mousedown", (e) => {
-			if (!windowTiling) {
-				focusWindow(this.winID);
-			}
+			focusWindow(this.winID);
 		});
 
 		// buttons
@@ -215,10 +212,11 @@ export class Window {
 	maximiseButton: HTMLElement;
 	title: HTMLElement;
 	iconDiv: HTMLElement;
-	mouseState: any;
 	winID: number;
 	Application: Application;
 	resizeObserver: ResizeObserver;
+
+	resizable: boolean = true;
 
 	reposition() {
 		const c = this.container;
@@ -405,9 +403,15 @@ function updateWindows(newTilingConfig: boolean = false) {
 	const windowHeight = availableHeight - blankSpace;
 
 	windows.forEach((win, index) => {
-		win.container.style.resize = windowTiling ? "none" : "both";
+		win.container.style.resize =
+			windowTiling && !win.resizable ? "none" : "both";
 
-		if (newTilingConfig == true && windowTiling == false && win.visible) {
+		if (
+			newTilingConfig == true &&
+			windowTiling &&
+			!win.resizable &&
+			win.visible
+		) {
 			win.move(padding + x, padding + y, index);
 			win.resize(windowWidth, windowHeight);
 
@@ -429,7 +433,7 @@ function updateWindows(newTilingConfig: boolean = false) {
 
 	windows.forEach((win, index) => {
 		// don't tile invisible windows.
-		if (!win.visible) return;
+		if (!win.visible || !win.resizable) return;
 
 		const col = index % cols;
 		const row = Math.floor(index / cols);
@@ -508,7 +512,7 @@ setInterval(() => {
 		lastKnownWindowMode = windowTiling;
 	}
 
-	if (target !== undefined) {
+	if (target !== undefined && !windowTiling && target?.resizable == true) {
 		const pos = structuredClone(target.position);
 
 		pos.left += diffX;
