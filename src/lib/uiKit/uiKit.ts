@@ -440,7 +440,7 @@ export class Renderer {
 		},
 
 		uikitBox: (
-			x: number = 100,
+			x: number = 0,
 			y: number = 100,
 			width: number = 100,
 			height: number = 100,
