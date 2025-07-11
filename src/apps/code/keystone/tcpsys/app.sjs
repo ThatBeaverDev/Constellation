@@ -1,11 +1,51 @@
 const fzfLib = await env.include("/System/CoreLibraries/fzf.sjs");
 const pathinf = await env.include("/System/CoreLibraries/pathinf.sjs");
 
+async function index(
+	directories = [
+		"/System/CoreExecutables",
+		"/Applications" /*,
+			"~/Applications"*/
+	]
+) {
+	let files = [];
+	let names = [];
+
+	for (const directory of directories) {
+		const list = await env.fs.listDirectory(directory);
+		if (!list.ok) throw list.data;
+
+		const localNames = list.data.map((item) =>
+			env.fs.relative(directory, String(item))
+		);
+		names = [...localNames, ...names];
+
+		// build file objects
+		const localFiles = localNames.map((dir) => {
+			return {
+				directory: dir,
+				name: pathinf.pathName(dir),
+				icon: pathinf.pathIcon(dir)
+			};
+		});
+
+		for (const i in localFiles) {
+			localFiles[i].name = await localFiles[i].name;
+			localFiles[i].icon = await localFiles[i].icon;
+		}
+
+		files = [...localFiles, ...files];
+	}
+
+	return {
+		files,
+		names
+	};
+}
+
 export default class KeystoneSearch extends Popup {
 	async init() {
 		this.renderer.window.rename("Keystone Search");
-
-		await this.search("");
 
 		this.results = [];
 
@@ -13,37 +53,22 @@ export default class KeystoneSearch extends Popup {
 		this.registerKeyboardShortcut("ScrollUp", "ArrowUp", []);
 		this.registerKeyboardShortcut("Open", "Enter", []);
 
+		const obj = await index();
+		this.files = obj.names;
+		this.fileInfo = obj.files;
+
+		await this.search("");
 		this.searchInterval = setInterval(async () => {
 			const query = this.renderer.getTextboxContent();
 
-			this.search(query);
-		}, 500);
+			await this.search(query);
+		}, 250);
 
 		this.ok = true;
 	}
 
-	async search(
-		term,
-		directories = [
-			"/System/CoreExecutables",
-			"/Applications" /*,
-			"~/Applications"*/
-		]
-	) {
-		let bigList = [];
-
-		for (const directory of directories) {
-			const list = await env.fs.listDirectory(directory);
-			if (!list.ok) throw list.data;
-
-			const mapped = list.data.map((item) =>
-				env.fs.relative(directory, String(item))
-			);
-
-			bigList = [...bigList, ...mapped];
-		}
-
-		const fzf = new fzfLib.Fzf(bigList);
+	async search(term) {
+		const fzf = new fzfLib.Fzf(this.files);
 
 		// object stating item, score and start/end points
 		this.entries = fzf.find(term);
@@ -53,22 +78,24 @@ export default class KeystoneSearch extends Popup {
 		// prevent rendering
 		this.ok = false;
 
-		// icon info
+		// file info
 		this.rendering = this.results.map((item) => {
-			return {
-				directory: item,
-				name: item,
-				icon: undefined
-			};
+			for (const itm of this.fileInfo) {
+				if (itm.directory == item) {
+					return itm;
+				}
+			}
 		});
-
-		for (const itm of this.rendering) {
-			itm.name = await pathinf.pathName(itm.directory);
-			itm.icon = await pathinf.pathIcon(itm.directory);
-		}
 
 		// allow rendering again
 		this.ok = true;
+	}
+
+	selectItem(index = this.selector) {
+		const item = this.rendering[index];
+
+		env.exec(item.directory);
+		this.exit();
 	}
 
 	async onmessage(origin, intent) {
@@ -82,10 +109,7 @@ export default class KeystoneSearch extends Popup {
 						this.selector--;
 						break;
 					case "keyboardShortcutTrigger-Open": {
-						const item = this.rendering[this.selector];
-
-						env.exec(item.directory);
-						this.exit();
+						this.selectItem(this.selector);
 						break;
 					}
 					default:
@@ -117,7 +141,7 @@ export default class KeystoneSearch extends Popup {
 			40,
 			"Search for apps...",
 			{
-				update: () => {},
+				update: () => this.search,
 				enter: () => {}
 			}
 		);
@@ -135,7 +159,7 @@ export default class KeystoneSearch extends Popup {
 				y,
 				pre + (itm.name || itm.directory),
 				async () => {
-					await env.exec(itm.directory);
+					this.selectItem(idx);
 				}
 			);
 			y += 27.5;
