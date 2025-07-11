@@ -1,5 +1,5 @@
 import conf from "../constellation.config.js";
-import { blobify } from "../lib/blobify.js";
+import { blobifyDirectory } from "../lib/blobify.js";
 import realFS from "../fs.js";
 import { execute, showPrompt } from "./apps.js";
 import { ImportError } from "../errors.js";
@@ -261,15 +261,7 @@ export async function include(location: string): Promise<Object> {
 
 	switch (type) {
 		case "directory":
-			const content = await realFS.readFile(location);
-
-			if (content == undefined) {
-				throw new ImportError(
-					"Import source is empty at '" + location + "'"
-				);
-			}
-
-			url = blobify(content, "text/javascript");
+			url = await blobifyDirectory(location, "text/javascript");
 			break;
 	}
 
