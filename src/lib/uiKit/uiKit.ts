@@ -500,15 +500,13 @@ export class Renderer {
 
 	commit = () => {
 		this.windowWidth = this.window.container.clientWidth;
-		this.windowWidth = this.window.container.clientHeight;
+		this.windowHeight = this.window.container.clientHeight;
 
-		// if the app or some other system has demanded a redraw, we don't cancel no matter that
 		if (!this.mustRedraw) {
-			// exit if the content is the same
-			if (this.steps.length == this.displayedSteps.length) {
+			if (this.steps.length === this.displayedSteps.length) {
 				const steps = JSON.stringify(this.steps);
 				const displayedSteps = JSON.stringify(this.displayedSteps);
-				if (steps == displayedSteps) {
+				if (steps === displayedSteps) {
 					return;
 				}
 			}
