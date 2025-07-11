@@ -514,26 +514,61 @@ export class Renderer {
 		// prevent infinite redraws
 		this.mustRedraw = false;
 
-		this.deleteElements();
+		// Abort all listeners, but keep the elements unless they are removed
+		this.controller.abort();
+		this.controller = new AbortController();
+		this.signal = this.controller.signal;
 
-		// add the elements
-		for (const item of this.steps) {
-			this.displayedSteps.push(item);
+		const newItems: HTMLElement[] = [];
+		const newDisplayedSteps: typeof this.steps = [];
 
-			// get the creator
-			const creator = this.creators[item.type];
-			if (creator == undefined) {
-				throw new UIError(
-					"Creator is not defined for uikit Type " + item.type
-				);
+		for (let i = 0; i < this.steps.length; i++) {
+			const newStep = this.steps[i];
+			const oldStep = this.displayedSteps[i];
+			const oldElement = this.items[i];
+
+			let element: HTMLElement;
+
+			const stepChanged =
+				!oldStep ||
+				oldStep.type !== newStep.type ||
+				JSON.stringify(oldStep.args) !== JSON.stringify(newStep.args);
+
+			if (stepChanged) {
+				// Remove old element if needed
+				if (oldElement) oldElement.remove();
+
+				// Create new element
+				const creator = this.creators[newStep.type];
+				if (!creator) {
+					throw new UIError(
+						`Creator is not defined for uikit Type ${newStep.type}`
+					);
+				}
+
+				// @ts-ignore
+				element = creator(...newStep.args)!;
+			} else {
+				element = oldElement!;
 			}
 
-			// create the element
-			// @ts-ignore (it dislikes the destructuring operation on item.args, no idea how to fix it.)
-			const live = creator(...item.args)!;
+			newItems.push(element);
+			newDisplayedSteps.push(newStep);
+		}
 
-			// add it to the list
-			this.items.push(live);
+		// Remove any extra old elements
+		for (let i = this.steps.length; i < this.items.length; i++) {
+			const item = this.items[i];
+			if (item) item.remove();
+		}
+
+		this.items = newItems;
+		this.displayedSteps = newDisplayedSteps;
+
+		// Clear and re-add all (new or reused) elements
+		this.window.body.innerHTML = "";
+		for (const element of this.items) {
+			this.window.body.appendChild(element);
 		}
 	};
 
