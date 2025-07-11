@@ -7,7 +7,7 @@ import {
 } from "./executables.js";
 import fs from "../fs.js";
 import * as uikit from "../lib/uiKit/uiKit.js";
-import { blobify } from "../lib/blobify.js";
+import { blobify, translateAllBlobURIsToDirectories } from "../lib/blobify.js";
 import * as env from "./api.js";
 import { focus, windows } from "../windows/windows.js";
 import { AppInitialisationError, ImportError } from "../errors.js";
@@ -62,7 +62,7 @@ export async function execute(directory: string, args: any[] = []) {
 
 	// get the app config
 	const configSrc = await get("config.js");
-	const configBlob = blobify(configSrc, "text/javascript");
+	const configBlob = await blobify(configSrc, "text/javascript");
 	const config = (await import(configBlob)).default;
 
 	const allowedExtensions: executionFiletype[] = ["sjs", "js"];
@@ -177,7 +177,11 @@ async function procExec(
 			Object.getPrototypeOf(proc).constructor.name ||
 			proc?.directory;
 
-		showPrompt("warning", `${name} quit unexpectedly.`, e.stack);
+		showPrompt(
+			"warning",
+			`${name} quit unexpectedly.`,
+			translateAllBlobURIsToDirectories(e.stack)
+		);
 
 		await terminate(proc);
 	}
