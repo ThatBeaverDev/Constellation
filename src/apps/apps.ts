@@ -5,7 +5,7 @@ import {
 	Popup,
 	Process
 } from "./executables.js";
-import fs from "../fs.js";
+import fs from "../io/fs.js";
 import * as uikit from "../lib/uiKit/uiKit.js";
 import { blobify, translateAllBlobURIsToDirectories } from "../lib/blobify.js";
 import * as env from "./api.js";
