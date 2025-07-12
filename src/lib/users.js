@@ -1,5 +1,5 @@
 import * as log from "./logging.js";
-import config from "../constellation.config.js";
+import * as config from "../constellation.config.js";
 import fs from "../fs.js";
 import { sha512 } from "./crypto.js";
 
