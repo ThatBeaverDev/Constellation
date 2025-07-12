@@ -1,4 +1,4 @@
-import fs from "../fs.js";
+import fs from "../io/fs.js";
 
 import { folders } from "./installation.config.js";
 

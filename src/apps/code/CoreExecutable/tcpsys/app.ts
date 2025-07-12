@@ -27,7 +27,7 @@ export default class initialiser extends BackgroundProcess {
 		]);
 	}
 
-	onmessage(origin, intent) {
+	onmessage(origin: string, intent: string) {
 		switch (origin) {
 			case "/System/keyboardShortcuts.js":
 				switch (intent) {

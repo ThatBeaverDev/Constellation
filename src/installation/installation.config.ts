@@ -1,12 +1,13 @@
 // /Users, /System, /Applications and /Temporary are premounted and don't need to be created.
-export const folders = [
+export const folders: string[] = [
 	"/System/CoreExecutables",
 	"/System/CoreComponents",
 	"/System/CoreLibraries",
+	"/System/CoreLibraries/gitFiles",
 	"/System/windows"
 ];
 
-export const files = {
+export const files: any = {
 	// finder app
 	"/build/apps/build/com.constellation.finder.idx": {
 		type: "jsonFilesIndex",
@@ -17,12 +18,18 @@ export const files = {
 	"/build/apps/apps.js": "/System/CoreComponents/apps.js",
 
 	// libraries
-	"/src/syslib/pathinf.sjs": "/System/CoreLibraries/pathinf.sjs",
-	"/src/syslib/keyboardUtils.sjs": "/System/CoreLibraries/keyboardUtils.sjs",
-	"/src/syslib/userFileSelector.sjs":
-		"/System/CoreLibraries/userFileSelector.sjs",
-	"/src/syslib/blob.sjs": "/System/CoreLibraries/blob.sjs",
-	"/src/lib/external/fzf.js": "/System/CoreLibraries/fzf.sjs",
+	"/build/syslib/pathinf.js": "/System/CoreLibraries/pathinf.js",
+	"/build/syslib/keyboardUtils.js": "/System/CoreLibraries/keyboardUtils.js",
+	"/build/syslib/userFileSelector.js":
+		"/System/CoreLibraries/userFileSelector.js",
+	"/build/syslib/blob.js": "/System/CoreLibraries/blob.js",
+	"/build/lib/external/fzf.js": "/System/CoreLibraries/fzf.js",
+	// git
+	"/build/syslib/git.js": "/System/CoreLibraries/git.js",
+	"/build/lib/external/isomorphicgit/isomorphic-git.js":
+		"/System/CoreLibraries/gitFiles/isomorphic-git.js",
+	"/build/lib/external/isomorphicgit/http.js":
+		"/System/CoreLibraries/gitFiles/http.js",
 
 	// init system
 	"/build/apps/build/com.constellation.CoreExecutable.idx": {
@@ -41,10 +48,21 @@ export const files = {
 		type: "jsonFilesIndex",
 		directory: "/Applications/Remapper.appl"
 	},
+
+	// OrionIDE
+	"/build/apps/build/com.constellation.OrionIDE.idx": {
+		type: "jsonFilesIndex",
+		directory: "/Applications/OrionIDE.appl"
+	},
 	// Popup
 	"/build/apps/build/com.constellation.popup.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreExecutables/Popup.appl"
+	},
+	// Rotur
+	"/build/apps/build/com.rotur.rotur.idx": {
+		type: "jsonFilesIndex",
+		directory: "/Applications/Rotur.appl"
 	},
 	// Settings
 	"/build/apps/build/com.constellation.settings.idx": {
@@ -55,6 +73,11 @@ export const files = {
 	"/build/apps/build/com.constellation.search.idx": {
 		type: "jsonFilesIndex",
 		directory: "/Applications/Search.appl"
+	},
+	// Dock & Desktop
+	"/build/apps/build/com.constellation.dock.idx": {
+		type: "jsonFilesIndex",
+		directory: "/System/CoreExecutables/Dock.appl"
 	},
 
 	// windowing files

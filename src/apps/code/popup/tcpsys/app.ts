@@ -1,5 +1,13 @@
 export default class Dialogue extends Popup {
-	init() {
+	params!: {
+		type: string;
+		title: string;
+		description: string;
+		error: string;
+	};
+	icon: string = "circle-question-mark";
+
+	async init() {
 		this.renderer.window.rename(this.args[1] || "Popup");
 		this.renderer.setWindowIcon("scroll-text");
 
@@ -23,8 +31,6 @@ export default class Dialogue extends Popup {
 			case "error":
 				this.icon = "octagon-x";
 				break;
-			default:
-				this.icon = "circle-question-mark";
 		}
 
 		this.renderer.setWindowIcon(this.icon);

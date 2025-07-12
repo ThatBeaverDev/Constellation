@@ -6,26 +6,26 @@ compile() {
     mkdir -p build/apps/build
 
     # Build the files explorer
-    ./scripts/tcpkg src/apps/code/finder build/apps/build/com.constellation.finder.idx -override=true -incrementor=true
+    ./scripts/tcpkg build/apps/code/finder build/apps/build/com.constellation.finder.idx -override=true -incrementor=true
 
     # Build the CoreExecutable
-    ./scripts/tcpkg src/apps/code/CoreExecutable build/apps/build/com.constellation.CoreExecutable.idx -override=true -incrementor=true
+    ./scripts/tcpkg build/apps/code/CoreExecutable build/apps/build/com.constellation.CoreExecutable.idx -override=true -incrementor=true
 
     # Build Terminal
-    ./scripts/tcpkg src/apps/code/terminal build/apps/build/com.constellation.terminal.idx -override=true -incrementor=true
+    ./scripts/tcpkg build/apps/code/terminal build/apps/build/com.constellation.terminal.idx -override=true -incrementor=true
 
     # Build Remapper
-    ./scripts/tcpkg src/apps/code/remapper build/apps/build/com.constellation.remapper.idx -override=true -incrementor=true
+    ./scripts/tcpkg build/apps/code/remapper build/apps/build/com.constellation.remapper.idx -override=true -incrementor=true
 
     # Build Popup
-    ./scripts/tcpkg src/apps/code/popup build/apps/build/com.constellation.popup.idx -override=true -incrementor=true
+    ./scripts/tcpkg build/apps/code/popup build/apps/build/com.constellation.popup.idx -override=true -incrementor=true
 
 
     # Build System Settings
-    ./scripts/tcpkg src/apps/code/settings build/apps/build/com.constellation.settings.idx -override=true -incrementor=true
+    ./scripts/tcpkg build/apps/code/settings build/apps/build/com.constellation.settings.idx -override=true -incrementor=true
 
     # Build keystone search
-    ./scripts/tcpkg src/apps/code/keystone build/apps/build/com.constellation.search.idx -override=true -incrementor=true
+    ./scripts/tcpkg build/apps/code/keystone build/apps/build/com.constellation.search.idx -override=true -incrementor=true
 }
 
 daemon() {

@@ -1,11 +1,13 @@
 export async function selectFile(initialDirectory = "/") {
-	const sendingPipe = [];
-	const recievingPipe = [];
+	const sendingPipe: any[] = [];
+	const recievingPipe: any[] = [];
 
-	const app = await env.exec(
-		"/System/CoreExecutables/com.constellation.finder",
-		["/", "picker", sendingPipe, recievingPipe]
-	);
+	await env.exec("/System/CoreExecutables/com.constellation.finder", [
+		initialDirectory,
+		"picker",
+		sendingPipe,
+		recievingPipe
+	]);
 
 	sendingPipe.push("hk");
 

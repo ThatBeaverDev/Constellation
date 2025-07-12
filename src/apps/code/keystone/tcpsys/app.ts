@@ -1,5 +1,11 @@
-const fzfLib = await env.include("/System/CoreLibraries/fzf.sjs");
-const pathinf = await env.include("/System/CoreLibraries/pathinf.sjs");
+const fzfLib = await env.include("/System/CoreLibraries/fzf.js");
+const pathinf = await env.include("/System/CoreLibraries/pathinf.js");
+
+type fileInfo = {
+	directory: string;
+	name: string;
+	icon: string;
+};
 
 async function index(
 	directories = [
@@ -8,20 +14,20 @@ async function index(
 			"~/Applications"*/
 	]
 ) {
-	let files = [];
-	let names = [];
+	let files: fileInfo[] = [];
+	let names: string[] = [];
 
 	for (const directory of directories) {
 		const list = await env.fs.listDirectory(directory);
 		if (!list.ok) throw list.data;
 
-		const localNames = list.data.map((item) =>
+		const localNames = list.data.map((item: string) =>
 			env.fs.relative(directory, String(item))
 		);
 		names = [...localNames, ...names];
 
 		// build file objects
-		const localFiles = localNames.map((dir) => {
+		const localFiles = localNames.map((dir: string) => {
 			return {
 				directory: dir,
 				name: pathinf.pathName(dir),
@@ -44,10 +50,17 @@ async function index(
 }
 
 export default class KeystoneSearch extends Popup {
+	results: object[] = [];
+	files: string[] = [];
+	fileInfo: fileInfo[] = [];
+	searchInterval: number = 0;
+	ok: boolean = false;
+	entries: any;
+	rendering: any[] = [];
+	selector: number = 0;
+
 	async init() {
 		this.renderer.window.rename("Keystone Search");
-
-		this.results = [];
 
 		this.registerKeyboardShortcut("ScrollDown", "ArrowDown", []);
 		this.registerKeyboardShortcut("ScrollUp", "ArrowUp", []);
@@ -61,25 +74,32 @@ export default class KeystoneSearch extends Popup {
 		this.searchInterval = setInterval(async () => {
 			const query = this.renderer.getTextboxContent();
 
+			if (query == null) {
+				return;
+			}
+
 			await this.search(query);
 		}, 250);
 
 		this.ok = true;
 	}
 
-	async search(term) {
+	async search(term: string) {
 		const fzf = new fzfLib.Fzf(this.files);
 
 		// object stating item, score and start/end points
 		this.entries = fzf.find(term);
 		// just names
-		this.results = this.entries.map((result) => result.item);
+		this.results = this.entries.map((result: any) => {
+			return String(result.item);
+		});
 
 		// prevent rendering
 		this.ok = false;
 
 		// file info
-		this.rendering = this.results.map((item) => {
+		// @ts-expect-error // it refuses to believe that item is a string, even though above it is forced to be one. typical.
+		this.rendering = this.results.map((item: string) => {
 			for (const itm of this.fileInfo) {
 				if (itm.directory == item) {
 					return itm;
@@ -98,7 +118,7 @@ export default class KeystoneSearch extends Popup {
 		this.exit();
 	}
 
-	async onmessage(origin, intent) {
+	async onmessage(origin: string, intent: string) {
 		switch (origin) {
 			case "/System/keyboardShortcuts.js":
 				switch (intent) {
@@ -152,14 +172,14 @@ export default class KeystoneSearch extends Popup {
 
 			this.renderer.icon(10, y, itm.icon);
 
-			const pre = this.selector == idx ? "> " : "  ";
+			const pre = this.selector == Number(idx) ? "> " : "  ";
 
 			this.renderer.button(
 				40,
 				y,
 				pre + (itm.name || itm.directory),
 				async () => {
-					this.selectItem(idx);
+					this.selectItem(Number(idx));
 				}
 			);
 			y += 27.5;
@@ -168,7 +188,7 @@ export default class KeystoneSearch extends Popup {
 		this.renderer.commit();
 	}
 
-	terminate() {
+	async terminate() {
 		clearInterval(this.searchInterval);
 	}
 }

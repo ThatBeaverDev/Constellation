@@ -10,10 +10,10 @@
 		"outDir": "build",
 		"strict": true,
 		"lib": ["ES2022", "DOM", "DOM.Iterable"],
-		"sourceMap": true
+		"sourceMap": false
 	},
 	"include": ["src"],
-	"exclude": ["build", "src/apps/code/*", "src/lib/external/*"],
+	"exclude": ["build"],
 	"watchOptions": {
 		"watchFile": "useFsEvents",
 		"watchDirectory": "useFsEvents",
@@ -22,9 +22,7 @@
 		"excludeDirectories": [
 			"**/node_modules",
 			"build",
-			"src/apps/code/*",
-			"src/apps/build/*",
-			"src/lib/external/isomorphicgit/*"
+			"src/apps/build/*"
 		]
 	}
 }

@@ -1,6 +1,6 @@
-const pathinf = await env.include("/System/CoreLibraries/pathinf.sjs");
+const pathinf = await env.include("/System/CoreLibraries/pathinf.js");
 
-const clamp = (n, min, max) => {
+const clamp = (n: number, min: number, max: number) => {
 	if (n < min) {
 		return min;
 	}
@@ -11,12 +11,34 @@ const clamp = (n, min, max) => {
 	return n;
 };
 
+// https://stackoverflow.com/questions/39494689/is-it-possible-to-restrict-number-to-a-certain-range
+type Enumerate<
+	N extends number,
+	Acc extends number[] = []
+> = Acc["length"] extends N
+	? Acc[number]
+	: Enumerate<N, [...Acc, Acc["length"]]>;
+
+type IntRange<F extends number, T extends number> = Exclude<
+	Enumerate<T>,
+	Enumerate<F>
+>;
+
+type T = IntRange<20, 300>;
+
+type listing = {
+	name: string;
+	path: string;
+	icon: string;
+	type: string;
+};
+
 export default class finder extends Application {
-	textWidth(text) {
+	textWidth(text: string) {
 		return this.renderer.getTextWidth(text, 15, "monospace");
 	}
 
-	writeText(text) {
+	writeText(text: string) {
 		this.renderer.text(this.x, 3, text);
 
 		// padding
@@ -24,7 +46,7 @@ export default class finder extends Application {
 		this.x += this.padding;
 	}
 
-	drawIcon(name) {
+	drawIcon(name: string) {
 		this.renderer.icon(this.x, 0, name);
 
 		// padding
@@ -32,7 +54,7 @@ export default class finder extends Application {
 		this.x += this.padding;
 	}
 
-	drawButton(text, callback) {
+	drawButton(text: string, callback: Function) {
 		this.renderer.button(this.x, 3, text, callback);
 
 		// padding
@@ -40,10 +62,22 @@ export default class finder extends Application {
 		this.x += this.padding;
 	}
 
-	async init() {
-		this.padding = 1;
-		this.name = "Finder";
+	name: string = "Finder";
+	x: number = 0;
+	y: number = 0;
+	padding: number = 1;
+	type: any;
+	pipes!: {
+		recieve: any;
+		send: any;
+	};
+	path: string = "/";
+	selector: number = 0;
+	listing: listing[] = [];
+	location: string = "Constellation";
+	icon: string = "folder";
 
+	async init() {
 		const [
 			initialDirectory = "/",
 			mode = "app",
@@ -77,7 +111,7 @@ export default class finder extends Application {
 		}, 500);
 	}
 
-	onmessage(origin, intent) {
+	onmessage(origin: string, intent: string) {
 		switch (origin) {
 			case "/System/keyboardShortcuts.js":
 				switch (intent) {
@@ -112,7 +146,7 @@ export default class finder extends Application {
 					case "keyboardShortcutTrigger-Descend Directory": {
 						const obj = this.listing[this.selector];
 						this.cd(obj.path);
-						this.selector = undefined;
+						this.selector = 0;
 						break;
 					}
 					case "keyboardShortcutTrigger-Ascend Directory":
@@ -122,7 +156,7 @@ export default class finder extends Application {
 					case "keyboardShortcutTrigger-Select Directory":
 						// TODO: GRAPHICAL PROMPT
 						// eslint-disable-next-line
-						this.cd(prompt("Select a directory"));
+						this.cd(prompt("Select a directory") || "");
 						break;
 					default:
 						throw new Error(
@@ -135,7 +169,7 @@ export default class finder extends Application {
 		}
 	}
 
-	async cd(directory) {
+	async cd(directory: string) {
 		const oldDir = String(this.path);
 
 		if (oldDir !== directory) {
@@ -157,17 +191,22 @@ export default class finder extends Application {
 			return;
 		}
 
-		this.listing = list.data;
+		let tempListing = [];
+
+		tempListing = list.data;
 		if (dir !== "/") {
-			this.listing = ["..", ...this.listing];
+			tempListing = ["..", ...tempListing];
 		}
 
-		this.listing.sort();
+		tempListing.sort();
 
-		this.listing = await this.listing.map((name) => {
-			const obj = {};
-			obj.name = name;
-			obj.path = env.fs.relative(this.path, name);
+		tempListing = await tempListing.map((name: string) => {
+			const obj: listing = {
+				name,
+				path: env.fs.relative(this.path, name),
+				icon: "",
+				type: "none"
+			};
 			obj.icon = pathinf.pathIcon(obj.path);
 
 			return obj;
@@ -176,6 +215,8 @@ export default class finder extends Application {
 		for (const obj of this.listing) {
 			obj.type = await env.fs.typeOfFile(obj.path);
 		}
+
+		this.listing = tempListing;
 
 		const newIcon = await pathinf.pathIcon(this.path);
 		if (newIcon !== this.icon) {
@@ -233,7 +274,7 @@ export default class finder extends Application {
 			const name = String(obj.name).padEnd(25, " ");
 
 			// add a '> ' if the item is selected, else just '  ', so everything is on the same starting point
-			const text = this.selector == i ? "> " + name : "  " + name;
+			const text = this.selector == Number(i) ? "> " + name : "  " + name;
 
 			// render
 			this.renderer.button(
@@ -242,7 +283,7 @@ export default class finder extends Application {
 				text,
 				async () => {
 					// right click
-					if (this.selector == i) {
+					if (this.selector == Number(i)) {
 						switch (obj.type) {
 							case "directory":
 								await this.cd(obj.path);
@@ -267,7 +308,7 @@ export default class finder extends Application {
 								);
 						}
 					} else {
-						this.selector = i;
+						this.selector = Number(i);
 					}
 				},
 				async () => {

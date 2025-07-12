@@ -1,7 +1,7 @@
 const windows = await env.include("/System/windows.js");
 
 let parent;
-export function init(process) {
+export function init(process: any) {
 	parent = process;
 }
 
@@ -16,7 +16,7 @@ export default {
 			getValue: () => {
 				return windows.windowTiling;
 			},
-			setValue: (value) => {
+			setValue: (value: string) => {
 				// the windowTilingMode stores a boolean for whether we are the tiling mode.
 				const bool = value == "Tiling";
 

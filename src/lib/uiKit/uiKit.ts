@@ -23,6 +23,16 @@ interface step {
 
 interface textboxCallbackObject {}
 
+type uikitTextboxDefaultConfig = {
+	isInvisible?: boolean;
+	isEmpty: boolean;
+	fontSize?: number;
+};
+type uikitTextareaDefaultConfig = {
+	isInvisible?: boolean;
+	isEmpty?: boolean;
+};
+
 // class
 export class Renderer {
 	constructor(process: Process) {
@@ -68,8 +78,8 @@ export class Renderer {
 		x: number,
 		y: number,
 		string: string,
-		leftClickCallback: Function,
-		rightClickCallback: Function,
+		leftClickCallback: Function = () => {},
+		rightClickCallback: Function = () => {},
 		size: number = 15
 	) => {
 		const obj: step = {
@@ -85,7 +95,7 @@ export class Renderer {
 		height: number = 20,
 		backtext: string,
 		callbacks: textboxCallbackObject,
-		options = this.defaultConfig.uikitTextbox
+		options: uikitTextboxDefaultConfig = this.defaultConfig.uikitTextbox
 	) => {
 		if (this.textboxExists == true) {
 			throw new UIError("UI cannot have more than one textbox.");
@@ -144,7 +154,7 @@ export class Renderer {
 		width: number,
 		height: number,
 		callbacks: textboxCallbackObject,
-		options = this.defaultConfig.uikitTextarea
+		options: uikitTextareaDefaultConfig = this.defaultConfig.uikitTextarea
 	) => {
 		if (this.textboxExists == true) {
 			throw new UIError("UI cannot have more than one textbox.");
@@ -178,7 +188,6 @@ export class Renderer {
 		const icon = getIcon(name);
 		this.window.setIcon(icon);
 	};
-
 	defaultConfig = {
 		uikitTextbox: {
 			isInvisible: false,
@@ -187,8 +196,7 @@ export class Renderer {
 		},
 		uikitTextarea: {
 			isInvisible: false,
-			isEmpty: false,
-			codeHighlight: undefined
+			isEmpty: false
 		}
 	};
 

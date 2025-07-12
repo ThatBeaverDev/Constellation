@@ -20,22 +20,40 @@ export class Process {
 	executing: boolean = false;
 
 	// program flow
-	init(...any: any): Promise<any> {
-		return any;
-	}
-	frame(...any: any): Promise<any> {
-		return any;
-	}
-	terminate(...any: any): Promise<any> {
-		return any;
-	}
+	async init() {}
+	frame() {}
+	async terminate() {}
 
 	// events
-	keydown(...any: any) {
-		any;
+	keydown(
+		code: string,
+		metaKey: boolean,
+		altKey: boolean,
+		ctrlKey: boolean,
+		shiftKey: boolean,
+		repeat: boolean
+	): void | undefined | null {
+		code;
+		metaKey;
+		altKey;
+		ctrlKey;
+		shiftKey;
+		repeat;
 	}
-	keyup(...any: any) {
-		any;
+	keyup(
+		code: string,
+		metaKey: boolean,
+		altKey: boolean,
+		ctrlKey: boolean,
+		shiftKey: boolean,
+		repeat: boolean
+	): void | undefined | null {
+		code;
+		metaKey;
+		altKey;
+		ctrlKey;
+		shiftKey;
+		repeat;
 	}
 
 	onmessage(...any: any) {
@@ -69,14 +87,10 @@ export class Application extends Process {
 
 	renderer: Renderer;
 
-	// events
-	keydown() {}
-	keyup() {}
-
-	exit() {
+	exit(value?: any) {
 		this.renderer.terminate();
 
-		super.exit();
+		super.exit(value);
 	}
 }
 

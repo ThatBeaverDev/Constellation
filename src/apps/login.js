@@ -1,5 +1,7 @@
 import fs from "/../lib/fs.js";
 
+// I need to state that this is OLD and does NOT work anymore.
+
 export default class Login extends window.Process {
 	constructor() {
 		super();

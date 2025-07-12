@@ -1,10 +1,9 @@
 // convert anything to a string, NICELY (no [object Object] here)
-function stringify(content) {
+function stringify(content: object) {
 	const type = typeof content;
 
 	switch (type) {
 		case "object":
-		case "Object":
 			if (content instanceof HTMLElement) {
 				return content.outerHTML;
 			}
@@ -15,7 +14,7 @@ function stringify(content) {
 	}
 }
 
-const clamp = (n, min, max) => {
+const clamp = (n: number, min: number, max: number) => {
 	if (n < min) {
 		return min;
 	}
@@ -27,14 +26,20 @@ const clamp = (n, min, max) => {
 };
 
 export default class terminalUI extends Application {
+	ok: boolean = false;
+	cmdreg: any;
+	logs: string[] = [];
+	terminalPath: string = "/";
+	scroll: number = 0;
+	displayedLogs: number = 50;
+	tick: number = 50;
+	tick2: number = 0;
+	hasExecutedCommand: boolean = false;
+	willCrash: boolean = false;
+
 	async init() {
-		this.ok = false;
-
-		const cmdregDir = env.fs.relative(this.directory, "./lib/cmdreg.sjs");
+		const cmdregDir = env.fs.relative(this.directory, "./lib/cmdreg.js");
 		this.cmdreg = await env.include(cmdregDir);
-
-		this.logs = [];
-		this.terminalPath = "/";
 
 		if (this.args.length !== 0) {
 			this.exit(await this.execute(this.args[0]));
@@ -43,10 +48,6 @@ export default class terminalUI extends Application {
 
 		this.renderer.window.rename("Terminal");
 		this.renderer.setWindowIcon("square-terminal");
-		this.scroll = 0;
-		this.displayedLogs = 50;
-		this.tick = 50;
-		this.tick2 = 0;
 
 		this.registerKeyboardShortcut("Scroll Down", "ArrowDown", []);
 		this.registerKeyboardShortcut("Scroll Down (Fast)", "ArrowDown", [
@@ -60,7 +61,7 @@ export default class terminalUI extends Application {
 		this.ok = true;
 	}
 
-	getCommand(name) {
+	getCommand(name: string): Function {
 		switch (name) {
 			case "help":
 				return () =>
@@ -71,7 +72,7 @@ export default class terminalUI extends Application {
 		}
 	}
 
-	onmessage(origin, intent) {
+	onmessage(origin: string, intent: string) {
 		switch (origin) {
 			case "/System/keyboardShortcuts.js":
 				switch (intent) {
@@ -114,7 +115,14 @@ export default class terminalUI extends Application {
 		}
 	}
 
-	keydown(code) {
+	keydown(
+		code: string,
+		metaKey: boolean,
+		altKey: boolean,
+		ctrlKey: boolean,
+		shiftKey: boolean,
+		repeat: boolean
+	) {
 		switch (code) {
 			case "ArrowUp":
 			case "ArrowDown":
@@ -133,7 +141,7 @@ export default class terminalUI extends Application {
 		}
 	}
 
-	async execute(text) {
+	async execute(text: string) {
 		this.hasExecutedCommand = true;
 
 		if (text == "crash") {
@@ -154,7 +162,7 @@ export default class terminalUI extends Application {
 		let logs;
 		try {
 			logs = (await bin(this, ...args)) || "";
-		} catch (error) {
+		} catch (error: any) {
 			logs = "<red>" + error.type + ": " + error.message + "</red>";
 		}
 		if (typeof logs !== "string") {
@@ -198,7 +206,7 @@ export default class terminalUI extends Application {
 			1000,
 			20,
 			"",
-			{ update: () => {}, enter: (text) => this.execute(text) },
+			{ update: () => {}, enter: (text: string) => this.execute(text) },
 			{ isInvisible: true, isEmpty: this.hasExecutedCommand }
 		);
 

@@ -1,9 +1,9 @@
 import { InstallationError } from "../errors.js";
-import fs from "../fs.js";
+import fs from "../io/fs.js";
 
 import { files } from "./installation.config.js";
 
-function blobToDataURL(blob) {
+function blobToDataURL(blob: Blob) {
 	return new Promise((resolve, reject) => {
 		const reader = new FileReader();
 		reader.onload = () => resolve(reader.result);
@@ -13,7 +13,7 @@ function blobToDataURL(blob) {
 	});
 }
 
-async function downloadAndConvert(URL) {
+async function downloadAndConvert(URL: string) {
 	try {
 		const response = await fetch(URL);
 		if (!response.ok) {

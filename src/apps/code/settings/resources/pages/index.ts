@@ -1,7 +1,7 @@
 export const list = ["home", "windows"];
 
-export default async function (parent) {
-	const result = {};
+export default async function (parent: any) {
+	const result: any = {};
 
 	for (const page of list) {
 		const data = await env.include(
