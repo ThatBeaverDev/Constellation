@@ -1,6 +1,6 @@
 import * as installer from "./installation/index.js";
 
-import fs from "./fs.js";
+import fs from "./io/fs.js";
 
 import { isDev } from "./lib/isDev.js";
 import * as apps from "./apps/apps.js";

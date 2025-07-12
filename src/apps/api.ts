@@ -1,7 +1,7 @@
 import { developmentLogging } from "../constellation.config.js";
 import * as conf from "../constellation.config.js";
 import { blobifyDirectory } from "../lib/blobify.js";
-import realFS from "../fs.js";
+import realFS from "../io/fs.js";
 import { execute, showPrompt } from "./apps.js";
 import { ImportError } from "../errors.js";
 
