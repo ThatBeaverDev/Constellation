@@ -19,7 +19,8 @@ export default defineConfig([
 				BackgroundProcess: "readonly",
 				Popup: "readonly",
 				exports: "writable"
-			}
+			},
+			sourceType: "module"
 		},
 		rules: {
 			"no-constructor-return": "warn",

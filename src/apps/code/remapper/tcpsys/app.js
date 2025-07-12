@@ -28,7 +28,7 @@ export default class remapper extends Application {
 		this.refreshLoop = setInterval(this.refresh, 1000);
 
 		const keyboardUtils = await env.include(
-			"/System/CoreLibraries/keyboardUtils.sjs"
+			"/System/CoreLibraries/keyboardUtils.js"
 		);
 
 		this.translateKeyName = keyboardUtils.translateKeyName;

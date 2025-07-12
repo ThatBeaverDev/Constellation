@@ -1,6 +1,6 @@
 // libraries
 const windowsAPI = await env.include("/System/windows.js");
-const pathinf = await env.include("/System/CoreLibraries/pathinf.sjs");
+const pathinf = await env.include("/System/CoreLibraries/pathinf.js");
 
 export async function cd(parent, directory = "~") {
 	const target = env.fs.relative(parent.terminalPath, directory);

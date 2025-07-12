@@ -198,7 +198,6 @@ document.addEventListener("keydown", (event) => {
 	if (typeof fnc == "function") {
 		fnc.call(
 			proc,
-			// @ts-expect-error
 			event.code,
 			event.metaKey,
 			event.altKey,
@@ -237,7 +236,6 @@ document.addEventListener("keyup", (event) => {
 	if (typeof fnc == "function") {
 		fnc.call(
 			proc,
-			// @ts-expect-error
 			event.code,
 			event.metaKey,
 			event.altKey,

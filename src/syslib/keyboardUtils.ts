@@ -1,6 +1,6 @@
 const isMac = window.navigator.platform == "MacIntel";
 
-export function translateKeyName(key) {
+export function translateKeyName(key: KeyboardEvent["code"]) {
 	switch (key) {
 		case "AltLeft":
 			return "Left Alt";
@@ -100,7 +100,7 @@ export function translateKeyName(key) {
 
 		default:
 			console.debug(
-				"keyboardUtils.sjs : translateKeyName does not support key '" +
+				"keyboardUtils.js : translateKeyName does not support key '" +
 					key +
 					"' and has been forced to fallback."
 			);

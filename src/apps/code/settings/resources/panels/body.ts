@@ -1,9 +1,14 @@
 export default class body {
-	constructor(parent) {
+	constructor(parent: any) {
 		this.parent = parent;
 
 		this.init();
 	}
+
+	parent: any;
+	pages: any;
+	location: string = "home";
+	initialised: boolean = false;
 
 	async init() {
 		const dir = env.fs.relative(
@@ -18,7 +23,7 @@ export default class body {
 		this.initialised = true;
 	}
 
-	async renderStructure(struct) {
+	async renderStructure(struct: any) {
 		const title = struct.title;
 		const items = struct.items;
 

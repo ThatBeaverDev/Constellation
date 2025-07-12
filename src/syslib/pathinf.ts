@@ -1,12 +1,12 @@
 const applicationExtensions = ["appl", "backgr"];
 
-async function getAppConfig(directory) {
+async function getAppConfig(directory: string) {
 	const appConf = await env.include(env.fs.relative(directory, "config.js"));
 	// get the real data
 	return appConf?.default;
 }
 
-export async function pathIcon(directory) {
+export async function pathIcon(directory: string) {
 	const stats = await env.fs.stat(directory);
 
 	if (!stats.ok) {
@@ -18,7 +18,7 @@ export async function pathIcon(directory) {
 	const isDir = await stats.data.isDirectory();
 
 	if (isDir) {
-		const name = directory.split("/").pop();
+		const name: string = directory.split("/").pop()!;
 		switch (name) {
 			case ".git":
 				return "folder-git-2";
@@ -565,7 +565,7 @@ export async function pathIcon(directory) {
 	}
 }
 
-export async function pathName(directory) {
+export async function pathName(directory: string) {
 	const ext = directory.textAfterAll(".");
 
 	if (applicationExtensions.includes(ext)) {
@@ -581,7 +581,7 @@ export async function pathName(directory) {
 	return directory.textBeforeLast(".");
 }
 
-export async function pathMime(directory) {
+export async function pathMime(directory: string) {
 	const stats = await env.fs.stat(directory);
 
 	if (!stats.ok) {
@@ -619,7 +619,7 @@ export async function pathMime(directory) {
 	return "text/plain";
 }
 
-export async function pathSize(directory) {
+export async function pathSize(directory: string) {
 	const stat = await env.fs.stat(directory);
 
 	const original = Number(stat.data.size) / 8;

@@ -1,7 +1,7 @@
-import fs from "../fs.js";
+import fs from "../io/fs.js";
 import * as log from "../lib/logging.js";
 
-async function rmdir(dir) {
+async function rmdir(dir: string) {
 	const ls = await fs.readdir(dir);
 
 	if (ls == undefined) {

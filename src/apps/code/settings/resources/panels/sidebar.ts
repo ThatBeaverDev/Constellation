@@ -1,5 +1,7 @@
 export default class sidebar {
-	constructor(parent) {
+	parent: any;
+
+	constructor(parent: any) {
 		this.parent = parent;
 	}
 
@@ -13,7 +15,7 @@ export default class sidebar {
 			20,
 			"Search Settings...",
 			{
-				update: (key, oldContent) => {
+				update: (/*key, oldContent*/) => {
 					// TODO: search settings
 				}
 			},

@@ -85,7 +85,7 @@ export const fs = {
 
 	createFile: async function (directory: string): Promise<fsResponse> {
 		try {
-			await expectFileType(directory, undefined);
+			await expectFileType(directory, "none");
 
 			await realFS.writeFile(directory, "");
 			return {
@@ -178,7 +178,7 @@ export const fs = {
 		const stat = await fs.stat(directory);
 
 		if (!stat.ok) {
-			return undefined;
+			return "none";
 		}
 
 		const st = stat.data;
@@ -213,7 +213,7 @@ export const fs = {
 			return "symbolicLink";
 		}
 
-		return undefined;
+		return "none"; // no idea to be honest
 	},
 	relative: function (base: string, child: string): string {
 		return realFS.relative(base, child);
@@ -228,7 +228,7 @@ type directoryPointType =
 	| "file"
 	| "socket"
 	| "symbolicLink"
-	| undefined;
+	| "none";
 
 const expectFileType = async (
 	directory: string,
@@ -248,7 +248,7 @@ const expectFileType = async (
 	}
 };
 
-export async function include(location: string): Promise<Object> {
+export async function include(location: string): Promise<any> {
 	let url = location;
 
 	let type = location.includes("://") ? "URL" : "directory";
