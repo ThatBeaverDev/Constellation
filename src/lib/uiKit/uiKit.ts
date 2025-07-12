@@ -331,8 +331,6 @@ export class Renderer {
 				{ signal: this.signal }
 			);
 
-			if (focus == this.window.winID) live.focus();
-
 			if (options.isEmpty == false)
 				textbox.value = String(this.textboxElem?.value || ""); // make the value stay
 			this.textboxElem = live;
@@ -501,6 +499,10 @@ export class Renderer {
 	commit = () => {
 		this.windowWidth = this.window.container.clientWidth;
 		this.windowHeight = this.window.container.clientHeight;
+
+		if (this.textboxElem !== undefined) {
+			if (focus == this.window.winID) this.textboxElem.focus();
+		}
 
 		if (!this.mustRedraw) {
 			if (this.steps.length === this.displayedSteps.length) {
