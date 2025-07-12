@@ -2,7 +2,7 @@
 const windowsAPI = await env.include("/System/windows.js");
 const pathinf = await env.include("/System/CoreLibraries/pathinf.js");
 
-export async function cd(parent, directory = "~") {
+export async function cd(parent: any, directory = "~") {
 	const target = env.fs.relative(parent.terminalPath, directory);
 
 	try {
@@ -14,16 +14,16 @@ export async function cd(parent, directory = "~") {
 	}
 }
 
-export function pwd(parent) {
+export function pwd(parent: any) {
 	return parent.terminalPath;
 }
 
-export function clear(parent) {
+export function clear(parent: any) {
 	parent.logs = [];
 }
 
 // fs operations
-export async function ls(parent, directory = ".") {
+export async function ls(parent: any, directory = ".") {
 	const dir = env.fs.relative(parent.terminalPath, directory);
 
 	const list = await env.fs.listDirectory(dir);
@@ -38,7 +38,7 @@ export async function ls(parent, directory = ".") {
 	return formatted;
 }
 
-export async function cat(parent, directory) {
+export async function cat(parent: any, directory: string) {
 	const rel = env.fs.relative(parent.terminalPath, directory);
 
 	const resp = await env.fs.readFile(rel);
@@ -52,7 +52,7 @@ export async function cat(parent, directory) {
 	return contents;
 }
 
-export async function touch(parent, directory) {
+export async function touch(parent: any, directory: string) {
 	const rel = env.fs.relative(parent.terminalPath, directory);
 
 	const resp = await env.fs.createFile(rel);
@@ -62,7 +62,13 @@ export async function touch(parent, directory) {
 	}
 }
 
-async function treeWalk(directory, prefix, maxDepth, depth, counts) {
+async function treeWalk(
+	directory: string,
+	prefix: string,
+	maxDepth: number,
+	depth: number,
+	counts: { files: number; dirs: number }
+) {
 	//if (depth > maxDepth) {
 	//	return;
 	//}
@@ -82,7 +88,9 @@ async function treeWalk(directory, prefix, maxDepth, depth, counts) {
 
 		if (/*(*/ file[0] !== "." /*) || (obj.showHidden)*/) {
 			const parts =
-				i == contents.length - 1 ? ["└── ", "    "] : ["├── ", "│   "];
+				Number(i) == contents.length - 1
+					? ["└── ", "    "]
+					: ["├── ", "│   "];
 
 			const dispFile = String(file);
 
@@ -120,7 +128,7 @@ async function treeWalk(directory, prefix, maxDepth, depth, counts) {
 	return result;
 }
 
-export async function tree(parent, directory = ".") {
+export async function tree(parent: any, directory = ".") {
 	const dir = env.fs.relative(parent.terminalPath, directory);
 
 	let result = dir + "\n";
@@ -134,7 +142,8 @@ export async function tree(parent, directory = ".") {
 
 	return result;
 }
-export async function mkdir(parent, directory) {
+
+export async function mkdir(parent: any, directory: string) {
 	const rel = env.fs.relative(parent.terminalPath, directory);
 
 	await env.fs.createDirectory(rel);
@@ -142,7 +151,7 @@ export async function mkdir(parent, directory) {
 	return undefined;
 }
 
-export function windows(parent, intent) {
+export function windows(parent: any, intent: string) {
 	switch (intent) {
 		case "tile":
 			windowsAPI.setWindowTilingMode(true);
@@ -157,7 +166,7 @@ export function windows(parent, intent) {
 	return "Successfully updated window tiling format";
 }
 
-export async function wallpaper(parent, intent, ...args) {
+export async function wallpaper(parent: any, intent: string, ...args: any[]) {
 	switch (intent) {
 		case "set": {
 			const dir = env.fs.relative(parent.path, args[0]);
@@ -175,7 +184,7 @@ export async function wallpaper(parent, intent, ...args) {
 	}
 }
 
-export async function size(parent, directory) {
+export async function size(parent: any, directory: string) {
 	const dir = env.fs.relative(parent.path, directory);
 
 	const inf = await pathinf.pathSize(dir);
@@ -183,6 +192,6 @@ export async function size(parent, directory) {
 	return Math.round(inf.value * 100) / 100 + " " + inf.units;
 }
 
-export function location(parent) {
+export function location(parent: any) {
 	return parent.directory;
 }
