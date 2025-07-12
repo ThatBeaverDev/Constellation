@@ -1,4 +1,4 @@
-import conf from "../constellation.config.js";
+import * as conf from "../constellation.config.js";
 import {
 	Application,
 	BackgroundProcess,

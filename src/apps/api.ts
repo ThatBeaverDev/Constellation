@@ -1,4 +1,5 @@
-import conf from "../constellation.config.js";
+import { developmentLogging } from "../constellation.config.js";
+import * as conf from "../constellation.config.js";
 import { blobifyDirectory } from "../lib/blobify.js";
 import realFS from "../fs.js";
 import { execute, showPrompt } from "./apps.js";
@@ -251,6 +252,8 @@ export async function include(location: string): Promise<Object> {
 	let url = location;
 
 	let type = location.includes("://") ? "URL" : "directory";
+
+	if (developmentLogging) console.debug("Inclusion of '" + location + "'");
 
 	// @ts-expect-error
 	if (conf.importOverrides[location] !== undefined) {
