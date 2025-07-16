@@ -8,13 +8,36 @@
 	}
 }
 
+:root {
+	--uikitClickableExpandDuration: 0.15s;
+}
+
 * {
 	font-size: 15px;
 	font-family: monospace;
 }
 
+.clickable {
+	transition: transform var(--uikitClickableExpandDuration) ease-in-out;
+}
+.clickable:hover {
+	transform: scale(1.3);
+}
+
 .uikitIcon {
 	position: absolute;
+	user-select: none;
+	-webkit-user-drag: none;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+}
+.uikitIcon.clickable {
+	user-select: all;
+	-webkit-user-drag: all;
+	-moz-user-select: all;
+	-webkit-user-select: all;
+	-ms-user-select: all;
 }
 
 .uikitText,
@@ -95,8 +118,12 @@
 }
 
 .uikitBox {
-	position: relative;
+	position: absolute;
 	padding: 0;
 	outline: 0;
 	border: 0;
+}
+
+.uikitBox.noBorderRadius {
+	border-radius: 0px !important;
 }

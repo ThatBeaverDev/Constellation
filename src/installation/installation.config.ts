@@ -4,6 +4,8 @@ export const folders: string[] = [
 	"/System/CoreComponents",
 	"/System/CoreLibraries",
 	"/System/CoreLibraries/gitFiles",
+	"/System/CoreAssets",
+	"/System/CoreAssets/Logos",
 	"/System/windows"
 ];
 
@@ -31,6 +33,11 @@ export const files: any = {
 	"/build/lib/external/isomorphicgit/http.js":
 		"/System/CoreLibraries/gitFiles/http.js",
 
+	// logos
+	"/logos/Constellation.svg": "/System/CoreAssets/Logos/Constellation.svg",
+	"/logos/Web.svg": "/System/CoreAssets/Logos/Constellation-Web.svg",
+	"/logos/White.svg": "/System/CoreAssets/Logos/Constellation-White.svg",
+
 	// init system
 	"/build/apps/build/com.constellation.CoreExecutable.idx": {
 		type: "jsonFilesIndex",
@@ -49,20 +56,19 @@ export const files: any = {
 		directory: "/Applications/Remapper.appl"
 	},
 
-	// OrionIDE
-	"/build/apps/build/com.constellation.OrionIDE.idx": {
-		type: "jsonFilesIndex",
-		directory: "/Applications/OrionIDE.appl"
-	},
 	// Popup
 	"/build/apps/build/com.constellation.popup.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreExecutables/Popup.appl"
 	},
 	// Rotur
-	"/build/apps/build/com.rotur.rotur.idx": {
+	"/build/apps/build/com.rotur.appl.idx": {
 		type: "jsonFilesIndex",
 		directory: "/Applications/Rotur.appl"
+	},
+	"/build/apps/build/com.rotur.backgr.idx": {
+		type: "jsonFilesIndex",
+		directory: "/Applications/Rotur.backgr"
 	},
 	// Settings
 	"/build/apps/build/com.constellation.settings.idx": {

@@ -27,7 +27,7 @@ export default class remapper extends Application {
 		await this.refresh();
 		this.refreshLoop = setInterval(this.refresh, 1000);
 
-		const keyboardUtils = await env.include(
+		const keyboardUtils = await this.env.include(
 			"/System/CoreLibraries/keyboardUtils.js"
 		);
 
@@ -35,7 +35,7 @@ export default class remapper extends Application {
 	}
 
 	async refresh() {
-		const keys = await env.include("/System/keybindings.js");
+		const keys = await this.env.include("/System/keybindings.js");
 
 		this.keys = keys.keyboardShortcuts;
 		this.updateKeyboardShortcut = keys.updateKeyboardShortcut;
@@ -51,7 +51,10 @@ export default class remapper extends Application {
 		this.arr = arr;
 	}
 
-	onmessage(origin, intent) {
+	onmessage(msg) {
+		const origin = msg.originDirectory;
+		const intent = msg.intent;
+
 		switch (origin) {
 			case "/System/keyboardShortcuts.js":
 				switch (intent) {

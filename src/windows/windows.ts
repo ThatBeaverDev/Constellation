@@ -128,12 +128,18 @@ export class Window {
 			"maximize",
 			0.75
 		);
+		this.minimiseButton = windowButton(
+			document.createElement("div"),
+			"minimize-2"
+		);
 
 		this.buttons = document.createElement("div");
 		this.buttons.id = String(window.renderID++);
 		this.buttons.className = "windowButtons";
 		this.buttons.innerHTML =
-			this.closeButton.outerHTML + this.maximiseButton.outerHTML;
+			this.closeButton.outerHTML +
+			this.minimiseButton.outerHTML +
+			this.maximiseButton.outerHTML;
 
 		this.header = document.createElement("div");
 		const h = this.header;
@@ -173,6 +179,7 @@ export class Window {
 
 		this.closeButton = document.getElementById(this.closeButton.id)!;
 		this.maximiseButton = document.getElementById(this.maximiseButton.id)!;
+		this.minimiseButton = document.getElementById(this.minimiseButton.id)!;
 
 		this.header.addEventListener("mousedown", (e) => {
 			target = this;
@@ -185,9 +192,11 @@ export class Window {
 		this.closeButton.addEventListener("mousedown", (e) => {
 			terminate(this.Application);
 		});
+		this.minimiseButton.addEventListener("mousedown", (e) => {
+			this.minimise();
+		});
 
-		const icon = getIcon("app-window-mac");
-		this.setIcon(icon);
+		this.setIcon("app-window-mac");
 
 		this.resizeObserver = new ResizeObserver(() => {
 			const widthPx = this.container.style.width;
@@ -201,6 +210,8 @@ export class Window {
 		});
 
 		this.resizeObserver.observe(this.container);
+
+		focusWindow(this.winID);
 	}
 
 	name: string;
@@ -210,13 +221,13 @@ export class Window {
 	buttons: HTMLElement;
 	closeButton: HTMLElement;
 	maximiseButton: HTMLElement;
+	minimiseButton: HTMLElement;
 	title: HTMLElement;
 	iconDiv: HTMLElement;
 	winID: number;
 	Application: Application;
 	resizeObserver: ResizeObserver;
-
-	resizable: boolean = true;
+	iconName: string = "app-window-mac";
 
 	reposition() {
 		const c = this.container;
@@ -292,6 +303,24 @@ export class Window {
 		this.header.style.height = "0px";
 	}
 
+	square() {
+		this.container.classList.add("sqare");
+	}
+	unsquare() {
+		this.container.classList.remove("sqare");
+	}
+
+	minimise() {
+		this.container.classList.add("gone");
+	}
+	unminimise() {
+		this.container.classList.remove("gone");
+		this.container.classList.add("ungone");
+		setTimeout(() => {
+			this.container.classList.remove("ungone");
+		}, 150);
+	}
+
 	visible: boolean = true;
 
 	dimensions = {
@@ -311,7 +340,12 @@ export class Window {
 		}
 	}
 
-	async setIcon(element: HTMLElement) {
+	async setIcon(loc: string) {
+		this.iconName = loc;
+		this._setIcon(getIcon(loc));
+	}
+
+	private async _setIcon(element: HTMLElement) {
 		this.iconDiv.innerHTML = element.outerHTML;
 	}
 
@@ -403,15 +437,9 @@ function updateWindows(newTilingConfig: boolean = false) {
 	const windowHeight = availableHeight - blankSpace;
 
 	windows.forEach((win, index) => {
-		win.container.style.resize =
-			windowTiling && !win.resizable ? "none" : "both";
+		win.container.style.resize = windowTiling ? "none" : "both";
 
-		if (
-			newTilingConfig == true &&
-			windowTiling &&
-			!win.resizable &&
-			win.visible
-		) {
+		if (newTilingConfig == true && windowTiling && win.visible) {
 			win.move(padding + x, padding + y, index);
 			win.resize(windowWidth, windowHeight);
 
@@ -433,7 +461,7 @@ function updateWindows(newTilingConfig: boolean = false) {
 
 	windows.forEach((win, index) => {
 		// don't tile invisible windows.
-		if (!win.visible || !win.resizable) return;
+		if (!win.visible) return;
 
 		const col = index % cols;
 		const row = Math.floor(index / cols);
@@ -512,7 +540,7 @@ setInterval(() => {
 		lastKnownWindowMode = windowTiling;
 	}
 
-	if (target !== undefined && !windowTiling && target?.resizable == true) {
+	if (target !== undefined && !windowTiling) {
 		const pos = structuredClone(target.position);
 
 		pos.left += diffX;

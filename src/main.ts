@@ -4,7 +4,7 @@ import fs from "./io/fs.js";
 
 import { isDev } from "./lib/isDev.js";
 import * as apps from "./apps/apps.js";
-import * as users from "./lib/users.js";
+import * as users from "./apps/users.js";
 import * as log from "./lib/logging.js";
 
 declare global {
@@ -44,10 +44,7 @@ async function main() {
 		await installer.install();
 	}
 
-	if (isDev) {
-		log.debug("core:main", "System in devmode: registering developer user");
-		await users.mkusr("Developer", "dev");
-	}
+	await users.init();
 
 	await apps.execute("/System/CoreExecutables/launchd.backgr");
 

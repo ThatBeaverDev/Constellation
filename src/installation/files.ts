@@ -100,6 +100,18 @@ export async function writeFiles() {
 					await item;
 				}
 
+				if (json.files["postunpkg.js"] !== undefined) {
+					const incl = await env.include(
+						fs.relative(directory, "postunpkg.js")
+					);
+
+					const fnc = incl.default;
+
+					if (typeof fnc == "function") {
+						fnc(directory);
+					}
+				}
+
 				break;
 			}
 			case "binary": {

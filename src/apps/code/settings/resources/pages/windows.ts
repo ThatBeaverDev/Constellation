@@ -1,8 +1,9 @@
-const windows = await env.include("/System/windows.js");
+let windows: any;
 
 let parent;
-export function init(process: any) {
+export async function init(process: any) {
 	parent = process;
+	windows = await parent.env.include("/System/windows.js");
 }
 
 export default {

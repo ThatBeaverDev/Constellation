@@ -1,39 +1,43 @@
 import * as conf from "../constellation.config.js";
-import {
-	Application,
-	BackgroundProcess,
-	Popup,
-	Process
-} from "./executables.js";
+
+import { Process } from "./executables.js";
+import * as executables from "./executables.js";
+
 import fs from "../io/fs.js";
 import * as uikit from "../lib/uiKit/uiKit.js";
 import { blobify, translateAllBlobURIsToDirectories } from "../lib/blobify.js";
-import * as env from "./api.js";
 import { focus, windows } from "../windows/windows.js";
 import { AppInitialisationError, ImportError } from "../errors.js";
 import AppWaitingObject from "./appWaitingObject.js";
-
-(globalThis as any).env = env;
+import { ApplicationAuthorisationAPI } from "./api.js";
+import { defaultUser } from "./users.js";
 
 declare global {
 	interface Window {
 		renderID: number;
-		Application: new (directory: string, args: any[]) => Application;
+		Application: new (
+			directory: string,
+			args: any[]
+		) => executables.Application;
 		BackgroundProcess: new (
 			directory: string,
 			args: any[]
-		) => BackgroundProcess;
-		Popup: new (directory: string, args: any[]) => Popup;
+		) => executables.BackgroundProcess;
+		Popup: new (directory: string, args: any[]) => executables.Popup;
+		Module: new (directory: string, args: any[]) => executables.Module;
 		sysimport: any;
-		processes: Process[];
-		env: typeof env;
+		processes: executables.Process[];
+		env: ApplicationAuthorisationAPI;
 		windows: Window[];
 	}
 }
-window.env = env;
+window.env = new ApplicationAuthorisationAPI(
+	"/System/globalPermissionsHost.js",
+	defaultUser
+);
 (window as any).env = window.env;
 
-export const processes: Process[] = [];
+export const processes: executables.Process[] = [];
 window.processes = processes;
 
 window.renderID = 0;
@@ -41,9 +45,18 @@ window.renderID = 0;
 await uikit.init();
 
 // allow processes to access this
-window.Application = Application;
-window.BackgroundProcess = BackgroundProcess;
-window.Popup = Popup;
+window.Application = executables.Application;
+window.BackgroundProcess = executables.BackgroundProcess;
+window.Popup = executables.Popup;
+window.Module = executables.Module;
+
+export function getProcessFromID(id: number) {
+	for (const proc of processes) {
+		if (proc.id == id) {
+			return proc;
+		}
+	}
+}
 
 type executionFiletype = "sjs" | "js";
 
@@ -159,18 +172,51 @@ export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
 	processes.splice(idx, 1);
 }
 
+const activeIterators = new WeakMap<
+	Process,
+	Iterator<any> | AsyncIterator<any>
+>();
+
 async function procExec(
 	proc: Process,
 	subset: "init" | "frame" | "terminate" = "frame"
 ) {
+	if (proc.executing) return;
+
 	try {
 		proc.executing = true;
-		await proc[subset]();
+
+		let iter = activeIterators.get(proc);
+
+		if (!iter) {
+			const result = proc[subset]();
+			// @ts-expect-error
+			if (result && typeof result.next === "function") {
+				// @ts-expect-error
+				iter = result;
+				// @ts-expect-error
+				activeIterators.set(proc, iter);
+			} else {
+				// normal function
+				await result;
+				proc.executing = false;
+				return;
+			}
+		}
+
+		// @ts-expect-error
+		const { done } = await iter.next();
+
+		if (done) {
+			activeIterators.delete(proc);
+		}
+
 		proc.executing = false;
 	} catch (e: any) {
+		proc.executing = false;
 		console.warn(e);
 
-		let name =
+		const name =
 			proc?.name ||
 			// @ts-expect-error
 			proc?.renderer?.window?.name ||

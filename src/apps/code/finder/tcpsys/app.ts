@@ -1,4 +1,4 @@
-const pathinf = await env.include("/System/CoreLibraries/pathinf.js");
+import { IPCMessage } from "../../../messages";
 
 const clamp = (n: number, min: number, max: number) => {
 	if (n < min) {
@@ -34,6 +34,8 @@ type listing = {
 };
 
 export default class finder extends Application {
+	pathinf: any;
+
 	textWidth(text: string) {
 		return this.renderer.getTextWidth(text, 15, "monospace");
 	}
@@ -85,6 +87,9 @@ export default class finder extends Application {
 			sendingPipe
 		] = this.args;
 
+		this.pathinf = await this.env.include(
+			"/System/CoreLibraries/pathinf.js"
+		);
 		await this.cd(initialDirectory);
 		this.type = mode;
 		this.pipes = {
@@ -111,7 +116,10 @@ export default class finder extends Application {
 		}, 500);
 	}
 
-	onmessage(origin: string, intent: string) {
+	onmessage(msg: IPCMessage) {
+		const origin = msg.originDirectory;
+		const intent = msg.intent;
+
 		switch (origin) {
 			case "/System/keyboardShortcuts.js":
 				switch (intent) {
@@ -176,7 +184,7 @@ export default class finder extends Application {
 			this.selector = 0;
 		}
 
-		this.path = env.fs.relative(this.path, directory);
+		this.path = this.env.fs.relative(this.path, directory);
 		const dir = this.path;
 		if (this.path == "/") {
 			this.location = "Constellation";
@@ -185,7 +193,7 @@ export default class finder extends Application {
 				"Constellation" + String(this.path).replaceAll("/", " > ");
 		}
 
-		const list = await env.fs.listDirectory(dir);
+		const list = await this.env.fs.listDirectory(dir);
 		if (!list.ok) {
 			this.path = oldDir;
 			return;
@@ -203,22 +211,22 @@ export default class finder extends Application {
 		tempListing = await tempListing.map((name: string) => {
 			const obj: listing = {
 				name,
-				path: env.fs.relative(this.path, name),
+				path: this.env.fs.relative(this.path, name),
 				icon: "",
 				type: "none"
 			};
-			obj.icon = pathinf.pathIcon(obj.path);
+			obj.icon = this.pathinf.pathIcon(obj.path);
 
 			return obj;
 		});
 
 		for (const obj of this.listing) {
-			obj.type = await env.fs.typeOfFile(obj.path);
+			obj.type = await this.env.fs.typeOfFile(obj.path);
 		}
 
 		this.listing = tempListing;
 
-		const newIcon = await pathinf.pathIcon(this.path);
+		const newIcon = await this.pathinf.pathIcon(this.path);
 		if (newIcon !== this.icon) {
 			this.icon = newIcon;
 			this.renderer.setWindowIcon(this.icon);
@@ -260,15 +268,15 @@ export default class finder extends Application {
 		}
 
 		// draw the folder name and icon at the top for the current location
-		this.renderer.icon(20, 0, await this.icon);
-		this.renderer.text(50, 0, this.path);
+		this.renderer.icon(10, 10, await this.icon);
+		this.renderer.text(40, 10, this.path);
 
 		// draw the folder contents
-		let y = 30;
+		let y = 40;
 		for (const i in this.listing) {
 			const obj = this.listing[i];
 
-			this.renderer.icon(20, y, await obj.icon);
+			this.renderer.icon(10, y, await obj.icon);
 
 			// insure the name is the right length
 			const name = String(obj.name).padEnd(25, " ");
@@ -278,7 +286,7 @@ export default class finder extends Application {
 
 			// render
 			this.renderer.button(
-				50,
+				40,
 				y,
 				text,
 				async () => {
@@ -294,7 +302,7 @@ export default class finder extends Application {
 									this.pickerSubmit();
 								} else {
 									/* TODO: OPEN THE FILE! */
-									env.prompt(
+									this.env.prompt(
 										"Functionality not implemented: opening files",
 										"no current API for opening files in applications."
 									);
@@ -326,7 +334,7 @@ export default class finder extends Application {
 			const path =
 				itemName == ".."
 					? this.path
-					: env.fs.relative(this.path, itemName);
+					: this.env.fs.relative(this.path, itemName);
 
 			this.renderer.button(
 				5,
@@ -342,9 +350,11 @@ export default class finder extends Application {
 	pickerSubmit() {
 		const itemName = this.listing[this.selector].name;
 		const path =
-			itemName == ".." ? this.path : env.fs.relative(this.path, itemName);
+			itemName == ".."
+				? this.path
+				: this.env.fs.relative(this.path, itemName);
 
-		env.debug(
+		this.env.debug(
 			this.directory,
 			"Submitting '" + path + "' for file picker result."
 		);

@@ -1,3 +1,8 @@
+html body {
+	width: 0px;
+	height: 0px;
+}
+
 :root {
 	--window-header-height: 25px;
 	--window-buttons-padding: 3.75px;
@@ -266,7 +271,6 @@ body {
 	margin: 0;
 	box-shadow: none;
 	resize: none !important;
-	pointer-events: none;
 }
 
 .invisible > .windowHeader {
@@ -289,6 +293,13 @@ body {
 	justify-content: center;
 
 	user-select: None;
+}
+
+.windowContainer.sqare {
+	border-radius: 0px !important;
+}
+.windowContainer.sqare > .windowHeader {
+	border-radius: 0px !important;
 }
 
 .windowTitle {

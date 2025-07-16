@@ -25,3 +25,17 @@ export class UIError extends Error {
 		this.name = "ImportError";
 	}
 }
+
+export class MessageError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = "MessageError";
+	}
+}
+
+export class PermissionsError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = "PermissionsError";
+	}
+}
