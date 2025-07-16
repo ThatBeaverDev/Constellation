@@ -1,28 +1,79 @@
+import { MessageError } from "../errors.js";
 import { registerKeyboardShortcut } from "../io/keyboardShortcuts.js";
 import { Renderer } from "../lib/uiKit/uiKit.js";
-import { execute, terminate } from "./apps.js";
+import { ApplicationAuthorisationAPI, associations } from "./api.js";
+import { execute, processes, terminate } from "./apps.js";
+import { IPCMessage, replyCallback, sendMessage } from "./messages.js";
+import { defaultUser } from "./users.js";
 
 export let nextPID = 0;
-export class Process {
+
+export class Framework {
 	constructor(directory: string, args: any[]) {
 		this.directory = directory;
+		this.env = new ApplicationAuthorisationAPI(directory, defaultUser);
 		this.id = nextPID++;
+		this.identifier = this.directory + ":" + this.id;
 		this.args = args;
+
+		this.sendmessage = this.sendmessage.bind(this);
 	}
 
 	readonly directory: string;
-	name: string | undefined; // use to name an app without including a temporary window header
 	readonly id: number;
+	readonly identifier: string;
 	readonly args: any[];
-	data: any;
 	readonly startTime: number = Date.now();
+	readonly env: ApplicationAuthorisationAPI;
 
 	executing: boolean = false;
+
+	sendmessage(
+		targetID: number,
+		intent: string,
+		data: any,
+		replyCallback?: replyCallback
+	) {
+		sendMessage(
+			this.directory,
+			this.id,
+			targetID,
+			intent,
+			data,
+			replyCallback
+		);
+	}
+
+	onmessage(msg: IPCMessage) {
+		msg;
+	}
+}
+
+export class Process extends Framework {
+	constructor(directory: string, args: any[]) {
+		super(directory, args);
+	}
+
+	name: string | undefined; // use to name an app without including a temporary window header
+
+	data: any;
 
 	// program flow
 	async init() {}
 	frame() {}
 	async terminate() {}
+
+	shout(name: string) {
+		if (associations[name] == undefined) {
+			associations[name] = this.id;
+		} else {
+			throw new Error(
+				"Association by name '" +
+					name +
+					"' is already taken. is another instance of your app already using it?"
+			);
+		}
+	}
 
 	// events
 	keydown(
@@ -56,10 +107,6 @@ export class Process {
 		repeat;
 	}
 
-	onmessage(...any: any) {
-		any;
-	}
-
 	registerKeyboardShortcut = (
 		name: string,
 		key: string,
@@ -78,6 +125,8 @@ export class Process {
 		this.data = value;
 	}
 }
+
+export class Module extends Framework {}
 
 export class Application extends Process {
 	constructor(directory: string, args: any[]) {
@@ -104,7 +153,6 @@ export class Popup extends Application {
 		const no = popupNo++;
 
 		this.renderer.window.move(undefined, undefined, no);
-		this.renderer.window.resizable = false;
 
 		this.windowPositioningInterval = setInterval(() => {
 			this.renderer.window.move(undefined, undefined, no);

@@ -33,4 +33,4 @@ export const userDirectories = [
 	"Media/Pictures",
 	"Media/Videos"
 ];
-export const developmentLogging = true;
+export const developmentLogging = false;

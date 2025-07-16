@@ -1,7 +1,6 @@
 import { rm_rf } from "./rm-rf.js";
 import { createFolders } from "./folders.js";
 import { writeFiles } from "./files.js";
-import { mkusr, User, users } from "../lib/users.js";
 
 import { reapplyStyles } from "../windows/windows.js";
 
@@ -12,13 +11,3 @@ export async function install() {
 
 	reapplyStyles();
 }
-
-declare global {
-	interface Window {
-		mkusr: Function;
-		users: User[];
-	}
-}
-
-window.mkusr = mkusr;
-window.users = users;

@@ -1,5 +1,4 @@
-const fzfLib = await env.include("/System/CoreLibraries/fzf.js");
-const pathinf = await env.include("/System/CoreLibraries/pathinf.js");
+import { IPCMessage } from "../../../messages";
 
 type fileInfo = {
 	directory: string;
@@ -7,66 +6,33 @@ type fileInfo = {
 	icon: string;
 };
 
-async function index(
-	directories = [
-		"/System/CoreExecutables",
-		"/Applications" /*,
-			"~/Applications"*/
-	]
-) {
-	let files: fileInfo[] = [];
-	let names: string[] = [];
-
-	for (const directory of directories) {
-		const list = await env.fs.listDirectory(directory);
-		if (!list.ok) throw list.data;
-
-		const localNames = list.data.map((item: string) =>
-			env.fs.relative(directory, String(item))
-		);
-		names = [...localNames, ...names];
-
-		// build file objects
-		const localFiles = localNames.map((dir: string) => {
-			return {
-				directory: dir,
-				name: pathinf.pathName(dir),
-				icon: pathinf.pathIcon(dir)
-			};
-		});
-
-		for (const i in localFiles) {
-			localFiles[i].name = await localFiles[i].name;
-			localFiles[i].icon = await localFiles[i].icon;
-		}
-
-		files = [...localFiles, ...files];
-	}
-
-	return {
-		files,
-		names
-	};
-}
-
 export default class KeystoneSearch extends Popup {
+	pathinf: any;
+	fzfLib: any;
+
 	results: object[] = [];
 	files: string[] = [];
 	fileInfo: fileInfo[] = [];
 	searchInterval: number = 0;
-	ok: boolean = false;
+	ok: boolean = true;
 	entries: any;
 	rendering: any[] = [];
 	selector: number = 0;
 
 	async init() {
 		this.renderer.window.rename("Keystone Search");
+		this.renderer.setWindowIcon("search");
 
 		this.registerKeyboardShortcut("ScrollDown", "ArrowDown", []);
 		this.registerKeyboardShortcut("ScrollUp", "ArrowUp", []);
 		this.registerKeyboardShortcut("Open", "Enter", []);
 
-		const obj = await index();
+		this.fzfLib = await this.env.include("/System/CoreLibraries/fzf.js");
+		this.pathinf = await this.env.include(
+			"/System/CoreLibraries/pathinf.js"
+		);
+
+		const obj = await this.index();
 		this.files = obj.names;
 		this.fileInfo = obj.files;
 
@@ -80,12 +46,62 @@ export default class KeystoneSearch extends Popup {
 
 			await this.search(query);
 		}, 250);
+	}
 
-		this.ok = true;
+	async index(
+		directories = [
+			"/System/CoreExecutables",
+			"/Applications" /*,
+			"~/Applications"*/
+		]
+	) {
+		let files: fileInfo[] = [];
+		let names: string[] = [];
+
+		for (const directory of directories) {
+			const list = await this.env.fs.listDirectory(directory);
+			if (!list.ok) throw list.data;
+
+			const localNames = list.data.map((item: string) =>
+				this.env.fs.relative(directory, String(item))
+			);
+			names = [...localNames, ...names];
+
+			// build file objects
+			const localFiles = localNames.map((dir: string) => {
+				return {
+					directory: dir,
+					name: this.pathinf.pathName(dir),
+					icon: this.pathinf.pathIcon(dir)
+				};
+			});
+
+			for (const vl of localFiles) {
+				vl.icon = await vl.icon;
+				vl.name = await vl.name;
+
+				if (
+					vl.directory.endsWith(".backgr") ||
+					vl.directory.endsWith(".appl")
+				) {
+					if (vl.name.startsWith("/")) {
+						vl.name = vl.directory.textAfterA;
+						("/");
+					}
+				}
+			}
+
+			files = [...localFiles, ...files];
+		}
+
+		return {
+			files,
+			names
+		};
 	}
 
 	async search(term: string) {
-		const fzf = new fzfLib.Fzf(this.files);
+		const fzf = new this.fzfLib.Fzf(this.files);
 
 		// object stating item, score and start/end points
 		this.entries = fzf.find(term);
@@ -114,11 +130,14 @@ export default class KeystoneSearch extends Popup {
 	selectItem(index = this.selector) {
 		const item = this.rendering[index];
 
-		env.exec(item.directory);
+		this.env.exec(item.directory);
 		this.exit();
 	}
 
-	async onmessage(origin: string, intent: string) {
+	async onmessage(msg: IPCMessage) {
+		const origin = msg.originDirectory;
+		const intent = msg.intent;
+
 		switch (origin) {
 			case "/System/keyboardShortcuts.js":
 				switch (intent) {

@@ -19,22 +19,46 @@ type uikitCreatorName = keyof Renderer["creators"];
 interface step {
 	type: uikitCreatorName;
 	args: any[];
+	onClick?: {
+		left?: Function;
+		right?: Function;
+	};
 }
 
 interface textboxCallbackObject {}
 
-type uikitTextboxDefaultConfig = {
-	isInvisible?: boolean;
-	isEmpty: boolean;
-	fontSize?: number;
-};
-type uikitTextareaDefaultConfig = {
+type uikitTextboxConfig = {
 	isInvisible?: boolean;
 	isEmpty?: boolean;
+	fontSize?: number;
+};
+type uikitTextareaConfig = {
+	isInvisible?: boolean;
+	isEmpty?: boolean;
+};
+type uikitBoxConfig = {
+	borderRadius?: number | string;
+	colour?: string; // colour but typescript is stupid and doesn't know rgb(255, 255, 255) is a colour 🤦
 };
 
 // class
 export class Renderer {
+	defaultConfig = {
+		uikitTextbox: {
+			isInvisible: false,
+			isEmpty: false,
+			fontSize: undefined
+		},
+		uikitTextarea: {
+			isInvisible: false,
+			isEmpty: false
+		},
+		uikitBox: {
+			borderRadius: 5,
+			colour: "rgb(255, 255, 255)"
+		}
+	};
+
 	constructor(process: Process) {
 		this.process = process;
 
@@ -54,7 +78,9 @@ export class Renderer {
 	private displayedSteps: step[] = [];
 	private textboxExists: Boolean = false;
 
-	icon = (
+	elemID: number = 0;
+
+	readonly icon = (
 		x: number = 0,
 		y: number = 0,
 		name: string = "circle-help",
@@ -64,17 +90,22 @@ export class Renderer {
 			type: "uikitIcon",
 			args: [x, y, name, scale]
 		};
-		this.steps.push(obj);
+		return this.steps.push(obj);
 	};
 
-	text = (x: number, y: number, string: string, size: number = 15) => {
+	readonly text = (
+		x: number,
+		y: number,
+		string: string,
+		size: number = 15
+	) => {
 		const obj: step = {
 			type: "uikitText",
 			args: [x, y, string, size]
 		};
-		this.steps.push(obj);
+		return this.steps.push(obj);
 	};
-	button = (
+	readonly button = (
 		x: number,
 		y: number,
 		string: string,
@@ -86,16 +117,16 @@ export class Renderer {
 			type: "uikitButton",
 			args: [x, y, string, leftClickCallback, rightClickCallback, size]
 		};
-		this.steps.push(obj);
+		return this.steps.push(obj);
 	};
-	textbox = (
+	readonly textbox = (
 		x: number,
 		y: number,
 		width: number = 200,
 		height: number = 20,
 		backtext: string,
 		callbacks: textboxCallbackObject,
-		options: uikitTextboxDefaultConfig = this.defaultConfig.uikitTextbox
+		options: uikitTextboxConfig = this.defaultConfig.uikitTextbox
 	) => {
 		if (this.textboxExists == true) {
 			throw new UIError("UI cannot have more than one textbox.");
@@ -115,26 +146,26 @@ export class Renderer {
 			type: "uikitTextbox",
 			args: [x, y, width, height, backtext, callbacks, opts]
 		};
-		this.steps.push(obj);
+		return this.steps.push(obj);
 	};
 
-	verticalLine = (x: number, y: number, height: number) => {
+	readonly verticalLine = (x: number, y: number, height: number) => {
 		const obj: step = {
 			type: "uikitVerticalLine",
 			args: [x, y, height]
 		};
-		this.steps.push(obj);
+		return this.steps.push(obj);
 	};
 
-	horizontalLine = (x: number, y: number, width: number) => {
+	readonly horizontalLine = (x: number, y: number, width: number) => {
 		const obj: step = {
 			type: "uikitHorizontalLine",
 			args: [x, y, width]
 		};
-		this.steps.push(obj);
+		return this.steps.push(obj);
 	};
 
-	progressBar = (
+	readonly progressBar = (
 		x: number,
 		y: number,
 		width: number,
@@ -145,16 +176,16 @@ export class Renderer {
 			type: "uikitProgressBar",
 			args: [x, y, width, height, progress]
 		};
-		this.steps.push(obj);
+		return this.steps.push(obj);
 	};
 
-	textarea = (
+	readonly textarea = (
 		x: number,
 		y: number,
 		width: number,
 		height: number,
 		callbacks: textboxCallbackObject,
-		options: uikitTextareaDefaultConfig = this.defaultConfig.uikitTextarea
+		options: uikitTextareaConfig = this.defaultConfig.uikitTextarea
 	) => {
 		if (this.textboxExists == true) {
 			throw new UIError("UI cannot have more than one textbox.");
@@ -166,49 +197,54 @@ export class Renderer {
 			type: "uikitTextarea",
 			args: [x, y, width, height, callbacks, options]
 		};
-		this.steps.push(obj);
+		return this.steps.push(obj);
 	};
 
-	box = (
+	readonly box = (
 		x: number,
 		y: number,
 		width: number,
 		height: number,
-		colour: string = "rgb(255, 255, 255)"
+		config: uikitBoxConfig
 	) => {
 		const obj: step = {
 			type: "uikitBox",
-			args: [x, y, width, height, colour]
+			args: [x, y, width, height, config]
 		};
-		this.steps.push(obj);
+		return this.steps.push(obj);
 	};
 
-	getTextWidth = getTextWidth;
-	setWindowIcon = (name: string) => {
-		const icon = getIcon(name);
-		this.window.setIcon(icon);
-	};
-	defaultConfig = {
-		uikitTextbox: {
-			isInvisible: false,
-			isEmpty: false,
-			fontSize: undefined
-		},
-		uikitTextarea: {
-			isInvisible: false,
-			isEmpty: false
-		}
+	onClick(
+		elemID: number,
+		leftClickCallback?: Function,
+		rightClickCallback?: Function
+	) {
+		const left =
+			leftClickCallback == undefined
+				? undefined
+				: leftClickCallback.bind(this.process);
+		const right =
+			rightClickCallback == undefined
+				? undefined
+				: rightClickCallback.bind(this.process);
+
+		this.steps[elemID - 1].onClick = { left: left, right: right };
+	}
+
+	readonly getTextWidth = getTextWidth;
+	readonly setWindowIcon = (name: string) => {
+		this.window.setIcon(name);
 	};
 
-	setTextboxContent(content: string) {
+	readonly setTextboxContent = (content: string) => {
 		// insure there is actually a textbox
 		if (this.textboxElem !== undefined) {
 			// set the value
 			this.textboxElem.value = content;
 		}
-	}
+	};
 
-	getTextboxContent() {
+	readonly getTextboxContent = () => {
 		// insure there is actually a textbox
 		if (this.textboxElem !== undefined) {
 			// return the value
@@ -217,10 +253,10 @@ export class Renderer {
 
 		// return null otherwise
 		return null;
-	}
+	};
 
 	private textboxElem: HTMLInputElement | HTMLTextAreaElement | undefined;
-	private creators = {
+	private readonly creators = {
 		uikitIcon: (x = 0, y = 0, name = "circle-help", scale = 1) => {
 			const icon = getIcon(name);
 
@@ -450,10 +486,10 @@ export class Renderer {
 			y: number = 100,
 			width: number = 100,
 			height: number = 100,
-			colour: string = "rgb(255, 255, 255)"
+			config: uikitBoxConfig
 		) => {
 			const box = document.createElement("div");
-			box.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px; background-color: ${colour};`;
+			box.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px; background-color: ${config.colour}; border-radius: ${config.borderRadius}px;`;
 			box.id = String(window.renderID++);
 			box.className = "uikitBox";
 
@@ -504,7 +540,7 @@ export class Renderer {
 		this.window.body.innerHTML = "";
 	}
 
-	commit = () => {
+	readonly commit = () => {
 		this.windowWidth = this.window.container.clientWidth;
 		this.windowHeight = this.window.container.clientHeight;
 
@@ -558,6 +594,50 @@ export class Renderer {
 
 				// @ts-ignore
 				element = creator(...newStep.args)!;
+
+				if (newStep.onClick !== undefined) {
+					element.classList.add("clickable");
+					element.addEventListener(
+						"mousedown",
+						(event: MouseEvent) => {
+							// typescript demands this so i'll oblige
+							if (newStep.onClick !== undefined) {
+								switch (event.button) {
+									case 0:
+										// left click
+										if (
+											typeof newStep.onClick.left ==
+											"function"
+										) {
+											newStep.onClick.left(
+												event.clientX,
+												event.clientY
+											);
+											event.preventDefault();
+										}
+										break;
+									case 1:
+										// middle button
+										break;
+									case 2:
+										// right click
+										if (
+											typeof newStep.onClick.right ==
+											"function"
+										) {
+											newStep.onClick.right(
+												event.clientX,
+												event.clientY
+											);
+											event.preventDefault();
+										}
+										break;
+								}
+							}
+						},
+						{ signal: this.signal }
+					);
+				}
 			} else {
 				element = oldElement!;
 			}
@@ -588,3 +668,8 @@ export class Renderer {
 		this.window.remove();
 	}
 }
+
+// devil line
+window.addEventListener(`contextmenu`, (e) => {
+	e.preventDefault();
+});

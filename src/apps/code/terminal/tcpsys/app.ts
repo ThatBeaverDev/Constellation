@@ -1,3 +1,5 @@
+import { IPCMessage } from "../../../messages";
+
 // convert anything to a string, NICELY (no [object Object] here)
 function stringify(content: object) {
 	const type = typeof content;
@@ -26,7 +28,6 @@ const clamp = (n: number, min: number, max: number) => {
 };
 
 export default class terminalUI extends Application {
-	ok: boolean = false;
 	cmdreg: any;
 	logs: string[] = [];
 	terminalPath: string = "/";
@@ -38,8 +39,13 @@ export default class terminalUI extends Application {
 	willCrash: boolean = false;
 
 	async init() {
-		const cmdregDir = env.fs.relative(this.directory, "./lib/cmdreg.js");
-		this.cmdreg = await env.include(cmdregDir);
+		const cmdregDir = this.env.fs.relative(
+			this.directory,
+			"./lib/cmdreg.js"
+		);
+		const reg = await this.env.include(cmdregDir);
+		this.cmdreg = new reg.default();
+		await this.cmdreg.init();
 
 		if (this.args.length !== 0) {
 			this.exit(await this.execute(this.args[0]));
@@ -57,8 +63,6 @@ export default class terminalUI extends Application {
 		this.registerKeyboardShortcut("Scroll Up (Fast)", "ArrowUp", [
 			"ShiftLeft"
 		]);
-
-		this.ok = true;
 	}
 
 	getCommand(name: string): Function {
@@ -72,7 +76,10 @@ export default class terminalUI extends Application {
 		}
 	}
 
-	onmessage(origin: string, intent: string) {
+	onmessage(msg: IPCMessage) {
+		const origin = msg.originDirectory;
+		const intent = msg.intent;
+
 		switch (origin) {
 			case "/System/keyboardShortcuts.js":
 				switch (intent) {
@@ -215,10 +222,6 @@ export default class terminalUI extends Application {
 	}
 
 	frame() {
-		if (!this.ok) {
-			return;
-		}
-
 		this.render();
 	}
 }

@@ -1,6 +1,7 @@
-const windows = await env.include("/System/windows.js");
+import { IPCMessage } from "../../../messages";
 
 export default class initialiser extends BackgroundProcess {
+	windows?: typeof import("../../../../windows/windows");
 	async init() {
 		const onstart = [
 			"/System/CoreExecutables/Dock.appl",
@@ -8,12 +9,14 @@ export default class initialiser extends BackgroundProcess {
 		];
 
 		for (const app of onstart) {
-			env.exec(app);
+			this.env.exec(app);
 		}
+
+		this.windows = await this.env.include("/System/windows.js");
 
 		this.registerKeyboardShortcut("Launcher", "KeyZ", ["AltLeft"]);
 		this.registerKeyboardShortcut("Remap Shortcuts", "KeyX", ["AltLeft"]);
-		// windows
+		// this.windows
 		this.registerKeyboardShortcut("Focus Left (Tiling)", "ArrowLeft", [
 			"AltLeft"
 		]);
@@ -27,7 +30,12 @@ export default class initialiser extends BackgroundProcess {
 		]);
 	}
 
-	onmessage(origin: string, intent: string) {
+	onmessage(msg: IPCMessage) {
+		const intent = msg.intent;
+		const origin = msg.originDirectory;
+
+		if (this.windows == undefined) return;
+
 		switch (origin) {
 			case "/System/keyboardShortcuts.js":
 				switch (intent) {
@@ -35,46 +43,48 @@ export default class initialiser extends BackgroundProcess {
 						this.search();
 						break;
 					case "keyboardShortcutTrigger-Remap Shortcuts":
-						env.exec(
+						this.env.exec(
 							"/System/CoreExecutables/com.constellation.remapper"
 						);
 						break;
 					// windows shortcuts
 					case "keyboardShortcutTrigger-Focus Left (Tiling)":
-						if (!windows.windowTiling) break;
+						if (!this.windows.windowTiling) break;
 						// Left!
-						windows.focusWindow(windows.focus - 1);
+						this.windows.focusWindow(this.windows.focus - 1);
 						break;
 					case "keyboardShortcutTrigger-Focus Right (Tiling)":
-						if (!windows.windowTiling) break;
+						if (!this.windows.windowTiling) break;
 						// Right!
-						windows.focusWindow(windows.focus + 1);
+						this.windows.focusWindow(this.windows.focus + 1);
 						break;
 					case "keyboardShortcutTrigger-Close Window": {
 						// Close Window!
 
-						if (windows.windows.length == 1) {
+						if (this.windows.windows.length == 1) {
 							return; // can't close the last window, sorry
 						}
-						const win = windows.windows[windows.focus];
+						const win = this.windows.windows[this.windows.focus];
 
 						win.remove();
 
 						setTimeout(() => {
-							const last = windows.windows.length - 1;
-							windows.focusWindow(
-								Math.max(0, Math.min(windows.focus, last))
+							if (this.windows == undefined) return;
+
+							const last = this.windows.windows.length - 1;
+							this.windows.focusWindow(
+								Math.max(0, Math.min(this.windows.focus, last))
 							);
 						}, 160); // wait for animation + layoutTiling
 						break;
 					}
 					case "keyboardShortcutTrigger-Toggle Window Tiling": {
 						// Toggle tiling
-						const tiling = windows.windowTiling;
+						const tiling = this.windows.windowTiling;
 
-						env.debug("Toggling tiling");
+						this.env.debug("Toggling tiling");
 
-						windows.setWindowTilingMode(!tiling);
+						this.windows.setWindowTilingMode(!tiling);
 						break;
 					}
 
@@ -90,6 +100,6 @@ export default class initialiser extends BackgroundProcess {
 	}
 
 	async search() {
-		await env.exec("/Applications/Search.appl");
+		await this.env.exec("/Applications/Search.appl");
 	}
 }

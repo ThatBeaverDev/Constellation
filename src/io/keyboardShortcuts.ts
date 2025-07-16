@@ -1,4 +1,5 @@
 import { BackgroundProcess, Process } from "../apps/executables.js";
+import { sendMessage } from "../apps/messages.js";
 import { focus, windows } from "../windows/windows.js";
 
 export const keyboardShortcuts: any = {};
@@ -118,8 +119,10 @@ document.addEventListener("keydown", (e) => {
 
 			if (ok) {
 				// trigger the shortcut
-				cut.process.onmessage(
+				sendMessage(
 					"/System/keyboardShortcuts.js",
+					0,
+					cut.process.id,
 					"keyboardShortcutTrigger-" + cut.name
 				);
 

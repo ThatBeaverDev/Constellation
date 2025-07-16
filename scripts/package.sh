@@ -20,12 +20,18 @@ compile() {
     # Build Popup
     ./scripts/tcpkg build/apps/code/popup build/apps/build/com.constellation.popup.idx -override=true -incrementor=true
 
+    # Build Rotur
+    ./scripts/tcpkg build/apps/code/rotur.appl build/apps/build/com.rotur.appl.idx -override=true -incrementor=true
+    ./scripts/tcpkg build/apps/code/rotur.backgr build/apps/build/com.rotur.backgr.idx -override=true -incrementor=true
 
     # Build System Settings
     ./scripts/tcpkg build/apps/code/settings build/apps/build/com.constellation.settings.idx -override=true -incrementor=true
 
     # Build keystone search
     ./scripts/tcpkg build/apps/code/keystone build/apps/build/com.constellation.search.idx -override=true -incrementor=true
+
+    # Build the Dock
+    ./scripts/tcpkg build/apps/code/dock build/apps/build/com.constellation.dock.idx -override=true -incrementor=true
 }
 
 daemon() {

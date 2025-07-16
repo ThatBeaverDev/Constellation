@@ -22,7 +22,7 @@ function initIcon(name: string) {
 export function getIcon(name: string): HTMLElement {
 	let icon: HTMLImageElement;
 	const id = String(window.renderID++);
-	if (name[0] == "/") {
+	if (name[0] == "/" || name.startsWith("http")) {
 		// this is a path, which must be loaded.
 
 		icon = document.createElement("img");
@@ -59,17 +59,22 @@ async function applySource(id: string, directory: string) {
 		throw content.data;
 	}
 
-	const type = directory.textAfterAll(".");
+	if (directory.startsWith("https://") || directory.startsWith("http://")) {
+		// it's just a URL.
+		dataURI = directory;
+	} else {
+		const type = directory.textAfterAll(".");
 
-	switch (type) {
-		case "svg":
-			// base64 it
-			const base64 = btoa(content.data);
-			// make the uri
-			dataURI = `data:image/svg+xml;base64,${base64}`;
-			break;
-		default:
-			dataURI = content.data;
+		switch (type) {
+			case "svg":
+				// base64 it
+				const base64 = btoa(content.data);
+				// make the uri
+				dataURI = `data:image/svg+xml;base64,${base64}`;
+				break;
+			default:
+				dataURI = content.data;
+		}
 	}
 
 	// @ts-expect-error // this will return an image element, trust me.
