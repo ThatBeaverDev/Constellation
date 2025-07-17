@@ -4,8 +4,9 @@ import fs from "./io/fs.js";
 
 import { isDev } from "./lib/isDev.js";
 import * as apps from "./apps/apps.js";
-import * as users from "./apps/users.js";
+import * as users from "./security/users.js";
 import * as log from "./lib/logging.js";
+import { setDirectoryPermission } from "./security/permissions.js";
 
 declare global {
 	interface String {
@@ -46,7 +47,11 @@ async function main() {
 
 	await users.init();
 
-	await apps.execute("/System/CoreExecutables/launchd.backgr");
+	const coreExecDirectory = "/System/CoreExecutables/launchd.backgr"
+
+	setDirectoryPermission(coreExecDirectory, "operator", true)
+	setDirectoryPermission(coreExecDirectory, "managePermissions", true)
+	await apps.execute(coreExecDirectory);
 
 	setInterval(async () => {
 		await apps.run();

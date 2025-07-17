@@ -1,17 +1,35 @@
 import { MessageError } from "../errors.js";
 import { registerKeyboardShortcut } from "../io/keyboardShortcuts.js";
 import { Renderer } from "../lib/uiKit/uiKit.js";
-import { ApplicationAuthorisationAPI, associations } from "./api.js";
+import { ApplicationAuthorisationAPI, associations } from "../security/env.js";
 import { execute, processes, terminate } from "./apps.js";
 import { IPCMessage, replyCallback, sendMessage } from "./messages.js";
-import { defaultUser } from "./users.js";
+import { defaultUser } from "../security/users.js";
 
 export let nextPID = 0;
+
+interface ApplicationManifest {
+	name: string;
+	description: string;
+	category:
+		| "Productivity"
+		| "Developer"
+		| "Entertainment"
+		| "Music"
+		| "Games"
+		| "Graphics and Design"
+		| "Social"
+		| "Weather"
+		| "Utilities";
+	author: string;
+	version: number;
+	icon: string;
+}
 
 export class Framework {
 	constructor(directory: string, args: any[]) {
 		this.directory = directory;
-		this.env = new ApplicationAuthorisationAPI(directory, defaultUser);
+		this.env = new ApplicationAuthorisationAPI(directory, defaultUser, this);
 		this.id = nextPID++;
 		this.identifier = this.directory + ":" + this.id;
 		this.args = args;
@@ -161,9 +179,9 @@ export class Popup extends Application {
 
 	private windowPositioningInterval: number;
 
-	exit() {
+	exit(value?: any) {
 		clearInterval(this.windowPositioningInterval);
 
-		super.exit();
+		super.exit(value);
 	}
 }

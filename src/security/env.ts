@@ -2,14 +2,19 @@ import { developmentLogging } from "../constellation.config.js";
 import * as conf from "../constellation.config.js";
 import { blobifyDirectory } from "../lib/blobify.js";
 import realFS from "../io/fs.js";
-import { execute, showPrompt } from "./apps.js";
+import { appName, execute, showPrompt } from "../apps/apps.js";
 import { ImportError, PermissionsError } from "../errors.js";
 import { windows } from "../windows/windows.js";
 import {
 	DirectoryPermissionStats,
 	getDirectoryPermissions,
-	getFilesDomainOfDirectory
-} from "./permissions.js";
+	getFilesDomainOfDirectory,
+	Permission,
+	setDirectoryPermission,
+	permissionsMetadata,
+	checkDirectoryPermission
+} from "../security/permissions.js";
+import { Framework, Process } from "../apps/executables.js";
 
 // Types
 
@@ -59,15 +64,23 @@ export type windowAlias = {
 export const associations: any = {};
 
 export class ApplicationAuthorisationAPI {
-	constructor(directory: string, user: string) {
+	constructor(directory: string, user: string, process?: Framework) {
 		this.directory = directory;
-		this.permissions = getDirectoryPermissions(this.directory);
+		this.#permissions = getDirectoryPermissions(this.directory);
 		this.user = user;
+		this.process = process;
+		console.debug(
+			"ApplicationAuthorisationAPI created as " +
+				user +
+				" for " +
+				directory
+		);
 	}
 
 	readonly directory: string;
-	readonly permissions: DirectoryPermissionStats;
+	readonly #permissions: DirectoryPermissionStats;
 	readonly user: string;
+	private readonly process?: Framework;
 
 	// logging
 	debug(initiator: string, ...content: any): undefined {
@@ -97,14 +110,17 @@ export class ApplicationAuthorisationAPI {
 				// all good
 				break;
 			case "user":
-				if (isWriteOperation && this.permissions.userFiles == false) {
+				if (isWriteOperation && this.#permissions.userFiles == false) {
 					throw new PermissionsError(
 						`Permission denied in action upon ${directory} - domain ${domainType}, isWriteOperation: ${isWriteOperation}`
 					);
 				}
 				break;
 			case "system":
-				if (isWriteOperation && this.permissions.systemFiles == false) {
+				if (
+					isWriteOperation &&
+					this.#permissions.systemFiles == false
+				) {
 					throw new PermissionsError(
 						`Permission denied in action upon ${directory} - domain ${domainType}, isWriteOperation: ${isWriteOperation}`
 					);
@@ -340,13 +356,49 @@ export class ApplicationAuthorisationAPI {
 		return associations[name];
 	}
 
-	allWindows(): windowAlias[] {
-		if (this.permissions.windows !== true)
-			throw new PermissionsError(
-				"Application " +
-					this.directory +
-					" does not have sufficient permissions for API 'windows'."
+	async requestUserPermission(permission: Permission) {
+		if (permissionsMetadata[permission].requestable == false) {
+			console.error(
+				"Permission by name " +
+					permission +
+					" requested, which is not allowed."
 			);
+			throw new PermissionsError(
+				`Permission '${permission}' is not requestable.`
+			);
+		}
+
+		let name
+		if (this.process == undefined) {
+			name = this.directory
+		} else {
+			name = appName(this.process);
+		}
+
+		console.log("Permission by name " + permission + " requested.");
+		const ok = await showPrompt(
+			"log",
+			name + " is requesting permission for " + permission,
+			permissionsMetadata[permission].description,
+			["Allow", "Deny"]
+		);
+
+		switch (ok) {
+			case "Allow":
+				setDirectoryPermission(this.directory, permission, true);
+				this.#permissions[permission] = true;
+				return true;
+			case "Deny":
+				throw new PermissionsError(
+					"Permission request for permission " +
+						permission +
+						" denied."
+				);
+		}
+	}
+
+	allWindows(): windowAlias[] {
+		checkDirectoryPermission(this.directory, "windows");
 
 		const obj: windowAlias[] = [];
 

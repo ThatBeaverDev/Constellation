@@ -9,8 +9,8 @@ import { blobify, translateAllBlobURIsToDirectories } from "../lib/blobify.js";
 import { focus, windows } from "../windows/windows.js";
 import { AppInitialisationError, ImportError } from "../errors.js";
 import AppWaitingObject from "./appWaitingObject.js";
-import { ApplicationAuthorisationAPI } from "./api.js";
-import { defaultUser } from "./users.js";
+import { ApplicationAuthorisationAPI } from "../security/env.js";
+import { defaultUser } from "../security/users.js";
 
 declare global {
 	interface Window {
@@ -143,14 +143,48 @@ let popupDirectory = "/System/CoreExecutables/Popup.appl";
 export async function showPrompt(
 	type: "error" | "warning" | "log",
 	title: string,
-	description?: any
+	description?: any,
+	buttons?: String[]
 ) {
 	const popup = await env.fs.readFile(popupDirectory + "/config.js");
 
 	if (popup.data == undefined) {
 		throw new Error("Popupapp at " + popupDirectory + " does not exist?");
 	} else {
-		await execute(popupDirectory, [type, title, title, description]);
+		const pipe: any[] = [];
+		await execute(popupDirectory, [
+			type,
+			title,
+			title,
+			description,
+			buttons,
+			pipe
+		]);
+
+		if (buttons !== undefined) {
+			return await new Promise((resolve: Function) => {
+				let interval = setInterval(() => {
+					for (const _ in pipe) {
+						_;
+						const msg = pipe[0];
+
+						if (typeof msg == "object") {
+							switch (msg.intent) {
+								case "popupResult":
+									// we can exit now
+									clearInterval(interval)
+									resolve(msg.data)
+									return
+							}
+						}
+
+						pipe.splice(0, 1);
+					}
+				});
+			});
+		} else {
+			return
+		}
 	}
 }
 
@@ -176,6 +210,20 @@ const activeIterators = new WeakMap<
 	Process,
 	Iterator<any> | AsyncIterator<any>
 >();
+
+export function appName(proc: executables.Framework) {
+	// @ts-expect-error
+	if (proc.name !== undefined) return proc.name
+
+	// @ts-expect-error
+	const windowName = proc?.renderer?.window?.name
+
+	if (windowName !== undefined && windowName !== proc.directory) return windowName;
+
+	const constructorName = Object.getPrototypeOf(proc).constructor.name
+
+	return constructorName
+}
 
 async function procExec(
 	proc: Process,
@@ -216,20 +264,22 @@ async function procExec(
 		proc.executing = false;
 		console.warn(e);
 
-		const name =
-			proc?.name ||
-			// @ts-expect-error
-			proc?.renderer?.window?.name ||
-			Object.getPrototypeOf(proc).constructor.name ||
-			proc?.directory;
-
-		showPrompt(
-			"warning",
-			`${name} quit unexpectedly.`,
-			translateAllBlobURIsToDirectories(e.stack)
-		);
+		const name = appName(proc);
 
 		await terminate(proc);
+
+		const choice = await showPrompt(
+			"warning",
+			`${name} quit unexpectedly.`,
+			translateAllBlobURIsToDirectories(e.stack),
+			["Ignore", "Report..."]
+		);
+
+		switch (choice) {
+			case "Report...":
+				console.log("we need to report thissss....")
+				break;
+		}
 	}
 }
 
