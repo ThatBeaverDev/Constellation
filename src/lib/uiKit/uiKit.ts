@@ -609,11 +609,11 @@ export class Renderer {
 											typeof newStep.onClick.left ==
 											"function"
 										) {
+											event.preventDefault();
 											newStep.onClick.left(
 												event.clientX,
 												event.clientY
 											);
-											event.preventDefault();
 										}
 										break;
 									case 1:
@@ -625,11 +625,11 @@ export class Renderer {
 											typeof newStep.onClick.right ==
 											"function"
 										) {
+											event.preventDefault();
 											newStep.onClick.right(
 												event.clientX,
 												event.clientY
 											);
-											event.preventDefault();
 										}
 										break;
 								}

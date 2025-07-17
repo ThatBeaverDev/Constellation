@@ -1,5 +1,5 @@
 import { Renderer } from "../../../../lib/uiKit/uiKit";
-import { windowAlias } from "../../../api";
+import { windowAlias } from "../../../../security/env";
 import dockAndDesktop from "../tcpsys/app";
 
 export default class dock {
@@ -21,7 +21,7 @@ export default class dock {
 		left: 0
 	};
 
-	wins: windowAlias[] = []
+	wins: windowAlias[] = [];
 
 	constructor(parent: any) {
 		this.parent = parent;
@@ -29,10 +29,18 @@ export default class dock {
 
 		this.winAPI = this.parent.env.include("/System/windows.js");
 
-		this.refresh()
-
-		setInterval(this.refresh, 10)
+		this.init()
 	}
+
+	async init() {
+		console.debug(await this.parent.env.requestUserPermission("windows"));
+
+		this.refresh();
+
+		this.ok = true;
+	}
+
+	ok: boolean = false;
 
 	renderContextMenu() {}
 
@@ -41,7 +49,10 @@ export default class dock {
 	}
 
 	async render() {
+		if (this.ok !== true) return;
 		if (this.winAPI instanceof Promise) this.winAPI = await this.winAPI;
+
+		this.refresh()
 
 		this.renderer.box(
 			125,
@@ -54,7 +65,7 @@ export default class dock {
 			}
 		);
 
-		const wins = this.wins
+		const wins = this.wins;
 
 		let x = 125 + this.dockPadding;
 		let y =
@@ -73,6 +84,7 @@ export default class dock {
 			this.renderer.onClick(
 				icon,
 				() => {
+					console.log(win)
 					if (win == undefined) return;
 					win.unminimise();
 					this.winAPI.focusWindow(win.winID);
