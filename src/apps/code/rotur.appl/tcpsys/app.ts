@@ -1,10 +1,10 @@
-const name = "roturIntegration.appl"
+const name = "roturIntegration.appl";
 
 export default class roturGui extends Application {
 	tick: number = 0;
 	state: "auth" | "dash" = "dash";
 	pages: any;
-	name: string = "roturIntegration.appl"
+	name: string = "roturIntegration.appl";
 
 	pipes: {
 		send?: any[];
@@ -48,7 +48,7 @@ export default class roturGui extends Application {
 		if (directoryListing.data == undefined) {
 			// the uh thingy isnt running
 			await env.exec("/Applications/Rotur.backgr");
-            env.debug(name, "Starting rotur.backgr connector service.")
+			env.debug(name, "Starting rotur.backgr connector service.");
 		}
 
 		const read = await env.fs.readFile(

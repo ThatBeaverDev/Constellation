@@ -55,9 +55,9 @@ export default class Dialogue extends Popup {
 				this.pipe.push({
 					intent: "popupResult",
 					data: text
-				})
+				});
 
-				this.exit()
+				this.exit();
 			});
 
 			x += 25 + this.renderer.getTextWidth(text);

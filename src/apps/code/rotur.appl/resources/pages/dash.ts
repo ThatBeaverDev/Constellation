@@ -1,6 +1,6 @@
 import { Renderer } from "../../../../../lib/uiKit/uiKit";
 import roturGui from "../../tcpsys/app";
-const roturLib = await env.include("/System/CoreLibraries/rotur.js")
+const roturLib = await env.include("/System/CoreLibraries/rotur.js");
 
 export default class dash {
 	parent: roturGui;
@@ -38,13 +38,18 @@ export default class dash {
 		this.tick++;
 
 		if (this.status == undefined) {
-			this.renderer.text(0, 0, "Loading...")
+			this.renderer.text(0, 0, "Loading...");
 			return;
 		}
 
 		this.renderer.text(0, 0, "Connection Status:");
 		this.renderer.text(0, 25, this.status.status);
-		this.renderer.icon(250, 0, "https://avatars.rotur.dev/" + this.status.username, 1.875)
+		this.renderer.icon(
+			250,
+			0,
+			"https://avatars.rotur.dev/" + this.status.username,
+			1.875
+		);
 
 		this.renderer.text(0, 70, "User Info:");
 		this.renderer.text(0, 95, "Username: " + this.status.username);

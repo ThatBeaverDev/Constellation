@@ -26,7 +26,6 @@ const randomString = function (length) {
 	return result;
 };
 
-
 export default class RoturExtension {
 	constructor(runtime) {
 		this.runtime = runtime;

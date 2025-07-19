@@ -47,10 +47,10 @@ async function main() {
 
 	await users.init();
 
-	const coreExecDirectory = "/System/CoreExecutables/launchd.backgr"
+	const coreExecDirectory = "/System/CoreExecutables/launchd.backgr";
 
-	setDirectoryPermission(coreExecDirectory, "operator", true)
-	setDirectoryPermission(coreExecDirectory, "managePermissions", true)
+	setDirectoryPermission(coreExecDirectory, "operator", true);
+	setDirectoryPermission(coreExecDirectory, "managePermissions", true);
 	await apps.execute(coreExecDirectory);
 
 	setInterval(async () => {
