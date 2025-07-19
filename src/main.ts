@@ -7,6 +7,9 @@ import * as apps from "./apps/apps.js";
 import * as users from "./security/users.js";
 import * as log from "./lib/logging.js";
 import { setDirectoryPermission } from "./security/permissions.js";
+import * as panic from "./lib/panic.js";
+
+panic.init();
 
 declare global {
 	interface String {
