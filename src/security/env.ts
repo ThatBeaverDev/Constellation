@@ -16,6 +16,8 @@ import {
 } from "../security/permissions.js";
 import { Framework, Process } from "../apps/executables.js";
 
+const name = "/System/security/env.js";
+
 // Types
 
 type fsResponse = {
@@ -69,11 +71,9 @@ export class ApplicationAuthorisationAPI {
 		this.#permissions = getDirectoryPermissions(this.directory);
 		this.user = user;
 		this.process = process;
-		console.debug(
-			"ApplicationAuthorisationAPI created as " +
-				user +
-				" for " +
-				directory
+		this.debug(
+			name,
+			`ApplicationAuthorisationAPI created as ${user} for ${directory}`
 		);
 	}
 
@@ -81,6 +81,15 @@ export class ApplicationAuthorisationAPI {
 	readonly #permissions: DirectoryPermissionStats;
 	readonly user: string;
 	private readonly process?: Framework;
+
+	#checkPermission(permission: Permission) {
+		if (this.#permissions.operator == true)
+			if (this.#permissions[permission] !== true) {
+				throw new PermissionsError(
+					`Permission denied - permission ${permission} is not held by the actor.`
+				);
+			}
+	}
 
 	// logging
 	debug(initiator: string, ...content: any): undefined {
@@ -331,7 +340,7 @@ export class ApplicationAuthorisationAPI {
 		let type = location.includes("://") ? "URL" : "directory";
 
 		if (developmentLogging)
-			console.debug("Inclusion of '" + location + "'");
+			this.debug(name, "Inclusion of '" + location + "'");
 
 		// @ts-expect-error
 		if (conf.importOverrides[location] !== undefined) {
@@ -356,9 +365,20 @@ export class ApplicationAuthorisationAPI {
 		return associations[name];
 	}
 
+	async setDirectoryPermission(
+		directory: string,
+		permission: Permission,
+		value: boolean
+	) {
+		this.#checkPermission("managePermissions");
+
+		await setDirectoryPermission(directory, permission, value);
+	}
+
 	async requestUserPermission(permission: Permission) {
 		if (permissionsMetadata[permission].requestable == false) {
-			console.error(
+			this.error(
+				name,
 				"Permission by name " +
 					permission +
 					" requested, which is not allowed."
@@ -368,24 +388,32 @@ export class ApplicationAuthorisationAPI {
 			);
 		}
 
-		let name
+		env.log(
+			name,
+			this.#permissions,
+			permission,
+			this.#permissions[permission]
+		);
+		if (this.#permissions[permission] == true) return true;
+
+		let appname;
 		if (this.process == undefined) {
-			name = this.directory
+			appname = this.directory;
 		} else {
-			name = appName(this.process);
+			appname = appName(this.process);
 		}
 
-		console.log("Permission by name " + permission + " requested.");
+		this.log(name, "Permission by name " + permission + " requested.");
 		const ok = await showPrompt(
 			"log",
-			name + " is requesting permission for " + permission,
+			appname + " is requesting permission for " + permission,
 			permissionsMetadata[permission].description,
 			["Allow", "Deny"]
 		);
 
 		switch (ok) {
 			case "Allow":
-				setDirectoryPermission(this.directory, permission, true);
+				await setDirectoryPermission(this.directory, permission, true);
 				this.#permissions[permission] = true;
 				return true;
 			case "Deny":
@@ -431,3 +459,5 @@ export class ApplicationAuthorisationAPI {
 		return obj;
 	}
 }
+
+export const systemEnv = new ApplicationAuthorisationAPI("/System", "operator");
