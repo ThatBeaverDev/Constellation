@@ -3,7 +3,8 @@ import { defaultUser } from "./users.js";
 
 export const permissionsDirectory = "/System/applicationPermissions.json";
 
-export type Permission = | "windows"
+export type Permission =
+	| "windows"
 	| "systemControl"
 	| "containers"
 	| "systemFiles"
@@ -20,48 +21,62 @@ export type DirectoryPermissionStats = Record<Permission, boolean> & {
 	user: string;
 };
 
-export const permissionsMetadata: Record<Permission, {
-	description: string,
-	requestable?: boolean
-}> = {
+export const permissionsMetadata: Record<
+	Permission,
+	{
+		description: string;
+		requestable?: boolean;
+	}
+> = {
 	windows: {
-		description: "Allows the application to control how Constellation displays windows and collect data about open windows."
+		description:
+			"Allows the application to control how Constellation displays windows and collect data about open windows."
 	},
 	systemControl: {
-		description: "Allows the application to to control Constellation through system APIs. DO NOT PROVIDE TO UNKNOWN APPS."
+		description:
+			"Allows the application to to control Constellation through system APIs. DO NOT PROVIDE TO UNKNOWN APPS."
 	},
 	containers: {
-		description: "Allows the application to run other applications within sandboxed environments"
+		description:
+			"Allows the application to run other applications within sandboxed environments"
 	},
 	systemFiles: {
-		description: "Allows the application to edit system files, therefore possibly breaking or changing the behaviour of the system. DO NOT PROVIDE TO UNKNOWN APPS."
+		description:
+			"Allows the application to edit system files, therefore possibly breaking or changing the behaviour of the system. DO NOT PROVIDE TO UNKNOWN APPS."
 	},
 	userFiles: {
-		description: "Allow the application to edit and delete all user files. This means apps can delete ALL your files!"
+		description:
+			"Allow the application to edit and delete all user files. This means apps can delete ALL your files!"
 	},
 	customPermissions: {
-		description: "Allows the application to create custom permissions and therefore popups for controlling other applications' access to data."
+		description:
+			"Allows the application to create custom permissions and therefore popups for controlling other applications' access to data."
 	},
 	network: {
-		description: "Allows the application to access the wider internet and therefore share data to malicious actors."
+		description:
+			"Allows the application to access the wider internet and therefore share data to malicious actors."
 	},
 	audioPlayback: {
 		description: "Allows the application to play sound from your device."
 	},
 	microphone: {
-		description: "Allows the application to access the microphone and therefore listen to you."
+		description:
+			"Allows the application to access the microphone and therefore listen to you."
 	},
 	camera: {
-		description: "Allows the application to access the camera and therefore see you."
+		description:
+			"Allows the application to access the camera and therefore see you."
 	},
 	managePermissions: {
-		description: "Allows the application to edit other applications' or it's own permissions. DO NOT PROVIDE TO UNKNOWN APPS."
+		description:
+			"Allows the application to edit other applications' or it's own permissions. DO NOT PROVIDE TO UNKNOWN APPS."
 	},
 	operator: {
-		description: "Allows the application access to ALL permissions. This permission is NOT requestable.",
+		description:
+			"Allows the application access to ALL permissions. This permission is NOT requestable.",
 		requestable: false
 	}
-}
+};
 
 type PermissionsStore = Record<string, DirectoryPermissionStats>;
 
@@ -112,12 +127,17 @@ export function getDirectoryPermissions(
 	return permissionsData[directory];
 }
 
-export function getDirectoryPermission(directory: string, permission: Permission) {{
-	const perm = permissionsData[directory][permission];
+export function getDirectoryPermission(
+	directory: string,
+	permission: Permission
+) {
+	{
+		const perm = permissionsData[directory][permission];
 
-	return perm
-}}
-export function setDirectoryPermission(
+		return perm;
+	}
+}
+export async function setDirectoryPermission(
 	directory: string,
 	permission: Permission,
 	value: boolean
@@ -125,16 +145,20 @@ export function setDirectoryPermission(
 	let perm = permissionsData[directory];
 
 	if (perm == undefined) {
-		perm = createDefaultPermissions()
+		perm = createDefaultPermissions();
 	}
 
 	perm[permission] = value;
-	void onPermissionsUpdate();
+	console.log(perm, permissionsData);
+	void (await onPermissionsUpdate());
 }
-export function checkDirectoryPermission(directory: string, permission: Permission) {
-	const val = getDirectoryPermission(directory, permission)
+export function checkDirectoryPermission(
+	directory: string,
+	permission: Permission
+) {
+	const val = getDirectoryPermission(directory, permission);
 
-	return val == true
+	return val == true;
 }
 
 export function getFilesDomainOfDirectory(
