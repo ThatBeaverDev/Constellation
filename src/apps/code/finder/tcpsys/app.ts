@@ -355,7 +355,7 @@ export default class finder extends Application {
 				: this.env.fs.relative(this.path, itemName);
 
 		this.env.debug(
-			this.directory,
+			this.name,
 			"Submitting '" + path + "' for file picker result."
 		);
 
