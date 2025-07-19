@@ -29,7 +29,7 @@ export default class dock {
 
 		this.winAPI = this.parent.env.include("/System/windows.js");
 
-		this.init()
+		this.init();
 	}
 
 	async init() {
@@ -52,7 +52,7 @@ export default class dock {
 		if (this.ok !== true) return;
 		if (this.winAPI instanceof Promise) this.winAPI = await this.winAPI;
 
-		this.refresh()
+		this.refresh();
 
 		this.renderer.box(
 			125,
@@ -79,12 +79,11 @@ export default class dock {
 		for (const win of wins) {
 			//if (win.name == "/System/CoreExecutables/Dock.appl") continue; // don't show an icon for the dock
 
-			const icon = this.renderer.icon(x, y, win.iconName, iconScale);
+			const iconID = this.renderer.icon(x, y, win.iconName, iconScale);
 
 			this.renderer.onClick(
-				icon,
+				iconID,
 				() => {
-					console.log(win)
 					if (win == undefined) return;
 					win.unminimise();
 					this.winAPI.focusWindow(win.winID);

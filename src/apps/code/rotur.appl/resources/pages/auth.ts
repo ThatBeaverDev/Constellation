@@ -76,7 +76,7 @@ export default class auth {
 											clearInterval(interval);
 											stop();
 											this.parent.exit();
-                                            return;
+											return;
 										}
 								}
 

@@ -172,9 +172,9 @@ export async function showPrompt(
 							switch (msg.intent) {
 								case "popupResult":
 									// we can exit now
-									clearInterval(interval)
-									resolve(msg.data)
-									return
+									clearInterval(interval);
+									resolve(msg.data);
+									return;
 							}
 						}
 
@@ -183,7 +183,7 @@ export async function showPrompt(
 				});
 			});
 		} else {
-			return
+			return;
 		}
 	}
 }
@@ -213,16 +213,17 @@ const activeIterators = new WeakMap<
 
 export function appName(proc: executables.Framework) {
 	// @ts-expect-error
-	if (proc.name !== undefined) return proc.name
+	if (proc.name !== undefined) return proc.name;
 
 	// @ts-expect-error
-	const windowName = proc?.renderer?.window?.name
+	const windowName = proc?.renderer?.window?.name;
 
-	if (windowName !== undefined && windowName !== proc.directory) return windowName;
+	if (windowName !== undefined && windowName !== proc.directory)
+		return windowName;
 
-	const constructorName = Object.getPrototypeOf(proc).constructor.name
+	const constructorName = Object.getPrototypeOf(proc).constructor.name;
 
-	return constructorName
+	return constructorName;
 }
 
 async function procExec(
@@ -277,7 +278,7 @@ async function procExec(
 
 		switch (choice) {
 			case "Report...":
-				console.log("we need to report thissss....")
+				console.log("we need to report thissss....");
 				break;
 		}
 	}

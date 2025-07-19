@@ -112,7 +112,7 @@ export default class roturIntegration extends BackgroundProcess {
 
 		this.shout("com.rotur.roturItegrationBackgr");
 
-		const fsInitResult = this.fsInit()
+		const fsInitResult = this.fsInit();
 
 		env.debug(this.name, "initialising rotur...");
 
@@ -138,7 +138,7 @@ export default class roturIntegration extends BackgroundProcess {
 
 		await r.connectToServer("crl", conf.name, conf.version);
 
-		await fsInitResult
+		await fsInitResult;
 
 		this.ok = true;
 	}
@@ -196,11 +196,10 @@ export default class roturIntegration extends BackgroundProcess {
 	async onmessage(msg: IPCMessage) {
 		switch (msg.intent) {
 			case "getRoturToken":
+				await this.validConnection();
 
-			await this.validConnection()
-
-			msg.reply(this.rotur.userToken);
-			break;
+				msg.reply(this.rotur.userToken);
+				break;
 		}
 	}
 }

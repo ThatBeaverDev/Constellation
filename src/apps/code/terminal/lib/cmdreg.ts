@@ -51,7 +51,6 @@ export default class terminalCommandRegistry {
 		const list = await this.env.fs.listDirectory(dir);
 
 		if (!list.ok) {
-			console.log(list);
 			return list.data;
 		}
 

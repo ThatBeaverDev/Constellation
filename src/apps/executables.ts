@@ -29,7 +29,11 @@ interface ApplicationManifest {
 export class Framework {
 	constructor(directory: string, args: any[]) {
 		this.directory = directory;
-		this.env = new ApplicationAuthorisationAPI(directory, defaultUser, this);
+		this.env = new ApplicationAuthorisationAPI(
+			directory,
+			defaultUser,
+			this
+		);
 		this.id = nextPID++;
 		this.identifier = this.directory + ":" + this.id;
 		this.args = args;
