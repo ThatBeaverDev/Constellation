@@ -1,6 +1,6 @@
 # Constellation
 
-<img src="https://raw.githubusercontent.com/ThatBeaverDev/Constellation/refs/heads/dev/logos/Banner.png" alt="Constellation banner logo" width="100%"/>
+<img src="https://raw.githubusercontent.com/ThatBeaverDev/Constellation/refs/heads/dev/logos/Banner.svg" alt="Constellation banner logo" width="100%"/>
 <br>
 <br>
 
