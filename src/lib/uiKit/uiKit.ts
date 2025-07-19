@@ -16,6 +16,7 @@ export async function init() {
 }
 
 type uikitCreatorName = keyof Renderer["creators"];
+type uiKitCreators = Record<string, (...args: any[]) => HTMLElement>
 interface step {
 	type: uikitCreatorName;
 	args: any[];
@@ -228,7 +229,12 @@ export class Renderer {
 				? undefined
 				: rightClickCallback.bind(this.process);
 
-		this.steps[elemID - 1].onClick = { left: left, right: right };
+		// insure elemID is valid
+		if (elemID > 0 && elemID <= this.steps.length) {
+			this.steps[elemID - 1].onClick = { left, right };
+		} else {
+			throw new UIError(`onClick called with invalid elemID: ${elemID}`);
+		}
 	}
 
 	readonly getTextWidth = getTextWidth;
@@ -256,14 +262,18 @@ export class Renderer {
 	};
 
 	private textboxElem: HTMLInputElement | HTMLTextAreaElement | undefined;
-	private readonly creators = {
+	private readonly creators: uiKitCreators = {
 		uikitIcon: (x = 0, y = 0, name = "circle-help", scale = 1) => {
 			const icon = getIcon(name);
-
 			icon.style.cssText = `left: ${x}px; top: ${y}px; width: ${24 * scale}px; height: ${24 * scale}px;`;
 
 			this.window.body.appendChild(icon);
 			const live = document.getElementById(icon.id);
+
+			if (live == null)
+				throw new UIError(
+					"uikit element has disappeared in processing"
+				);
 
 			return live;
 		},
@@ -278,6 +288,11 @@ export class Renderer {
 
 			this.window.body.appendChild(text);
 			const live = document.getElementById(text.id);
+
+			if (live == null)
+				throw new UIError(
+					"uikit element has disappeared in processing"
+				);
 
 			return live;
 		},
@@ -299,7 +314,12 @@ export class Renderer {
 
 			this.window.body.appendChild(button);
 			// @ts-ignore // query selector doesn't work for this since we have numbers in the ID
-			const live: HTMLButtonElement = document.getElementById(button.id)!;
+			const live: HTMLButtonElement = document.getElementById(button.id);
+
+			if (live == null)
+				throw new UIError(
+					"uikit element has disappeared in processing"
+				);
 
 			live.addEventListener(
 				"mousedown",
@@ -357,6 +377,11 @@ export class Renderer {
 			// @ts-expect-error
 			const live: HTMLInputElement = document.getElementById(textbox.id);
 
+			if (live == null)
+				throw new UIError(
+					"uikit element has disappeared in processing"
+				);
+
 			live.addEventListener(
 				"keydown",
 				(event) =>
@@ -392,6 +417,11 @@ export class Renderer {
 			this.window.body.appendChild(line);
 			const live = document.getElementById(line.id);
 
+			if (live == null)
+				throw new UIError(
+					"uikit element has disappeared in processing"
+				);
+
 			return live;
 		},
 
@@ -404,6 +434,11 @@ export class Renderer {
 
 			this.window.body.appendChild(line);
 			const live = document.getElementById(line.id);
+
+			if (live == null)
+				throw new UIError(
+					"uikit element has disappeared in processing"
+				);
 
 			return live;
 		},
@@ -432,6 +467,11 @@ export class Renderer {
 			this.window.body.appendChild(bar);
 			const live = document.getElementById(bar.id);
 
+			if (live == null)
+				throw new UIError(
+					"uikit element has disappeared in processing"
+				);
+
 			return live;
 		},
 
@@ -454,6 +494,11 @@ export class Renderer {
 			this.window.body.appendChild(area);
 			// @ts-expect-error
 			const live: HTMLTextAreaElement = document.getElementById(area.id);
+
+			if (live == null)
+				throw new UIError(
+					"uikit element has disappeared in processing"
+				);
 
 			live.addEventListener(
 				"keydown",
@@ -495,6 +540,11 @@ export class Renderer {
 
 			this.window.body.appendChild(box);
 			const live = document.getElementById(box.id);
+
+			if (live == null)
+				throw new UIError(
+					"uikit element has disappeared in processing"
+				);
 
 			return live;
 		}
@@ -568,7 +618,7 @@ export class Renderer {
 		const newItems: HTMLElement[] = [];
 		const newDisplayedSteps: typeof this.steps = [];
 
-		for (let i = 0; i < this.steps.length; i++) {
+		for (const i in this.steps) {
 			const newStep = this.steps[i];
 			const oldStep = this.displayedSteps[i];
 			const oldElement = this.items[i];
@@ -580,11 +630,10 @@ export class Renderer {
 				oldStep.type !== newStep.type ||
 				JSON.stringify(oldStep.args) !== JSON.stringify(newStep.args);
 
+			// inside your commit() loop where you create new elements
 			if (stepChanged) {
-				// Remove old element if needed
 				if (oldElement) oldElement.remove();
 
-				// Create new element
 				const creator = this.creators[newStep.type];
 				if (!creator) {
 					throw new UIError(
@@ -592,54 +641,53 @@ export class Renderer {
 					);
 				}
 
-				// @ts-ignore
+				// Create fresh element
 				element = creator(...newStep.args)!;
 
-				if (newStep.onClick !== undefined) {
-					element.classList.add("clickable");
-					element.addEventListener(
-						"mousedown",
-						(event: MouseEvent) => {
-							// typescript demands this so i'll oblige
-							if (newStep.onClick !== undefined) {
-								switch (event.button) {
-									case 0:
-										// left click
-										if (
-											typeof newStep.onClick.left ==
-											"function"
-										) {
-											event.preventDefault();
-											newStep.onClick.left(
-												event.clientX,
-												event.clientY
-											);
-										}
-										break;
-									case 1:
-										// middle button
-										break;
-									case 2:
-										// right click
-										if (
-											typeof newStep.onClick.right ==
-											"function"
-										) {
-											event.preventDefault();
-											newStep.onClick.right(
-												event.clientX,
-												event.clientY
-											);
-										}
-										break;
-								}
-							}
-						},
-						{ signal: this.signal }
-					);
-				}
 			} else {
 				element = oldElement!;
+			}
+
+			// add event listeners to the element
+			// the old element had all uiKit event listeners removed by the AbortController
+			if (newStep.onClick !== undefined) {
+				element.classList.add("clickable");
+
+				// Clean event listeners by using AbortController as you have
+				element.addEventListener(
+					"click",
+					(event: MouseEvent) => {
+						if (!newStep.onClick) return;
+
+						switch (event.button) {
+							case 0:
+								if (
+									typeof newStep.onClick.left ===
+									"function"
+								) {
+									event.preventDefault();
+									newStep.onClick.left(
+										event.clientX,
+										event.clientY
+									);
+								}
+								break;
+							case 2:
+								if (
+									typeof newStep.onClick.right ===
+									"function"
+								) {
+									event.preventDefault();
+									newStep.onClick.right(
+										event.clientX,
+										event.clientY
+									);
+								}
+								break;
+						}
+					},
+					{ signal: this.signal }
+				);
 			}
 
 			newItems.push(element);
