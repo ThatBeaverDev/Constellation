@@ -652,11 +652,11 @@ export class Renderer {
 			if (newStep.onClick !== undefined) {
 				element.classList.add("clickable");
 
-				// Clean event listeners by using AbortController as you have
 				element.addEventListener(
 					"click",
 					(event: MouseEvent) => {
 						if (!newStep.onClick) return;
+						console.log(event.button);
 
 						switch (event.button) {
 							case 0:
@@ -670,17 +670,18 @@ export class Renderer {
 									);
 								}
 								break;
-							case 2:
-								if (
-									typeof newStep.onClick.right === "function"
-								) {
-									event.preventDefault();
-									newStep.onClick.right(
-										event.clientX,
-										event.clientY
-									);
-								}
-								break;
+						}
+					},
+					{ signal: this.signal }
+				);
+				element.addEventListener(
+					"contextmenu",
+					(event: MouseEvent) => {
+						if (!newStep.onClick) return;
+
+						if (typeof newStep.onClick.right === "function") {
+							event.preventDefault();
+							newStep.onClick.right(event.clientX, event.clientY);
 						}
 					},
 					{ signal: this.signal }
@@ -691,7 +692,7 @@ export class Renderer {
 			newDisplayedSteps.push(newStep);
 		}
 
-		// Remove any extra old elements
+		// remove missed old elements
 		for (let i = this.steps.length; i < this.items.length; i++) {
 			const item = this.items[i];
 			if (item) item.remove();
@@ -700,8 +701,10 @@ export class Renderer {
 		this.items = newItems;
 		this.displayedSteps = newDisplayedSteps;
 
-		// Clear and re-add all (new or reused) elements
+		// reall insure everything is gone
 		this.window.body.innerHTML = "";
+
+		// add the new elements
 		for (const element of this.items) {
 			this.window.body.appendChild(element);
 		}
@@ -713,20 +716,3 @@ export class Renderer {
 		this.window.remove();
 	}
 }
-
-let lastContextAttempt = { x: NaN, y: NaN };
-// devil line
-window.addEventListener(`contextmenu`, (e) => {
-	if (
-		lastContextAttempt.x == e.clientX &&
-		lastContextAttempt.y == e.clientY
-	) {
-		return;
-	}
-
-	lastContextAttempt = {
-		x: e.clientX,
-		y: e.clientY
-	};
-	e.preventDefault();
-});
