@@ -10,7 +10,11 @@ if (canvas == null)
 	);
 const ctx = canvas.getContext("2d");
 
-export function getTextWidth(text: string, size = 15, fontFamily = "Arial") {
+export function getTextWidth(
+	text: string,
+	size = 15,
+	fontFamily = "monospace"
+) {
 	if (ctx == null) throw new uiKitInitialisationError("ctx is null.");
 
 	ctx.font = `${size}px ${fontFamily}`;
