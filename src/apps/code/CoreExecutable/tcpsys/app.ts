@@ -8,6 +8,12 @@ export default class initialiser extends BackgroundProcess {
 			"/Applications/Finder.appl"
 		];
 
+		this.env.setDirectoryPermission(
+			"/System/CoreExecutables/Dock.appl",
+			"windows",
+			true
+		);
+
 		for (const app of onstart) {
 			this.env.exec(app);
 		}
@@ -82,7 +88,7 @@ export default class initialiser extends BackgroundProcess {
 						// Toggle tiling
 						const tiling = this.windows.windowTiling;
 
-						this.env.debug("Toggling tiling");
+						this.env.debug(this.directory, "Toggling tiling");
 
 						this.windows.setWindowTilingMode(!tiling);
 						break;
