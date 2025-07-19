@@ -388,7 +388,7 @@ export class ApplicationAuthorisationAPI {
 			);
 		}
 
-		env.log(
+		this.log(
 			name,
 			this.#permissions,
 			permission,
