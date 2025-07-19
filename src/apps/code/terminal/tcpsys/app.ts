@@ -44,7 +44,7 @@ export default class terminalUI extends Application {
 			"./lib/cmdreg.js"
 		);
 		const reg = await this.env.include(cmdregDir);
-		this.cmdreg = new reg.default();
+		this.cmdreg = new reg.default(this);
 		await this.cmdreg.init();
 
 		if (this.args.length !== 0) {
