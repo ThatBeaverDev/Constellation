@@ -8,7 +8,7 @@
     "icons": [
         {
             "src": "logos/PWA.png",
-            "sizes": "200x200",
+            "sizes": "260x260",
             "type": "image/png"
         }
     ]
