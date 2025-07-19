@@ -388,12 +388,6 @@ export class ApplicationAuthorisationAPI {
 			);
 		}
 
-		this.log(
-			name,
-			this.#permissions,
-			permission,
-			this.#permissions[permission]
-		);
 		if (this.#permissions[permission] == true) return true;
 
 		let appname;
