@@ -16,7 +16,7 @@ export async function init() {
 }
 
 type uikitCreatorName = keyof Renderer["creators"];
-type uiKitCreators = Record<string, (...args: any[]) => HTMLElement>
+type uiKitCreators = Record<string, (...args: any[]) => HTMLElement>;
 interface step {
 	type: uikitCreatorName;
 	args: any[];
@@ -643,7 +643,6 @@ export class Renderer {
 
 				// Create fresh element
 				element = creator(...newStep.args)!;
-
 			} else {
 				element = oldElement!;
 			}
@@ -662,8 +661,7 @@ export class Renderer {
 						switch (event.button) {
 							case 0:
 								if (
-									typeof newStep.onClick.left ===
-									"function"
+									typeof newStep.onClick.left === "function"
 								) {
 									event.preventDefault();
 									newStep.onClick.left(
@@ -674,8 +672,7 @@ export class Renderer {
 								break;
 							case 2:
 								if (
-									typeof newStep.onClick.right ===
-									"function"
+									typeof newStep.onClick.right === "function"
 								) {
 									event.preventDefault();
 									newStep.onClick.right(
@@ -717,7 +714,19 @@ export class Renderer {
 	}
 }
 
+let lastContextAttempt = { x: NaN, y: NaN };
 // devil line
 window.addEventListener(`contextmenu`, (e) => {
+	if (
+		lastContextAttempt.x == e.clientX &&
+		lastContextAttempt.y == e.clientY
+	) {
+		return;
+	}
+
+	lastContextAttempt = {
+		x: e.clientX,
+		y: e.clientY
+	};
 	e.preventDefault();
 });
