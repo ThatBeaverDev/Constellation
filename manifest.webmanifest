@@ -1,0 +1,15 @@
+{
+    "name": "Constellation",
+    "short_name": "Constellation",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#000000",
+    "description": "Constellation is an environment for JavaScript (Or TypeScript) based apps to run inside.",
+    "icons": [
+        {
+            "src": "logos/PWA.png",
+            "sizes": "200x200",
+            "type": "image/png"
+        }
+    ]
+}
