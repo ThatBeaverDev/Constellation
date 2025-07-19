@@ -149,7 +149,8 @@ export async function setDirectoryPermission(
 	}
 
 	perm[permission] = value;
-	console.log(perm, permissionsData);
+	permissionsData[directory] = perm;
+
 	void (await onPermissionsUpdate());
 }
 export function checkDirectoryPermission(
