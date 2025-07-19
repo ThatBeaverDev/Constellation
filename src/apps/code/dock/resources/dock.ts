@@ -33,7 +33,12 @@ export default class dock {
 	}
 
 	async init() {
-		console.debug(await this.parent.env.requestUserPermission("windows"));
+		let getPerms: boolean | undefined = false;
+		try {
+			getPerms = await this.parent.env.requestUserPermission("windows");
+		} catch {}
+
+		if (getPerms !== true) return;
 
 		this.refresh();
 
