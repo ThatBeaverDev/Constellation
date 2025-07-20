@@ -30,6 +30,10 @@ export async function blobifyDirectory(location: string, mime = "text/plain") {
 export function translateAllBlobURIsToDirectories(text: string): string {
 	let str = text;
 
+	if (typeof str !== "string") {
+		throw new Error("Translation must from type string");
+	}
+
 	for (const i in index) {
 		str = str.replaceAll(i, index[i]);
 	}
