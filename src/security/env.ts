@@ -41,6 +41,7 @@ export type windowAlias = {
 
 	minimise: Function;
 	unminimise: Function;
+	toggleMinification: Function;
 
 	show: Function;
 	hide: Function;
@@ -51,6 +52,7 @@ export type windowAlias = {
 	name: string;
 	iconName: string;
 	winID: number;
+	applicationDirectory: string;
 
 	position: {
 		left: number;
@@ -431,6 +433,7 @@ export class ApplicationAuthorisationAPI {
 
 				minimise: win.minimise.bind(win),
 				unminimise: win.unminimise.bind(win),
+				toggleMinification: win.toggleMinimise,
 
 				show: win.show.bind(win),
 				hide: win.hide.bind(win),
@@ -440,6 +443,7 @@ export class ApplicationAuthorisationAPI {
 
 				name: win.name,
 				iconName: win.iconName,
+				applicationDirectory: win.Application.directory,
 
 				position: win.position,
 				dimensions: win.dimensions,
