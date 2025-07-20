@@ -72,7 +72,7 @@ export default class terminalUI extends Application {
 					`Terminal commands are as follows:\n- ` +
 					Object.keys(this.cmdreg).join("\n- ");
 			default:
-				return this.cmdreg[name];
+				return this.cmdreg[name].bind(this.cmdreg);
 		}
 	}
 
