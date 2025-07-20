@@ -25,7 +25,7 @@ export default class menubar {
 		this.renderer.icon(
 			iconPadding,
 			iconPadding,
-			"/System/CoreAssets/Logos/Constellation-Web.svg"
+			"/System/CoreAssets/Logos/Constellation-White.svg"
 		);
 	}
 }
