@@ -3,10 +3,7 @@ import { IPCMessage } from "../../../messages";
 export default class initialiser extends BackgroundProcess {
 	windows?: typeof import("../../../../windows/windows");
 	async init() {
-		const onstart = [
-			"/System/CoreExecutables/Dock.appl",
-			"/Applications/Finder.appl"
-		];
+		const onstart = ["/System/CoreExecutables/Dock.appl"];
 
 		this.env.setDirectoryPermission(
 			"/System/CoreExecutables/Dock.appl",
@@ -17,6 +14,9 @@ export default class initialiser extends BackgroundProcess {
 		for (const app of onstart) {
 			this.env.exec(app);
 		}
+
+		// TODO: remove once applications menu is done
+		setTimeout(() => this.env.exec("/Applications/Finder.appl"), 50);
 
 		this.windows = await this.env.include("/System/windows.js");
 
