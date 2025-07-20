@@ -1,4 +1,12 @@
-// @ts-expect-error
+let bfs: Function | undefined;
+
+const bfsCode = await (
+	await fetch("/src/lib/external/browserfs.min.js")
+).text();
+
+bfs = new Function(bfsCode);
+await bfs(); // start browserFS
+
 const BrowserFS = window.BrowserFS;
 
 BrowserFS.configure(
@@ -43,6 +51,7 @@ const fs = BrowserFS.BFSRequire("fs");
 declare global {
 	interface Window {
 		rawFS: any;
+		BrowserFS: any;
 	}
 }
 window.rawFS = fs;
@@ -154,3 +163,15 @@ const main = {
 };
 
 export default main;
+
+export async function fsLoaded() {
+	await new Promise((resolve: Function) => {
+		let interval = setInterval(() => {
+			if (typeof bfs == "function") {
+				clearInterval(interval);
+				resolve();
+				return;
+			}
+		});
+	});
+}
