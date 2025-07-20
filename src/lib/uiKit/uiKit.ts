@@ -44,6 +44,13 @@ type uikitBoxConfig = {
 	colour?: string; // colour but typescript is stupid and doesn't know rgb(255, 255, 255) is a colour 🤦
 };
 
+let lastClick: number = 0;
+function onClick() {
+	lastClick = Date.now();
+}
+document.addEventListener("mousedown", onClick);
+document.addEventListener("pointerdown", onClick);
+
 // class
 export class Renderer {
 	defaultConfig = {
@@ -239,6 +246,22 @@ export class Renderer {
 		} else {
 			throw new UIError(`onClick called with invalid elemID: ${elemID}`);
 		}
+	}
+
+	async awaitClick(callback: () => void | Promise<void>) {
+		const init = Date.now();
+
+		await new Promise((resolve: Function) => {
+			let interval = setInterval(() => {
+				if (lastClick > init) {
+					clearInterval(interval);
+					resolve();
+					return;
+				}
+			});
+		});
+
+		callback();
 	}
 
 	readonly getTextWidth = getTextWidth;
@@ -673,7 +696,6 @@ export class Renderer {
 
 				function mouseDown(event: MouseEvent) {
 					if (!newStep.onClick) return;
-					console.log(event.button);
 
 					switch (event.button) {
 						case 0:
