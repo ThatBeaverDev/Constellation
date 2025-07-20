@@ -22,26 +22,10 @@
 </head>
 
 <body>
-	<div class="wallpaper"></div>
-	<script defer src="/src/lib/external/browserfs.min.js"></script>
-	<!--minified SHOULD be smaller to import-->
-
-	<!-- Vercel speed analytics -->
-	<script>
-		window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
-	</script>
-	<script defer src="/_vercel/speed-insights/script.js"></script>
-	<!-- Vercel Analytics -->
-	<script>
-		window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-	</script>
-	<script defer src="/_vercel/insights/script.js"></script>
-
-	<script defer type="module" src="src/buildCheck.js">
-	</script>
 	<link rel="stylesheet" href="/styles/styles.css" />
 	<link rel="stylesheet" href="/styles/sourceCodePro.css"/>
 
+	<div class="wallpaper"></div>
 	<div class="hidden">
 		<canvas id="hiddenCanvas"></canvas>
 	</div>
@@ -53,6 +37,22 @@
 		<div class="loader planet" id="two"></div>
 		<div class="loader planet" id="three"></div>
 	</div>
+
+
+	<script defer src="/src/lib/external/browserfs.min.js"></script>
+	<!-- Vercel general -->
+	<script>
+		window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+		window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+	</script>
+
+	<!-- Vercel speed analytics -->
+	<script defer src="/_vercel/speed-insights/script.js"></script>
+
+	<!-- Vercel Analytics -->
+	<script defer src="/_vercel/insights/script.js"></script>
+
+	<script defer type="module" src="src/buildCheck.js"></script>
 </body>
 
 </html>
