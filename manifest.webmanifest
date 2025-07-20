@@ -2,14 +2,22 @@
     "name": "Constellation",
     "short_name": "Constellation",
     "start_url": "/",
-    "display": "standalone",
-    "background_color": "#000000",
     "description": "Constellation is an environment for JavaScript (Or TypeScript) based apps to run inside.",
     "icons": [
         {
-            "src": "logos/PWA.png",
-            "sizes": "260x260",
-            "type": "image/png"
+            "src": "/logos/web-app-manifest-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/logos/web-app-manifest-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
         }
-    ]
+    ],
+    "theme_color": "#29314F",
+    "background_color": "#29314F",
+    "display": "standalone"
 }
