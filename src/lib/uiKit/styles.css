@@ -17,6 +17,10 @@
 	font-family: monospace;
 }
 
+body {
+	-webkit-touch-callout: none !important;
+}
+
 .clickable {
 	transition: transform var(--uikitClickableExpandDuration) ease-in-out;
 }
