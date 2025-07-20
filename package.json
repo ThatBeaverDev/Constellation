@@ -14,7 +14,8 @@
 		"clean": "npm run clean-build && npm run clean-dsstore",
 		"clean-build": "rm -rf build/*",
 		"clean-dsstore": "find . -name .DS_Store -exec rm {} +",
-		"newenv": "npm install && git submodule update && npm run build && echo \"Open http://localhost:5173 to use Constellation!\" && npm run dev"
+		"newenv": "npm install && git submodule update && npm run build && echo \"Open http://localhost:5173 to use Constellation!\" && npm run dev",
+		"reclone-test": "./scripts/reclone.sh"
 	},
 	"devDependencies": {
 		"@eslint/js": "9.28.0",
