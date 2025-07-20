@@ -50,11 +50,12 @@ async function check() {
 			':root {--wallpaper-url: "/wallpapers/Sahara Night Sky.jpg"}';
 		document.body.appendChild(style);
 	} else {
-		const script = document.createElement("script");
-		script.type = "module";
-		script.src = "/build/main.js";
+		const main = document.createElement("script");
+		main.type = "module";
+		main.src = "/build/main.js";
+		main.defer = "true";
 
-		document.body.appendChild(script);
+		document.body.appendChild(main);
 	}
 }
 
