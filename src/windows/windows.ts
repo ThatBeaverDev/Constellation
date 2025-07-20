@@ -326,10 +326,20 @@ export class Window {
 		this.container.classList.remove("sqare");
 	}
 
+	minimised: boolean = false;
+	toggleMinimise() {
+		if (this.minimised == true) {
+			this.unminimise();
+		} else {
+			this.minimise();
+		}
+	}
 	minimise() {
+		this.minimised = true;
 		this.container.classList.add("gone");
 	}
 	unminimise() {
+		this.minimised = false;
 		this.container.classList.remove("gone");
 		this.container.classList.add("ungone");
 		setTimeout(() => {
