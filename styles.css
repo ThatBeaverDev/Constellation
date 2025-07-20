@@ -204,6 +204,14 @@
 	overflow: hidden;
 }
 
+/* Disable text selection everywhere */
+* {
+    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    touch-action: manipulation; /* block double tab zoom */
+    -webkit-tap-highlight-color: transparent; /* remove highlight for selection */
+}
 
 body {
 	width: 100vw;
@@ -216,6 +224,7 @@ body {
 	padding: 0px;
 	margin: 0px;
 	overflow: hidden;
+	position: fixed;
 }
 
 * {

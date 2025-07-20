@@ -214,7 +214,11 @@ export default class terminalUI extends Application {
 			20,
 			"",
 			{ update: () => {}, enter: (text: string) => this.execute(text) },
-			{ isInvisible: true, isEmpty: this.hasExecutedCommand }
+			{
+				isInvisible: true,
+				isEmpty: this.hasExecutedCommand,
+				disableMobileAutocorrect: true
+			}
 		);
 
 		this.renderer.commit();
