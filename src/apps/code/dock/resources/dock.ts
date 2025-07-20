@@ -1,31 +1,24 @@
 import { Renderer } from "../../../../lib/uiKit/uiKit";
-import { windowAlias } from "../../../../security/env";
+import {
+	ApplicationAuthorisationAPI,
+	windowAlias
+} from "../../../../security/env";
 import dockAndDesktop from "../tcpsys/app";
 
 export default class dock {
 	parent: dockAndDesktop;
 	renderer: Renderer;
+	env: ApplicationAuthorisationAPI;
 	winAPI: any;
 
 	dockHeight: number = 50;
 	dockPadding: number = 10;
-	contextMenu: {
-		left: number;
-		top: number;
-		visible: boolean;
-		win?: windowAlias;
-	} = {
-		visible: false,
-		win: undefined,
-		top: 0,
-		left: 0
-	};
-
 	wins: windowAlias[] = [];
 
 	constructor(parent: any) {
 		this.parent = parent;
 		this.renderer = parent.renderer;
+		this.env = parent.env;
 
 		this.winAPI = this.parent.env.include("/System/windows.js");
 
@@ -47,7 +40,56 @@ export default class dock {
 
 	ok: boolean = false;
 
-	renderContextMenu() {}
+	contextMenu: {
+		left: number;
+		top: number;
+		visible: boolean;
+		win?: windowAlias;
+	} = { visible: false, win: undefined, top: 0, left: 0 };
+
+	renderContextMenu() {
+		if (this.contextMenu == undefined) return;
+
+		const c = this.contextMenu;
+		const title = String(c.win?.name);
+
+		// get string stuff
+		const strings = [title, "Show in Finder...", "Flick", "Close"];
+		let longestString = "";
+		for (const str of strings) {
+			if (str.length > longestString.length) {
+				longestString = str;
+			}
+		}
+
+		const x = c.left;
+		let y = c.top - 500;
+
+		const padding = 10;
+		const width = this.renderer.getTextWidth(longestString) + padding * 2; //150
+		const height = 500;
+
+		this.renderer.box(x, y, width, height, {
+			colour: "var(--main-theme-tertiary)",
+			borderRadius: 10
+		});
+
+		const titleWidth = this.renderer.getTextWidth(title);
+		y += padding;
+		this.renderer.text(x + padding, y, strings[0]);
+
+		y += padding * 2 + 5;
+		this.renderer.button(
+			x + padding,
+			y,
+			strings[1].padEnd(longestString.length, " "),
+			() => {
+				this.env.exec("/Applications/Finder.appl", [
+					env.fs.relative(c.win?.applicationDirectory, "..")
+				]);
+			}
+		);
+	}
 
 	refresh() {
 		this.wins = this.parent.env.allWindows();
@@ -90,7 +132,9 @@ export default class dock {
 				iconID,
 				() => {
 					if (win == undefined) return;
-					win.unminimise();
+
+					win.toggleMinification();
+
 					this.winAPI.focusWindow(win.winID);
 				},
 				(left: number, top: number) => {
@@ -99,6 +143,11 @@ export default class dock {
 					this.contextMenu.left = left;
 					this.contextMenu.top = top;
 					this.contextMenu.win = win;
+
+					this.renderer.awaitClick(() => {
+						this.env.log(this.parent.directory, "context gone");
+						this.contextMenu.visible = false;
+					});
 				}
 			);
 
