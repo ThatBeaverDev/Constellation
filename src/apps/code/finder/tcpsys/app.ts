@@ -78,6 +78,7 @@ export default class finder extends Application {
 	listing: listing[] = [];
 	location: string = "Constellation";
 	icon: string = "folder";
+	ok: boolean = false;
 
 	async init() {
 		const [
@@ -114,6 +115,8 @@ export default class finder extends Application {
 		setInterval(() => {
 			this.cd(this.path);
 		}, 500);
+
+		this.ok = true;
 	}
 
 	onmessage(msg: IPCMessage) {
@@ -178,6 +181,8 @@ export default class finder extends Application {
 	}
 
 	async cd(directory: string) {
+		this.ok = false;
+
 		const oldDir = String(this.path);
 
 		if (oldDir !== directory) {
@@ -193,22 +198,23 @@ export default class finder extends Application {
 				"Constellation" + String(this.path).replaceAll("/", " > ");
 		}
 
-		const list = await this.env.fs.listDirectory(dir);
-		if (!list.ok) {
+		const directoryContents = await this.env.fs.listDirectory(dir);
+		if (!directoryContents.ok) {
 			this.path = oldDir;
 			return;
 		}
 
-		let tempListing = [];
+		let list = directoryContents.data;
 
-		tempListing = list.data;
+		// sort the list
+		list.sort();
+
+		// add the ascent button if possible (not at root)
 		if (dir !== "/") {
-			tempListing = ["..", ...tempListing];
+			list = ["..", ...list];
 		}
 
-		tempListing.sort();
-
-		tempListing = await tempListing.map((name: string) => {
+		list = list.map((name: string) => {
 			const obj: listing = {
 				name,
 				path: this.env.fs.relative(this.path, name),
@@ -220,17 +226,19 @@ export default class finder extends Application {
 			return obj;
 		});
 
-		for (const obj of this.listing) {
+		for (const obj of list) {
 			obj.type = await this.env.fs.typeOfFile(obj.path);
 		}
 
-		this.listing = tempListing;
+		this.listing = list;
 
 		const newIcon = await this.pathinf.pathIcon(this.path);
 		if (newIcon !== this.icon) {
 			this.icon = newIcon;
 			this.renderer.setWindowIcon(this.icon);
 		}
+
+		this.ok = true;
 	}
 
 	async frame() {
@@ -259,6 +267,9 @@ export default class finder extends Application {
 		if (this.selector == undefined) {
 			this.selector = 0;
 		}
+
+		// insure we are ready to render
+		if (!this.ok) return;
 
 		this.renderer.clear();
 
