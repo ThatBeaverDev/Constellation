@@ -53,7 +53,16 @@ function clamp(n: number | undefined, min: number, max: number) {
 }
 
 // event listeners
-window.addEventListener("mousemove", (e) => {
+function windowMouseDown(e: MouseEvent) {
+	diffX = 0;
+	diffY = 0;
+}
+
+// stop the first drag from snapping to the top left
+window.addEventListener("mousedown", windowMouseDown);
+window.addEventListener("pointerdown", windowMouseDown);
+
+function windowMouseMove(e: MouseEvent) {
 	if (diffX !== 0 && diffY !== 0) return; // insure the dragged window has recieved the movement before resetting it
 
 	const x = e.clientX;
@@ -67,12 +76,17 @@ window.addEventListener("mousemove", (e) => {
 
 	oldX = x;
 	oldY = y;
-});
-window.addEventListener("mousedown", (e) => {
-	diffX = 0;
-	diffY = 0;
-}); // stop the first drag from snapping to the top left
-window.addEventListener("mouseup", (e) => (target = undefined)); // stop the dragging
+}
+window.addEventListener("mousemove", windowMouseMove);
+window.addEventListener("pointermove", windowMouseMove);
+
+function windowMouseUp(e: MouseEvent) {
+	target = undefined;
+}
+// stop the dragging
+window.addEventListener("mouseup", windowMouseUp);
+window.addEventListener("pointerup", windowMouseUp);
+
 window.addEventListener("resize", (e) => {
 	updateWindows();
 });
@@ -181,20 +195,22 @@ export class Window {
 		this.maximiseButton = document.getElementById(this.maximiseButton.id)!;
 		this.minimiseButton = document.getElementById(this.minimiseButton.id)!;
 
-		this.header.addEventListener("mousedown", (e) => {
-			target = this;
-		});
-		this.container.addEventListener("mousedown", (e) => {
-			focusWindow(this.winID);
-		});
+		const headerMouseDown = () => (target = this);
+		this.header.addEventListener("mousedown", headerMouseDown.bind(this));
+		this.header.addEventListener("pointerdown", headerMouseDown.bind(this));
+
+		const containerMouseDown = () => focusWindow(this.winID);
+		this.container.addEventListener("mousedown", containerMouseDown);
+		this.container.addEventListener("pointerdown", containerMouseDown);
 
 		// buttons
-		this.closeButton.addEventListener("mousedown", (e) => {
-			terminate(this.Application);
-		});
-		this.minimiseButton.addEventListener("mousedown", (e) => {
-			this.minimise();
-		});
+		const closeButtonMouseDown = () => terminate(this.Application);
+		this.closeButton.addEventListener("mousedown", closeButtonMouseDown);
+		this.closeButton.addEventListener("pointerdown", closeButtonMouseDown);
+
+		const minimiseMouseDown = () => this.minimise();
+		this.minimiseButton.addEventListener("mousedown", minimiseMouseDown);
+		this.minimiseButton.addEventListener("pointerdown", minimiseMouseDown);
 
 		this.setIcon("app-window-mac");
 

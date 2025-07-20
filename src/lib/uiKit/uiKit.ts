@@ -32,10 +32,12 @@ type uikitTextboxConfig = {
 	isInvisible?: boolean;
 	isEmpty?: boolean;
 	fontSize?: number;
+	disableMobileAutocorrect: boolean;
 };
 type uikitTextareaConfig = {
 	isInvisible?: boolean;
 	isEmpty?: boolean;
+	disableMobileAutocorrect: boolean;
 };
 type uikitBoxConfig = {
 	borderRadius?: number | string;
@@ -48,11 +50,13 @@ export class Renderer {
 		uikitTextbox: {
 			isInvisible: false,
 			isEmpty: false,
-			fontSize: undefined
+			fontSize: undefined,
+			disableMobileAutocorrect: false
 		},
 		uikitTextarea: {
 			isInvisible: false,
-			isEmpty: false
+			isEmpty: false,
+			disableMobileAutocorrect: false
 		},
 		uikitBox: {
 			borderRadius: 5,
@@ -321,27 +325,30 @@ export class Renderer {
 					"uikit element has disappeared in processing"
 				);
 
-			live.addEventListener(
-				"mousedown",
-				(event) => {
-					event.preventDefault();
-					switch (event.button) {
-						case 0:
-							// left click
-							leftClickCallback();
-							break;
-						case 1:
-							// middle click
-							// unused
-							break;
-						case 2:
-							// right click
-							rightClickCallback();
-							break;
-					}
-				},
-				{ signal: this.signal }
-			);
+			function mouseDown(event: MouseEvent) {
+				event.preventDefault();
+				switch (event.button) {
+					case 0:
+						// left click
+						leftClickCallback();
+						break;
+					case 1:
+						// middle click
+						// unused
+						break;
+					case 2:
+						// right click
+						rightClickCallback();
+						break;
+				}
+			}
+
+			live.addEventListener("mousedown", mouseDown, {
+				signal: this.signal
+			});
+			live.addEventListener("pointerdown", mouseDown, {
+				signal: this.signal
+			});
 
 			return live;
 		},
@@ -360,10 +367,16 @@ export class Renderer {
 		) => {
 			const textbox = document.createElement("input");
 			textbox.type = "text";
+			textbox.inputMode = "text";
 			textbox.classList.add("uikitTextbox");
 
 			if (options.isInvisible)
 				textbox.classList.add("uikitTextboxInvisible");
+			if (options.disableMobileAutocorrect) {
+				textbox.autocomplete = "off";
+				textbox.autocapitalize = "off";
+				textbox.spellcheck = false;
+			}
 
 			textbox.id = String(window.renderID++);
 			textbox.placeholder = backtext;
@@ -486,10 +499,16 @@ export class Renderer {
 			const area = document.createElement("textarea");
 			area.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;`;
 			area.id = String(window.renderID++);
+			area.inputMode = "text";
 			area.className = "uikitTextarea";
 
 			if (options.isInvisible)
 				area.classList.add("uikitTextboxInvisible");
+			if (options.disableMobileAutocorrect) {
+				area.autocomplete = "off";
+				area.autocapitalize = "off";
+				area.spellcheck = false;
+			}
 
 			this.window.body.appendChild(area);
 			// @ts-expect-error
@@ -652,28 +671,29 @@ export class Renderer {
 			if (newStep.onClick !== undefined) {
 				element.classList.add("clickable");
 
-				element.addEventListener(
-					"click",
-					(event: MouseEvent) => {
-						if (!newStep.onClick) return;
-						console.log(event.button);
+				function mouseDown(event: MouseEvent) {
+					if (!newStep.onClick) return;
+					console.log(event.button);
 
-						switch (event.button) {
-							case 0:
-								if (
-									typeof newStep.onClick.left === "function"
-								) {
-									event.preventDefault();
-									newStep.onClick.left(
-										event.clientX,
-										event.clientY
-									);
-								}
-								break;
-						}
-					},
-					{ signal: this.signal }
-				);
+					switch (event.button) {
+						case 0:
+							if (typeof newStep.onClick.left === "function") {
+								event.preventDefault();
+								newStep.onClick.left(
+									event.clientX,
+									event.clientY
+								);
+							}
+							break;
+					}
+				}
+
+				element.addEventListener("mousedown", mouseDown, {
+					signal: this.signal
+				});
+				element.addEventListener("pointerdown", mouseDown, {
+					signal: this.signal
+				});
 				element.addEventListener(
 					"contextmenu",
 					(event: MouseEvent) => {
