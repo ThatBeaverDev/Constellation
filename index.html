@@ -8,9 +8,6 @@
 	<title>Constellation</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-	<link
-		href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Source+Code+Pro:ital@0;1&display=swap"
-		rel="stylesheet" />
 
 	<!-- https://realfavicongenerator.net/ useful site-->
 	<link rel="icon" type="image/png" href="/favicons/favicon-96x96.png" sizes="96x96" />
@@ -20,8 +17,8 @@
 	<meta name="apple-mobile-web-app-title" content="Constellation" />
 	<link rel="manifest" href="/manifest.webmanifest" />
 
-	<link rel="stylesheet" href="/boot.css" />
-	<link rel="stylesheet" href="/styles.css" />
+	<!-- boot.css -->
+	<libk rel="stylesheet" href="/styles/boot.css">
 </head>
 
 <body>
@@ -42,6 +39,8 @@
 
 	<script defer type="module" src="src/buildCheck.js">
 	</script>
+	<link rel="stylesheet" href="/styles/styles.css" />
+	<link rel="stylesheet" href="/styles/sourceCodePro.css"/>
 
 	<div class="hidden">
 		<canvas id="hiddenCanvas"></canvas>
