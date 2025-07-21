@@ -1,4 +1,4 @@
-import { focus, newWindow, Window } from "../../windows/windows.js";
+import { focus, newWindow, GraphicalWindow } from "../../windows/windows.js";
 import { getIcon } from "../icons.js";
 import { getTextWidth } from "./calcWidth.js";
 import { Process } from "../../apps/executables.js";
@@ -79,7 +79,7 @@ export class Renderer {
 	}
 
 	private process: Process;
-	window: Window;
+	window: GraphicalWindow;
 
 	clear = () => {
 		this.textboxExists = false;

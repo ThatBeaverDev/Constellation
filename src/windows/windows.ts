@@ -4,27 +4,29 @@ import { terminate } from "../apps/apps.js";
 import * as css from "./cssVariables.js";
 
 // constants
-export const EDGE_THRESHOLD = 8;
-export let windowTiling = false;
 
+export const EDGE_THRESHOLD = 8;
 export const minHeight = 25;
 export const minWidth = 100;
 
-export let focus: any;
-export let target: Window | undefined = undefined;
-
-export const windows: Window[] = [];
-// @ts-expect-error
+export const windows: GraphicalWindow[] = [];
+declare global {
+	interface Window {
+		windows: GraphicalWindow[];
+	}
+}
 window.windows = windows;
 
-// others
-let diffX: number = 0;
-let diffY: number = 0;
-let oldX: number;
-let oldY: number;
+// variables
+export let windowTiling = false;
+export let focus: any;
+export let target: GraphicalWindow | undefined = undefined;
+let startMouseX = 0;
+let startMouseY = 0;
+let offsetX = 0;
+let offsetY = 0;
 
 let winID = 0;
-
 export let windowTilingNumber = 0;
 
 // init css styles
@@ -53,39 +55,29 @@ function clamp(n: number | undefined, min: number, max: number) {
 }
 
 // event listeners
-function windowMouseDown(e: MouseEvent) {
-	diffX = 0;
-	diffY = 0;
-}
 
-// stop the first drag from snapping to the top left
-window.addEventListener("mousedown", windowMouseDown);
-window.addEventListener("pointerdown", windowMouseDown);
+const windowPointerDown = (e: PointerEvent) => {
+	// clear target if clicking outside windows
+	if (!target) return;
+	e.preventDefault();
+};
+window.addEventListener("pointerdown", windowPointerDown);
 
-function windowMouseMove(e: MouseEvent) {
-	if (diffX !== 0 && diffY !== 0) return; // insure the dragged window has recieved the movement before resetting it
+const windowPointerMove = (e: PointerEvent) => {
+	if (!target) return;
 
-	const x = e.clientX;
-	const y = e.clientY;
+	const x = e.clientX - offsetX;
+	const y = e.clientY - offsetY;
 
-	if (oldX == undefined) oldX = x;
-	if (oldY == undefined) oldY = y;
+	target.move(x, y);
+};
+window.addEventListener("pointermove", windowPointerMove);
 
-	diffX = x - oldX;
-	diffY = y - oldY;
-
-	oldX = x;
-	oldY = y;
-}
-window.addEventListener("mousemove", windowMouseMove);
-window.addEventListener("pointermove", windowMouseMove);
-
-function windowMouseUp(e: MouseEvent) {
-	target = undefined;
-}
 // stop the dragging
-window.addEventListener("mouseup", windowMouseUp);
-window.addEventListener("pointerup", windowMouseUp);
+const windowPointerUp = (e: PointerEvent) => {
+	target = undefined;
+};
+window.addEventListener("pointerup", windowPointerUp);
 
 window.addEventListener("resize", (e) => {
 	updateWindows();
@@ -109,7 +101,7 @@ function windowButton(elem: HTMLElement, svg: string, scale: number = 1) {
 	return elem;
 }
 
-export class Window {
+export class GraphicalWindow {
 	constructor(name: string, Application: Application) {
 		this.name = name;
 		this.winID = winID++;
@@ -195,22 +187,31 @@ export class Window {
 		this.maximiseButton = document.getElementById(this.maximiseButton.id)!;
 		this.minimiseButton = document.getElementById(this.minimiseButton.id)!;
 
-		const headerMouseDown = () => (target = this);
-		this.header.addEventListener("mousedown", headerMouseDown.bind(this));
-		this.header.addEventListener("pointerdown", headerMouseDown.bind(this));
+		const headerPointerDown = (e: PointerEvent) => {
+			target = this;
 
-		const containerMouseDown = () => focusWindow(this.winID);
-		this.container.addEventListener("mousedown", containerMouseDown);
-		this.container.addEventListener("pointerdown", containerMouseDown);
+			const rect = this.container.getBoundingClientRect();
+			offsetX = e.clientX - rect.left;
+			offsetY = e.clientY - rect.top;
+			startMouseX = e.clientX;
+			startMouseY = e.clientY;
+
+			e.preventDefault();
+		};
+		this.header.addEventListener("pointerdown", headerPointerDown);
+
+		const containerPointerDown = () => focusWindow(this.winID);
+		this.container.addEventListener("pointerdown", containerPointerDown);
 
 		// buttons
-		const closeButtonMouseDown = () => terminate(this.Application);
-		this.closeButton.addEventListener("mousedown", closeButtonMouseDown);
-		this.closeButton.addEventListener("pointerdown", closeButtonMouseDown);
+		const closePointerDown = () => terminate(this.Application);
+		this.closeButton.addEventListener("pointerdown", closePointerDown);
 
-		const minimiseMouseDown = () => this.minimise();
-		this.minimiseButton.addEventListener("mousedown", minimiseMouseDown);
-		this.minimiseButton.addEventListener("pointerdown", minimiseMouseDown);
+		const minimisePointerDown = () => this.minimise();
+		this.minimiseButton.addEventListener(
+			"pointerdown",
+			minimisePointerDown
+		);
 
 		this.setIcon("app-window-mac");
 
@@ -326,25 +327,21 @@ export class Window {
 		this.container.classList.remove("sqare");
 	}
 
-	minimised: boolean = false;
-	toggleMinimise() {
-		if (this.minimised == true) {
-			this.unminimise();
-		} else {
+	get minimised() {
+		return this.container.classList.contains("gone");
+	}
+	set minimised(value: boolean) {
+		if (value == true) {
 			this.minimise();
+		} else {
+			this.unminimise();
 		}
 	}
 	minimise() {
-		this.minimised = true;
 		this.container.classList.add("gone");
 	}
 	unminimise() {
-		this.minimised = false;
 		this.container.classList.remove("gone");
-		this.container.classList.add("ungone");
-		setTimeout(() => {
-			this.container.classList.remove("ungone");
-		}, 150);
 	}
 
 	visible: boolean = true;
@@ -503,7 +500,7 @@ function updateWindows(newTilingConfig: boolean = false) {
 window.addEventListener("resize", () => updateWindows());
 
 export function newWindow(title: string, ApplicationObject: Application) {
-	const win = new Window(title, ApplicationObject);
+	const win = new GraphicalWindow(title, ApplicationObject);
 
 	win.winID = windows.length; // assign ID before push
 	windows.push(win);
@@ -565,16 +562,4 @@ setInterval(() => {
 		updateLiveStyling();
 		lastKnownWindowMode = windowTiling;
 	}
-
-	if (target !== undefined && !windowTiling) {
-		const pos = structuredClone(target.position);
-
-		pos.left += diffX;
-		pos.top += diffY;
-
-		target.move(pos.left, pos.top);
-	}
-
-	diffX = 0;
-	diffY = 0;
 });

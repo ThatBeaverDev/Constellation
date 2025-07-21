@@ -6,7 +6,7 @@ import * as executables from "./executables.js";
 import fs from "../io/fs.js";
 import * as uikit from "../lib/uiKit/uiKit.js";
 import { blobify, translateAllBlobURIsToDirectories } from "../lib/blobify.js";
-import { focus, windows } from "../windows/windows.js";
+import { focus, GraphicalWindow, windows } from "../windows/windows.js";
 import { AppInitialisationError, ImportError } from "../errors.js";
 import AppWaitingObject from "./appWaitingObject.js";
 import { ApplicationAuthorisationAPI } from "../security/env.js";
@@ -28,7 +28,7 @@ declare global {
 		sysimport: any;
 		processes: executables.Process[];
 		env: ApplicationAuthorisationAPI;
-		windows: Window[];
+		windows: GraphicalWindow[];
 	}
 }
 window.env = new ApplicationAuthorisationAPI(

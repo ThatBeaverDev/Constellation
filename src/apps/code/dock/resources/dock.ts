@@ -133,7 +133,11 @@ export default class dock {
 				() => {
 					if (win == undefined) return;
 
-					win.toggleMinification();
+					if (win.minimised) {
+						win.unminimise();
+					} else {
+						win.minimise();
+					}
 
 					this.winAPI.focusWindow(win.winID);
 				},
