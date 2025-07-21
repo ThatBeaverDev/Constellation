@@ -3,7 +3,6 @@ export const folders: string[] = [
 	"/System/CoreExecutables",
 	"/System/CoreComponents",
 	"/System/CoreLibraries",
-	"/System/CoreLibraries/gitFiles",
 	"/System/CoreAssets",
 	"/System/CoreAssets/Logos",
 	"/System/windows"
@@ -26,12 +25,6 @@ export const files: any = {
 		"/System/CoreLibraries/userFileSelector.js",
 	"/build/syslib/blob.js": "/System/CoreLibraries/blob.js",
 	"/build/lib/external/fzf.js": "/System/CoreLibraries/fzf.js",
-	// git
-	"/build/syslib/git.js": "/System/CoreLibraries/git.js",
-	"/build/lib/external/isomorphicgit/isomorphic-git.js":
-		"/System/CoreLibraries/gitFiles/isomorphic-git.js",
-	"/build/lib/external/isomorphicgit/http.js":
-		"/System/CoreLibraries/gitFiles/http.js",
 
 	// logos
 	"/logos/Constellation.svg": "/System/CoreAssets/Logos/Constellation.svg",

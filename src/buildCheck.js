@@ -2,9 +2,12 @@
 // made to inform the user the system is not built yet and needs to be built to prevent an error.
 
 async function check() {
-	const src = await fetch("/build/main.js");
+	const src = await fetch("/build/date.txt");
 
 	if (src.status !== 200) {
+		// remove boot screen
+		document.querySelector("div.bootCover").remove();
+
 		// system needs to be build
 		const div = document.createElement("div");
 		div.style.width = "50vw";

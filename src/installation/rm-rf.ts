@@ -1,6 +1,6 @@
 import fs from "../io/fs.js";
 import * as log from "../lib/logging.js";
-
+import { setStatus } from "../constellation.config.js";
 async function rmdir(dir: string) {
 	const ls = await fs.readdir(dir);
 
@@ -34,5 +34,6 @@ async function rmdir(dir: string) {
 }
 
 export async function rm_rf() {
+	setStatus(`Installation : Deleting Files...`);
 	await rmdir("/");
 }
