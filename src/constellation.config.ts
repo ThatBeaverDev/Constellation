@@ -33,4 +33,9 @@ export const userDirectories = [
 	"Media/Pictures",
 	"Media/Videos"
 ];
-export const developmentLogging = false;
+
+export let status = "";
+export function setStatus(text: string) {
+	console.log("BootStatus:", text);
+	status = text;
+}

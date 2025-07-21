@@ -3,12 +3,11 @@ import * as installer from "./installation/index.js";
 import fs from "./io/fs.js";
 import { fsLoaded } from "./io/fs.js";
 
-import { isDev } from "./lib/isDev.js";
 import * as apps from "./apps/apps.js";
 import * as users from "./security/users.js";
-import * as log from "./lib/logging.js";
 import { setDirectoryPermission } from "./security/permissions.js";
 import * as panic from "./lib/panic.js";
+import { status } from "./constellation.config.js";
 
 panic.init();
 
@@ -20,7 +19,6 @@ declare global {
 		textBeforeLast(before: string): string;
 	}
 }
-
 String.prototype.textAfter = function (after) {
 	return this.substring(this.indexOf(after) + String(after).length);
 };
@@ -51,6 +49,12 @@ async function main() {
 		await installer.install();
 	}
 
+	const bootBackground = document.querySelector("div.bootCover")!;
+	bootBackground.classList.add("fadeOut");
+
+	clearInterval(bootScreenVerboseInterval);
+
+	setTimeout(() => bootBackground.remove(), 5000);
 	await users.init();
 
 	const coreExecDirectory = "/System/CoreExecutables/launchd.backgr";
@@ -64,4 +68,18 @@ async function main() {
 	}, 50);
 }
 
-main();
+const url = new URL(window.location.href);
+const params = url.searchParams;
+const bootScreenTest = params.get("bootscreenTest") == "true";
+
+let bootScreenVerboseInterval = setInterval(() => {
+	const elem: HTMLParagraphElement = document.querySelector("p.bootText")!;
+
+	if (elem !== null) {
+		elem.innerText = status;
+	}
+});
+
+if (!bootScreenTest) {
+	main();
+}

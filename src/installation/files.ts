@@ -1,3 +1,4 @@
+import { setStatus } from "../constellation.config.js";
 import { InstallationError } from "../errors.js";
 import fs from "../io/fs.js";
 
@@ -29,6 +30,8 @@ async function downloadAndConvert(URL: string) {
 }
 
 export async function writeFiles() {
+	setStatus(`Installation : Writing Files...`);
+
 	for (const location in files) {
 		let directory;
 		let type;
@@ -49,12 +52,15 @@ export async function writeFiles() {
 		let json;
 		switch (type) {
 			case "text":
+				setStatus(`Installation : Cloning ${location}`);
 				content = await (await fetch(location)).text();
 
 				await fs.writeFile(directory, content);
 
 				break;
 			case "jsonFilesIndex": {
+				setStatus(`Installation : Unpackaging ${location}`);
+
 				content = await (await fetch(location)).text();
 
 				await fs.mkdir(directory);
@@ -115,6 +121,8 @@ export async function writeFiles() {
 				break;
 			}
 			case "binary": {
+				setStatus(`Installation : Cloning and Encoding ${location}`);
+
 				content = await downloadAndConvert(location);
 
 				await fs.writeFile(directory, content);

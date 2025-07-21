@@ -1,4 +1,3 @@
-import { developmentLogging } from "../constellation.config.js";
 import * as conf from "../constellation.config.js";
 import { blobifyDirectory } from "../lib/blobify.js";
 import realFS from "../io/fs.js";
@@ -340,10 +339,6 @@ export class ApplicationAuthorisationAPI {
 		this._directoryActionCheck(location, false);
 
 		let type = location.includes("://") ? "URL" : "directory";
-
-		if (developmentLogging)
-			this.debug(name, "Inclusion of '" + location + "'");
-
 		// @ts-expect-error
 		if (conf.importOverrides[location] !== undefined) {
 			type = "URL";

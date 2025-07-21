@@ -6,8 +6,6 @@
 	<link rel="icon" type="image/svg+xml" href="/logos/Web.svg" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Constellation</title>
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
 	<!-- https://realfavicongenerator.net/ useful site-->
 	<link rel="icon" type="image/png" href="/favicons/favicon-96x96.png" sizes="96x96" />
@@ -18,12 +16,11 @@
 	<link rel="manifest" href="/manifest.webmanifest" />
 
 	<!-- boot.css -->
-	<libk rel="stylesheet" href="/styles/boot.css">
+	<link rel="stylesheet" href="/styles/boot.css">
+	<link rel="stylesheet" href="/styles/styles.css" />
 </head>
 
 <body>
-	<link rel="stylesheet" href="/styles/styles.css" />
-	<link rel="stylesheet" href="/styles/sourceCodePro.css"/>
 
 	<div class="wallpaper"></div>
 	<div class="hidden">
@@ -31,15 +28,12 @@
 	</div>
 
 	<div class="bootCover">
-		<p class="bootStatus">Constellation is loading...</p>
-		<div class="loader star"></div>
-		<div class="loader planet" id="one"></div>
-		<div class="loader planet" id="two"></div>
-		<div class="loader planet" id="three"></div>
+		<img class="bootImage" src="/favicons/favicon.svg"></img>
+		<span class="loader"></span>
+		<p class="bootText">Initialising...</p>
 	</div>
 
 
-	<script defer src="/src/lib/external/browserfs.min.js"></script>
 	<!-- Vercel general -->
 	<script>
 		window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
