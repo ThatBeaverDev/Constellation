@@ -1,4 +1,4 @@
-import { ApplicationAuthorisationAPI } from "../../../../security/env";
+import { ApplicationAuthorisationAPI } from "../security/env";
 
 export default interface TerminalAlias {
 	path: string;
