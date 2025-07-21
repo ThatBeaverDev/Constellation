@@ -10,7 +10,9 @@
 		"outDir": "build",
 		"strict": true,
 		"lib": ["ES2022", "DOM", "DOM.Iterable"],
-		"sourceMap": false
+		"sourceMap": false,
+		"declaration": true,
+		"declarationDir": "types"
 	},
 	"include": ["src"],
 	"exclude": ["build"],
