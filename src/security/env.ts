@@ -41,7 +41,7 @@ export type windowAlias = {
 
 	minimise: Function;
 	unminimise: Function;
-	toggleMinification: Function;
+	minimised: boolean;
 
 	show: Function;
 	hide: Function;
@@ -433,7 +433,7 @@ export class ApplicationAuthorisationAPI {
 
 				minimise: win.minimise.bind(win),
 				unminimise: win.unminimise.bind(win),
-				toggleMinification: win.toggleMinimise,
+				minimised: win.minimised,
 
 				show: win.show.bind(win),
 				hide: win.hide.bind(win),
