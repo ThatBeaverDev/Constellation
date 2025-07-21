@@ -4,7 +4,21 @@ import { getTextWidth } from "./calcWidth.js";
 import { Process } from "../../apps/executables.js";
 import { UIError } from "../../errors.js";
 
-export const font = "Arial";
+function clamp(n: number | undefined, min: number, max: number) {
+	if (n == undefined) {
+		return 0;
+	}
+
+	if (n < min) {
+		return min;
+	}
+	if (max < n) {
+		return max;
+	}
+	return n;
+}
+
+export const font = "monospace";
 
 export async function init() {
 	const styles = await (await fetch("/src/lib/uiKit/styles.css")).text();
@@ -28,28 +42,26 @@ interface step {
 
 interface textboxCallbackObject {}
 
-type uikitTextboxConfig = {
+export type uikitTextboxConfig = {
 	isInvisible?: boolean;
 	isEmpty?: boolean;
 	fontSize?: number;
 	disableMobileAutocorrect: boolean;
 };
-type uikitTextareaConfig = {
+export type uikitTextareaConfig = {
 	isInvisible?: boolean;
 	isEmpty?: boolean;
 	disableMobileAutocorrect: boolean;
 };
-type uikitBoxConfig = {
+export type uikitBoxConfig = {
 	borderRadius?: number | string;
 	colour?: string; // colour but typescript is stupid and doesn't know rgb(255, 255, 255) is a colour 🤦
 };
 
 let lastClick: number = 0;
-function onClick() {
+document.addEventListener("pointerdown", function () {
 	lastClick = Date.now();
-}
-document.addEventListener("mousedown", onClick);
-document.addEventListener("pointerdown", onClick);
+});
 
 // class
 export class Renderer {
@@ -75,7 +87,7 @@ export class Renderer {
 		this.process = process;
 
 		// @ts-ignore
-		this.window = newWindow(this.process.directory, process).data!;
+		this.window = newWindow(this.process.directory, process).data;
 	}
 
 	private process: Process;
@@ -348,30 +360,29 @@ export class Renderer {
 					"uikit element has disappeared in processing"
 				);
 
-			function mouseDown(event: MouseEvent) {
-				event.preventDefault();
-				switch (event.button) {
-					case 0:
-						// left click
-						leftClickCallback();
-						break;
-					case 1:
-						// middle click
-						// unused
-						break;
-					case 2:
-						// right click
-						rightClickCallback();
-						break;
+			live.addEventListener(
+				"pointerdown",
+				(event: MouseEvent) => {
+					event.preventDefault();
+					switch (event.button) {
+						case 0:
+							// left click
+							leftClickCallback();
+							break;
+						case 1:
+							// middle click
+							// unused
+							break;
+						case 2:
+							// right click
+							rightClickCallback();
+							break;
+					}
+				},
+				{
+					signal: this.signal
 				}
-			}
-
-			live.addEventListener("mousedown", mouseDown, {
-				signal: this.signal
-			});
-			live.addEventListener("pointerdown", mouseDown, {
-				signal: this.signal
-			});
+			);
 
 			return live;
 		},
@@ -632,6 +643,12 @@ export class Renderer {
 		this.window.body.innerHTML = "";
 	}
 
+	#focusTextbox() {
+		if (this.textboxElem !== undefined) {
+			this.textboxElem.focus();
+		}
+	}
+
 	readonly commit = () => {
 		this.windowWidth = this.window.container.clientWidth;
 		this.windowHeight = this.window.container.clientHeight;
@@ -645,6 +662,7 @@ export class Renderer {
 				const steps = JSON.stringify(this.steps);
 				const displayedSteps = JSON.stringify(this.displayedSteps);
 				if (steps === displayedSteps) {
+					this.#focusTextbox();
 					return;
 				}
 			}
@@ -694,28 +712,29 @@ export class Renderer {
 			if (newStep.onClick !== undefined) {
 				element.classList.add("clickable");
 
-				function mouseDown(event: MouseEvent) {
-					if (!newStep.onClick) return;
+				element.addEventListener(
+					"pointerdown",
+					function (event: MouseEvent) {
+						if (!newStep.onClick) return;
 
-					switch (event.button) {
-						case 0:
-							if (typeof newStep.onClick.left === "function") {
-								event.preventDefault();
-								newStep.onClick.left(
-									event.clientX,
-									event.clientY
-								);
-							}
-							break;
+						switch (event.button) {
+							case 0:
+								if (
+									typeof newStep.onClick.left === "function"
+								) {
+									event.preventDefault();
+									newStep.onClick.left(
+										event.clientX,
+										event.clientY
+									);
+								}
+								break;
+						}
+					},
+					{
+						signal: this.signal
 					}
-				}
-
-				element.addEventListener("mousedown", mouseDown, {
-					signal: this.signal
-				});
-				element.addEventListener("pointerdown", mouseDown, {
-					signal: this.signal
-				});
+				);
 				element.addEventListener(
 					"contextmenu",
 					(event: MouseEvent) => {
@@ -750,6 +769,8 @@ export class Renderer {
 		for (const element of this.items) {
 			this.window.body.appendChild(element);
 		}
+
+		this.#focusTextbox();
 	};
 
 	terminate() {
