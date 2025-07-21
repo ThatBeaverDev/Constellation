@@ -31,7 +31,11 @@ compile() {
     ./scripts/tcpkg build/apps/code/keystone build/apps/build/com.constellation.search.idx -override=true
 
     # Build the Dock
-    ./scripts/tcpkg build/apps/code/dock build/apps/build/com.constellation.dock.idx -override=true -incrementor=true
+    ./scripts/tcpkg build/apps/code/dock build/apps/build/com.constellation.dock.idx -override=true
+    
+    # Package audio files
+    mkdir -p build/assets
+    ./scripts/tcpkg assets/sounds build/assets/sounds.idx -override=true
 }
 
 daemon() {

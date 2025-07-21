@@ -55,6 +55,14 @@ async function main() {
 	clearInterval(bootScreenVerboseInterval);
 
 	setTimeout(() => bootBackground.remove(), 5000);
+
+	const bootSound = await fs.readFile(
+		"/System/CoreAssets/Sounds/boot/iMacG3.mp3"
+	);
+	const sound = new Audio(bootSound);
+	sound.play();
+	sound.remove();
+
 	await users.init();
 
 	const coreExecDirectory = "/System/CoreExecutables/launchd.backgr";
