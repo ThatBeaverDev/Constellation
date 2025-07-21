@@ -14,6 +14,7 @@ import {
 	checkDirectoryPermission
 } from "../security/permissions.js";
 import { Framework, Process } from "../apps/executables.js";
+import Shell from "../lib/shell.js";
 
 const name = "/System/security/env.js";
 
@@ -68,10 +69,14 @@ export const associations: any = {};
 
 export class ApplicationAuthorisationAPI {
 	constructor(directory: string, user: string, process?: Framework) {
+		this.#permissions = getDirectoryPermissions(directory);
+		this.shell = new Shell(directory, this);
+		this.shell.indexCommands();
+
 		this.directory = directory;
-		this.#permissions = getDirectoryPermissions(this.directory);
 		this.user = user;
 		this.process = process;
+
 		this.debug(
 			name,
 			`ApplicationAuthorisationAPI created as ${user} for ${directory}`
@@ -91,6 +96,9 @@ export class ApplicationAuthorisationAPI {
 				);
 			}
 	}
+
+	// shell
+	shell: Shell;
 
 	// logging
 	debug(initiator: string, ...content: any): undefined {

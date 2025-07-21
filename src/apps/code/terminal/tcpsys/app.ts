@@ -1,3 +1,4 @@
+import { uikitTextboxConfig } from "../../../../lib/uiKit/uiKit";
 import { IPCMessage } from "../../../messages";
 
 // convert anything to a string, NICELY (no [object Object] here)
@@ -37,16 +38,9 @@ export default class terminalUI extends Application {
 	tick2: number = 0;
 	hasExecutedCommand: boolean = false;
 	willCrash: boolean = false;
+	pretext: string = "";
 
 	async init() {
-		const cmdregDir = this.env.fs.relative(
-			this.directory,
-			"./lib/cmdreg.js"
-		);
-		const reg = await this.env.include(cmdregDir);
-		this.cmdreg = new reg.default(this);
-		await this.cmdreg.init();
-
 		if (this.args.length !== 0) {
 			this.exit(await this.execute(this.args[0]));
 			return;
@@ -63,17 +57,6 @@ export default class terminalUI extends Application {
 		this.registerKeyboardShortcut("Scroll Up (Fast)", "ArrowUp", [
 			"ShiftLeft"
 		]);
-	}
-
-	getCommand(name: string): Function {
-		switch (name) {
-			case "help":
-				return () =>
-					`Terminal commands are as follows:\n- ` +
-					Object.keys(this.cmdreg).join("\n- ");
-			default:
-				return this.cmdreg[name].bind(this.cmdreg);
-		}
 	}
 
 	onmessage(msg: IPCMessage) {
@@ -158,20 +141,31 @@ export default class terminalUI extends Application {
 		const args = text.trim().split(" ");
 		const cmd = args.splice(0, 1)[0].trim();
 
-		this.logs.push(text);
+		this.logs.push(this.pretext + " " + text);
 
-		const bin = this.getCommand(cmd);
-		if (typeof bin !== "function") {
-			this.logs.push(cmd + " is not a known or found command.");
-			return;
-		}
+		let logs, result;
 
-		let logs;
+		this.env.shell.setRef({
+			path: this.terminalPath,
+			env: this.env,
+			logs: this.logs,
+			clearLogs: (() => {
+				this.logs = [];
+			}).bind(this),
+			origin: this.directory
+		});
+
 		try {
-			logs = (await bin(this, ...args)) || "";
-		} catch (error: any) {
-			logs = "<red>" + error.type + ": " + error.message + "</red>";
+			result = await this.env.shell.exec(cmd, ...args);
+			if (result == undefined) return;
+
+			logs = result.result || "";
+			this.terminalPath = result.ref.path;
+			this.logs = result.ref.logs;
+		} catch (e) {
+			logs = String(e);
 		}
+
 		if (typeof logs !== "string") {
 			logs = stringify(logs);
 		}
@@ -203,22 +197,29 @@ export default class terminalUI extends Application {
 
 		y += 5;
 
-		if (this.willCrash) {
-			throw new Error("terminalCrashRequested");
-		}
+		this.renderer.text(0, y, this.pretext);
+		const sideTextWidth = this.renderer.getTextWidth(this.pretext);
+
+		const textboxCallbacks = {
+			update: () => {},
+			enter: (text: string) => {
+				this.execute(text);
+			}
+		};
+		const textboxConfig: uikitTextboxConfig = {
+			isInvisible: true,
+			isEmpty: true,
+			disableMobileAutocorrect: true
+		};
 
 		this.renderer.textbox(
-			0,
+			sideTextWidth + 5,
 			y,
 			1000,
 			20,
 			"",
-			{ update: () => {}, enter: (text: string) => this.execute(text) },
-			{
-				isInvisible: true,
-				isEmpty: this.hasExecutedCommand,
-				disableMobileAutocorrect: true
-			}
+			textboxCallbacks,
+			textboxConfig
 		);
 
 		this.renderer.commit();
@@ -226,6 +227,12 @@ export default class terminalUI extends Application {
 	}
 
 	frame() {
+		if (this.willCrash) {
+			throw new Error("terminalCrashRequested");
+		}
+
+		this.pretext = this.terminalPath;
+
 		this.render();
 	}
 }
