@@ -134,7 +134,7 @@ const stat = async (directory: string) => {
 	});
 };
 
-export const relative = (base = "/", target: string) => {
+const relative = (base = "/", target: string) => {
 	if (target.startsWith("/")) return target;
 
 	const baseParts = base.split("/").filter(Boolean);
