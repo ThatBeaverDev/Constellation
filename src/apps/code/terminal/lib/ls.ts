@@ -1,0 +1,15 @@
+import TerminalAlias from "../../../../lib/terminalAlias";
+
+export default async function ls(parent: TerminalAlias, directory = ".") {
+	const dir = parent.env.fs.relative(parent.path, directory);
+
+	const list = await parent.env.fs.listDirectory(dir);
+
+	if (!list.ok) {
+		return list.data;
+	}
+
+	const formatted = list.data.join("   ");
+
+	return formatted;
+}
