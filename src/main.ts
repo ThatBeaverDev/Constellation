@@ -84,7 +84,9 @@ let bootScreenVerboseInterval = setInterval(() => {
 	const elem: HTMLParagraphElement = document.querySelector("p.bootText")!;
 
 	if (elem !== null) {
-		elem.innerText = status;
+		if (elem.innerText !== String(status)) {
+			elem.innerText = String(status);
+		}
 	}
 });
 
