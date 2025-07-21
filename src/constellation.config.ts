@@ -35,7 +35,43 @@ export const userDirectories = [
 ];
 
 export let status = "";
-export function setStatus(text: string) {
-	console.log("BootStatus:", text);
-	status = text;
+export function setStatus(
+	text: string | Error,
+	state: "working" | "error" = "working"
+) {
+	if (state == "error") {
+		console.error("BootStatus:", text);
+	} else {
+		console.log("BootStatus:", text);
+	}
+
+	status = String(text);
+
+	if (text instanceof Error) {
+		const style = document.createElement("style");
+		style.textContent = `
+		img.bootImage {
+			filter: hue-rotate(80deg) saturate(1000%) !important;
+		}
+
+		p.bootText {
+			color: red !important;
+		}
+
+		span.loader {
+			border-color: red !important;
+		}
+
+		span.loader::after {
+			background-color: red !important;
+			animation: none !important;
+			width: 100%;
+		}
+		`;
+		document.body.appendChild(style);
+
+		setTimeout(() => {
+			throw text;
+		}, 5000);
+	}
 }

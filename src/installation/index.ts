@@ -8,11 +8,16 @@ import { setStatus } from "../constellation.config.js";
 export async function install() {
 	setStatus(`Installation : Initialising`);
 
-	await rm_rf();
-	await createFolders();
-	await writeFiles();
+	try {
+		await rm_rf();
+		await createFolders();
+		await writeFiles();
 
-	reapplyStyles();
+		reapplyStyles();
+	} catch (e: any) {
+		setStatus(e, "error");
+		throw e; // escalate again to make sure main knows something went wrong
+	}
 
 	setStatus("Installation : Complete");
 }
