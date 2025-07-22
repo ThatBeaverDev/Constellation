@@ -18,7 +18,7 @@ export async function init() {
 	const permissionsFileExists = (await fs.stat(usersDirectory)) !== undefined;
 	// if the permissions file exists, use it, else use {}
 	const fileData = permissionsFileExists
-		? JSON.parse(await fs.readFile(usersDirectory))
+		? JSON.parse((await fs.readFile(usersDirectory)) || {})
 		: {};
 
 	// put data into the permissions storage variable
