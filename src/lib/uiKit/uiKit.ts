@@ -680,7 +680,6 @@ export class Renderer {
 				const steps = JSON.stringify(this.steps);
 				const displayedSteps = JSON.stringify(this.displayedSteps);
 				if (steps === displayedSteps) {
-					this.#focusTextbox();
 					return;
 				}
 			}
@@ -715,7 +714,7 @@ export class Renderer {
 				const creator = this.creators[newStep.type];
 				if (!creator) {
 					throw new UIError(
-						`Creator is not defined for uikit Type ${newStep.type}`
+						`Creator is not defined for ${newStep.type}`
 					);
 				}
 
@@ -796,9 +795,6 @@ export class Renderer {
 									);
 								}
 								break;
-							case 2:
-								// handled via contextmenu
-								break;
 						}
 					},
 					{ signal: this.signal }
@@ -847,27 +843,14 @@ export class Renderer {
 			newDisplayedSteps.push(newStep);
 		}
 
-		// remove missed old elements
-		for (let i = this.steps.length; i < this.items.length; i++) {
-			const item = this.items[i];
-			if (item) item.remove();
-		}
+		//// remove missed old elements
+		//for (let i = this.steps.length; i < this.items.length; i++) {
+		//	const item = this.items[i];
+		//	if (item) item.remove();
+		//}
 
 		this.items = newItems;
 		this.displayedSteps = newDisplayedSteps;
-
-		// reall insure everything is gone
-		this.window.body.innerHTML = "";
-
-		// add the new elements
-		for (const element of this.items) {
-			if (element == null) {
-				console.warn("null element found in uiKit commit list");
-				continue;
-			}
-
-			this.window.body.appendChild(element);
-		}
 
 		this.#focusTextbox();
 	};
