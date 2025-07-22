@@ -1,3 +1,4 @@
+import { PermissionsError } from "../errors.js";
 import fs from "../io/fs.js";
 import { defaultUser } from "./users.js";
 
@@ -132,9 +133,7 @@ export function getDirectoryPermission(
 	permission: Permission
 ) {
 	{
-		const perm = permissionsData[directory][permission];
-
-		return perm;
+		return permissionsData[directory][permission];
 	}
 }
 export async function setDirectoryPermission(
@@ -159,7 +158,11 @@ export function checkDirectoryPermission(
 ) {
 	const val = getDirectoryPermission(directory, permission);
 
-	return val == true;
+	if (val !== true) {
+		throw new PermissionsError(
+			`Application at ${directory} does not have permission ${permission}`
+		);
+	}
 }
 
 export function getFilesDomainOfDirectory(
