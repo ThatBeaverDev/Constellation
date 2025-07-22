@@ -5,7 +5,9 @@ export const folders: string[] = [
 	"/System/CoreLibraries",
 	"/System/CoreAssets",
 	"/System/CoreAssets/Logos",
-	"/System/windows"
+	"/System/windows",
+
+	"/System/CoreLibraries/mimeFiles"
 ];
 
 export const files: any = {
@@ -25,6 +27,10 @@ export const files: any = {
 		"/System/CoreLibraries/userFileSelector.js",
 	"/build/syslib/blob.js": "/System/CoreLibraries/blob.js",
 	"/build/lib/external/fzf.js": "/System/CoreLibraries/fzf.js",
+
+	// mime library
+	"/build/syslib/mime/mimes.js": "/System/CoreLibraries/mimeFiles/mimes.js",
+	"/build/syslib/mime.js": "/System/CoreLibraries/mime.js",
 
 	// logos
 	"/logos/Constellation.svg": "/System/CoreAssets/Logos/Constellation.svg",
