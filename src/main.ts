@@ -44,10 +44,10 @@ String.prototype.textBeforeLast = function (before) {
 async function main() {
 	await fsLoaded();
 
-	const firstBoot = (await fs.readFile("/System/arc.json")) == undefined;
-	if (firstBoot) {
-		await installer.install();
-	}
+	//const firstBoot = (await fs.readFile("/System/arc.json")) == undefined;
+	//if (firstBoot) {
+	await installer.install();
+	//}
 
 	const bootBackground = document.querySelector("div.bootCover")!;
 	bootBackground.classList.add("fadeOut");
