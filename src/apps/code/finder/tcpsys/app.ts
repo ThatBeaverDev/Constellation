@@ -1,3 +1,4 @@
+import { onClickOptions } from "../../../../lib/uiKit/uiKit";
 import { IPCMessage } from "../../../messages";
 
 const clamp = (n: number, min: number, max: number) => {
@@ -56,7 +57,7 @@ export default class finder extends Application {
 		this.x += this.padding;
 	}
 
-	drawButton(text: string, callback: Function) {
+	drawButton(text: string, callback: Function, rightCallback: Function) {
 		this.renderer.button(this.x, 3, text, callback);
 
 		// padding
@@ -287,53 +288,100 @@ export default class finder extends Application {
 		for (const i in this.listing) {
 			const obj = this.listing[i];
 
-			this.renderer.icon(10, y, await obj.icon);
-
 			// insure the name is the right length
-			const name = String(obj.name).padEnd(25, " ");
+			const name = String(obj.name).padEnd(1000, " ");
 
 			// add a '> ' if the item is selected, else just '  ', so everything is on the same starting point
 			const text = this.selector == Number(i) ? "> " + name : "  " + name;
 
-			// render
-			this.renderer.button(
-				40,
-				y,
-				text,
-				async () => {
-					// right click
-					if (this.selector == Number(i)) {
-						switch (obj.type) {
-							case "directory":
-								await this.cd(obj.path);
-								break;
-							case "file":
-								if (this.type == "picker") {
-									// select and submit the file
-									this.pickerSubmit();
-								} else {
-									/* TODO: OPEN THE FILE! */
-									this.env.prompt(
-										"Functionality not implemented: opening files",
-										"no current API for opening files in applications."
-									);
-								}
-
-								break;
-							default:
-								throw new Error(
-									"Unknown filetype cannot be handled for action: " +
-										obj.type
-								);
-						}
-					} else {
-						this.selector = Number(i);
-					}
-				},
-				async () => {
-					// left click
+			const openFile = () => {
+				if (this.type == "picker") {
+					// select and submit the file
+					this.pickerSubmit();
+				} else {
+					/* TODO: OPEN THE FILE! */
+					this.env.prompt(
+						"Functionality not implemented: opening files",
+						"no current API for opening files in applications."
+					);
 				}
-			);
+			};
+			const openDirectory = async () => {
+				await this.cd(obj.path);
+			};
+
+			const leftClick = async () => {
+				// left click
+				if (this.selector == Number(i)) {
+					switch (obj.type) {
+						case "directory":
+							await openDirectory();
+							break;
+						case "file":
+							openFile();
+
+							break;
+						default:
+							throw new Error(
+								"Unknown filetype cannot be handled for action: " +
+									obj.type
+							);
+					}
+				} else {
+					this.selector = Number(i);
+				}
+			};
+
+			const rightClick = async (x: number, y: number) => {
+				// right click
+
+				const context: Record<string, Function> = {};
+
+				switch (obj.type) {
+					case "file":
+						context["Open File"] = openFile.bind(this);
+						break;
+					case "directory":
+						context["Open Directory"] = openDirectory.bind(this);
+						break;
+				}
+
+				context["Rename"] = () => {
+					/* TODO: RENAME THE FILE! */
+					this.env.prompt(
+						"Functionality not implemented: renaming files"
+					);
+					/* TODO: RENAME THE FILE! */
+					this.env.prompt(
+						"Functionality not implemented: renaming files"
+					);
+				};
+				context["Move to Bin"] = () => {
+					/* TODO: MOVE THE FILE! */
+					this.env.prompt(
+						"Functionality not implemented: trashing files"
+					);
+				};
+				context["Copy"] = () => {
+					/* TODO: COPY THE FILE! */
+					this.env.prompt(
+						"Functionality not implemented: copying files"
+					);
+				};
+
+				this.renderer.setContextMenu(x, y, obj.name, context);
+			};
+			const onClickConfig: onClickOptions = {
+				scale: 1.1,
+				origin: "left"
+			};
+
+			// render
+			const icon = this.renderer.icon(10, y, await obj.icon);
+			const button = this.renderer.button(40, y, text);
+
+			this.renderer.onClick(icon, leftClick, rightClick, onClickConfig);
+			this.renderer.onClick(button, leftClick, rightClick, onClickConfig);
 
 			y += 25;
 		}
