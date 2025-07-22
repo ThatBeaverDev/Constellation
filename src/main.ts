@@ -17,6 +17,7 @@ declare global {
 		textAfterAll(after: string): string;
 		textBefore(before: string): string;
 		textBeforeLast(before: string): string;
+		map(mappings: any): string;
 	}
 }
 String.prototype.textAfter = function (after) {
@@ -39,6 +40,16 @@ String.prototype.textBeforeLast = function (before) {
 		.split("")
 		.reverse()
 		.join("");
+};
+
+String.prototype.map = function (mappings) {
+	let text = String(this);
+
+	for (const replaced in mappings) {
+		text = text.replaceAll(replaced, mappings[replaced]);
+	}
+
+	return text;
 };
 
 async function main() {
