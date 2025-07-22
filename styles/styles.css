@@ -199,7 +199,7 @@ body {
 	flex-direction: column;
 
 	animation-name: spawnWindow;
-	animation-timing-function: cubic-bezier(0.67, 0.2, 0.59, 1.2);
+	animation-timing-function: ease-out;
 	animation-duration: 0.2s;
 
 	/* box shadow */
@@ -209,14 +209,14 @@ body {
 		z-index var(--window-transition-duration) ease-in-out;
 }
 
-.windowContainer.focused {
-	opacity: var(--window-focused-opacity) !important;
-	filter: var(--window-focused-filters) !important;
-}
-
 .windowContainer:not(.invisible) {
 	opacity: var(--window-unfocused-opacity);
 	filter: var(--window-unfocused-filters);
+}
+
+.windowContainer.focused {
+	opacity: var(--window-focused-opacity);
+	filter: var(--window-focused-filters);
 }
 
 .windowContainer.invisible {
@@ -330,8 +330,8 @@ body {
 
 @keyframes spawnWindow {
 	from {
-		transform: scale(0.5);
-		filter: blur(5px) opacity(0);
+		transform: scale(0.25);
+		filter: blur(25px) opacity(0) !important;
 	}
 }
 

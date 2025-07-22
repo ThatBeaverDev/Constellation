@@ -378,13 +378,13 @@ export class GraphicalWindow {
 			[
 				{},
 				{
-					transform: "scale(0.5)",
-					filter: "blur(5px) opacity(0)"
+					transform: "scale(0.25)",
+					filter: "blur(25px) opacity(0)"
 				}
 			],
 			{
-				duration: 200,
-				easing: "cubic-bezier(0.67, 0.2, 0.58, 1.2)"
+				duration: 500,
+				easing: "ease-in"
 			}
 		);
 
