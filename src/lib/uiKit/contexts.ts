@@ -1,0 +1,177 @@
+import { getTextWidth } from "./calcWidth.js";
+
+const padding = 10;
+
+export function newContext(
+	x: number = 0,
+	y: number = 0,
+	headerText: string = "",
+	items: string[] = []
+) {
+	const container = document.createElement("div");
+	container.id = String(window.renderID++);
+	container.className = "uikitContextContainer";
+
+	container.style.left = `${x}px`;
+	container.style.top = `${y}px`;
+
+	const header = document.createElement("p");
+	header.className = "uikitText";
+	header.id = String(window.renderID++);
+	header.innerText = headerText;
+
+	function newTextButton(container: HTMLDivElement, id: number) {
+		const elem = document.createElement("button");
+		elem.className = "uiKitButton";
+		elem.id = String(window.renderID++);
+
+		elem.innerText = items[id];
+
+		elem.style.left = `${padding}px`;
+		elem.style.top = `${padding + id * 5}`;
+
+		container.appendChild(elem);
+	}
+
+	newTextButton(container, 0);
+
+	document.body.appendChild(container);
+	const live = document.getElementById(container.id)!;
+
+	console.log(live);
+
+	return live;
+}
+
+export class ContextMenu {
+	constructor(
+		x: number,
+		y: number,
+		headerText: string,
+		items: Record<string, Function>
+	) {
+		let maxWidth = 0;
+		let maxWidthString = "";
+		for (const i of [headerText, ...Object.keys(items)]) {
+			const width = getTextWidth(i);
+
+			if (width > maxWidth) {
+				maxWidth = width;
+				maxWidthString = i;
+			}
+		}
+
+		let height = 0;
+		height += padding; // header
+        height += 5 // divider
+		height += Object.keys(items).length * (padding * 2 + 5); // items, 2 padding each and 5px.
+
+		if (y + height > window.innerHeight) {
+			// need to show ABOVE the mouse
+			y -= height;
+		}
+
+		this.container = document.createElement("div");
+		this.container.className = "uikitContextContainer";
+		this.container.id = "context" + String(window.renderID++);
+		this.container.style.left = `${x}px`;
+		this.container.style.top = `${y}px`;
+		this.container.style.width = `${maxWidth}px`;
+		this.container.style.height = `${height}px`;
+
+		this.header = document.createElement("p");
+		this.header.id = "context" + String(window.renderID++);
+		this.header.className = "uikitText";
+		this.header.innerText = headerText;
+
+		let yPos = padding * 2 + 5;
+
+        yPos += 5
+        this.divider = document.createElement("div")
+        this.divider.id = "context" + String(window.renderID++)
+        this.divider.className = "uikitHorizontalLine"
+        this.divider.style.left = `${padding}px`
+        this.divider.style.top = `${yPos}px`
+        this.divider.style.width = `${maxWidth}px`
+        yPos += 5
+
+		this.items = Object.keys(items).map((text: string, index: number) => {
+			const elem = document.createElement("button");
+			elem.className = "uikitButton noBackground";
+			elem.id = "context" + String(window.renderID++);
+
+			elem.style.top = `${yPos}px`;
+			elem.style.left = `${padding}px`;
+
+            elem.style.width = `${maxWidth}px`
+            elem.style.textAlign = "left"
+
+			elem.innerText = text;
+			elem.dataset.index = String(index);
+
+			yPos += padding * 2 + 5;
+
+			return elem;
+		});
+
+		document.body.appendChild(this.container);
+		this.container = document.querySelector("div#" + this.container.id)!;
+
+		this.container.appendChild(this.header);
+		this.header = document.querySelector("p#" + this.header.id)!;
+
+        this.container.appendChild(this.divider)
+        this.divider = document.querySelector("div#" + this.divider.id)!;
+
+		for (const i in this.items) {
+			const elem = this.items[i];
+
+			this.container.appendChild(elem);
+
+			this.items[i] = document.querySelector("button#" + elem.id)!;
+			this.items[i].addEventListener(
+				"pointerdown",
+				() => {
+					const index = Number(this.items[i].dataset.index);
+
+					const text = Object.keys(items)[index];
+
+					const callback = items[text];
+
+					callback();
+				},
+				{
+					signal: this.#signal
+				}
+			);
+		}
+
+        document.addEventListener(
+			"pointerdown",
+			(e: PointerEvent) => {
+				this.remove();
+				e.stopImmediatePropagation();
+			},
+			{ once: true }
+		);
+	}
+
+	container: HTMLDivElement;
+    divider: HTMLDivElement;
+    header: HTMLParagraphElement;
+	items: HTMLButtonElement[];
+
+	// add abort controller to remove event listeners
+	#controller = new AbortController();
+	#signal = this.#controller.signal;
+
+	readonly remove = () => {
+		this.#controller.abort();
+
+		this.header.remove();
+		for (const i in this.items) {
+			this.items[i].remove;
+		}
+		this.container.remove();
+	};
+}

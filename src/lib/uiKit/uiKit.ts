@@ -3,20 +3,7 @@ import { getIcon } from "../icons.js";
 import { getTextWidth } from "./calcWidth.js";
 import { Process } from "../../apps/executables.js";
 import { UIError } from "../../errors.js";
-
-function clamp(n: number | undefined, min: number, max: number) {
-	if (n == undefined) {
-		return 0;
-	}
-
-	if (n < min) {
-		return min;
-	}
-	if (max < n) {
-		return max;
-	}
-	return n;
-}
+import { ContextMenu } from "./contexts.js";
 
 export const font = "monospace";
 
@@ -607,6 +594,25 @@ export class Renderer {
 	private controller = new AbortController();
 	private signal = this.controller.signal;
 
+	#context?: ContextMenu;
+	readonly setContextMenu = (
+		x: number,
+		y: number,
+		header: string,
+		buttons: Record<string, Function>
+	) => {
+		this.removeContextMenu();
+
+		this.#context = new ContextMenu(x, y, header, buttons);
+	};
+	readonly removeContextMenu = () => {
+		if (this.#context !== undefined) {
+			this.#context.remove();
+		}
+
+		this.#context = undefined;
+	};
+
 	windowWidth: number = 0;
 	windowHeight: number = 0;
 
@@ -767,6 +773,11 @@ export class Renderer {
 
 		// add the new elements
 		for (const element of this.items) {
+			if (element == null) {
+				console.warn("null element found in uiKit commit list");
+				continue;
+			}
+
 			this.window.body.appendChild(element);
 		}
 
