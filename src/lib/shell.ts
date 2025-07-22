@@ -33,7 +33,7 @@ export default class Shell {
 			if (!(list.data instanceof Array)) continue;
 
 			for (const item of list.data) {
-				const rel = await this.#env.fs.relative(dir, item);
+				const rel = await this.#env.fs.resolve(dir, item);
 
 				if (rel.endsWith(".appl") || rel.endsWith(".backgr")) {
 					allApps.push(rel);
@@ -44,7 +44,7 @@ export default class Shell {
 		const commands: string[] = [];
 
 		for (const app of allApps) {
-			const lib = this.#env.fs.relative(app, "lib");
+			const lib = this.#env.fs.resolve(app, "lib");
 
 			const libListing = await this.#env.fs.listDirectory(lib);
 
@@ -52,7 +52,7 @@ export default class Shell {
 			if (libListing.data == undefined) continue;
 
 			for (const sub of libListing.data) {
-				commands.push(this.#env.fs.relative(lib, sub));
+				commands.push(this.#env.fs.resolve(lib, sub));
 			}
 		}
 

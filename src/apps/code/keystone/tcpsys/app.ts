@@ -63,7 +63,7 @@ export default class KeystoneSearch extends Popup {
 			if (!list.ok) throw list.data;
 
 			const localNames = list.data.map((item: string) =>
-				this.env.fs.relative(directory, String(item))
+				this.env.fs.resolve(directory, String(item))
 			);
 			names = [...localNames, ...names];
 

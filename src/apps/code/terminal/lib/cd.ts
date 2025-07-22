@@ -1,7 +1,7 @@
 import TerminalAlias from "../../../../lib/terminalAlias";
 
 export default async function cd(parent: TerminalAlias, directory = "~") {
-	const target = parent.env.fs.relative(parent.path, directory);
+	const target = parent.env.fs.resolve(parent.path, directory);
 
 	try {
 		const ls = await parent.env.fs.listDirectory(directory);

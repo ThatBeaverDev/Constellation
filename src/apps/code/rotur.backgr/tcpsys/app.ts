@@ -20,7 +20,7 @@ export default class roturIntegration extends BackgroundProcess {
 
 		const roturConfig = (
 			await env.include(
-				env.fs.relative(this.directory, "data/rotur.config.js")
+				env.fs.resolve(this.directory, "data/rotur.config.js")
 			)
 		).default;
 
@@ -119,7 +119,7 @@ export default class roturIntegration extends BackgroundProcess {
 		await env.fs.writeFile("/Temporary/roturBackendRunning", "true");
 
 		const rotur = await env.include(
-			env.fs.relative(this.directory, "./resources/roturV6.js")
+			env.fs.resolve(this.directory, "./resources/roturV6.js")
 		);
 		const construct = rotur.default;
 

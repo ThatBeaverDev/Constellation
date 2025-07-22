@@ -134,7 +134,7 @@ const stat = async (directory: string) => {
 	});
 };
 
-const relative = (base = "/", target: string) => {
+const resolve = (base = "/", target: string) => {
 	if (target.startsWith("/")) return target;
 
 	const baseParts = base.split("/").filter(Boolean);
@@ -151,6 +151,44 @@ const relative = (base = "/", target: string) => {
 
 	return "/" + baseParts.join("/");
 };
+const normalize = (path: string) =>
+	path.replace(/\/+/g, "/").replace(/\/$/, "") || "/";
+function relative(from: string, to: string) {
+	from = normalize(from);
+	to = normalize(to);
+
+	if (from === to) return "";
+
+	const fromParts = from.split("/").filter(Boolean);
+	const toParts = to.split("/").filter(Boolean);
+
+	// find the point where both paths are the same
+	let commonLength = 0;
+	while (
+		commonLength < fromParts.length &&
+		commonLength < toParts.length &&
+		fromParts[commonLength] === toParts[commonLength]
+	) {
+		commonLength++;
+	}
+
+	// steps to ascend from common ancestor
+	const upSteps = fromParts.length - commonLength;
+	const up = Array(upSteps).fill("..");
+
+	// steps to descend to the target
+	const down = toParts.slice(commonLength);
+
+	// merge steps to get one set of steps
+	const result = [...up, ...down].join("/");
+	return result || ".";
+}
+
+/*
+
+tcpkg /System /sys.idx
+
+*/
 
 const main = {
 	...fs,
@@ -158,7 +196,9 @@ const main = {
 	writeFile,
 	readFile,
 	readdir,
+	resolve,
 	relative,
+	normalize,
 	stat
 };
 

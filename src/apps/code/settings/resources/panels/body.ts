@@ -11,7 +11,7 @@ export default class body {
 	initialised: boolean = false;
 
 	async init() {
-		const dir = env.fs.relative(
+		const dir = env.fs.resolve(
 			this.parent.directory,
 			"resources/pages/index.js"
 		);

@@ -85,7 +85,7 @@ export default class dock {
 			strings[1].padEnd(longestString.length, " "),
 			() => {
 				this.env.exec("/Applications/Finder.appl", [
-					env.fs.relative(c.win?.applicationDirectory, "..")
+					env.fs.resolve(c.win?.applicationDirectory, "..")
 				]);
 			}
 		);

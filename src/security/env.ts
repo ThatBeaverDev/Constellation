@@ -318,8 +318,11 @@ export class ApplicationAuthorisationAPI {
 
 			return "none"; // no idea to be honest
 		},
-		relative: (base: string, child: string): string => {
-			return realFS.relative(base, child);
+		resolve: (base: string, child: string): string => {
+			return realFS.resolve(base, child);
+		},
+		relative: (from: string, to: string): string => {
+			return realFS.relative(from, to);
 		}
 	};
 

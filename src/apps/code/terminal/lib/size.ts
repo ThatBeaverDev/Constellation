@@ -1,7 +1,7 @@
 const pathinf = await env.include("/System/CoreLibraries/pathinf.js");
 
 export default async function size(parent: any, directory: string) {
-	const dir = parent.env.fs.relative(parent.path, directory);
+	const dir = parent.env.fs.resolve(parent.path, directory);
 
 	const inf = await pathinf.pathSize(dir);
 
