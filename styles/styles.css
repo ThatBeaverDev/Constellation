@@ -249,6 +249,11 @@ body {
 	justify-content: center;
 
 	user-select: None;
+	cursor: grab;
+}
+
+.windowHeader:active {
+	cursor: grabbing;
 }
 
 .windowContainer.sqare {

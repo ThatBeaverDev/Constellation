@@ -1,0 +1,36 @@
+@keyframes flick-up {
+	from {
+	}
+
+	to {
+		top: -10vh;
+		height: 0px;
+	}
+}
+
+@keyframes flick-back {
+	from {
+	}
+
+	to {
+		transform: scale(0.1);
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.windowContainer.gone {
+		animation:
+			flick-up 0.5s cubic-bezier(0.98, 0.01, 0.99, 0.63) 0s 1 forwards,
+			flick-back 0.5s cubic-bezier(0.04, 1.07, 0.78, 0.72) 0s 1 normal
+				forwards;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.windowContainer.gone {
+		top: -10vh;
+		height: 0px;
+
+		transform: scale(0.1);
+	}
+}

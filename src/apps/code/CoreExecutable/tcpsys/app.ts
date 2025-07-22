@@ -23,17 +23,7 @@ export default class initialiser extends BackgroundProcess {
 		this.registerKeyboardShortcut("Launcher", "KeyZ", ["AltLeft"]);
 		this.registerKeyboardShortcut("Remap Shortcuts", "KeyX", ["AltLeft"]);
 		// this.windows
-		this.registerKeyboardShortcut("Focus Left (Tiling)", "ArrowLeft", [
-			"AltLeft"
-		]);
-		this.registerKeyboardShortcut("Focus Right (Tiling)", "ArrowRight", [
-			"AltLeft"
-		]);
 		this.registerKeyboardShortcut("Close Window", "KeyW", ["AltLeft"]);
-		this.registerKeyboardShortcut("Toggle Window Tiling", "KeyT", [
-			"AltLeft",
-			"ShiftLeft"
-		]);
 	}
 
 	onmessage(msg: IPCMessage) {
@@ -54,16 +44,6 @@ export default class initialiser extends BackgroundProcess {
 						);
 						break;
 					// windows shortcuts
-					case "keyboardShortcutTrigger-Focus Left (Tiling)":
-						if (!this.windows.windowTiling) break;
-						// Left!
-						this.windows.focusWindow(this.windows.focus - 1);
-						break;
-					case "keyboardShortcutTrigger-Focus Right (Tiling)":
-						if (!this.windows.windowTiling) break;
-						// Right!
-						this.windows.focusWindow(this.windows.focus + 1);
-						break;
 					case "keyboardShortcutTrigger-Close Window": {
 						// Close Window!
 
@@ -82,15 +62,6 @@ export default class initialiser extends BackgroundProcess {
 								Math.max(0, Math.min(this.windows.focus, last))
 							);
 						}, 160); // wait for animation + layoutTiling
-						break;
-					}
-					case "keyboardShortcutTrigger-Toggle Window Tiling": {
-						// Toggle tiling
-						const tiling = this.windows.windowTiling;
-
-						this.env.debug(this.directory, "Toggling tiling");
-
-						this.windows.setWindowTilingMode(!tiling);
 						break;
 					}
 

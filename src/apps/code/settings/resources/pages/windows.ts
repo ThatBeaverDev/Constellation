@@ -11,17 +11,15 @@ export default {
 	items: [
 		{
 			type: "optionsList",
-			text: "Tiling Mode",
+			text: "Minimise Animation",
 			default: 0,
-			options: ["Floating", "Tiling"],
+			options: ["flick", "scale"],
 			getValue: () => {
-				return windows.windowTiling;
+				return windows.minimiseAnimation;
 			},
 			setValue: (value: string) => {
 				// the windowTilingMode stores a boolean for whether we are the tiling mode.
-				const bool = value == "Tiling";
-
-				windows.setWindowTilingMode(bool);
+				windows.setMinimiseEffect(value);
 			}
 		}
 	]
