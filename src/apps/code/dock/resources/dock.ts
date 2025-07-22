@@ -96,7 +96,7 @@ export default class dock {
 							this.env.exec("/Applications/Finder.appl", [
 								env.fs.resolve(win.applicationDirectory, "..")
 							]),
-						Flick: () => win.minimise(),
+						Minimise: () => win.minimise(),
 						Restore: () => win.unminimise(),
 						Close: () => win.close()
 					};

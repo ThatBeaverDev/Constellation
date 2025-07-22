@@ -86,8 +86,8 @@ export const files: any = {
 	},
 
 	// windowing files
-	"/src/windows/tiling.css": "/System/windows/tiling.css",
-	"/src/windows/floating.css": "/System/windows/floating.css",
+	"/src/windows/flick.css": "/System/windows/flick.css",
+	"/src/windows/scale.css": "/System/windows/scale.css",
 
 	// sounds
 	"/build/assets/sounds.idx": {

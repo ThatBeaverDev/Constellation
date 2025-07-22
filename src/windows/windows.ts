@@ -18,7 +18,7 @@ declare global {
 window.windows = windows;
 
 // variables
-export let windowTiling = false;
+export let minimiseAnimation = "flick";
 export let focus: any;
 export let target: GraphicalWindow | undefined = undefined;
 let startMouseX = 0;
@@ -32,13 +32,6 @@ export let windowTilingNumber = 0;
 // init css styles
 css.initialiseStyles();
 export const setCSSVariable = css.setCSSVariable;
-
-export function setWindowTilingMode(enabled: boolean) {
-	if (typeof windowTiling !== "boolean")
-		throw new Error("input was not of type boolean.");
-
-	windowTiling = enabled;
-}
 
 function clamp(n: number | undefined, min: number, max: number) {
 	if (n == undefined) {
@@ -402,7 +395,7 @@ export class GraphicalWindow {
 	}
 
 	close() {
-		terminate(this.Application)
+		terminate(this.Application);
 	}
 }
 
@@ -439,8 +432,11 @@ export function focusWindow(id: number) {
 	);
 }
 
-// Add this function anywhere appropriate (e.g., near `newWindow`)
-function updateWindows(newTilingConfig: boolean = false) {
+export function setMinimiseEffect(effect: string) {
+	minimiseAnimation = String(effect);
+}
+
+function updateWindows() {
 	let x = 0;
 	let y = 0;
 
@@ -464,44 +460,19 @@ function updateWindows(newTilingConfig: boolean = false) {
 	const windowHeight = availableHeight - blankSpace;
 
 	windows.forEach((win, index) => {
-		win.container.style.resize = windowTiling ? "none" : "both";
-
-		if (newTilingConfig == true && windowTiling && win.visible) {
-			win.move(padding + x, padding + y, index);
-			win.resize(windowWidth, windowHeight);
-
-			x += windowHeaderHeight;
-			y += windowHeaderHeight;
-		}
+		win.container.style.resize = "both";
 
 		win.reposition();
-	});
-
-	// window tiling features
-	if (!windowTiling) return;
-
-	const cols = Math.ceil(Math.sqrt(totalWindows));
-	const rows = Math.ceil(totalWindows / cols);
-
-	const cellWidth = Math.floor(window.innerWidth / cols);
-	const cellHeight = Math.floor(window.innerHeight / rows);
-
-	windows.forEach((win, index) => {
-		// don't tile invisible windows.
-		if (!win.visible) return;
-
-		const col = index % cols;
-		const row = Math.floor(index / cols);
-
-		const left = col * cellWidth;
-		const top = row * cellHeight;
-
-		win.move(left, top);
-		win.resize(cellWidth, cellHeight);
 	});
 }
 
 window.addEventListener("resize", () => updateWindows());
+
+function preventBehavior(e: TouchEvent) {
+	e.preventDefault();
+}
+
+document.addEventListener("touchmove", preventBehavior, { passive: false });
 
 export function newWindow(title: string, ApplicationObject: Application) {
 	const win = new GraphicalWindow(title, ApplicationObject);
@@ -519,25 +490,27 @@ export function newWindow(title: string, ApplicationObject: Application) {
 	};
 }
 
-let lastKnownWindowMode: boolean | undefined; // undefined so that we definitely initialise the mode we are in.
+let oldMinimiseAnimation: string | undefined; // undefined so that we definitely initialise the mode we are in.
 export function reapplyStyles() {
-	lastKnownWindowMode = undefined;
+	oldMinimiseAnimation = undefined;
 }
 
 const styleElem = document.createElement("style");
 styleElem.id = String(window.renderID++);
+styleElem.className = "windowsAnimationStyles";
 
 document.body.appendChild(styleElem);
 const live = document.getElementById(styleElem.id)!;
+console.log(live);
 
 async function updateLiveStyling() {
 	const fnc = async () => {
-		const styleType = windowTiling ? "tiling" : "floating";
-
-		console.debug("Loading windowing CSS for mode: " + styleType);
+		console.debug(
+			"Loading windowing CSS for minimise animation: " + minimiseAnimation
+		);
 
 		const css = await env.fs.readFile(
-			"/System/windows/" + styleType + ".css"
+			"/System/windows/" + minimiseAnimation + ".css"
 		);
 
 		if (!css.ok) {
@@ -547,23 +520,20 @@ async function updateLiveStyling() {
 			return;
 		}
 
-		console.debug("CSS retrieved successfully for mode: " + styleType);
+		console.debug(
+			"CSS retrieved successfully for minimise animation: " +
+				minimiseAnimation
+		);
 
 		live.textContent = css.data;
 	};
 
-	if (windowTiling) {
-		await fnc();
-	} else {
-		setTimeout(fnc, 500);
-	}
-
-	updateWindows(true);
+	setTimeout(fnc, 500);
 }
 
 setInterval(() => {
-	if (lastKnownWindowMode !== windowTiling) {
+	if (minimiseAnimation !== oldMinimiseAnimation) {
+		oldMinimiseAnimation = String(minimiseAnimation);
 		updateLiveStyling();
-		lastKnownWindowMode = windowTiling;
 	}
 });
