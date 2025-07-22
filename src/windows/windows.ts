@@ -204,7 +204,7 @@ export class GraphicalWindow {
 		this.container.addEventListener("pointerdown", containerPointerDown);
 
 		// buttons
-		const closePointerDown = () => terminate(this.Application);
+		const closePointerDown = () => this.close();
 		this.closeButton.addEventListener("pointerdown", closePointerDown);
 
 		const minimisePointerDown = () => this.minimise();
@@ -399,6 +399,10 @@ export class GraphicalWindow {
 		};
 
 		setTimeout(del, 150);
+	}
+
+	close() {
+		terminate(this.Application)
 	}
 }
 

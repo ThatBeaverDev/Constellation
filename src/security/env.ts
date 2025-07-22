@@ -38,6 +38,7 @@ type directoryPointType =
 export type windowAlias = {
 	move: Function;
 	resize: Function;
+	close: Function;
 
 	minimise: Function;
 	unminimise: Function;
@@ -436,6 +437,7 @@ export class ApplicationAuthorisationAPI {
 			const wn: windowAlias = {
 				move: win.move.bind(win),
 				resize: win.resize.bind(win),
+				close: win.remove.bind(win),
 
 				minimise: win.minimise.bind(win),
 				unminimise: win.unminimise.bind(win),
