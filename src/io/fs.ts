@@ -1,20 +1,29 @@
 let bfs: Function | undefined;
 
-const bfsCode = await (
-	await fetch("/src/lib/external/browserfs.min.js")
-).text();
+const isDev = window.location.hostname == "localhost";
+const bfsName = isDev ? "browserfs.js" : "browserfs.min.js";
+
+const bfsCode = await (await fetch(`/src/lib/external/${bfsName}`)).text();
 
 bfs = new Function(bfsCode);
 await bfs(); // start browserFS
 
+// @ts-expect-error
 const BrowserFS = window.BrowserFS;
+// @ts-expect-error
+window.BrowserFS = undefined;
+// @ts-expect-error
+delete window.BrowserFS;
 
 BrowserFS.configure(
 	{
 		fs: "MountableFileSystem",
 		options: {
 			"/": {
-				fs: "InMemory"
+				fs: "IndexedDB",
+				options: {
+					storeName: "root"
+				}
 			},
 			"/System": {
 				fs: "IndexedDB",
@@ -48,13 +57,15 @@ BrowserFS.configure(
 
 const fs = BrowserFS.BFSRequire("fs");
 
-declare global {
-	interface Window {
-		rawFS: any;
-		BrowserFS: any;
+function isRoot(directory: string) {
+	const segments = directory.split("/").filter((section) => section !== "");
+
+	if (segments.length == 0 || segments.length == 1) {
+		return true;
+	} else {
+		return false;
 	}
 }
-window.rawFS = fs;
 
 const writeFile = async (directory: string, content: string) => {
 	let written = false;
@@ -75,46 +86,69 @@ const writeFile = async (directory: string, content: string) => {
 };
 
 const readFile = async (directory: string): Promise<string | undefined> => {
-	let read = false;
-	let content: string;
+	return new Promise((resolve: Function) =>
+		fs.readFile(directory, "utf8", (e: any, data: string) => {
+			resolve(data);
+		})
+	);
+};
 
-	fs.readFile(directory, "utf8", (_: any, data: string, _2: any) => {
-		read = true;
-		content = data;
-	});
+const renameFile = async (
+	oldDirectory: string,
+	newDirectory: string
+): Promise<undefined> => {
+	return new Promise((resolve: Function) =>
+		fs.rename(oldDirectory, newDirectory, (e: any, data: any) => {
+			resolve();
+		})
+	);
+};
+const rename = async (
+	oldDirectory: string,
+	newDirectory: string
+): Promise<undefined> => {
+	const type = await stat(oldDirectory);
+	if (type == undefined) return;
 
-	return new Promise((resolve) => {
-		const interval = setInterval(() => {
-			if (read == true) {
-				clearInterval(interval);
-				resolve(content);
-				return;
-			}
+	const isDir = type.isDirectory();
+
+	if (isDir) {
+		await mkdir(newDirectory);
+
+		const list = await readdir(oldDirectory);
+
+		for (const item of list) {
+			const resolvedOld = resolve(oldDirectory, item);
+			const resolvedNew = resolve(newDirectory, item);
+
+			await rename(resolvedOld, resolvedNew);
+		}
+
+		await fs.rmdir(oldDirectory);
+	} else {
+		return renameFile(oldDirectory, newDirectory);
+	}
+};
+
+const readdir = async (directory: string): Promise<string[]> => {
+	return new Promise((resolve: Function) =>
+		fs.readdir(directory, (e: any, data: string[]) => {
+			resolve(data);
+		})
+	);
+};
+const mkdir = async (directory: string): Promise<undefined> => {
+	if (isRoot(directory))
+		throw new Error("Directories cannot be created under root.");
+
+	return new Promise((resolve: Function) => {
+		fs.mkdir(directory, (e: any) => {
+			resolve();
 		});
 	});
 };
 
-const readdir = async (directory: string) => {
-	let ls: string[];
-	let listed = false;
-
-	fs.readdir(directory, (_: any, data: string[]) => {
-		ls = data;
-		listed = true;
-	});
-
-	return new Promise((resolve) => {
-		const interval = setInterval(() => {
-			if (listed == true) {
-				clearInterval(interval);
-				resolve(ls);
-				return;
-			}
-		});
-	});
-};
-
-const stat = async (directory: string) => {
+const stat = async (directory: string): Promise<any> => {
 	let stats: any;
 	let ok = false;
 
@@ -199,7 +233,9 @@ const main = {
 	resolve,
 	relative,
 	normalize,
-	stat
+	stat,
+	rename,
+	mkdir
 };
 
 export default main;
@@ -215,3 +251,6 @@ export async function fsLoaded() {
 		});
 	});
 }
+
+// @ts-expect-error
+window.realFS = main;

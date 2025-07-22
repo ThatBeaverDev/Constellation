@@ -254,6 +254,22 @@ export class ApplicationAuthorisationAPI {
 				};
 			}
 		},
+		move: async (
+			oldDirectory: string,
+			newDirectory: string
+		): Promise<fsResponse> => {
+			try {
+				return {
+					data: await realFS.rename(oldDirectory, newDirectory),
+					ok: true
+				};
+			} catch (error) {
+				return {
+					data: error,
+					ok: false
+				};
+			}
+		},
 
 		stat: async (directory: string): Promise<fsResponse> => {
 			try {
