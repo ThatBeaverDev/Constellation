@@ -1,7 +1,7 @@
 const applicationExtensions = ["appl", "backgr"];
 
 async function getAppConfig(directory: string) {
-	const appConf = await env.include(env.fs.relative(directory, "config.js"));
+	const appConf = await env.include(env.fs.resolve(directory, "config.js"));
 	// get the real data
 	return appConf?.default;
 }
@@ -35,7 +35,7 @@ export async function pathIcon(directory: string) {
 							const isDir = [".", "/"].includes(icon[0]);
 
 							if (isDir) {
-								const dir = env.fs.relative(directory, icon);
+								const dir = env.fs.resolve(directory, icon);
 								return dir;
 							} else {
 								return icon;

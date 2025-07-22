@@ -1,7 +1,7 @@
 import TerminalAlias from "../../../../lib/terminalAlias";
 
 export default async function tree(parent: TerminalAlias, directory = ".") {
-	const dir = env.fs.relative(parent.path, directory);
+	const dir = env.fs.resolve(parent.path, directory);
 
 	let result = dir + "\n";
 
@@ -50,7 +50,7 @@ async function treeWalk(
 
 			const dispFile = String(file);
 
-			const asDir = await parent.env.fs.relative(directory, file);
+			const asDir = await parent.env.fs.resolve(directory, file);
 
 			//if (obj.fullDir) {
 			//	dispFile = asDir;

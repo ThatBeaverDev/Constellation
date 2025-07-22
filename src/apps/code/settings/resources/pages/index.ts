@@ -5,7 +5,7 @@ export default async function (parent: any) {
 
 	for (const page of list) {
 		const data = await env.include(
-			env.fs.relative(parent.directory, "resources/pages/" + page + ".js")
+			env.fs.resolve(parent.directory, "resources/pages/" + page + ".js")
 		);
 
 		if (typeof data.init == "function") {

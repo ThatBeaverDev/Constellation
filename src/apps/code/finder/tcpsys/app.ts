@@ -189,7 +189,7 @@ export default class finder extends Application {
 			this.selector = 0;
 		}
 
-		this.path = this.env.fs.relative(this.path, directory);
+		this.path = this.env.fs.resolve(this.path, directory);
 		const dir = this.path;
 		if (this.path == "/") {
 			this.location = "Constellation";
@@ -217,7 +217,7 @@ export default class finder extends Application {
 		list = list.map((name: string) => {
 			const obj: listing = {
 				name,
-				path: this.env.fs.relative(this.path, name),
+				path: this.env.fs.resolve(this.path, name),
 				icon: "",
 				type: "none"
 			};
@@ -345,7 +345,7 @@ export default class finder extends Application {
 			const path =
 				itemName == ".."
 					? this.path
-					: this.env.fs.relative(this.path, itemName);
+					: this.env.fs.resolve(this.path, itemName);
 
 			this.renderer.button(
 				5,
@@ -363,7 +363,7 @@ export default class finder extends Application {
 		const path =
 			itemName == ".."
 				? this.path
-				: this.env.fs.relative(this.path, itemName);
+				: this.env.fs.resolve(this.path, itemName);
 
 		this.env.debug(
 			this.name,

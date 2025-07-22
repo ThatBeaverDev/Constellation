@@ -74,7 +74,7 @@ export async function writeFiles() {
 				}
 
 				for (const path of json.directories) {
-					const relative = fs.relative(directory, path);
+					const relative = fs.resolve(directory, path);
 
 					await fs.mkdir(relative);
 				}
@@ -82,7 +82,7 @@ export async function writeFiles() {
 				const awaitFiles = [];
 				for (const path in json.files) {
 					const data = json.files[path];
-					const relative = fs.relative(directory, path);
+					const relative = fs.resolve(directory, path);
 
 					const type = data.type == undefined ? "string" : data.type;
 
@@ -108,7 +108,7 @@ export async function writeFiles() {
 
 				if (json.files["postunpkg.js"] !== undefined) {
 					const incl = await env.include(
-						fs.relative(directory, "postunpkg.js")
+						fs.resolve(directory, "postunpkg.js")
 					);
 
 					const fnc = incl.default;

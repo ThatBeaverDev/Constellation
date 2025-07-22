@@ -9,7 +9,7 @@ async function rmdir(dir: string) {
 	}
 
 	for (const name of ls) {
-		const relative = fs.relative(dir, name);
+		const relative = fs.resolve(dir, name);
 
 		const stats = await fs.stat(relative);
 

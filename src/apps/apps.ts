@@ -62,7 +62,7 @@ type executionFiletype = "sjs" | "js";
 
 export async function execute(directory: string, args: any[] = []) {
 	const get = async (dir: string, throwIfEmpty: Boolean = true) => {
-		const rel = fs.relative(directory, dir);
+		const rel = fs.resolve(directory, dir);
 
 		const content = await fs.readFile(rel);
 
@@ -82,12 +82,12 @@ export async function execute(directory: string, args: any[] = []) {
 
 	let executableDirectory: string | undefined;
 	let type: executionFiletype | undefined;
-	const tcpsys = await fs.readdir(fs.relative(directory, "tcpsys"));
+	const tcpsys = await fs.readdir(fs.resolve(directory, "tcpsys"));
 
 	// get the script
 	for (const ext of allowedExtensions) {
 		if (tcpsys.includes("app." + ext)) {
-			executableDirectory = fs.relative(directory, "tcpsys/app." + ext);
+			executableDirectory = fs.resolve(directory, "tcpsys/app." + ext);
 			type = ext;
 			break;
 		}
@@ -103,7 +103,7 @@ export async function execute(directory: string, args: any[] = []) {
 
 				if (content == undefined) {
 					throw new AppInitialisationError(
-						fs.relative(directory, "tcpsys/app.[js / sjs]") +
+						fs.resolve(directory, "tcpsys/app.[js / sjs]") +
 							" is empty and cannot be executed"
 					);
 				}

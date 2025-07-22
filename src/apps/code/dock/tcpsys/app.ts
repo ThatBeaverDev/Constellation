@@ -14,12 +14,12 @@ export default class dockAndDesktop extends Application {
 
 		this.dock = new (
 			await this.env.include(
-				this.env.fs.relative(this.directory, "resources/dock.js")
+				this.env.fs.resolve(this.directory, "resources/dock.js")
 			)
 		).default(this);
 		this.menubar = new (
 			await this.env.include(
-				this.env.fs.relative(this.directory, "resources/menubar.js")
+				this.env.fs.resolve(this.directory, "resources/menubar.js")
 			)
 		).default(this);
 	}

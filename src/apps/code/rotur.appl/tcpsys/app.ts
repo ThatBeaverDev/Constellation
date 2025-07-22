@@ -23,14 +23,14 @@ export default class roturGui extends Application {
 
 		this.renderer.window.rename("Rotur");
 		this.renderer.setWindowIcon(
-			env.fs.relative(this.directory, "./resources/icon.svg")
+			env.fs.resolve(this.directory, "./resources/icon.svg")
 		);
 
 		const dashImport = await env.include(
-			env.fs.relative(this.directory, "resources/pages/dash.js")
+			env.fs.resolve(this.directory, "resources/pages/dash.js")
 		);
 		const authImport = await env.include(
-			env.fs.relative(this.directory, "resources/pages/auth.js")
+			env.fs.resolve(this.directory, "resources/pages/auth.js")
 		);
 
 		this.pages = {

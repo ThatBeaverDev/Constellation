@@ -8,7 +8,7 @@ export default async function wallpaper(
 ) {
 	switch (intent) {
 		case "set": {
-			const dir = env.fs.relative(parent.path, args[0]);
+			const dir = env.fs.resolve(parent.path, args[0]);
 
 			const content = await env.fs.readFile(dir);
 
