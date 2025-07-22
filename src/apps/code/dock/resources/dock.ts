@@ -14,6 +14,7 @@ export default class dock {
 	dockHeight: number = 50;
 	dockPadding: number = 10;
 	wins: windowAlias[] = [];
+	ok: boolean = false;
 
 	constructor(parent: any) {
 		this.parent = parent;
@@ -36,59 +37,6 @@ export default class dock {
 		this.refresh();
 
 		this.ok = true;
-	}
-
-	ok: boolean = false;
-
-	contextMenu: {
-		left: number;
-		top: number;
-		visible: boolean;
-		win?: windowAlias;
-	} = { visible: false, win: undefined, top: 0, left: 0 };
-
-	renderContextMenu() {
-		if (this.contextMenu == undefined) return;
-
-		const c = this.contextMenu;
-		const title = String(c.win?.name);
-
-		// get string stuff
-		const strings = [title, "Show in Finder...", "Flick", "Close"];
-		let longestString = "";
-		for (const str of strings) {
-			if (str.length > longestString.length) {
-				longestString = str;
-			}
-		}
-
-		const x = c.left;
-		let y = c.top - 500;
-
-		const padding = 10;
-		const width = this.renderer.getTextWidth(longestString) + padding * 2; //150
-		const height = 500;
-
-		this.renderer.box(x, y, width, height, {
-			colour: "var(--main-theme-tertiary)",
-			borderRadius: 10
-		});
-
-		const titleWidth = this.renderer.getTextWidth(title);
-		y += padding;
-		this.renderer.text(x + padding, y, strings[0]);
-
-		y += padding * 2 + 5;
-		this.renderer.button(
-			x + padding,
-			y,
-			strings[1].padEnd(longestString.length, " "),
-			() => {
-				this.env.exec("/Applications/Finder.appl", [
-					env.fs.resolve(c.win?.applicationDirectory, "..")
-				]);
-			}
-		);
 	}
 
 	refresh() {
@@ -142,24 +90,33 @@ export default class dock {
 					this.winAPI.focusWindow(win.winID);
 				},
 				(left: number, top: number) => {
-					// show context menu
-					this.contextMenu.visible = true;
-					this.contextMenu.left = left;
-					this.contextMenu.top = top;
-					this.contextMenu.win = win;
+					// menu items
+					const contextMenuItems = {
+						"Show in Finder": () =>
+							this.env.exec("/Applications/Finder.appl", [
+								env.fs.resolve(win.applicationDirectory, "..")
+							]),
+						Flick: () => win.minimise(),
+						Restore: () => win.unminimise(),
+						Close: () => win.close()
+					};
 
-					this.renderer.awaitClick(() => {
-						this.env.log(this.parent.directory, "context gone");
-						this.contextMenu.visible = false;
-					});
+					// show menu
+					this.renderer.setContextMenu(
+						left,
+						top,
+						win.name,
+						contextMenuItems
+					);
+
+					// remove menu on click
+					//this.renderer.awaitClick(() => {
+					//	this.renderer.removeContextMenu();
+					//});
 				}
 			);
 
 			x += iconWidth + this.dockPadding;
-		}
-
-		if (this.contextMenu.visible) {
-			this.renderContextMenu();
 		}
 	}
 }

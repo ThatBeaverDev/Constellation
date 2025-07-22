@@ -11,6 +11,7 @@ export default class dockAndDesktop extends Application {
 		this.renderer.setWindowIcon(
 			"/System/CoreAssets/Logos/Constellation-White.svg"
 		);
+		this.renderer.window.rename("Constellation")
 
 		this.dock = new (
 			await this.env.include(
