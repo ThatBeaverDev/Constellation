@@ -63,7 +63,7 @@ export class ContextMenu {
 
 		let height = 0;
 		height += padding; // header
-        height += 5 // divider
+		height += 5; // divider
 		height += Object.keys(items).length * (padding * 2 + 5); // items, 2 padding each and 5px.
 
 		if (y + height > window.innerHeight) {
@@ -86,14 +86,14 @@ export class ContextMenu {
 
 		let yPos = padding * 2 + 5;
 
-        yPos += 5
-        this.divider = document.createElement("div")
-        this.divider.id = "context" + String(window.renderID++)
-        this.divider.className = "uikitHorizontalLine"
-        this.divider.style.left = `${padding}px`
-        this.divider.style.top = `${yPos}px`
-        this.divider.style.width = `${maxWidth}px`
-        yPos += 5
+		yPos += 5;
+		this.divider = document.createElement("div");
+		this.divider.id = "context" + String(window.renderID++);
+		this.divider.className = "uikitHorizontalLine";
+		this.divider.style.left = `${padding}px`;
+		this.divider.style.top = `${yPos}px`;
+		this.divider.style.width = `${maxWidth}px`;
+		yPos += 5;
 
 		this.items = Object.keys(items).map((text: string, index: number) => {
 			const elem = document.createElement("button");
@@ -103,8 +103,8 @@ export class ContextMenu {
 			elem.style.top = `${yPos}px`;
 			elem.style.left = `${padding}px`;
 
-            elem.style.width = `${maxWidth}px`
-            elem.style.textAlign = "left"
+			elem.style.width = `${maxWidth}px`;
+			elem.style.textAlign = "left";
 
 			elem.innerText = text;
 			elem.dataset.index = String(index);
@@ -120,8 +120,8 @@ export class ContextMenu {
 		this.container.appendChild(this.header);
 		this.header = document.querySelector("p#" + this.header.id)!;
 
-        this.container.appendChild(this.divider)
-        this.divider = document.querySelector("div#" + this.divider.id)!;
+		this.container.appendChild(this.divider);
+		this.divider = document.querySelector("div#" + this.divider.id)!;
 
 		for (const i in this.items) {
 			const elem = this.items[i];
@@ -146,7 +146,7 @@ export class ContextMenu {
 			);
 		}
 
-        document.addEventListener(
+		document.addEventListener(
 			"pointerdown",
 			(e: PointerEvent) => {
 				this.remove();
@@ -157,8 +157,8 @@ export class ContextMenu {
 	}
 
 	container: HTMLDivElement;
-    divider: HTMLDivElement;
-    header: HTMLParagraphElement;
+	divider: HTMLDivElement;
+	header: HTMLParagraphElement;
 	items: HTMLButtonElement[];
 
 	// add abort controller to remove event listeners

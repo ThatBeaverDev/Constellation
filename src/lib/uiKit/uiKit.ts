@@ -18,13 +18,20 @@ export async function init() {
 
 type uikitCreatorName = keyof Renderer["creators"];
 type uiKitCreators = Record<string, (...args: any[]) => HTMLElement>;
+
+export interface onClickOptions {
+	scale?: number;
+	origin?: string;
+}
+interface clickReference extends onClickOptions {
+	left?: Function;
+	right?: Function;
+}
+
 interface step {
 	type: uikitCreatorName;
 	args: any[];
-	onClick?: {
-		left?: Function;
-		right?: Function;
-	};
+	onClick?: clickReference;
 }
 
 interface textboxCallbackObject {}
@@ -228,7 +235,8 @@ export class Renderer {
 	onClick(
 		elemID: number,
 		leftClickCallback?: Function,
-		rightClickCallback?: Function
+		rightClickCallback?: Function,
+		otherConfig?: onClickOptions
 	) {
 		const left =
 			leftClickCallback == undefined
@@ -241,7 +249,11 @@ export class Renderer {
 
 		// insure elemID is valid
 		if (elemID > 0 && elemID <= this.steps.length) {
-			this.steps[elemID - 1].onClick = { left, right };
+			this.steps[elemID - 1].onClick = {
+				...(otherConfig || {}),
+				left,
+				right
+			};
 		} else {
 			throw new UIError(`onClick called with invalid elemID: ${elemID}`);
 		}
@@ -717,11 +729,60 @@ export class Renderer {
 			// the old element had all uiKit event listeners removed by the AbortController
 			if (newStep.onClick !== undefined) {
 				element.classList.add("clickable");
+				element.style.setProperty(
+					"--scale",
+					String(newStep.onClick.scale || 1.3)
+				);
+				element.style.setProperty(
+					"--origin",
+					newStep.onClick.origin || "center"
+				);
+
+				let pressTimer: ReturnType<typeof setTimeout> | null = null;
+				let longPressTriggered = false;
 
 				element.addEventListener(
 					"pointerdown",
-					function (event: MouseEvent) {
+					(event: PointerEvent) => {
 						if (!newStep.onClick) return;
+						longPressTriggered = false;
+
+						if (
+							event.pointerType === "touch" ||
+							event.pointerType === "pen"
+						) {
+							pressTimer = setTimeout(() => {
+								longPressTriggered = true;
+								if (
+									typeof newStep.onClick?.right === "function"
+								) {
+									event.preventDefault();
+									newStep.onClick.right(
+										event.clientX,
+										event.clientY
+									);
+								}
+							}, 500);
+							return; // Skip mouse clicks on touch/pen
+						}
+					},
+					{ signal: this.signal }
+				);
+
+				element.addEventListener(
+					"pointerup",
+					(event: PointerEvent) => {
+						if (!newStep.onClick) return;
+
+						if (
+							event.pointerType === "touch" ||
+							event.pointerType === "pen"
+						) {
+							if (longPressTriggered) {
+								event.preventDefault();
+								return; // skip click after long press
+							}
+						}
 
 						switch (event.button) {
 							case 0:
@@ -735,16 +796,43 @@ export class Renderer {
 									);
 								}
 								break;
+							case 2:
+								// handled via contextmenu
+								break;
 						}
 					},
-					{
-						signal: this.signal
+					{ signal: this.signal }
+				);
+
+				// Clear timer on end/cancel/leave
+				const clearLongPress = () => {
+					if (pressTimer) clearTimeout(pressTimer);
+					pressTimer = null;
+				};
+
+				["pointerup", "pointercancel", "pointerleave"].forEach(
+					(eventName) => {
+						element.addEventListener(eventName, clearLongPress, {
+							signal: this.signal
+						});
 					}
 				);
+
+				// Always prevent contextmenu for touch/pen
 				element.addEventListener(
 					"contextmenu",
-					(event: MouseEvent) => {
+					(event: MouseEvent | PointerEvent) => {
 						if (!newStep.onClick) return;
+
+						// prevent contextmenu after long press or on touch entirely
+						if (
+							(event as PointerEvent).pointerType === "touch" ||
+							(event as PointerEvent).pointerType === "pen" ||
+							longPressTriggered
+						) {
+							event.preventDefault();
+							return;
+						}
 
 						if (typeof newStep.onClick.right === "function") {
 							event.preventDefault();
