@@ -78,23 +78,23 @@ export class Renderer {
 	};
 
 	constructor(process: Process) {
-		this.process = process;
+		this.#process = process;
 
 		// @ts-ignore
-		this.window = newWindow(this.process.directory, process).data;
+		this.window = newWindow(this.#process.directory, process).data;
 	}
 
-	private process: Process;
+	#process: Process;
 	window: GraphicalWindow;
 
 	clear = () => {
-		this.textboxExists = false;
-		this.steps = [];
+		this.#textboxExists = false;
+		this.#steps = [];
 	};
 
-	private steps: step[] = [];
-	private displayedSteps: step[] = [];
-	private textboxExists: Boolean = false;
+	#steps: step[] = [];
+	#displayedSteps: step[] = [];
+	#textboxExists: Boolean = false;
 
 	elemID: number = 0;
 
@@ -108,7 +108,8 @@ export class Renderer {
 			type: "uikitIcon",
 			args: [x, y, name, scale]
 		};
-		return this.steps.push(obj);
+
+		return this.#steps.push(obj);
 	};
 
 	readonly text = (
@@ -121,7 +122,7 @@ export class Renderer {
 			type: "uikitText",
 			args: [x, y, string, size]
 		};
-		return this.steps.push(obj);
+		return this.#steps.push(obj);
 	};
 	readonly button = (
 		x: number,
@@ -135,7 +136,7 @@ export class Renderer {
 			type: "uikitButton",
 			args: [x, y, string, leftClickCallback, rightClickCallback, size]
 		};
-		return this.steps.push(obj);
+		return this.#steps.push(obj);
 	};
 	readonly textbox = (
 		x: number,
@@ -146,12 +147,12 @@ export class Renderer {
 		callbacks: textboxCallbackObject,
 		options: uikitTextboxConfig = this.defaultConfig.uikitTextbox
 	) => {
-		if (this.textboxExists == true) {
+		if (this.#textboxExists == true) {
 			throw new UIError("UI cannot have more than one textbox.");
 		}
 
 		// mark the textbox as present to prevent another from being created
-		this.textboxExists = true;
+		this.#textboxExists = true;
 
 		// insure all values are met. if not, apply the default
 		const opts = {};
@@ -164,7 +165,7 @@ export class Renderer {
 			type: "uikitTextbox",
 			args: [x, y, width, height, backtext, callbacks, opts]
 		};
-		return this.steps.push(obj);
+		return this.#steps.push(obj);
 	};
 
 	readonly verticalLine = (x: number, y: number, height: number) => {
@@ -172,7 +173,7 @@ export class Renderer {
 			type: "uikitVerticalLine",
 			args: [x, y, height]
 		};
-		return this.steps.push(obj);
+		return this.#steps.push(obj);
 	};
 
 	readonly horizontalLine = (x: number, y: number, width: number) => {
@@ -180,7 +181,7 @@ export class Renderer {
 			type: "uikitHorizontalLine",
 			args: [x, y, width]
 		};
-		return this.steps.push(obj);
+		return this.#steps.push(obj);
 	};
 
 	readonly progressBar = (
@@ -194,7 +195,7 @@ export class Renderer {
 			type: "uikitProgressBar",
 			args: [x, y, width, height, progress]
 		};
-		return this.steps.push(obj);
+		return this.#steps.push(obj);
 	};
 
 	readonly textarea = (
@@ -205,17 +206,17 @@ export class Renderer {
 		callbacks: textboxCallbackObject,
 		options: uikitTextareaConfig = this.defaultConfig.uikitTextarea
 	) => {
-		if (this.textboxExists == true) {
+		if (this.#textboxExists == true) {
 			throw new UIError("UI cannot have more than one textbox.");
 		}
 
-		this.textboxExists = true;
+		this.#textboxExists = true;
 
 		const obj: step = {
 			type: "uikitTextarea",
 			args: [x, y, width, height, callbacks, options]
 		};
-		return this.steps.push(obj);
+		return this.#steps.push(obj);
 	};
 
 	readonly box = (
@@ -229,7 +230,7 @@ export class Renderer {
 			type: "uikitBox",
 			args: [x, y, width, height, config]
 		};
-		return this.steps.push(obj);
+		return this.#steps.push(obj);
 	};
 
 	onClick(
@@ -241,15 +242,15 @@ export class Renderer {
 		const left =
 			leftClickCallback == undefined
 				? undefined
-				: leftClickCallback.bind(this.process);
+				: leftClickCallback.bind(this.#process);
 		const right =
 			rightClickCallback == undefined
 				? undefined
-				: rightClickCallback.bind(this.process);
+				: rightClickCallback.bind(this.#process);
 
 		// insure elemID is valid
-		if (elemID > 0 && elemID <= this.steps.length) {
-			this.steps[elemID - 1].onClick = {
+		if (elemID > 0 && elemID <= this.#steps.length) {
+			this.#steps[elemID - 1].onClick = {
 				...(otherConfig || {}),
 				left,
 				right
@@ -282,25 +283,26 @@ export class Renderer {
 
 	readonly setTextboxContent = (content: string) => {
 		// insure there is actually a textbox
-		if (this.textboxElem !== undefined) {
+		if (this.#textboxElem !== undefined) {
 			// set the value
-			this.textboxElem.value = content;
+			this.#textboxElem.value = content;
 		}
 	};
 
 	readonly getTextboxContent = () => {
 		// insure there is actually a textbox
-		if (this.textboxElem !== undefined) {
+		if (this.#textboxElem !== undefined) {
 			// return the value
-			return this.textboxElem.value;
+			return this.#textboxElem.value;
 		}
 
 		// return null otherwise
 		return null;
 	};
 
-	private textboxElem: HTMLInputElement | HTMLTextAreaElement | undefined;
-	private readonly creators: uiKitCreators = {
+	#textboxElem: HTMLInputElement | HTMLTextAreaElement | undefined;
+
+	readonly creators: uiKitCreators = {
 		uikitIcon: (x = 0, y = 0, name = "circle-help", scale = 1) => {
 			const icon = getIcon(name);
 			icon.style.cssText = `left: ${x}px; top: ${y}px; width: ${24 * scale}px; height: ${24 * scale}px;`;
@@ -379,7 +381,7 @@ export class Renderer {
 					}
 				},
 				{
-					signal: this.signal
+					signal: this.#signal
 				}
 			);
 
@@ -443,12 +445,12 @@ export class Renderer {
 							callbacks.update(event.key, val);
 						}
 					}, 2),
-				{ signal: this.signal }
+				{ signal: this.#signal }
 			);
 
 			if (options.isEmpty == false)
-				textbox.value = String(this.textboxElem?.value || ""); // make the value stay
-			this.textboxElem = live;
+				textbox.value = String(this.#textboxElem?.value || ""); // make the value stay
+			this.#textboxElem = live;
 
 			return live;
 		},
@@ -567,13 +569,13 @@ export class Renderer {
 						callbacks.update(event.key, val);
 					}
 				},
-				{ signal: this.signal }
+				{ signal: this.#signal }
 			);
 
 			if (focus == this.window.winID) live.focus();
 
-			area.value = String(this.textboxElem?.value || ""); // make the value stay
-			this.textboxElem = live;
+			area.value = String(this.#textboxElem?.value || ""); // make the value stay
+			this.#textboxElem = live;
 
 			return live;
 		},
@@ -603,8 +605,8 @@ export class Renderer {
 	};
 
 	// add abort controller to remove event listeners
-	private controller = new AbortController();
-	private signal = this.controller.signal;
+	#controller = new AbortController();
+	#signal = this.#controller.signal;
 
 	#context?: ContextMenu;
 	readonly setContextMenu = (
@@ -628,33 +630,33 @@ export class Renderer {
 	windowWidth: number = 0;
 	windowHeight: number = 0;
 
-	private items: any[] = [];
+	#items: any[] = [];
 
-	private mustRedraw: boolean = false;
+	#mustRedraw: boolean = false;
 	redraw = () => {
-		this.mustRedraw = true;
+		this.#mustRedraw = true;
 	};
 
-	private deleteElements() {
+	#deleteElements() {
 		// remove all event listeners
-		this.controller.abort();
+		this.#controller.abort();
 
 		// recreate the AbortController so the next set can be bulk removed
-		this.controller = new AbortController();
-		this.signal = this.controller.signal;
+		this.#controller = new AbortController();
+		this.#signal = this.#controller.signal;
 
-		this.displayedSteps = [];
+		this.#displayedSteps = [];
 
 		// delete all the elements
-		for (const i in this.items) {
-			const item = this.items[i];
+		for (const i in this.#items) {
+			const item = this.#items[i];
 
 			// just incase
 			if (item !== null) {
 				item.remove();
 			}
 			// @ts-ignore
-			this.items.splice(i, 1);
+			this.#items.splice(i, 1);
 		}
 
 		// just make sure everything is gone
@@ -662,8 +664,8 @@ export class Renderer {
 	}
 
 	#focusTextbox() {
-		if (this.textboxElem !== undefined) {
-			this.textboxElem.focus();
+		if (this.#textboxElem !== undefined) {
+			this.#textboxElem.focus();
 		}
 	}
 
@@ -671,38 +673,40 @@ export class Renderer {
 		this.windowWidth = this.window.container.clientWidth;
 		this.windowHeight = this.window.container.clientHeight;
 
-		if (this.textboxElem !== undefined) {
-			if (focus == this.window.winID) this.textboxElem.focus();
+		if (this.#textboxElem !== undefined) {
+			if (focus == this.window.winID) this.#textboxElem.focus();
 		}
 
-		if (!this.mustRedraw) {
-			if (this.steps.length === this.displayedSteps.length) {
-				const steps = JSON.stringify(this.steps);
-				const displayedSteps = JSON.stringify(this.displayedSteps);
+		if (!this.#mustRedraw) {
+			if (this.#steps.length === this.#displayedSteps.length) {
+				const steps = JSON.stringify(this.#steps);
+
+				const displayedSteps = JSON.stringify(this.#displayedSteps);
+
 				if (steps === displayedSteps) {
 					return;
 				}
 			}
 		}
 		// prevent infinite redraws
-		this.mustRedraw = false;
+		this.#mustRedraw = false;
 
 		// Abort all listeners, but keep the elements unless they are removed
-		this.controller.abort();
-		this.controller = new AbortController();
-		this.signal = this.controller.signal;
+		this.#controller.abort();
+		this.#controller = new AbortController();
+		this.#signal = this.#controller.signal;
 
 		const newItems: HTMLElement[] = [];
-		const newDisplayedSteps: typeof this.steps = [];
+		const newDisplayedSteps: step[] = [];
 
 		for (
 			let i = 0;
-			i < Math.max(this.steps.length, this.displayedSteps.length);
+			i < Math.max(this.#steps.length, this.#displayedSteps.length);
 			i++
 		) {
-			const newStep = this.steps[i];
-			const oldStep = this.displayedSteps[i];
-			const oldElement = this.items[i];
+			const newStep = this.#steps[i];
+			const oldStep = this.#displayedSteps[i];
+			const oldElement = this.#items[i];
 
 			// if the element has disappeared, simply remove the old one.
 			if (newStep == undefined) {
@@ -775,7 +779,7 @@ export class Renderer {
 							return; // Skip mouse clicks on touch/pen
 						}
 					},
-					{ signal: this.signal }
+					{ signal: this.#signal }
 				);
 
 				element.addEventListener(
@@ -807,7 +811,7 @@ export class Renderer {
 								break;
 						}
 					},
-					{ signal: this.signal }
+					{ signal: this.#signal }
 				);
 
 				// Clear timer on end/cancel/leave
@@ -819,7 +823,7 @@ export class Renderer {
 				["pointerup", "pointercancel", "pointerleave"].forEach(
 					(eventName) => {
 						element.addEventListener(eventName, clearLongPress, {
-							signal: this.signal
+							signal: this.#signal
 						});
 					}
 				);
@@ -845,7 +849,7 @@ export class Renderer {
 							newStep.onClick.right(event.clientX, event.clientY);
 						}
 					},
-					{ signal: this.signal }
+					{ signal: this.#signal }
 				);
 			}
 
@@ -859,14 +863,14 @@ export class Renderer {
 		//	if (item) item.remove();
 		//}
 
-		this.items = newItems;
-		this.displayedSteps = newDisplayedSteps;
+		this.#items = newItems;
+		this.#displayedSteps = newDisplayedSteps;
 
 		this.#focusTextbox();
 	};
 
 	terminate() {
-		this.deleteElements();
+		this.#deleteElements();
 
 		this.window.remove();
 	}
