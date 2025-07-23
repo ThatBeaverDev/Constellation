@@ -12,7 +12,7 @@ export const folders: string[] = [
 
 export const files: any = {
 	// finder app
-	"/build/apps/build/com.constellation.finder.idx": {
+	"/build/apps/com.constellation.finder.idx": {
 		type: "jsonFilesIndex",
 		directory: "/Applications/Finder.appl"
 	},
@@ -39,49 +39,49 @@ export const files: any = {
 	"/logos/White.svg": "/System/CoreAssets/Logos/Constellation-White.svg",
 
 	// init system
-	"/build/apps/build/com.constellation.CoreExecutable.idx": {
+	"/build/apps/com.constellation.CoreExecutable.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreExecutables/launchd.backgr"
 	},
 
 	// terminal
-	"/build/apps/build/com.constellation.terminal.idx": {
+	"/build/apps/com.constellation.terminal.idx": {
 		type: "jsonFilesIndex",
 		directory: "/Applications/Terminal.appl"
 	},
 
 	// remapper
-	"/build/apps/build/com.constellation.remapper.idx": {
+	"/build/apps/com.constellation.remapper.idx": {
 		type: "jsonFilesIndex",
 		directory: "/Applications/Remapper.appl"
 	},
 
 	// Popup
-	"/build/apps/build/com.constellation.popup.idx": {
+	"/build/apps/com.constellation.popup.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreExecutables/Popup.appl"
 	},
 	// Rotur
-	"/build/apps/build/com.rotur.appl.idx": {
+	"/build/apps/com.rotur.appl.idx": {
 		type: "jsonFilesIndex",
 		directory: "/Applications/Rotur.appl"
 	},
-	"/build/apps/build/com.rotur.backgr.idx": {
+	"/build/apps/com.rotur.backgr.idx": {
 		type: "jsonFilesIndex",
 		directory: "/Applications/Rotur.backgr"
 	},
 	// Settings
-	"/build/apps/build/com.constellation.settings.idx": {
+	"/build/apps/com.constellation.settings.idx": {
 		type: "jsonFilesIndex",
 		directory: "/Applications/Settings.appl"
 	},
 	// Search
-	"/build/apps/build/com.constellation.search.idx": {
+	"/build/apps/com.constellation.search.idx": {
 		type: "jsonFilesIndex",
 		directory: "/Applications/Search.appl"
 	},
 	// Dock & Desktop
-	"/build/apps/build/com.constellation.dock.idx": {
+	"/build/apps/com.constellation.dock.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreExecutables/Dock.appl"
 	},
