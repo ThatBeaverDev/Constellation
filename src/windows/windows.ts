@@ -97,7 +97,6 @@ function windowButton(elem: HTMLElement, svg: string, scale: number = 1) {
 export class GraphicalWindow {
 	constructor(name: string, Application: Application) {
 		this.name = name;
-		this.shortname = name;
 		this.winID = winID++;
 		this.Application = Application;
 
@@ -226,7 +225,7 @@ export class GraphicalWindow {
 	}
 
 	name: string;
-	shortname: string;
+	shortname?: string;
 	container: HTMLElement;
 	body: HTMLElement;
 	header: HTMLElement;

@@ -1,12 +1,18 @@
+import { font, Renderer } from "../../../../lib/uiKit/uiKit";
+import { ApplicationAuthorisationAPI } from "../../../../security/env";
+import dockAndDesktop from "../tcpsys/app";
+
 export default class menubar {
-	parent: any;
-	renderer: any;
+	parent: dockAndDesktop;
+	renderer: Renderer;
+	env: ApplicationAuthorisationAPI;
 
 	barHeight: number = 35;
 
 	constructor(parent: any) {
 		this.parent = parent;
 		this.renderer = parent.renderer;
+		this.env = parent.env;
 	}
 	render() {
 		this.renderer.box(
@@ -22,10 +28,74 @@ export default class menubar {
 
 		const iconPadding = (this.barHeight - 24) / 2;
 
+		// autopadding is 1.5 (15px text size, 18px paragraph height)
+		let fontSize = 15;
+		const textPadding = (this.barHeight - (fontSize + 3)) / 2;
+
+		let x = iconPadding;
 		this.renderer.icon(
-			iconPadding,
+			x,
 			iconPadding,
 			"/System/CoreAssets/Logos/Constellation-White.svg"
+		);
+		x += 24 + iconPadding;
+
+		x += textPadding;
+		const focus = this.env.windows.getFocus();
+		this.renderer.text(
+			x,
+			textPadding,
+			String(
+				focus?.shortName || focus?.name || focus?.applicationDirectory
+			)
+		);
+		x += textPadding;
+
+		const date = new Date();
+		let weekDay = (() => {
+			switch (date.getDay()) {
+				case 1:
+					return "Monday";
+				case 2:
+					return "Tuesday";
+				case 3:
+					return "Wednesday";
+				case 4:
+					return "Thursday";
+				case 5:
+					return "Friday";
+				case 6:
+					return "Saturday";
+				case 7:
+					return "Sunday";
+			}
+		})();
+		const day = date.getDate();
+		const month = date.getMonth() + 1; // why does .getMonth() return from ZERO TO ELEVEN???
+		const year = date.getFullYear();
+		const hours = date.getHours();
+		const minutes = date.getMinutes();
+		const seconds = date.getSeconds();
+
+		const timemap = "WDY DD/MM/YY HH:MNS:SS";
+
+		const mappings = {
+			WDY: String(weekDay),
+			DD: String(day),
+			MM: String(month),
+			YY: String(year),
+			HH: String(hours).padStart(2, "0"),
+			MNS: String(minutes).padStart(2, "0"),
+			SS: String(seconds).padStart(2, "0")
+		};
+
+		const time = timemap.map(mappings);
+		const timeWidth = this.renderer.getTextWidth(time);
+
+		this.renderer.text(
+			window.innerWidth - timeWidth - textPadding,
+			textPadding,
+			time
 		);
 	}
 }

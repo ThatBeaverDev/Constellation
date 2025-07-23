@@ -260,8 +260,10 @@ export default class finder extends Application {
 		// if we're a picker, name ourselves so
 		if (this.type == "picker") {
 			this.renderer.window.rename("File Picker - " + this.path);
+			this.renderer.window.shortname = "File Picker";
 		} else {
 			this.renderer.window.rename("Finder - " + this.path);
+			this.renderer.window.shortname = "Finder";
 		}
 
 		// insure this.selector is defined
