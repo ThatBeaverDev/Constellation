@@ -38,7 +38,7 @@ export class IPCMessage {
 	target: number;
 	data: any;
 	intent: string;
-	private replyCallback?: replyCallback;
+	#replyCallback?: replyCallback;
 	hasReplyCallback: boolean = false;
 
 	constructor(
@@ -56,14 +56,14 @@ export class IPCMessage {
 		this.data = data;
 
 		if (typeof replyCallback == "function") {
-			this.replyCallback = replyCallback;
+			this.#replyCallback = replyCallback;
 			this.hasReplyCallback = true;
 		}
 	}
 
 	reply(data: any) {
-		if (this.replyCallback !== undefined) {
-			this.replyCallback(data);
+		if (this.#replyCallback !== undefined) {
+			this.#replyCallback(data);
 		} else {
 			throw new MessageError("This message has no reply callback.");
 		}

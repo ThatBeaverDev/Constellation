@@ -361,10 +361,10 @@ export class GraphicalWindow {
 
 	async setIcon(loc: string) {
 		this.iconName = loc;
-		this._setIcon(getIcon(loc));
+		this.#setIcon(getIcon(loc));
 	}
 
-	private async _setIcon(element: HTMLElement) {
+	async #setIcon(element: HTMLElement) {
 		this.iconDiv.innerHTML = element.outerHTML;
 	}
 

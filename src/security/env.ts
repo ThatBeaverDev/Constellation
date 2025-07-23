@@ -83,7 +83,7 @@ export class ApplicationAuthorisationAPI {
 
 		this.directory = directory;
 		this.user = user;
-		this.process = process;
+		this.#process = process;
 
 		this.debug(
 			name,
@@ -94,7 +94,7 @@ export class ApplicationAuthorisationAPI {
 	readonly directory: string;
 	readonly #permissions: DirectoryPermissionStats;
 	readonly user: string;
-	private readonly process?: Framework;
+	readonly #process?: Framework;
 
 	#checkPermission(permission: Permission) {
 		if (this.#permissions.operator == true)
@@ -126,10 +126,7 @@ export class ApplicationAuthorisationAPI {
 		showPrompt("log", text, reason);
 	}
 
-	private _directoryActionCheck(
-		directory: string,
-		isWriteOperation: boolean
-	) {
+	#directoryActionCheck(directory: string, isWriteOperation: boolean) {
 		const domainType = getFilesDomainOfDirectory(directory, this.user);
 		switch (domainType) {
 			case "global":
@@ -158,7 +155,7 @@ export class ApplicationAuthorisationAPI {
 	fs: any = {
 		createDirectory: async (directory: string): Promise<fsResponse> => {
 			try {
-				this._directoryActionCheck(directory, true);
+				this.#directoryActionCheck(directory, true);
 
 				await realFS.mkdir(directory);
 				return { data: true, ok: true };
@@ -171,7 +168,7 @@ export class ApplicationAuthorisationAPI {
 		},
 		listDirectory: async (directory: string = "/"): Promise<fsResponse> => {
 			try {
-				this._directoryActionCheck(directory, false);
+				this.#directoryActionCheck(directory, false);
 
 				const list = await realFS.readdir(directory);
 				return { data: list, ok: true };
@@ -184,7 +181,7 @@ export class ApplicationAuthorisationAPI {
 		},
 		deleteDirectory: async (directory: string): Promise<fsResponse> => {
 			try {
-				this._directoryActionCheck(directory, true);
+				this.#directoryActionCheck(directory, true);
 
 				let err: Error | undefined;
 				await realFS.rmdir(directory, (e: Error) => {
@@ -218,7 +215,7 @@ export class ApplicationAuthorisationAPI {
 			contents: string
 		): Promise<fsResponse> => {
 			try {
-				this._directoryActionCheck(directory, true);
+				this.#directoryActionCheck(directory, true);
 
 				await realFS.writeFile(directory, contents);
 				return {
@@ -234,7 +231,7 @@ export class ApplicationAuthorisationAPI {
 		},
 		deleteFile: async (directory: string): Promise<fsResponse> => {
 			try {
-				this._directoryActionCheck(directory, true);
+				this.#directoryActionCheck(directory, true);
 
 				await realFS.unlink(directory);
 				return {
@@ -280,7 +277,7 @@ export class ApplicationAuthorisationAPI {
 
 		stat: async (directory: string): Promise<fsResponse> => {
 			try {
-				this._directoryActionCheck(directory, false);
+				this.#directoryActionCheck(directory, false);
 
 				const stat = await realFS.stat(directory);
 
@@ -371,7 +368,7 @@ export class ApplicationAuthorisationAPI {
 	async include(location: string): Promise<any> {
 		let url = location;
 
-		this._directoryActionCheck(location, false);
+		this.#directoryActionCheck(location, false);
 
 		let type = location.includes("://") ? "URL" : "directory";
 		// @ts-expect-error
@@ -423,10 +420,10 @@ export class ApplicationAuthorisationAPI {
 		if (this.#permissions[permission] == true) return true;
 
 		let appname;
-		if (this.process == undefined) {
+		if (this.#process == undefined) {
 			appname = this.directory;
 		} else {
-			appname = appName(this.process);
+			appname = appName(this.#process);
 		}
 
 		this.log(name, "Permission by name " + permission + " requested.");
