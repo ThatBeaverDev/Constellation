@@ -6,6 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "python3 -m http.server 5173",
+		"dev-https": "npx http-server . -S -C certs/cert.pem -K certs/key.pem -p 5174",
 		"fix": "npx eslint src --fix && prettier src --write",
 		"build": "npm run fix && npm run build-nofix",
 		"copyAssets": "node scripts/copy.mjs",
