@@ -40,7 +40,7 @@ export default class dock {
 	}
 
 	refresh() {
-		this.wins = this.parent.env.allWindows();
+		this.wins = this.parent.env.windows.all();
 	}
 
 	async render() {
@@ -72,8 +72,6 @@ export default class dock {
 		const iconScale = iconWidth / 24;
 
 		for (const win of wins) {
-			//if (win.name == "/System/CoreExecutables/Dock.appl") continue; // don't show an icon for the dock
-
 			const iconID = this.renderer.icon(x, y, win.iconName, iconScale);
 
 			this.renderer.onClick(
