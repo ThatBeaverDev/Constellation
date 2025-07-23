@@ -1,6 +1,7 @@
 export default class dockAndDesktop extends Application {
 	dock: any;
 	menubar: any;
+	showApps: boolean = false;
 
 	async init() {
 		this.renderer.window.hide();
@@ -11,7 +12,7 @@ export default class dockAndDesktop extends Application {
 		this.renderer.setWindowIcon(
 			"/System/CoreAssets/Logos/Constellation-White.svg"
 		);
-		this.renderer.window.rename("Constellation")
+		this.renderer.window.rename("Constellation");
 
 		this.dock = new (
 			await this.env.include(
@@ -23,6 +24,10 @@ export default class dockAndDesktop extends Application {
 				this.env.fs.resolve(this.directory, "resources/menubar.js")
 			)
 		).default(this);
+
+		this.renderer.window.minimise = () => {
+			this.showApps = true;
+		};
 	}
 
 	frame() {
