@@ -19,7 +19,7 @@ window.windows = windows;
 
 // variables
 export let minimiseAnimation = "flick";
-export let focus: any;
+export let focus: number;
 export let target: GraphicalWindow | undefined = undefined;
 let startMouseX = 0;
 let startMouseY = 0;
@@ -97,6 +97,7 @@ function windowButton(elem: HTMLElement, svg: string, scale: number = 1) {
 export class GraphicalWindow {
 	constructor(name: string, Application: Application) {
 		this.name = name;
+		this.shortname = name;
 		this.winID = winID++;
 		this.Application = Application;
 
@@ -225,6 +226,7 @@ export class GraphicalWindow {
 	}
 
 	name: string;
+	shortname: string;
 	container: HTMLElement;
 	body: HTMLElement;
 	header: HTMLElement;
@@ -399,7 +401,7 @@ export class GraphicalWindow {
 	}
 }
 
-function getWindowOfId(id: number) {
+export function getWindowOfId(id: number) {
 	for (const window of windows) {
 		if (window.winID == id) {
 			return window;
@@ -501,7 +503,6 @@ styleElem.className = "windowsAnimationStyles";
 
 document.body.appendChild(styleElem);
 const live = document.getElementById(styleElem.id)!;
-console.log(live);
 
 async function updateLiveStyling() {
 	const fnc = async () => {

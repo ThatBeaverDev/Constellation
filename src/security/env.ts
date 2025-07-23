@@ -3,7 +3,13 @@ import { blobifyDirectory } from "../lib/blobify.js";
 import realFS from "../io/fs.js";
 import { appName, execute, showPrompt } from "../apps/apps.js";
 import { ImportError, PermissionsError } from "../errors.js";
-import { windows } from "../windows/windows.js";
+import {
+	focus,
+	focusWindow,
+	getWindowOfId,
+	GraphicalWindow,
+	windows
+} from "../windows/windows.js";
 import {
 	DirectoryPermissionStats,
 	getDirectoryPermissions,
@@ -51,6 +57,7 @@ export type windowAlias = {
 	hideHeader: Function;
 
 	name: string;
+	shortName?: string;
 	iconName: string;
 	winID: number;
 	applicationDirectory: string;
@@ -444,42 +451,62 @@ export class ApplicationAuthorisationAPI {
 		}
 	}
 
-	allWindows(): windowAlias[] {
-		checkDirectoryPermission(this.directory, "windows");
+	#windowToAlias = (win: GraphicalWindow): windowAlias => {
+		const obj: windowAlias = {
+			move: win.move.bind(win),
+			resize: win.resize.bind(win),
+			close: win.remove.bind(win),
 
-		const obj: windowAlias[] = [];
+			minimise: win.minimise.bind(win),
+			unminimise: win.unminimise.bind(win),
+			minimised: win.minimised,
 
-		for (const win of windows) {
-			const wn: windowAlias = {
-				move: win.move.bind(win),
-				resize: win.resize.bind(win),
-				close: win.remove.bind(win),
+			show: win.show.bind(win),
+			hide: win.hide.bind(win),
 
-				minimise: win.minimise.bind(win),
-				unminimise: win.unminimise.bind(win),
-				minimised: win.minimised,
+			showHeader: win.showHeader.bind(win),
+			hideHeader: win.hideHeader.bind(win),
 
-				show: win.show.bind(win),
-				hide: win.hide.bind(win),
+			name: win.name,
+			shortName: win.shortname,
+			iconName: win.iconName,
+			applicationDirectory: win.Application.directory,
 
-				showHeader: win.showHeader.bind(win),
-				hideHeader: win.hideHeader.bind(win),
+			position: win.position,
+			dimensions: win.dimensions,
 
-				name: win.name,
-				iconName: win.iconName,
-				applicationDirectory: win.Application.directory,
-
-				position: win.position,
-				dimensions: win.dimensions,
-
-				winID: win.winID
-			};
-
-			obj.push(wn);
-		}
+			winID: win.winID
+		};
 
 		return obj;
-	}
+	};
+
+	windows = {
+		all: (): windowAlias[] => {
+			checkDirectoryPermission(this.directory, "windows");
+
+			const obj: windowAlias[] = [];
+
+			for (const win of windows) {
+				const wn = this.#windowToAlias(win);
+
+				obj.push(wn);
+			}
+
+			return obj;
+		},
+		getFocus: (): windowAlias | undefined => {
+			checkDirectoryPermission(this.directory, "windows");
+
+			const target = getWindowOfId(focus);
+
+			if (target == undefined) return undefined; // no window is focused
+
+			const obj = this.#windowToAlias(target);
+
+			return obj;
+		}
+	};
 }
 
 export const systemEnv = new ApplicationAuthorisationAPI("/System", "operator");
