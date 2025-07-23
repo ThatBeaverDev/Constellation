@@ -176,15 +176,15 @@ export class Popup extends Application {
 
 		this.renderer.window.move(undefined, undefined, no);
 
-		this.windowPositioningInterval = setInterval(() => {
+		this.#windowPositioningInterval = setInterval(() => {
 			this.renderer.window.move(undefined, undefined, no);
 		}, 500);
 	}
 
-	private windowPositioningInterval: number;
+	#windowPositioningInterval: number;
 
 	exit(value?: any) {
-		clearInterval(this.windowPositioningInterval);
+		clearInterval(this.#windowPositioningInterval);
 
 		super.exit(value);
 	}
