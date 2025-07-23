@@ -94,11 +94,15 @@ function windowButton(elem: HTMLElement, svg: string, scale: number = 1) {
 	return elem;
 }
 
+let maxWinID = 0;
 export class GraphicalWindow {
 	constructor(name: string, Application: Application) {
 		this.name = name;
 		this.winID = winID++;
 		this.Application = Application;
+
+		this.winID = maxWinID++;
+		windows.push(this);
 
 		// position windows where requested or at the default location
 		const width: number = 500;
@@ -220,8 +224,6 @@ export class GraphicalWindow {
 		});
 
 		this.resizeObserver.observe(this.container);
-
-		focusWindow(this.winID);
 	}
 
 	name: string;
@@ -235,7 +237,7 @@ export class GraphicalWindow {
 	minimiseButton: HTMLElement;
 	title: HTMLElement;
 	iconDiv: HTMLElement;
-	winID: number;
+	readonly winID: number;
 	Application: Application;
 	resizeObserver: ResizeObserver;
 	iconName: string = "app-window-mac";
@@ -384,10 +386,10 @@ export class GraphicalWindow {
 
 		const del = () => {
 			this.container.remove();
-			windows.splice(this.winID, 1);
 
-			// Reassign winIDs
-			windows.forEach((win, i) => (win.winID = i));
+			const idx = windows.indexOf(this);
+
+			windows.splice(idx, 1);
 
 			updateWindows();
 		};
@@ -477,9 +479,6 @@ document.addEventListener("touchmove", preventBehavior, { passive: false });
 
 export function newWindow(title: string, ApplicationObject: Application) {
 	const win = new GraphicalWindow(title, ApplicationObject);
-
-	win.winID = windows.length; // assign ID before push
-	windows.push(win);
 
 	focusWindow(win.winID);
 

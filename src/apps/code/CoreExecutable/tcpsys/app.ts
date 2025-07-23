@@ -47,10 +47,11 @@ export default class initialiser extends BackgroundProcess {
 					case "keyboardShortcutTrigger-Close Window": {
 						// Close Window!
 
-						if (this.windows.windows.length == 1) {
-							return; // can't close the last window, sorry
-						}
-						const win = this.windows.windows[this.windows.focus];
+						const win = this.windows.getWindowOfId(
+							this.windows.focus
+						);
+
+						if (win == undefined) return;
 
 						win.remove();
 
