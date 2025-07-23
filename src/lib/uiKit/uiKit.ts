@@ -695,10 +695,20 @@ export class Renderer {
 		const newItems: HTMLElement[] = [];
 		const newDisplayedSteps: typeof this.steps = [];
 
-		for (const i in this.steps) {
+		for (
+			let i = 0;
+			i < Math.max(this.steps.length, this.displayedSteps.length);
+			i++
+		) {
 			const newStep = this.steps[i];
 			const oldStep = this.displayedSteps[i];
 			const oldElement = this.items[i];
+
+			// if the element has disappeared, simply remove the old one.
+			if (newStep == undefined) {
+				oldElement.remove();
+				continue;
+			}
 
 			let element: HTMLElement;
 
