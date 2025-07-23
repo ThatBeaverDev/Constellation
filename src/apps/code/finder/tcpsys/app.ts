@@ -317,7 +317,12 @@ export default class finder extends Application {
 				if (this.selector == Number(i)) {
 					switch (obj.type) {
 						case "directory":
-							await openDirectory();
+							if (obj.path.endsWith(".appl")) {
+								this.env.exec(obj.path);
+								return;
+							} else {
+								await openDirectory();
+							}
 							break;
 						case "file":
 							openFile();
@@ -344,7 +349,12 @@ export default class finder extends Application {
 						context["Open File"] = openFile.bind(this);
 						break;
 					case "directory":
-						context["Open Directory"] = openDirectory.bind(this);
+						if (obj.path.endsWith(".appl")) {
+							context["Show Contents"] = openDirectory.bind(this);
+						} else {
+							context["Open Directory"] =
+								openDirectory.bind(this);
+						}
 						break;
 				}
 
