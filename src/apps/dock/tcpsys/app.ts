@@ -1,6 +1,9 @@
+import dock from "../resources/dock";
+import menubar from "../resources/menubar";
+
 export default class dockAndDesktop extends Application {
-	dock: any;
-	menubar: any;
+	dock?: dock;
+	menubar?: menubar;
 	showApps: boolean = false;
 
 	async init() {
@@ -37,8 +40,8 @@ export default class dockAndDesktop extends Application {
 
 		this.renderer.clear();
 
-		this.dock.render();
-		this.menubar.render();
+		if (this.dock !== undefined) this.dock.render();
+		if (this.menubar !== undefined) this.menubar.render();
 
 		this.renderer.commit();
 	}

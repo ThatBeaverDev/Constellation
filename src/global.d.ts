@@ -19,6 +19,14 @@ declare global {
 		Module: new (directory: string, args: any[]) => executables.Module;
 	}
 
+	interface String {
+		textAfter(after: string): string;
+		textAfterAll(after: string): string;
+		textBefore(before: string): string;
+		textBeforeLast(before: string): string;
+		map(mappings: any): string;
+	}
+
 	const env: ApplicationAuthorisationAPI;
 	const Application: new (
 		directory: string,

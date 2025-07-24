@@ -17,7 +17,7 @@ export default async function tcupkg(
 	await env.fs.createDirectory(directory);
 
 	try {
-		json = JSON.parse(content);
+		json = JSON.parse(content.data);
 	} catch {
 		throw new Error(`Package is not packaged properly.`);
 	}

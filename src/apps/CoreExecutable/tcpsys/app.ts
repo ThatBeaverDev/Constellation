@@ -15,13 +15,16 @@ export default class initialiser extends BackgroundProcess {
 			this.env.exec(app);
 		}
 
-		// TODO: remove once applications menu is done
-		setTimeout(() => this.env.exec("/Applications/Finder.appl"), 50);
+		// TODO: remove once applications menu is done // working on that applications menu
+		setTimeout(
+			() => this.env.exec("/System/CoreExecutables/Library.appl"),
+			50
+		);
 
 		this.windows = await this.env.include("/System/windows.js");
 
-		this.registerKeyboardShortcut("Launcher", "KeyZ", ["AltLeft"]);
-		this.registerKeyboardShortcut("Remap Shortcuts", "KeyX", ["AltLeft"]);
+		this.registerKeyboardShortcut("Search", "KeyZ", ["AltLeft"]);
+		this.registerKeyboardShortcut("Library", "KeyX", ["AltLeft"]);
 		// this.windows
 		this.registerKeyboardShortcut("Close Window", "KeyW", ["AltLeft"]);
 	}
@@ -35,13 +38,11 @@ export default class initialiser extends BackgroundProcess {
 		switch (origin) {
 			case "/System/keyboardShortcuts.js":
 				switch (intent) {
-					case "keyboardShortcutTrigger-Launcher":
+					case "keyboardShortcutTrigger-Search":
 						this.search();
 						break;
-					case "keyboardShortcutTrigger-Remap Shortcuts":
-						this.env.exec(
-							"/System/CoreExecutables/com.constellation.remapper"
-						);
+					case "keyboardShortcutTrigger-Library":
+						this.env.exec("/System/CoreExecutables/Library.appl");
 						break;
 					// windows shortcuts
 					case "keyboardShortcutTrigger-Close Window": {

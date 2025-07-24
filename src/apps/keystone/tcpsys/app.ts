@@ -32,7 +32,18 @@ export default class KeystoneSearch extends Popup {
 			"/System/CoreLibraries/pathinf.js"
 		);
 
+		await this.env.shell.index();
+
+		this.index = async () => {
+			const result = await this.env.shell.exec("appfind");
+
+			return result?.result;
+		};
+
 		const obj = await this.index();
+
+		console.log(obj);
+
 		this.files = obj.names;
 		this.fileInfo = obj.files;
 
@@ -48,57 +59,7 @@ export default class KeystoneSearch extends Popup {
 		}, 250);
 	}
 
-	async index(
-		directories = [
-			"/System/CoreExecutables",
-			"/Applications" /*,
-			"~/Applications"*/
-		]
-	) {
-		let files: fileInfo[] = [];
-		let names: string[] = [];
-
-		for (const directory of directories) {
-			const list = await this.env.fs.listDirectory(directory);
-			if (!list.ok) throw list.data;
-
-			const localNames = list.data.map((item: string) =>
-				this.env.fs.resolve(directory, String(item))
-			);
-			names = [...localNames, ...names];
-
-			// build file objects
-			const localFiles = localNames.map((dir: string) => {
-				return {
-					directory: dir,
-					name: this.pathinf.pathName(dir),
-					icon: this.pathinf.pathIcon(dir)
-				};
-			});
-
-			for (const vl of localFiles) {
-				vl.icon = await vl.icon;
-				vl.name = await vl.name;
-
-				if (
-					vl.directory.endsWith(".backgr") ||
-					vl.directory.endsWith(".appl")
-				) {
-					if (vl.name.startsWith("/")) {
-						vl.name = vl.directory.textAfterA;
-						("/");
-					}
-				}
-			}
-
-			files = [...localFiles, ...files];
-		}
-
-		return {
-			files,
-			names
-		};
-	}
+	index?: Function;
 
 	async search(term: string) {
 		const fzf = new this.fzfLib.Fzf(this.files);

@@ -1,7 +1,7 @@
 import TerminalAlias from "../../../lib/terminalAlias";
 
 interface TCPackage {
-	files: any;
+	files: Record<string, string | { type: "binary" | "text"; data: string }>;
 	directories: string[];
 }
 
@@ -9,14 +9,14 @@ export default async function tcpkg(
 	parent: TerminalAlias,
 	packageDirectory: string,
 	outputDirectory: string,
-	...data: any[]
+	...data: string[]
 ) {
 	const mimeLib = await env.include("/System/CoreLibraries/mime.js");
 
 	let logs = [];
 
 	// get params from args
-	const params: any = {};
+	const params: Record<string, string> = {};
 	const args = data
 		.map((item) => {
 			if (item[0] == "-") {
@@ -33,7 +33,6 @@ export default async function tcpkg(
 		})
 		.filter((item) => item !== undefined);
 
-	console.log(args, params);
 	let verbose = params.v == "-v" || String(params["-verbose"]) == "true";
 
 	if (["", undefined, null].includes(packageDirectory)) {

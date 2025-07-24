@@ -331,7 +331,10 @@ body {
 	height: 100%;
 	flex: 1 1 auto;
 
-	overflow: clip;
+	overflow-x: clip;
+	overflow-y: scroll;
+
+	scrollbar-width: none;
 }
 
 @keyframes spawnWindow {

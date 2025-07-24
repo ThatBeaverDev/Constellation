@@ -79,7 +79,7 @@ export class ApplicationAuthorisationAPI {
 	constructor(directory: string, user: string, process?: Framework) {
 		this.#permissions = getDirectoryPermissions(directory);
 		this.shell = new Shell(directory, this);
-		this.shell.indexCommands();
+		this.shell.index();
 
 		this.directory = directory;
 		this.user = user;
@@ -152,7 +152,7 @@ export class ApplicationAuthorisationAPI {
 		}
 	}
 
-	fs: any = {
+	fs = {
 		createDirectory: async (directory: string): Promise<fsResponse> => {
 			try {
 				this.#directoryActionCheck(directory, true);

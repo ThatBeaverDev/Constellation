@@ -33,6 +33,8 @@ compile() {
     # Build the Dock
     ./scripts/tcpkg build/apps/dock build/apps/com.constellation.dock.idx -override=true
     
+    # Build app library
+    ./scripts/tcpkg build/apps/library build/apps/com.constellation.library.idx -override=true
 
     # Build the app-template
     packageSDKapp src/apps/app-template com.constellation.app-template

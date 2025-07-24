@@ -218,6 +218,7 @@ export default {
 	"application/yang": ["yang"],
 	"application/yin+xml": ["yin"],
 	"application/zip": ["zip"],
+	"application/fileIndex": ["idx"],
 	"application/zip+dotlottie": ["lottie"],
 	"audio/3gpp": ["*3gpp"],
 	"audio/aac": ["adts", "aac"],

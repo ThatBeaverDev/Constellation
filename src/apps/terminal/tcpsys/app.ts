@@ -2,7 +2,7 @@ import { uikitTextboxConfig } from "../../../lib/uiKit/uiKit";
 import { IPCMessage } from "../../messages";
 
 // convert anything to a string, NICELY (no [object Object] here)
-function stringify(content: object) {
+function stringify(content: object, fancy: boolean = false) {
 	const type = typeof content;
 
 	switch (type) {
@@ -11,7 +11,11 @@ function stringify(content: object) {
 				return content.outerHTML;
 			}
 
-			return JSON.stringify(content);
+			if (fancy) {
+				return JSON.stringify(content, null, 4);
+			} else {
+				return JSON.stringify(content);
+			}
 		default:
 			return String(content);
 	}
@@ -167,7 +171,7 @@ export default class terminalUI extends Application {
 		}
 
 		if (typeof logs !== "string") {
-			logs = stringify(logs);
+			logs = stringify(logs, true);
 		}
 
 		if ([null, undefined, ""].includes(logs)) {
@@ -190,7 +194,7 @@ export default class terminalUI extends Application {
 			-this.scroll || undefined
 		);
 
-		for (const i of visibleLogs) {
+		for (const i of this.logs) {
 			this.renderer.text(0, y, i);
 			y += 18;
 		}
@@ -215,7 +219,7 @@ export default class terminalUI extends Application {
 		this.renderer.textbox(
 			sideTextWidth + 5,
 			y,
-			1000,
+			this.renderer.window.dimensions.width - (sideTextWidth * 2 + 5),
 			20,
 			"",
 			textboxCallbacks,
