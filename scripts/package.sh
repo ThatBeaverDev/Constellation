@@ -48,6 +48,8 @@ compile() {
 packageSDKapp() {
     cd $1
 
+    echo "packageSDKapp: $(pwd)"
+
     npm run build-app
 
     cd -

@@ -7,7 +7,7 @@
 	"scripts": {
 		"dev": "python3 -m http.server 5173",
 		"dev-https": "npx http-server . -S -C certs/cert.pem -K certs/key.pem -p 5174",
-		"build": "./scripts/build.sh",
+		"build": "./scripts/runtime-info.sh && ./scripts/build.sh",
 		"newenv": "npm install && git submodule update && npm run build && echo \"Open http://localhost:5173 to use Constellation!\" && npm run dev",
 		"reclone-test": "./scripts/reclone.sh"
 	},
@@ -24,5 +24,8 @@
 	],
 	"dependencies": {
 		"mime": "4.0.7"
+	},
+	"engines": {
+		"node": "22.x"
 	}
 }
