@@ -9,7 +9,7 @@ export default class menubar {
 
 	barHeight: number = 35;
 
-	constructor(parent: any) {
+	constructor(parent: dockAndDesktop) {
 		this.parent = parent;
 		this.renderer = parent.renderer;
 		this.env = parent.env;

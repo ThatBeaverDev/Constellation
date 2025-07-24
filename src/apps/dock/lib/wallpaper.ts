@@ -4,8 +4,8 @@ const windowsAPI = await env.include("/System/windows.js");
 export default async function wallpaper(
 	parent: TerminalAlias,
 	intent: string,
-	...args: any[]
-) {
+	...args: string[]
+): Promise<string> {
 	switch (intent) {
 		case "set": {
 			const dir = env.fs.resolve(parent.path, args[0]);
@@ -16,7 +16,7 @@ export default async function wallpaper(
 
 			windowsAPI.setCSSVariable("wallpaper-url", val);
 
-			return;
+			return "";
 		}
 		default:
 			return "Wallpaper intents:\n  set - Sets the wallpaper\n  get - Gets the wallpaper";

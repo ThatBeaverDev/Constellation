@@ -16,7 +16,7 @@ export default class dock {
 	wins: windowAlias[] = [];
 	ok: boolean = false;
 
-	constructor(parent: any) {
+	constructor(parent: dockAndDesktop) {
 		this.parent = parent;
 		this.renderer = parent.renderer;
 		this.env = parent.env;

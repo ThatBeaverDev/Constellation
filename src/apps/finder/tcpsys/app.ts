@@ -69,7 +69,7 @@ export default class finder extends Application {
 	x: number = 0;
 	y: number = 0;
 	padding: number = 1;
-	type: any;
+	type: "picker" | "app" = "app";
 	pipes!: {
 		recieve: any;
 		send: any;

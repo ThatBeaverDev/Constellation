@@ -11,7 +11,7 @@ type shellResult = {
 export default class Shell {
 	readonly #directory: string;
 	readonly #env: ApplicationAuthorisationAPI;
-	index: string[] = [];
+	#index: string[] = [];
 
 	#terminalReference?: TerminalAlias;
 
@@ -19,9 +19,10 @@ export default class Shell {
 		this.#directory = directory;
 		this.#env = env;
 		this.setRef();
+		this.index();
 	}
 
-	indexCommands = async (
+	index = async (
 		directories: string[] = ["/System/CoreExecutables", "/Applications"]
 	) => {
 		const allApps: string[] = [];
@@ -56,7 +57,7 @@ export default class Shell {
 			}
 		}
 
-		this.index = commands;
+		this.#index = commands;
 	};
 
 	setRef(
@@ -73,23 +74,29 @@ export default class Shell {
 
 	async #getUtility(
 		name: string
-	): Promise<((parent: TerminalAlias, ...args: any[]) => any) | undefined> {
-		for (const item of this.index) {
+	): Promise<(parent: TerminalAlias, ...args: any[]) => any> {
+		for (const item of this.#index) {
 			const filename = item.textAfterAll("/").textBeforeLast(".");
 
 			if (filename == name) {
 				// this is the one
 				const include = await this.#env.include(item);
 
-				if (include == undefined) return;
+				if (include == undefined)
+					throw new Error("File at include does not exist");
 
 				const fnc = include.default;
 
-				if (typeof fnc !== "function") return;
+				if (typeof fnc !== "function")
+					throw new Error(
+						"Default export of library file is not a function and is therefore invalid."
+					);
 
 				return fnc;
 			}
 		}
+
+		throw new Error("No such command found.");
 	}
 
 	async exec(name: string, ...args: any[]): Promise<shellResult | undefined> {
@@ -97,8 +104,6 @@ export default class Shell {
 			throw new Error("Terminal reference must be defined!");
 
 		const util = await this.#getUtility(name);
-
-		if (util == undefined) return undefined;
 
 		const result = await util(this.#terminalReference, ...args);
 
