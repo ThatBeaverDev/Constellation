@@ -48,7 +48,7 @@ compile() {
 packageSDKapp() {
     cd $1
 
-    npm run build
+    npm run build-app
 
     cd -
 
