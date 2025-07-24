@@ -10,7 +10,6 @@
 		"outDir": "build",
 		"strict": true,
 		"lib": ["esnext", "ES2022", "DOM", "DOM.Iterable", "ES5", "ES6"],
-		"types": [],
 		"sourceMap": false,
 		"declaration": true,
 		"declarationDir": "types"
@@ -20,7 +19,8 @@
 		"src/lib/external/flubber.min.js"
 	],
 	"exclude": [
-		"build"
+		"build",
+		"src/apps/app-template"
 	],
 	"watchOptions": {
 		"watchFile": "useFsEvents",
@@ -30,7 +30,7 @@
 		"excludeDirectories": [
 			"**/node_modules",
 			"build",
-			"src/apps/build/*"
+			"src/apps/app-template/constellation.d.ts"
 		]
 	}
 }
