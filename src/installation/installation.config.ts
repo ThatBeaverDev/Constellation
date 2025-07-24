@@ -106,3 +106,15 @@ export const files: any = {
 		directory: "/System/CoreAssets/Sounds"
 	}
 };
+
+const url = new URL(window.location.href);
+const params = url.searchParams;
+
+const isAppdev = params.get("appdev") !== null;
+
+if (isAppdev) {
+	files["http://localhost:5172/app.idx"] = {
+		type: "jsonFilesIndex",
+		directory: "/Applications/developerApplication.appl"
+	};
+}
