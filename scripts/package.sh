@@ -33,9 +33,24 @@ compile() {
     # Build the Dock
     ./scripts/tcpkg build/apps/dock build/apps/com.constellation.dock.idx -override=true
     
+
+    # Build the app-template
+    packageSDKapp src/apps/app-template com.constellation.app-template
+
     # Package audio files
     mkdir -p build/assets
     ./scripts/tcpkg assets/sounds build/assets/sounds.idx -override=true
+}
+
+# first param is directory, second param is name
+packageSDKapp() {
+    cd $1
+
+    npm run build
+
+    cd -
+
+    cp "$1/app.idx" "build/apps/$2.idx"
 }
 
 daemon() {
