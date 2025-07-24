@@ -12,7 +12,7 @@
 		"reclone-test": "./scripts/reclone.sh"
 	},
 	"devDependencies": {
-		"@typescript/native-preview": "7.0.0-dev.20250724.1",
+		"@typescript/native-preview": "7.0.0-dev.20250624.1",
 		"prettier": "3.5.3",
 		"rollup": "^4.45.1",
 		"rollup-plugin-dts": "^6.2.1",
