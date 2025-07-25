@@ -11,6 +11,7 @@ import { AppInitialisationError, ImportError } from "../errors.js";
 import AppWaitingObject from "./appWaitingObject.js";
 import { ApplicationAuthorisationAPI } from "../security/env.js";
 import { defaultUser } from "../security/users.js";
+import { rewriteImportsAsync } from "./appsImportReplacements.js";
 
 declare global {
 	interface Window {
@@ -57,7 +58,7 @@ export function getProcessFromID(id: number) {
 	}
 }
 
-type executionFiletype = "sjs" | "js";
+type executionFiletype = "js";
 
 export async function execute(directory: string, args: any[] = []) {
 	const get = async (dir: string, throwIfEmpty: Boolean = true) => {
@@ -77,7 +78,7 @@ export async function execute(directory: string, args: any[] = []) {
 	const configBlob = await blobify(configSrc, "text/javascript");
 	const config = (await import(configBlob)).default;
 
-	const allowedExtensions: executionFiletype[] = ["sjs", "js"];
+	const allowedExtensions: executionFiletype[] = ["js"];
 
 	let executableDirectory: string | undefined;
 	let type: executionFiletype | undefined;
@@ -92,11 +93,13 @@ export async function execute(directory: string, args: any[] = []) {
 		}
 	}
 
+	if (executableDirectory == undefined)
+		throw new Error("No Executable found.");
+
 	let data: string = "";
 
 	switch (type) {
 		case "js":
-		case "sjs":
 			{
 				const content = await fs.readFile(executableDirectory);
 
@@ -107,12 +110,17 @@ export async function execute(directory: string, args: any[] = []) {
 					);
 				}
 
-				data = content;
+				const importsResolved = await rewriteImportsAsync(
+					content,
+					executableDirectory
+				);
+
+				data = importsResolved;
 			}
 			break;
 		default:
 			throw new AppInitialisationError(
-				"Type '" + type + "' is not recognised."
+				"Type '" + type + "' is not executable."
 			);
 	}
 

@@ -1,5 +1,5 @@
-import dock from "../resources/dock";
-import menubar from "../resources/menubar";
+import dock from "../resources/dock.js";
+import menubar from "../resources/menubar.js";
 
 export default class dockAndDesktop extends Application {
 	dock?: dock;
@@ -17,16 +17,8 @@ export default class dockAndDesktop extends Application {
 		);
 		this.renderer.windowName = "Constellation";
 
-		this.dock = new (
-			await this.env.include(
-				this.env.fs.resolve(this.directory, "resources/dock.js")
-			)
-		).default(this);
-		this.menubar = new (
-			await this.env.include(
-				this.env.fs.resolve(this.directory, "resources/menubar.js")
-			)
-		).default(this);
+		this.dock = new dock(this);
+		this.menubar = new menubar(this);
 
 		this.renderer.minimiseWindow = () => {
 			this.showApps = true;
