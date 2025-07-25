@@ -79,12 +79,21 @@ export class Renderer {
 	moveWindow(x?: number, y?: number, z?: number) {
 		this.#window.move(x, y, z);
 	}
-	readonly renameWindow = (name: string) => {
+
+	set windowName(name: string) {
 		this.#window.rename(name);
-	};
-	readonly setShortName = (name: string | undefined) => {
+	}
+	get windowName() {
+		return this.#window.name;
+	}
+
+	get windowShortName() {
+		return this.#window.shortname;
+	}
+	set windowShortName(name: string | undefined) {
 		this.#window.shortname = name;
-	};
+	}
+
 	readonly setIcon = (name: string) => {
 		this.#window.setIcon(name);
 	};
@@ -141,6 +150,8 @@ export class Renderer {
 		// window position
 		this.windowX = this.#window.position.left;
 		this.windowY = this.#window.position.top;
+
+		// other window properties
 	};
 
 	readonly icon = (

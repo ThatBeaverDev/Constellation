@@ -15,16 +15,10 @@ export default class menubar {
 		this.env = parent.env;
 	}
 	render() {
-		this.renderer.box(
-			0,
-			0,
-			this.renderer.windowWidth,
-			this.barHeight,
-			{
-				colour: "var(--main-theme-secondary)",
-				borderRadius: "0px 0px 10px 10"
-			}
-		);
+		this.renderer.box(0, 0, this.renderer.windowWidth, this.barHeight, {
+			colour: "var(--main-theme-secondary)",
+			borderRadius: "0px 0px 10px 10"
+		});
 
 		const iconPadding = (this.barHeight - 24) / 2;
 
