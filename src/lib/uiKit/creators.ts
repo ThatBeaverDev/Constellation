@@ -293,10 +293,10 @@ export default class uiKitCreators {
 		y: number = 100,
 		width: number = 100,
 		height: number = 100,
-		config: uikitBoxConfig
+		config?: uikitBoxConfig
 	) => {
 		const box = document.createElement("div");
-		box.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px; background-color: ${config.colour}; border-radius: ${config.borderRadius}px;`;
+		box.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px; background-color: ${config?.colour}; border-radius: ${config?.borderRadius}px;`;
 		box.id = String(window.renderID++);
 		box.className = "uikitBox";
 
@@ -358,6 +358,4 @@ export default class uiKitCreators {
 
 		return live;
 	};
-
-	//uikitCanvas3D = (x: number, y: number, width: number, height: number) => {};
 }

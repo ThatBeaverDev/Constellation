@@ -301,18 +301,6 @@ export class Renderer {
 		};
 		return this.#steps.push(obj);
 	};
-	//readonly canvas3D = (
-	//	x: number,
-	//	y: number,
-	//	width: number,
-	//	height: number
-	//) => {
-	//	const obj: step = {
-	//		type: "uikitCanvas3D",
-	//		args: [x, y, width, height, []] // last arguement (the []) is the list of drawing commands
-	//	};
-	//	return this.#steps.push(obj);
-	//};
 
 	onClick(
 		elemID: number,
