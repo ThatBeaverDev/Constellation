@@ -7,15 +7,15 @@ export default class dockAndDesktop extends Application {
 	showApps: boolean = false;
 
 	async init() {
-		this.renderer.window.hide();
-		this.renderer.window.hideHeader();
-		this.renderer.window.square();
+		this.renderer.makeWindowInvisible();
+		this.renderer.hideWindowHeader();
+		this.renderer.hideWindowCorners();
 
-		//this.renderer.setWindowIcon("dock")
-		this.renderer.setWindowIcon(
+		//this.renderer.setIcon("dock")
+		this.renderer.setIcon(
 			"/System/CoreAssets/Logos/Constellation-White.svg"
 		);
-		this.renderer.window.rename("Constellation");
+		this.renderer.renameWindow("Constellation");
 
 		this.dock = new (
 			await this.env.include(
@@ -28,15 +28,15 @@ export default class dockAndDesktop extends Application {
 			)
 		).default(this);
 
-		this.renderer.window.minimise = () => {
+		this.renderer.minimiseWindow = () => {
 			this.showApps = true;
 		};
 	}
 
 	frame() {
 		// resize and reposition
-		this.renderer.window.move(0, 0);
-		this.renderer.window.resize(window.innerWidth, window.innerHeight);
+		this.renderer.moveWindow(0, 0);
+		this.renderer.resizeWindow(window.innerWidth, window.innerHeight);
 
 		this.renderer.clear();
 

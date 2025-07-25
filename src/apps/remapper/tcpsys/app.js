@@ -14,7 +14,7 @@ const clamp = (n, min, max) => {
 
 export default class remapper extends Application {
 	async init() {
-		this.renderer.window.rename("Keybinding Remapper");
+		this.renderer.renameWindow("Keybinding Remapper");
 
 		this.registerKeyboardShortcut("ScrollDown", "ArrowDown", []);
 		this.registerKeyboardShortcut("ScrollUp", "ArrowUp", []);

@@ -4,6 +4,16 @@ import { getTextWidth } from "./calcWidth.js";
 import { Process } from "../../apps/executables.js";
 import { UIError } from "../../errors.js";
 import { ContextMenu } from "./contexts.js";
+import uiKitCreators from "./creators.js";
+import {
+	onClickOptions,
+	step,
+	textboxCallbackObject,
+	uikitBoxConfig,
+	uikitCanvasOptions,
+	uikitTextareaConfig,
+	uikitTextboxConfig
+} from "./definitions.js";
 
 export const font = "monospace";
 
@@ -16,42 +26,6 @@ export async function init() {
 	document.body.appendChild(style);
 }
 
-type uikitCreatorName = keyof Renderer["creators"];
-type uiKitCreators = Record<string, (...args: any[]) => HTMLElement>;
-
-export interface onClickOptions {
-	scale?: number;
-	origin?: string;
-}
-interface clickReference extends onClickOptions {
-	left?: Function;
-	right?: Function;
-}
-
-interface step {
-	type: uikitCreatorName;
-	args: any[];
-	onClick?: clickReference;
-}
-
-interface textboxCallbackObject {}
-
-export type uikitTextboxConfig = {
-	isInvisible?: boolean;
-	isEmpty?: boolean;
-	fontSize?: number;
-	disableMobileAutocorrect: boolean;
-};
-export type uikitTextareaConfig = {
-	isInvisible?: boolean;
-	isEmpty?: boolean;
-	disableMobileAutocorrect: boolean;
-};
-export type uikitBoxConfig = {
-	borderRadius?: number | string;
-	colour?: string; // colour but typescript is stupid and doesn't know rgb(255, 255, 255) is a colour 🤦
-};
-
 let lastClick: number = 0;
 document.addEventListener("pointerdown", function () {
 	lastClick = Date.now();
@@ -59,7 +33,12 @@ document.addEventListener("pointerdown", function () {
 
 // class
 export class Renderer {
-	defaultConfig = {
+	defaultConfig: {
+		uikitTextbox: uikitTextboxConfig;
+		uikitTextarea: uikitTextareaConfig;
+		uikitBox: uikitBoxConfig;
+		uikitCanvasStep: uikitCanvasOptions;
+	} = {
 		uikitTextbox: {
 			isInvisible: false,
 			isEmpty: false,
@@ -73,30 +52,96 @@ export class Renderer {
 		},
 		uikitBox: {
 			borderRadius: 5,
-			colour: "rgb(255, 255, 255)"
+			colour: "rgb(155, 155, 155)"
+		},
+		uikitCanvasStep: {
+			colour: "rgb(155, 155, 155)"
 		}
 	};
+	#process: Process;
+	#window: GraphicalWindow;
+	#steps: step[] = [];
+	#displayedSteps: step[] = [];
+	elemID: number = 0;
+	// add abort controller to remove event listeners
+	#controller = new AbortController();
+	#signal: AbortSignal = this.#controller.signal;
+	#context?: ContextMenu;
+
+	// window stuff
+	windowWidth: number = 0;
+	windowHeight: number = 0;
+	resizeWindow(width: number, height: number) {
+		this.#window.resize(width, height);
+	}
+	windowX: number = 0;
+	windowY: number = 0;
+	moveWindow(x?: number, y?: number, z?: number) {
+		this.#window.move(x, y, z);
+	}
+	readonly renameWindow = (name: string) => {
+		this.#window.rename(name);
+	};
+	readonly setShortName = (name: string | undefined) => {
+		this.#window.shortname = name;
+	};
+	readonly setIcon = (name: string) => {
+		this.#window.setIcon(name);
+	};
+	makeWindowInvisible() {
+		this.#window.hide();
+	}
+	makeWindowVisible() {
+		this.#window.show();
+	}
+	hideWindowCorners() {
+		this.#window.square();
+	}
+	showWindowCorners() {
+		this.#window.unsquare();
+	}
+	hideWindowHeader() {
+		this.#window.hideHeader();
+	}
+	showWindowHeader() {
+		this.#window.showHeader();
+	}
+	minimiseWindow() {
+		this.#window.minimise;
+	}
+	restoreWindow() {
+		this.#window.unminimise();
+	}
+
+	#items: any[] = [];
+
+	#mustRedraw: boolean = false;
 
 	constructor(process: Process) {
 		this.#process = process;
 
 		// @ts-ignore
-		this.window = newWindow(this.#process.directory, process).data;
+		this.#window = newWindow(this.#process.directory, process).data;
+
+		this.#creators = new uiKitCreators(
+			this,
+			this.#window,
+			this.#controller
+		);
 	}
 
-	#process: Process;
-	window: GraphicalWindow;
-
 	clear = () => {
-		this.#textboxExists = false;
+		this.#creators.hasTextbox = false;
 		this.#steps = [];
+
+		// window dimensions
+		this.windowWidth = this.#window.dimensions.width;
+		this.windowHeight = this.#window.dimensions.height;
+
+		// window position
+		this.windowX = this.#window.position.left;
+		this.windowY = this.#window.position.top;
 	};
-
-	#steps: step[] = [];
-	#displayedSteps: step[] = [];
-	#textboxExists: Boolean = false;
-
-	elemID: number = 0;
 
 	readonly icon = (
 		x: number = 0,
@@ -147,12 +192,12 @@ export class Renderer {
 		callbacks: textboxCallbackObject,
 		options: uikitTextboxConfig = this.defaultConfig.uikitTextbox
 	) => {
-		if (this.#textboxExists == true) {
+		if (this.#creators.hasTextbox == true) {
 			throw new UIError("UI cannot have more than one textbox.");
 		}
 
 		// mark the textbox as present to prevent another from being created
-		this.#textboxExists = true;
+		this.#creators.hasTextbox = true;
 
 		// insure all values are met. if not, apply the default
 		const opts = {};
@@ -206,11 +251,11 @@ export class Renderer {
 		callbacks: textboxCallbackObject,
 		options: uikitTextareaConfig = this.defaultConfig.uikitTextarea
 	) => {
-		if (this.#textboxExists == true) {
+		if (this.#creators.hasTextbox == true) {
 			throw new UIError("UI cannot have more than one textbox.");
 		}
 
-		this.#textboxExists = true;
+		this.#creators.hasTextbox = true;
 
 		const obj: step = {
 			type: "uikitTextarea",
@@ -232,6 +277,31 @@ export class Renderer {
 		};
 		return this.#steps.push(obj);
 	};
+
+	readonly canvas2D = (
+		x: number,
+		y: number,
+		width: number,
+		height: number
+	) => {
+		const obj: step = {
+			type: "uikitCanvas2D",
+			args: [x, y, width, height, []] // last arguement (the []) is the list of drawing commands
+		};
+		return this.#steps.push(obj);
+	};
+	//readonly canvas3D = (
+	//	x: number,
+	//	y: number,
+	//	width: number,
+	//	height: number
+	//) => {
+	//	const obj: step = {
+	//		type: "uikitCanvas3D",
+	//		args: [x, y, width, height, []] // last arguement (the []) is the list of drawing commands
+	//	};
+	//	return this.#steps.push(obj);
+	//};
 
 	onClick(
 		elemID: number,
@@ -277,338 +347,27 @@ export class Renderer {
 	}
 
 	readonly getTextWidth = getTextWidth;
-	readonly setWindowIcon = (name: string) => {
-		this.window.setIcon(name);
-	};
 
 	readonly setTextboxContent = (content: string) => {
 		// insure there is actually a textbox
-		if (this.#textboxElem !== undefined) {
+		if (this.#creators.textboxElem !== undefined) {
 			// set the value
-			this.#textboxElem.value = content;
+			this.#creators.textboxElem.value = content;
 		}
 	};
 
 	readonly getTextboxContent = () => {
 		// insure there is actually a textbox
-		if (this.#textboxElem !== undefined) {
+		if (this.#creators.textboxElem !== undefined) {
 			// return the value
-			return this.#textboxElem.value;
+			return this.#creators.textboxElem.value;
 		}
 
 		// return null otherwise
 		return null;
 	};
 
-	#textboxElem: HTMLInputElement | HTMLTextAreaElement | undefined;
-
-	readonly creators: uiKitCreators = {
-		uikitIcon: (x = 0, y = 0, name = "circle-help", scale = 1) => {
-			const icon = getIcon(name);
-			icon.style.cssText = `left: ${x}px; top: ${y}px; width: ${24 * scale}px; height: ${24 * scale}px;`;
-
-			this.window.body.appendChild(icon);
-			const live = document.getElementById(icon.id);
-
-			if (live == null)
-				throw new UIError(
-					"uikit element has disappeared in processing"
-				);
-
-			return live;
-		},
-
-		uikitText: (x = 0, y = 0, string = "", size: number) => {
-			const text = document.createElement("p");
-			text.className = "uikitText";
-
-			text.id = String(window.renderID++);
-			text.innerText = string;
-			text.style.cssText = `left: ${x}px; top: ${y}px; font-size: ${size}px;`;
-
-			this.window.body.appendChild(text);
-			const live = document.getElementById(text.id);
-
-			if (live == null)
-				throw new UIError(
-					"uikit element has disappeared in processing"
-				);
-
-			return live;
-		},
-
-		uikitButton: (
-			x = 0,
-			y = 0,
-			string = "",
-			leftClickCallback = () => {},
-			rightClickCallback = () => {},
-			size: number
-		) => {
-			const button = document.createElement("button");
-			button.className = "uikitButton";
-
-			button.id = String(window.renderID++);
-			button.innerText = string;
-			button.style.cssText = `left: ${x}px; top: ${y}px; font-size: ${size}px;`;
-
-			this.window.body.appendChild(button);
-			// @ts-ignore // query selector doesn't work for this since we have numbers in the ID
-			const live: HTMLButtonElement = document.getElementById(button.id);
-
-			if (live == null)
-				throw new UIError(
-					"uikit element has disappeared in processing"
-				);
-
-			live.addEventListener(
-				"pointerdown",
-				(event: MouseEvent) => {
-					event.preventDefault();
-					switch (event.button) {
-						case 0:
-							// left click
-							leftClickCallback();
-							break;
-						case 1:
-							// middle click
-							// unused
-							break;
-						case 2:
-							// right click
-							rightClickCallback();
-							break;
-					}
-				},
-				{
-					signal: this.#signal
-				}
-			);
-
-			return live;
-		},
-
-		uikitTextbox: (
-			x = 0,
-			y = 0,
-			width = 200,
-			height = 20,
-			backtext = "",
-			callbacks = {
-				update: (key: string, value: string) => {},
-				enter: (value: string) => {}
-			},
-			options = this.defaultConfig.uikitTextbox
-		) => {
-			const textbox = document.createElement("input");
-			textbox.type = "text";
-			textbox.inputMode = "text";
-			textbox.classList.add("uikitTextbox");
-
-			if (options.isInvisible)
-				textbox.classList.add("uikitTextboxInvisible");
-			if (options.disableMobileAutocorrect) {
-				textbox.autocomplete = "off";
-				textbox.autocapitalize = "off";
-				textbox.spellcheck = false;
-			}
-
-			textbox.id = String(window.renderID++);
-			textbox.placeholder = backtext;
-			textbox.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;`;
-
-			if (options.fontSize !== undefined) {
-				textbox.style.cssText += `font-size: ${options.fontSize}px;`;
-			}
-
-			this.window.body.appendChild(textbox);
-			// @ts-expect-error
-			const live: HTMLInputElement = document.getElementById(textbox.id);
-
-			if (live == null)
-				throw new UIError(
-					"uikit element has disappeared in processing"
-				);
-
-			live.addEventListener(
-				"keydown",
-				(event) =>
-					setTimeout(() => {
-						const val = String(live.value);
-						if (event.code == "Enter") {
-							if (typeof callbacks.enter !== "function") return;
-
-							callbacks.enter(val);
-						} else {
-							if (typeof callbacks.update !== "function") return;
-
-							callbacks.update(event.key, val);
-						}
-					}, 2),
-				{ signal: this.#signal }
-			);
-
-			if (options.isEmpty == false)
-				textbox.value = String(this.#textboxElem?.value || ""); // make the value stay
-			this.#textboxElem = live;
-
-			return live;
-		},
-
-		uikitVerticalLine: (x: number, y: number, height: number) => {
-			const line = document.createElement("div");
-			line.className = "uikitVerticalLine";
-
-			line.id = String(window.renderID++);
-			line.style.cssText = `left: ${x}px; top: ${y}px; height: ${height}px;`;
-
-			this.window.body.appendChild(line);
-			const live = document.getElementById(line.id);
-
-			if (live == null)
-				throw new UIError(
-					"uikit element has disappeared in processing"
-				);
-
-			return live;
-		},
-
-		uikitHorizontalLine: (x: number, y: number, width: number) => {
-			const line = document.createElement("div");
-			line.className = "uikitHorizontalLine";
-
-			line.id = String(window.renderID++);
-			line.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px;`;
-
-			this.window.body.appendChild(line);
-			const live = document.getElementById(line.id);
-
-			if (live == null)
-				throw new UIError(
-					"uikit element has disappeared in processing"
-				);
-
-			return live;
-		},
-
-		uikitProgressBar: (
-			x: number,
-			y: number,
-			width: number,
-			height: number,
-			progress: number | "throb"
-		) => {
-			const bar = document.createElement("div");
-			bar.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;`;
-			bar.id = String(window.renderID++);
-			bar.className = "uikitProgressBar";
-
-			const progressor = document.createElement("div");
-
-			progressor.style.width = progress + "%";
-
-			progressor.id = String(window.renderID++);
-			progressor.className = "uikitProgressBarInner";
-
-			bar.innerHTML = progressor.outerHTML;
-
-			this.window.body.appendChild(bar);
-			const live = document.getElementById(bar.id);
-
-			if (live == null)
-				throw new UIError(
-					"uikit element has disappeared in processing"
-				);
-
-			return live;
-		},
-
-		uikitTextarea: (
-			x: number = 0,
-			y: number = 0,
-			width: number = 100,
-			height: number = 50,
-			callbacks: any,
-			options = this.defaultConfig.uikitTextarea
-		) => {
-			const area = document.createElement("textarea");
-			area.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;`;
-			area.id = String(window.renderID++);
-			area.inputMode = "text";
-			area.className = "uikitTextarea";
-
-			if (options.isInvisible)
-				area.classList.add("uikitTextboxInvisible");
-			if (options.disableMobileAutocorrect) {
-				area.autocomplete = "off";
-				area.autocapitalize = "off";
-				area.spellcheck = false;
-			}
-
-			this.window.body.appendChild(area);
-			// @ts-expect-error
-			const live: HTMLTextAreaElement = document.getElementById(area.id);
-
-			if (live == null)
-				throw new UIError(
-					"uikit element has disappeared in processing"
-				);
-
-			live.addEventListener(
-				"keydown",
-				(event) => {
-					const val = String(live.value);
-
-					if (event.code == "Enter") {
-						if (typeof callbacks.enter !== "function") return;
-
-						callbacks.enter(val);
-					} else {
-						if (typeof callbacks.update !== "function") return;
-
-						callbacks.update(event.key, val);
-					}
-				},
-				{ signal: this.#signal }
-			);
-
-			if (focus == this.window.winID) live.focus();
-
-			area.value = String(this.#textboxElem?.value || ""); // make the value stay
-			this.#textboxElem = live;
-
-			return live;
-		},
-
-		uikitBox: (
-			x: number = 0,
-			y: number = 100,
-			width: number = 100,
-			height: number = 100,
-			config: uikitBoxConfig
-		) => {
-			const box = document.createElement("div");
-			box.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px; background-color: ${config.colour}; border-radius: ${config.borderRadius}px;`;
-			box.id = String(window.renderID++);
-			box.className = "uikitBox";
-
-			this.window.body.appendChild(box);
-			const live = document.getElementById(box.id);
-
-			if (live == null)
-				throw new UIError(
-					"uikit element has disappeared in processing"
-				);
-
-			return live;
-		}
-	};
-
-	// add abort controller to remove event listeners
-	#controller = new AbortController();
-	#signal = this.#controller.signal;
-
-	#context?: ContextMenu;
+	readonly #creators: uiKitCreators;
 	readonly setContextMenu = (
 		x: number,
 		y: number,
@@ -627,12 +386,6 @@ export class Renderer {
 		this.#context = undefined;
 	};
 
-	windowWidth: number = 0;
-	windowHeight: number = 0;
-
-	#items: any[] = [];
-
-	#mustRedraw: boolean = false;
 	redraw = () => {
 		this.#mustRedraw = true;
 	};
@@ -660,21 +413,21 @@ export class Renderer {
 		}
 
 		// just make sure everything is gone
-		this.window.body.innerHTML = "";
+		this.#window.body.innerHTML = "";
 	}
 
 	#focusTextbox() {
-		if (this.#textboxElem !== undefined) {
-			this.#textboxElem.focus();
+		if (this.#creators.textboxElem !== undefined) {
+			this.#creators.textboxElem.focus();
 		}
 	}
 
 	readonly commit = () => {
-		this.windowWidth = this.window.container.clientWidth;
-		this.windowHeight = this.window.container.clientHeight;
+		this.windowWidth = this.#window.container.clientWidth;
+		this.windowHeight = this.#window.container.clientHeight;
 
-		if (this.#textboxElem !== undefined) {
-			if (focus == this.window.winID) this.#textboxElem.focus();
+		if (this.#creators.textboxElem !== undefined) {
+			if (focus == this.#window.winID) this.#creators.textboxElem.focus();
 		}
 
 		if (!this.#mustRedraw) {
@@ -725,7 +478,8 @@ export class Renderer {
 			if (stepChanged) {
 				if (oldElement) oldElement.remove();
 
-				const creator = this.creators[newStep.type];
+				const creator: (...args: any) => HTMLElement =
+					this.#creators[newStep.type];
 				if (!creator) {
 					throw new UIError(
 						`Creator is not defined for ${newStep.type}`
@@ -733,7 +487,7 @@ export class Renderer {
 				}
 
 				// Create fresh element
-				element = creator(...newStep.args)!;
+				element = creator(...newStep.args);
 			} else {
 				element = oldElement!;
 			}
@@ -872,6 +626,6 @@ export class Renderer {
 	terminate() {
 		this.#deleteElements();
 
-		this.window.remove();
+		this.#window.remove();
 	}
 }

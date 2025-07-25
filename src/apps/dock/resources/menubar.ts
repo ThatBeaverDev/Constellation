@@ -18,7 +18,7 @@ export default class menubar {
 		this.renderer.box(
 			0,
 			0,
-			this.renderer.window.dimensions.width,
+			this.renderer.windowWidth,
 			this.barHeight,
 			{
 				colour: "var(--main-theme-secondary)",

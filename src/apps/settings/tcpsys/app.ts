@@ -18,8 +18,8 @@ export default class systemSettings extends Application {
 		);
 		this.body = new body.default(this);
 
-		this.renderer.window.rename("System Settings");
-		this.renderer.setWindowIcon("cog");
+		this.renderer.renameWindow("System Settings");
+		this.renderer.setIcon("cog");
 	}
 
 	frame() {

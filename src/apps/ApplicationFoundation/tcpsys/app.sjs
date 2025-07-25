@@ -10,7 +10,7 @@ export default class ApplicationFoundation extends Application {
 		//const directoryIcon = this.env.fs.resolve(this.directory, "./resources/icon.svg");
 		//await this.renderer.window.setIcon(directoryIcon);
 		// currently the only way to set an app icon is from the icon set
-		await this.renderer.setWindowIcon("party-popper");
+		await this.renderer.setIcon("party-popper");
 	}
 
 	// runs every frame (duh)
