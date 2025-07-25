@@ -5,5 +5,6 @@ export default {
 	category: "Productivity",
 	author: "ThatBeaverDev",
 	version: 1,
-	icon: "binary"
+	icon: "binary",
+	userspace: false
 };

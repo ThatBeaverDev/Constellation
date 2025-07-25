@@ -581,6 +581,20 @@ export async function pathName(directory: string) {
 	return directory.textBeforeLast(".");
 }
 
+export async function pathVisible(directory: string): Promise<boolean> {
+	const ext = directory.textAfterAll(".");
+
+	if (applicationExtensions.includes(ext)) {
+		// app
+		const config = await getAppConfig(directory);
+		const show = config?.userspace;
+
+		if (show == false) return false;
+	}
+
+	return !directory.textAfterAll("/").startsWith(".");
+}
+
 export async function pathMime(directory: string) {
 	const stats = await env.fs.stat(directory);
 

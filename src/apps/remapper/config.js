@@ -4,5 +4,6 @@ export default {
 	category: "Productivity",
 	author: "ThatBeaverDev",
 	version: 1,
-	icon: "keyboard"
+	icon: "keyboard",
+	userspace: false
 };

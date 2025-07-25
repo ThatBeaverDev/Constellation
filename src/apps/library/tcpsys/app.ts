@@ -1,8 +1,4 @@
-type fileInfo = {
-	directory: string;
-	name: string;
-	icon: string;
-};
+import { appFindResult, fileInfo } from "../../keystone/lib/appfind";
 
 export default class library extends Application {
 	index: { files: fileInfo[]; names: string[] } = { files: [], names: [] };
@@ -18,7 +14,13 @@ export default class library extends Application {
 
 	async refresh() {
 		const result = await this.env.shell.exec("appfind");
-		this.index = result?.result;
+		const data: appFindResult = result?.result;
+		if (data == undefined)
+			throw new Error("Undefined result from appfind.");
+
+		data.files = data.files.filter((item: fileInfo) => item.visible);
+
+		this.index = data;
 	}
 
 	async installFromURL() {}
@@ -53,20 +55,20 @@ export default class library extends Application {
 			const name = app.name || app.directory;
 
 			let nameShortened = name;
-			if (name.length > 10) {
-				nameShortened = name.substring(0, 8) + "..";
+			if (name.length > 15) {
+				nameShortened = name.substring(0, 13) + "..";
 			}
 
 			const iconCenterX = x + iconSize / 2;
-			const iconBottomY = y - iconSize / 2;
+			const iconTopY = y - iconSize / 2;
 
-			const textWidth = this.renderer.getTextWidth(nameShortened, 13);
+			const textWidth = this.renderer.getTextWidth(nameShortened, 10);
 
 			this.renderer.text(
 				iconCenterX - textWidth / 2,
-				iconBottomY,
+				iconTopY,
 				nameShortened,
-				13
+				10
 			);
 
 			x += iconSize + padding + padding;
