@@ -16,10 +16,18 @@ export default class initialiser extends BackgroundProcess {
 		}
 
 		// TODO: remove once applications menu is done // working on that applications menu
-		setTimeout(
-			() => this.env.exec("/System/CoreExecutables/Library.appl"),
-			50
-		);
+
+		setTimeout(() => {
+			const isAppdev =
+				new URL(window.location.href).searchParams.get("appdev") !==
+				null;
+
+			if (isAppdev) {
+				this.env.exec("/Applications/developerApplication.appl");
+			} else {
+				this.env.exec("/System/CoreExecutables/Library.appl");
+			}
+		}, 50);
 
 		this.windows = await this.env.include("/System/windows.js");
 
