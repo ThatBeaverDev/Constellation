@@ -280,7 +280,7 @@ export class Renderer {
 		y: number,
 		width: number,
 		height: number,
-		config: uikitBoxConfig
+		config?: uikitBoxConfig
 	) => {
 		const obj: step = {
 			type: "uikitBox",
