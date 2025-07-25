@@ -25,7 +25,6 @@ declare global {
 		) => executables.BackgroundProcess;
 		Popup: new (directory: string, args: any[]) => executables.Popup;
 		Module: new (directory: string, args: any[]) => executables.Module;
-		sysimport: any;
 		processes: executables.Process[];
 		env: ApplicationAuthorisationAPI;
 		windows: GraphicalWindow[];
@@ -197,10 +196,10 @@ export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
 		} catch {}
 	}
 
-	// @ts-expect-error
-	if (proc.renderer !== undefined) {
-		// @ts-expect-error
-		proc.renderer.window.remove();
+	if (proc instanceof Application) {
+		try {
+			proc?.renderer?.terminate();
+		} catch {}
 	}
 
 	processes.splice(idx, 1);
@@ -228,7 +227,8 @@ export function appName(proc: executables.Framework) {
 
 async function procExec(
 	proc: Process,
-	subset: "init" | "frame" | "terminate" = "frame"
+	subset: "init" | "frame" | "terminate" = "frame",
+	catchError: boolean = true
 ) {
 	if (proc.executing) return;
 
@@ -264,6 +264,8 @@ async function procExec(
 	} catch (e: any) {
 		proc.executing = false;
 		console.warn(e);
+
+		if (!catchError) return;
 
 		const name = appName(proc);
 

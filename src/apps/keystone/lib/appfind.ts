@@ -28,7 +28,7 @@ export default async function find(
 		names = [...localNames, ...names];
 
 		// build file objects
-		const localFiles = localNames.map((dir: string) => {
+		const localFiles = localNames.map((dir: string): fileInfo => {
 			return {
 				directory: dir,
 				name: pathinf.pathName(dir),

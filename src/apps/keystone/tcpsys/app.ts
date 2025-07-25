@@ -7,8 +7,8 @@ type fileInfo = {
 };
 
 export default class KeystoneSearch extends Popup {
-	pathinf: any;
-	fzfLib: any;
+	pathinf?: typeof import("../../../syslib/pathinf");
+	fzfLib?: typeof import("../../../lib/external/fzf");
 
 	results: object[] = [];
 	files: string[] = [];
@@ -20,7 +20,7 @@ export default class KeystoneSearch extends Popup {
 	selector: number = 0;
 
 	async init() {
-		this.renderer.renameWindow("Keystone Search");
+		this.renderer.windowName = "Keystone Search";
 		this.renderer.setIcon("search");
 
 		this.registerKeyboardShortcut("ScrollDown", "ArrowDown", []);
@@ -62,6 +62,8 @@ export default class KeystoneSearch extends Popup {
 	index?: Function;
 
 	async search(term: string) {
+		if (this.fzfLib == undefined) return;
+
 		const fzf = new this.fzfLib.Fzf(this.files);
 
 		// object stating item, score and start/end points

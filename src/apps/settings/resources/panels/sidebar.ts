@@ -1,7 +1,9 @@
-export default class sidebar {
-	parent: any;
+import systemSettings from "../../tcpsys/app";
 
-	constructor(parent: any) {
+export default class sidebar {
+	parent: systemSettings;
+
+	constructor(parent: systemSettings) {
 		this.parent = parent;
 	}
 

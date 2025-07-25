@@ -9,7 +9,7 @@ export default class dock {
 	parent: dockAndDesktop;
 	renderer: Renderer;
 	env: ApplicationAuthorisationAPI;
-	winAPI: any;
+	winAPI?: typeof import("../../../windows/windows");
 
 	dockHeight: number = 50;
 	dockPadding: number = 10;
@@ -20,8 +20,6 @@ export default class dock {
 		this.parent = parent;
 		this.renderer = parent.renderer;
 		this.env = parent.env;
-
-		this.winAPI = this.parent.env.include("/System/windows.js");
 
 		this.init();
 	}
@@ -34,6 +32,8 @@ export default class dock {
 
 		if (getPerms !== true) return;
 
+		this.winAPI = await this.parent.env.include("/System/windows.js");
+
 		this.refresh();
 
 		this.ok = true;
@@ -45,7 +45,7 @@ export default class dock {
 
 	async render() {
 		if (this.ok !== true) return;
-		if (this.winAPI instanceof Promise) this.winAPI = await this.winAPI;
+		if (this.winAPI == undefined) return;
 
 		this.refresh();
 
@@ -63,10 +63,7 @@ export default class dock {
 		const wins = this.wins;
 
 		let x = 125 + this.dockPadding;
-		let y =
-			this.renderer.windowHeight -
-			this.dockHeight +
-			this.dockPadding;
+		let y = this.renderer.windowHeight - this.dockHeight + this.dockPadding;
 
 		const iconWidth = this.dockHeight - this.dockPadding * 2;
 		const iconScale = iconWidth / 24;
@@ -77,6 +74,7 @@ export default class dock {
 			this.renderer.onClick(
 				iconID,
 				() => {
+					if (this.winAPI == undefined) return;
 					if (win == undefined) return;
 
 					if (win.minimised) {
