@@ -8,6 +8,7 @@
 		"dev": "python3 -m http.server 5173",
 		"dev-https": "npx http-server . -S -C certs/cert.pem -K certs/key.pem -p 5174",
 		"build": "./scripts/runtime-info.sh && ./scripts/build.sh",
+		"build-nofix": "./scripts/runtime-info.sh && ./scripts/build.sh --no-fix",
 		"newenv": "npm install && git submodule update && npm run build && echo \"Open http://localhost:5173 to use Constellation!\" && npm run dev",
 		"reclone-test": "./scripts/reclone.sh"
 	},

@@ -39,7 +39,10 @@ date_file() {
 }
 
 clean
-fix
+if [[ $1 != "--no-fix" ]]
+then
+    fix
+fi
 build_tsc
 package_apps
 date_file
