@@ -3,7 +3,8 @@ import { join } from "path";
 
 const srcDir = "src";
 const outDir = "build";
-const blacklist = [".js", ".mjs", "cjs", ".jsx", ".ts", ".tsx"];
+const blacklistFileExtensions = [".js", ".mjs", "cjs", ".jsx", ".ts", ".tsx"];
+const blacklistDirectories = ["src/apps/app-template/node_modules", "src/apps/app-template/.git"]
 
 async function copyFiles(dir = "") {
 	const fullSrc = join(srcDir, dir);
@@ -15,8 +16,9 @@ async function copyFiles(dir = "") {
 		const srcPath = join(fullSrc, entry.name);
 		const outPath = join(fullOut, entry.name);
 
+
 		const allowedFile = (() => {
-			for (const item of blacklist) {
+			for (const item of blacklistFileExtensions) {
 				if (entry.name.endsWith(item)) {
 					return false;
 				}
@@ -24,6 +26,8 @@ async function copyFiles(dir = "") {
 
 			return true;
 		})();
+
+		if (blacklistDirectories.includes(srcPath)) continue;
 
 		if (entry.isDirectory()) {
 			await copyFiles(join(dir, entry.name));
