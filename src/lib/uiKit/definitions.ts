@@ -40,7 +40,7 @@ export type uikitTextboxConfig = {
 	isInvisible?: boolean;
 	isEmpty?: boolean;
 	fontSize?: number;
-	disableMobileAutocorrect: boolean;
+	disableMobileAutocorrect?: boolean;
 };
 export type uikitTextareaConfig = {
 	isInvisible?: boolean;
