@@ -85,7 +85,9 @@ const writeFile = async (directory: string, content: string) => {
 	});
 };
 
-const readFile = async (directory: string): Promise<string | undefined> => {
+export const readFile = async (
+	directory: string
+): Promise<string | undefined> => {
 	return new Promise((resolve: Function) =>
 		fs.readFile(directory, "utf8", (e: any, data: string) => {
 			resolve(data);
@@ -168,7 +170,7 @@ const stat = async (directory: string): Promise<any> => {
 	});
 };
 
-const resolve = (base = "/", target: string) => {
+export const resolve = (base = "/", target: string) => {
 	if (target.startsWith("/")) return target;
 
 	const baseParts = base.split("/").filter(Boolean);
@@ -187,7 +189,7 @@ const resolve = (base = "/", target: string) => {
 };
 const normalize = (path: string) =>
 	path.replace(/\/+/g, "/").replace(/\/$/, "") || "/";
-function relative(from: string, to: string) {
+export function relative(from: string, to: string) {
 	from = normalize(from);
 	to = normalize(to);
 

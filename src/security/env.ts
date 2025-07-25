@@ -21,6 +21,7 @@ import {
 } from "../security/permissions.js";
 import { Framework, Process } from "../apps/executables.js";
 import Shell from "../lib/shell.js";
+import { include } from "../apps/appsImportReplacements.js";
 
 const name = "/System/security/env.js";
 
@@ -380,13 +381,12 @@ export class ApplicationAuthorisationAPI {
 
 		switch (type) {
 			case "directory":
-				url = await blobifyDirectory(location, "text/javascript");
-				break;
+				return await include(location);
+			case "URL":
+				const exports = await import(url);
+
+				return exports;
 		}
-
-		const exports = await import(url);
-
-		return exports;
 	}
 
 	exec = execute;
