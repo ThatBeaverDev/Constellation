@@ -5,13 +5,8 @@
 		}
 	],
 	"settings": {
-		"files.exclude": {
-			"**/.git": false,
-			"**/.svn": false
-		},
 		"files.associations": {
-			"*.idx": "json",
-			"*.sjs": "javascript"
+			"*.idx": "json"
 		},
 		"[javascript]": {
 			"editor.defaultFormatter": "esbenp.prettier-vscode"
