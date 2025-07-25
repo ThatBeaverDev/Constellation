@@ -35,7 +35,7 @@ type listing = {
 };
 
 export default class finder extends Application {
-	pathinf: any;
+	pathinf?: typeof import("../../../syslib/pathinf");
 
 	textWidth(text: string) {
 		return this.renderer.getTextWidth(text, 15, "monospace");
@@ -71,8 +71,8 @@ export default class finder extends Application {
 	padding: number = 1;
 	type: "picker" | "app" = "app";
 	pipes!: {
-		recieve: any;
-		send: any;
+		recieve: { intent: string; data: any }[];
+		send: { intent: string; data: any }[];
 	};
 	path: string = "/";
 	selector: number = 0;
@@ -182,6 +182,8 @@ export default class finder extends Application {
 	}
 
 	async cd(directory: string) {
+		if (this.pathinf == undefined) return;
+
 		this.ok = false;
 
 		const oldDir = String(this.path);
@@ -215,20 +217,18 @@ export default class finder extends Application {
 			list = ["..", ...list];
 		}
 
-		list = list.map((name: string) => {
+		for (const i in list) {
+			const name = list[i];
+			const path = this.env.fs.resolve(this.path, name);
+
 			const obj: listing = {
 				name,
-				path: this.env.fs.resolve(this.path, name),
-				icon: "",
-				type: "none"
+				path,
+				icon: await this.pathinf.pathIcon(path),
+				type: await this.env.fs.typeOfFile(path)
 			};
-			obj.icon = this.pathinf.pathIcon(obj.path);
 
-			return obj;
-		});
-
-		for (const obj of list) {
-			obj.type = await this.env.fs.typeOfFile(obj.path);
+			list[i] = obj;
 		}
 
 		this.listing = list;

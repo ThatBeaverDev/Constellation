@@ -1,7 +1,9 @@
+import systemSettings from "../../tcpsys/app";
+
 export const list = ["home", "windows"];
 
-export default async function (parent: any) {
-	const result: any = {};
+export default async function (parent: systemSettings) {
+	const result: Record<string, any> = {};
 
 	for (const page of list) {
 		const data = await env.include(
