@@ -1,10 +1,5 @@
 import { IPCMessage } from "../../messages";
-
-type fileInfo = {
-	directory: string;
-	name: string;
-	icon: string;
-};
+import { fileInfo } from "../lib/appfind";
 
 export default class KeystoneSearch extends Popup {
 	pathinf?: typeof import("../../../syslib/pathinf");
@@ -67,24 +62,28 @@ export default class KeystoneSearch extends Popup {
 		const fzf = new this.fzfLib.Fzf(this.files);
 
 		// object stating item, score and start/end points
-		this.entries = fzf.find(term);
+		const entries = fzf.find(term);
+
 		// just names
-		this.results = this.entries.map((result: any) => {
-			return String(result.item);
-		});
+		const results: string[] = entries.map(
+			(result: { item: string }): string => result.item
+		);
 
 		// prevent rendering
 		this.ok = false;
 
 		// file info
-		// @ts-expect-error // it refuses to believe that item is a string, even though above it is forced to be one. typical.
-		this.rendering = this.results.map((item: string) => {
-			for (const itm of this.fileInfo) {
-				if (itm.directory == item) {
-					return itm;
+		this.rendering = results
+			.map((item: string) => {
+				for (const itm of this.fileInfo) {
+					if (itm.directory == item) {
+						if (itm.visible) {
+							return itm;
+						}
+					}
 				}
-			}
-		});
+			})
+			.filter((item: fileInfo | undefined) => item?.visible == true);
 
 		// allow rendering again
 		this.ok = true;

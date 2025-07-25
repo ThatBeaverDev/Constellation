@@ -4,5 +4,6 @@ export default {
 	category: "Developer",
 	author: "ThatBeaverDev",
 	version: 1,
-	icon: "scroll-text"
+	icon: "scroll-text",
+	userspace: false
 };

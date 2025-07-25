@@ -2,11 +2,14 @@ import TerminalAlias from "../../../lib/terminalAlias";
 
 const pathinf = await env.include("/System/CoreLibraries/pathinf.js");
 
-type fileInfo = {
+export type fileInfo = {
 	directory: string;
 	name: string;
 	icon: string;
+	visible: boolean;
 };
+
+export type appFindResult = { files: fileInfo[]; names: string[] };
 
 export default async function find(
 	parent: TerminalAlias,
@@ -14,7 +17,7 @@ export default async function find(
 		"/System/CoreExecutables",
 		"/Applications" /*,"~/Applications"*/
 	]
-): Promise<{ files: fileInfo[]; names: string[] }> {
+): Promise<appFindResult> {
 	let files: fileInfo[] = [];
 	let names: string[] = [];
 
@@ -28,28 +31,28 @@ export default async function find(
 		names = [...localNames, ...names];
 
 		// build file objects
-		const localFiles = localNames.map((dir: string): fileInfo => {
-			return {
+		const localFiles: fileInfo[] = [];
+		for (const dir of localNames) {
+			const obj: fileInfo = {
 				directory: dir,
-				name: pathinf.pathName(dir),
-				icon: pathinf.pathIcon(dir)
+				name: await pathinf.pathName(dir),
+				icon: await pathinf.pathIcon(dir),
+				visible: await pathinf.pathVisible(dir)
 			};
-		});
-
-		for (const vl of localFiles) {
-			vl.icon = await vl.icon;
-			vl.name = await vl.name;
 
 			if (
-				vl.directory.endsWith(".backgr") ||
-				vl.directory.endsWith(".appl")
+				obj.directory.endsWith(".backgr") ||
+				obj.directory.endsWith(".appl")
 			) {
-				if (vl.name.startsWith("/")) {
-					vl.name = vl.directory.textAfterA;
-					("/");
+				if (obj.name.startsWith("/")) {
+					obj.name = obj.directory.textAfterAll("/");
 				}
 			}
+
+			localFiles.push(obj);
 		}
+
+		console.log(localFiles);
 
 		files = [...localFiles, ...files];
 	}
