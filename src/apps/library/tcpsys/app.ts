@@ -11,6 +11,9 @@ export default class library extends Application {
 	async init() {
 		await this.env.shell.index();
 		await this.refresh();
+
+		this.renderer.setIcon("square-library");
+		this.renderer.windowName = "Library";
 	}
 
 	async refresh() {
@@ -67,10 +70,7 @@ export default class library extends Application {
 			);
 
 			x += iconSize + padding + padding;
-			if (
-				x + iconSize + padding >
-				this.renderer.windowWidth
-			) {
+			if (x + iconSize + padding > this.renderer.windowWidth) {
 				x = 0 + padding;
 				y += iconSize + padding + padding;
 			}

@@ -10,7 +10,7 @@ export default class Dialogue extends Popup {
 	pipe: any[] = [];
 
 	async init() {
-		this.renderer.renameWindow(this.args[1] || "Popup");
+		this.renderer.windowName = this.args[1] || "Popup";
 		this.renderer.setIcon("scroll-text");
 
 		if (this.args.length == 0) {

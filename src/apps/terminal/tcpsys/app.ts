@@ -50,7 +50,7 @@ export default class terminalUI extends Application {
 			return;
 		}
 
-		this.renderer.renameWindow("Terminal");
+		this.renderer.windowName = "Terminal";
 		this.renderer.setIcon("square-terminal");
 
 		this.registerKeyboardShortcut("Scroll Down", "ArrowDown", []);

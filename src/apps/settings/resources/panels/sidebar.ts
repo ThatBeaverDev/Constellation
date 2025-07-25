@@ -22,6 +22,6 @@ export default class sidebar {
 			{ fontSize: 10 }
 		);
 
-		r.verticalLine(105, 0, r.window.dimensions.height);
+		r.verticalLine(105, 0, r.windowHeight);
 	}
 }

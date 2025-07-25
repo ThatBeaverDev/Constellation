@@ -21,7 +21,7 @@ export default class roturGui extends Application {
 			};
 		}
 
-		this.renderer.renameWindow("Rotur");
+		this.renderer.windowName = "Rotur";
 		this.renderer.setIcon(
 			env.fs.resolve(this.directory, "./resources/icon.svg")
 		);
