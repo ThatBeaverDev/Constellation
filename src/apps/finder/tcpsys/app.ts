@@ -1,4 +1,4 @@
-import { onClickOptions } from "../../../lib/uiKit/uiKit";
+import { onClickOptions } from "../../../lib/uiKit/definitions";
 import { IPCMessage } from "../../messages";
 
 const clamp = (n: number, min: number, max: number) => {
@@ -99,7 +99,7 @@ export default class finder extends Application {
 			send: sendingPipe
 		};
 
-		this.renderer.setWindowIcon("folder");
+		this.renderer.setIcon("folder");
 
 		this.registerKeyboardShortcut("Scroll Down", "ArrowDown", []);
 		this.registerKeyboardShortcut("Scroll Down (Fast)", "ArrowDown", [
@@ -236,7 +236,7 @@ export default class finder extends Application {
 		const newIcon = await this.pathinf.pathIcon(this.path);
 		if (newIcon !== this.icon) {
 			this.icon = newIcon;
-			this.renderer.setWindowIcon(this.icon);
+			this.renderer.setIcon(this.icon);
 		}
 
 		this.ok = true;
@@ -259,11 +259,11 @@ export default class finder extends Application {
 
 		// if we're a picker, name ourselves so
 		if (this.type == "picker") {
-			this.renderer.window.rename("File Picker - " + this.path);
-			this.renderer.window.shortname = "File Picker";
+			this.renderer.renameWindow("File Picker - " + this.path);
+			this.renderer.setShortName("File Picker");
 		} else {
-			this.renderer.window.rename("Finder - " + this.path);
-			this.renderer.window.shortname = "Finder";
+			this.renderer.renameWindow("Finder - " + this.path);
+			this.renderer.setShortName("Finder");
 		}
 
 		// insure this.selector is defined
@@ -409,7 +409,7 @@ export default class finder extends Application {
 
 			this.renderer.button(
 				5,
-				this.renderer.window.dimensions.height - 50,
+				this.renderer.windowHeight - 50,
 				"Select location (" + path + ")",
 				this.pickerSubmit
 			);

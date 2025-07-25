@@ -20,8 +20,8 @@ export default class KeystoneSearch extends Popup {
 	selector: number = 0;
 
 	async init() {
-		this.renderer.window.rename("Keystone Search");
-		this.renderer.setWindowIcon("search");
+		this.renderer.renameWindow("Keystone Search");
+		this.renderer.setIcon("search");
 
 		this.registerKeyboardShortcut("ScrollDown", "ArrowDown", []);
 		this.registerKeyboardShortcut("ScrollUp", "ArrowUp", []);
@@ -137,7 +137,7 @@ export default class KeystoneSearch extends Popup {
 		this.renderer.textbox(
 			0,
 			0,
-			this.renderer.window.dimensions.width,
+			this.renderer.windowWidth,
 			40,
 			"Search for apps...",
 			{

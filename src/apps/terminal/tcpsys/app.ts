@@ -1,4 +1,4 @@
-import { uikitTextboxConfig } from "../../../lib/uiKit/uiKit";
+import { uikitTextboxConfig } from "../../../lib/uiKit/definitions";
 import { IPCMessage } from "../../messages";
 
 // convert anything to a string, NICELY (no [object Object] here)
@@ -50,8 +50,8 @@ export default class terminalUI extends Application {
 			return;
 		}
 
-		this.renderer.window.rename("Terminal");
-		this.renderer.setWindowIcon("square-terminal");
+		this.renderer.renameWindow("Terminal");
+		this.renderer.setIcon("square-terminal");
 
 		this.registerKeyboardShortcut("Scroll Down", "ArrowDown", []);
 		this.registerKeyboardShortcut("Scroll Down (Fast)", "ArrowDown", [
@@ -219,7 +219,7 @@ export default class terminalUI extends Application {
 		this.renderer.textbox(
 			sideTextWidth + 5,
 			y,
-			this.renderer.window.dimensions.width - (sideTextWidth * 2 + 5),
+			this.renderer.windowWidth - (sideTextWidth * 2 + 5),
 			20,
 			"",
 			textboxCallbacks,

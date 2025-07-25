@@ -69,7 +69,7 @@ export default class library extends Application {
 			x += iconSize + padding + padding;
 			if (
 				x + iconSize + padding >
-				this.renderer.window.dimensions.width
+				this.renderer.windowWidth
 			) {
 				x = 0 + padding;
 				y += iconSize + padding + padding;

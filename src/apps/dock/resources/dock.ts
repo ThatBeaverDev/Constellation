@@ -51,8 +51,8 @@ export default class dock {
 
 		this.renderer.box(
 			125,
-			this.renderer.window.dimensions.height - this.dockHeight,
-			this.renderer.window.dimensions.width - 250,
+			this.renderer.windowHeight - this.dockHeight,
+			this.renderer.windowWidth - 250,
 			this.dockHeight,
 			{
 				colour: "var(--main-theme-secondary)",
@@ -64,7 +64,7 @@ export default class dock {
 
 		let x = 125 + this.dockPadding;
 		let y =
-			this.renderer.window.dimensions.height -
+			this.renderer.windowHeight -
 			this.dockHeight +
 			this.dockPadding;
 

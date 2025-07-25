@@ -35,7 +35,7 @@ export default class auth {
 				this.renderer.textbox(
 					0,
 					30,
-					this.renderer.window.dimensions.width,
+					this.renderer.windowWidth,
 					25,
 					"Enter your rotur username here...",
 					{
@@ -89,7 +89,7 @@ export default class auth {
 				this.renderer.textbox(
 					0,
 					30,
-					this.renderer.window.dimensions.width,
+					this.renderer.windowWidth,
 					25,
 					`Enter the rotur password for user '${this.credentials.username}'...`,
 					{

@@ -10,8 +10,8 @@ export default class Dialogue extends Popup {
 	pipe: any[] = [];
 
 	async init() {
-		this.renderer.window.rename(this.args[1] || "Popup");
-		this.renderer.setWindowIcon("scroll-text");
+		this.renderer.renameWindow(this.args[1] || "Popup");
+		this.renderer.setIcon("scroll-text");
 
 		if (this.args.length == 0) {
 			throw new Error("Popup initialised with no params.");
@@ -38,7 +38,7 @@ export default class Dialogue extends Popup {
 				break;
 		}
 
-		this.renderer.setWindowIcon(this.icon);
+		this.renderer.setIcon(this.icon);
 	}
 
 	frame() {
