@@ -55,7 +55,7 @@ export default class dock {
 			this.renderer.windowWidth - 250,
 			this.dockHeight,
 			{
-				colour: "var(--main-theme-secondary)",
+				background: "var(--main-theme-secondary)",
 				borderRadius: "10"
 			}
 		);

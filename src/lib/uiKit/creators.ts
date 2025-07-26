@@ -296,7 +296,7 @@ export default class uiKitCreators {
 		config?: uikitBoxConfig
 	) => {
 		const box = document.createElement("div");
-		box.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px; background-color: ${config?.colour}; border-radius: ${config?.borderRadius}px;`;
+		box.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px; background: ${config?.background || "var(--main-theme-tertiary)"}; border-radius: ${config?.borderRadius}px;`;
 		box.id = String(window.renderID++);
 		box.className = "uikitBox";
 
