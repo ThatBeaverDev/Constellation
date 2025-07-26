@@ -2,9 +2,9 @@
 import dts from "rollup-plugin-dts";
 
 export default {
-	input: "types/global.d.ts", // or your main entry .d.ts
+	input: "types/global.d.ts",
 	output: {
-		file: "src/apps/app-template/constellation.d.ts",
+		file: "src/apps/types/constellation.d.ts",
 		format: "es",
 	},
 	plugins: [dts()],

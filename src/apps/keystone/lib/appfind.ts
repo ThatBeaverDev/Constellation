@@ -52,8 +52,6 @@ export default async function find(
 			localFiles.push(obj);
 		}
 
-		console.log(localFiles);
-
 		files = [...localFiles, ...files];
 	}
 
