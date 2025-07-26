@@ -37,8 +37,6 @@ export default class KeystoneSearch extends Popup {
 
 		const obj = await this.index();
 
-		console.log(obj);
-
 		this.files = obj.names;
 		this.fileInfo = obj.files;
 

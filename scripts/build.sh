@@ -26,7 +26,7 @@ build_apps_d_ts() {
     npx rollup -c
 
     # add an export {} to the .d.ts file so it can augment global scope
-    printf "export {}\n\n%s" "$(cat src/apps/app-template/constellation.d.ts)" > src/apps/app-template/constellation.d.ts
+    printf "export {}\n\n%s" "$(cat src/apps/types/constellation.d.ts)" > src/apps/types/constellation.d.ts
 }
 
 package_apps() {

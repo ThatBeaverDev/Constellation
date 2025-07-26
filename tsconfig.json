@@ -20,7 +20,8 @@
 	],
 	"exclude": [
 		"build",
-		"src/apps/app-template"
+		"src/apps/app-template",
+		"src/apps/types"
 	],
 	"watchOptions": {
 		"watchFile": "useFsEvents",
@@ -30,7 +31,8 @@
 		"excludeDirectories": [
 			"**/node_modules",
 			"build",
-			"src/apps/app-template/constellation.d.ts"
+			"src/apps/app-template/constellation.d.ts",
+			"src/apps/types/constellation.d.ts"
 		]
 	}
 }
