@@ -49,7 +49,6 @@ export async function rewriteImportsAsync(
 				currentPath.textBeforeLast("/"),
 				specifier
 			);
-			console.log(currentPath, specifier, resolved);
 			// blobify it
 			const blobUrl = await blobifyModule(resolved);
 			return {
