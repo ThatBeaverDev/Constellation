@@ -52,7 +52,7 @@ export class Renderer {
 		},
 		uikitBox: {
 			borderRadius: 5,
-			colour: "rgb(155, 155, 155)"
+			background: "rgb(155, 155, 155)"
 		},
 		uikitCanvasStep: {
 			colour: "rgb(155, 155, 155)"
