@@ -15,6 +15,7 @@ import {
 	uikitTextareaConfig,
 	uikitTextboxConfig
 } from "./definitions.js";
+import canvasKit from "./canvasKit.js";
 
 const uiKitStart = performance.now();
 
@@ -63,7 +64,7 @@ export class Renderer {
 	};
 	#process: Process;
 	#window: GraphicalWindow;
-	#steps: step[] = [];
+	readonly #steps: step[] = [];
 	#displayedSteps: step[] = [];
 	elemID: number = 0;
 	// add abort controller to remove event listeners
@@ -79,6 +80,8 @@ export class Renderer {
 	}
 	windowX: number = 0;
 	windowY: number = 0;
+	#timeCommit: boolean = false;
+
 	moveWindow(x?: number, y?: number, z?: number) {
 		this.#window.move(x, y, z);
 	}
@@ -129,6 +132,8 @@ export class Renderer {
 
 	#mustRedraw: boolean = false;
 
+	canvas: canvasKit = new canvasKit(this.#steps);
+
 	constructor(process: Process) {
 		this.#process = process;
 
@@ -144,11 +149,11 @@ export class Renderer {
 
 	clear = () => {
 		this.#creators.hasTextbox = false;
-		this.#steps = [];
+		this.#steps.splice(0, this.#steps.length + 10);
 
 		// window dimensions
-		this.windowWidth = this.#window.dimensions.width;
-		this.windowHeight = this.#window.dimensions.height;
+		this.windowWidth = this.#window.body.clientWidth;
+		this.windowHeight = this.#window.body.clientHeight;
 
 		// window position
 		this.windowX = this.#window.position.left;
