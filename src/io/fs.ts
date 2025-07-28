@@ -1,10 +1,24 @@
+import { DevToolsColor, performanceLog } from "../lib/debug.js";
+
+export function filesystemTimestamp(
+	label: string,
+	start: DOMHighResTimeStamp,
+	colour: DevToolsColor = "secondary"
+) {
+	performanceLog(label, start, "FileSystemManager", colour);
+}
+
+const start = performance.now();
 let bfs: Function | undefined;
 
 const isDev = window.location.hostname == "localhost";
 const bfsName = isDev ? "browserfs.js" : "browserfs.min.js";
 
+const startDownloadBrowserFS = performance.now();
 const bfsCode = await (await fetch(`/src/lib/external/${bfsName}`)).text();
+filesystemTimestamp("Download BrowserFS", startDownloadBrowserFS);
 
+const startInitBrowserFS = performance.now();
 bfs = new Function(bfsCode);
 await bfs(); // start browserFS
 
@@ -14,6 +28,8 @@ const BrowserFS = window.BrowserFS;
 window.BrowserFS = undefined;
 // @ts-expect-error
 delete window.BrowserFS;
+
+filesystemTimestamp("Initialise BrowserFS", startInitBrowserFS);
 
 BrowserFS.configure(
 	{
@@ -68,6 +84,7 @@ function isRoot(directory: string) {
 }
 
 const writeFile = async (directory: string, content: string) => {
+	const start = performance.now();
 	let written = false;
 
 	await fs.writeFile(directory, content, () => {
@@ -77,6 +94,8 @@ const writeFile = async (directory: string, content: string) => {
 	return new Promise((resolve) => {
 		const interval = setInterval(() => {
 			if (written == true) {
+				filesystemTimestamp(`writeFile ${directory}`, start);
+
 				clearInterval(interval);
 				resolve(undefined);
 				return;
@@ -88,69 +107,93 @@ const writeFile = async (directory: string, content: string) => {
 export const readFile = async (
 	directory: string
 ): Promise<string | undefined> => {
+	const start = performance.now();
+
 	return new Promise((resolve: Function) =>
 		fs.readFile(directory, "utf8", (e: any, data: string) => {
+			filesystemTimestamp(`readFile ${directory}`, start);
 			resolve(data);
 		})
 	);
 };
 
-const renameFile = async (
-	oldDirectory: string,
-	newDirectory: string
-): Promise<undefined> => {
-	return new Promise((resolve: Function) =>
-		fs.rename(oldDirectory, newDirectory, (e: any, data: any) => {
-			resolve();
-		})
-	);
+const renameFile = async (oldPath: string, newPath: string): Promise<void> => {
+	const start = performance.now();
+
+	return new Promise((resolve, reject) => {
+		fs.rename(oldPath, newPath, (err: any) => {
+			filesystemTimestamp(`renameFile ${oldPath} → ${newPath}`, start);
+			if (err) {
+				console.warn(`renameFile failed: ${oldPath} → ${newPath}`, err);
+				reject(err);
+			} else {
+				resolve();
+			}
+		});
+	});
 };
-const rename = async (
-	oldDirectory: string,
-	newDirectory: string
-): Promise<undefined> => {
-	const type = await stat(oldDirectory);
-	if (type == undefined) return;
+
+const rename = async (oldPath: string, newPath: string): Promise<void> => {
+	const type = await stat(oldPath);
+	if (!type) return;
 
 	const isDir = type.isDirectory();
 
 	if (isDir) {
-		await mkdir(newDirectory);
+		await mkdir(newPath).catch(() => {});
 
-		const list = await readdir(oldDirectory);
+		const entries = await readdir(oldPath);
 
-		for (const item of list) {
-			const resolvedOld = resolve(oldDirectory, item);
-			const resolvedNew = resolve(newDirectory, item);
-
-			await rename(resolvedOld, resolvedNew);
+		for (const entry of entries) {
+			const from = resolve(oldPath, entry);
+			const to = resolve(newPath, entry);
+			await rename(from, to);
 		}
 
-		await fs.rmdir(oldDirectory);
+		await new Promise<void>((resolve, reject) => {
+			fs.rmdir(oldPath, (err: any) => {
+				filesystemTimestamp(`rmdir ${oldPath}`, performance.now());
+				if (err) reject(err);
+				else resolve();
+			});
+		});
 	} else {
-		return renameFile(oldDirectory, newDirectory);
+		await renameFile(oldPath, newPath);
 	}
 };
 
 const readdir = async (directory: string): Promise<string[]> => {
+	const start = performance.now();
+
 	return new Promise((resolve: Function) =>
 		fs.readdir(directory, (e: any, data: string[]) => {
+			filesystemTimestamp(`readdir ${directory}`, start);
 			resolve(data);
 		})
 	);
 };
 const mkdir = async (directory: string): Promise<undefined> => {
-	if (isRoot(directory))
+	const start = performance.now();
+
+	if (isRoot(directory)) {
+		filesystemTimestamp(
+			`mkdir ${directory} - failed (no new children of root)`,
+			start,
+			"error"
+		);
 		throw new Error("Directories cannot be created under root.");
+	}
 
 	return new Promise((resolve: Function) => {
 		fs.mkdir(directory, (e: any) => {
+			filesystemTimestamp(`mkdir ${directory}`, start);
 			resolve();
 		});
 	});
 };
 
 const stat = async (directory: string): Promise<any> => {
+	const start = performance.now();
 	let stats: any;
 	let ok = false;
 
@@ -162,6 +205,7 @@ const stat = async (directory: string): Promise<any> => {
 	return new Promise((resolve) => {
 		const interval = setInterval(() => {
 			if (ok == true) {
+				filesystemTimestamp(`stat ${directory}`, start);
 				clearInterval(interval);
 				resolve(stats);
 				return;
@@ -256,3 +300,5 @@ export async function fsLoaded() {
 
 // @ts-expect-error
 window.realFS = main;
+
+filesystemTimestamp("Startup of src/io/fs.ts", start, "primary");

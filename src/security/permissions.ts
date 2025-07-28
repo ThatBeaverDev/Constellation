@@ -1,6 +1,9 @@
 import { PermissionsError } from "../errors.js";
 import fs from "../io/fs.js";
+import { securityTimestamp } from "./definitions.js";
 import { defaultUser } from "./users.js";
+
+const start = performance.now()
 
 export const permissionsDirectory = "/System/applicationPermissions.json";
 
@@ -190,3 +193,5 @@ export function getFilesDomainOfDirectory(
 			return "global";
 	}
 }
+
+securityTimestamp("Startup /src/security/permissions.ts", start)

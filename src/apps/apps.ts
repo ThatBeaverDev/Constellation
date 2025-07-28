@@ -12,6 +12,17 @@ import ProcessWaitingObject from "./appWaitingObject.js";
 import { ApplicationAuthorisationAPI } from "../security/env.js";
 import { defaultUser } from "../security/users.js";
 import { rewriteImportsAsync } from "./appsImportReplacements.js";
+import { DevToolsColor, performanceLog } from "../lib/debug.js";
+
+export function AppsTimeStamp(
+	label: string,
+	start: DOMHighResTimeStamp,
+	colour: DevToolsColor = "secondary"
+) {
+	performanceLog(label, start, "AppsRuntime", colour);
+}
+
+const appsStart = performance.now();
 
 declare global {
 	interface Window {
@@ -67,6 +78,8 @@ type executionFiletype = "js";
  * @returns an Object containing a promise with the Process Waiting object - this promise will resolve when the process exits, and return the value the process exited with.
  */
 export async function execute(directory: string, args: any[] = []) {
+	const start = performance.now();
+
 	const get = async (dir: string, throwIfEmpty: Boolean = true) => {
 		const rel = fs.resolve(directory, dir);
 
@@ -147,6 +160,8 @@ export async function execute(directory: string, args: any[] = []) {
 
 	await procExec(live, "init");
 
+	AppsTimeStamp(`Open program from ${directory}`, start);
+
 	return {
 		promise: ProcessWaitingObject(live)
 	};
@@ -207,6 +222,9 @@ export async function showPrompt(
  * @param isDueToCrash - whether this is from a crash - true means the process' terminate function is not called.
  */
 export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
+	const start = performance.now();
+	const procDir = String(proc.directory);
+
 	const idx = processes.indexOf(proc);
 
 	if (!isDueToCrash) {
@@ -222,6 +240,8 @@ export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
 	}
 
 	processes.splice(idx, 1);
+
+	AppsTimeStamp(`Terminate process ${procDir}`, start);
 }
 
 const activeIterators = new WeakMap<
@@ -382,25 +402,8 @@ document.addEventListener("keyup", (event) => {
 	}
 });
 
-declare global {
-	interface Window {
-		profileNextFrame: Boolean;
-	}
-}
-
-declare global {
-	interface Console {
-		profile: Function;
-		profileEnd: Function;
-	}
-}
-
-window.profileNextFrame = false;
-
 export function run() {
-	if (window.profileNextFrame) {
-		console.profile("tick");
-	}
+	const start = performance.now();
 
 	for (const pid in processes) {
 		const process = processes[pid];
@@ -408,9 +411,7 @@ export function run() {
 		procExec(process);
 	}
 
-	if (window.profileNextFrame) {
-		console.profileEnd("tick");
-
-		window.profileNextFrame = false;
-	}
+	AppsTimeStamp("Processes frame", start);
 }
+
+AppsTimeStamp("Startup of src/apps/apps.ts", appsStart, "primary");

@@ -9,11 +9,14 @@ import {
 	onClickOptions,
 	step,
 	textboxCallbackObject,
+	uiKitTimestamp,
 	uikitBoxConfig,
 	uikitCanvasOptions,
 	uikitTextareaConfig,
 	uikitTextboxConfig
 } from "./definitions.js";
+
+const uiKitStart = performance.now();
 
 export const font = "monospace";
 
@@ -286,6 +289,7 @@ export class Renderer {
 			type: "uikitBox",
 			args: [x, y, width, height, config]
 		};
+
 		return this.#steps.push(obj);
 	};
 
@@ -456,6 +460,8 @@ export class Renderer {
 			i < Math.max(this.#steps.length, this.#displayedSteps.length);
 			i++
 		) {
+			const start = performance.now();
+
 			const newStep = this.#steps[i];
 			const oldStep = this.#displayedSteps[i];
 			const oldElement = this.#items[i];
@@ -608,6 +614,8 @@ export class Renderer {
 
 			newItems.push(element);
 			newDisplayedSteps.push(newStep);
+
+			uiKitTimestamp(`Commit Step ${newStep.type}`, start);
 		}
 
 		//// remove missed old elements
@@ -620,6 +628,8 @@ export class Renderer {
 		this.#displayedSteps = newDisplayedSteps;
 
 		this.#focusTextbox();
+
+		uiKitTimestamp("Commit to Window", start);
 	};
 
 	terminate() {
@@ -628,3 +638,5 @@ export class Renderer {
 		this.#window.remove();
 	}
 }
+
+uiKitTimestamp("Startup of src/lib/uiKit/uiKit.ts", uiKitStart, "primary");

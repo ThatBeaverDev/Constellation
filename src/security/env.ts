@@ -22,7 +22,9 @@ import {
 import { Framework, Process } from "../apps/executables.js";
 import Shell from "../lib/shell.js";
 import { include } from "../apps/appsImportReplacements.js";
+import { securityTimestamp } from "./definitions.js";
 
+const start = performance.now();
 const name = "/System/security/env.js";
 
 // Types
@@ -78,6 +80,8 @@ export const associations: any = {};
 
 export class ApplicationAuthorisationAPI {
 	constructor(directory: string, user: string, process?: Framework) {
+		const start = performance.now();
+
 		this.#permissions = getDirectoryPermissions(directory);
 		this.shell = new Shell(directory, this);
 		this.shell.index();
@@ -90,6 +94,7 @@ export class ApplicationAuthorisationAPI {
 			name,
 			`ApplicationAuthorisationAPI created as ${user} for ${directory}`
 		);
+		securityTimestamp(`Create env for ${directory}`, start);
 	}
 
 	readonly directory: string;
@@ -415,6 +420,8 @@ export class ApplicationAuthorisationAPI {
 	 * @returns Nothing - throws an error if the request is denied.
 	 */
 	async requestUserPermission(permission: Permission) {
+		const start = performance.now();
+
 		if (permissionsMetadata[permission].requestable == false) {
 			this.error(
 				name,
@@ -454,6 +461,11 @@ export class ApplicationAuthorisationAPI {
 					`Permission request for permission ${permission} denied.`
 				);
 		}
+
+		securityTimestamp(
+			`${this.directory} request permission ${permission} from user (${ok})`,
+			start
+		);
 	}
 
 	#windowToAlias = (win: GraphicalWindow): WindowAlias => {
@@ -491,6 +503,8 @@ export class ApplicationAuthorisationAPI {
 		 * @returns an array for every window's WindowAlias
 		 */
 		all: (): WindowAlias[] => {
+			const start = performance.now();
+
 			checkDirectoryPermission(this.directory, "windows");
 
 			const obj: WindowAlias[] = [];
@@ -501,12 +515,16 @@ export class ApplicationAuthorisationAPI {
 				obj.push(wn);
 			}
 
+			securityTimestamp(`Env ${this.directory} get all windows`, start);
+
 			return obj;
 		},
 		/**
 		 * @returns WindowAlias of the focused window
 		 */
 		getFocus: (): WindowAlias | undefined => {
+			const start = performance.now();
+
 			checkDirectoryPermission(this.directory, "windows");
 
 			const target = getWindowOfId(focus);
@@ -515,9 +533,13 @@ export class ApplicationAuthorisationAPI {
 
 			const obj = this.#windowToAlias(target);
 
+			securityTimestamp(`Env ${this.directory} get window focus`, start);
+
 			return obj;
 		}
 	};
 }
 
 export const systemEnv = new ApplicationAuthorisationAPI("/System", "operator");
+
+securityTimestamp("Startup /src/security/env.ts", start);
