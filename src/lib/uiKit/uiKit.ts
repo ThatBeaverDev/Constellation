@@ -430,25 +430,81 @@ export class Renderer {
 		}
 	}
 
+	#compareSteps() {}
+
+	/**
+	 * Commits all UI elements since the last `renderer.clear()` call.
+	 */
 	readonly commit = () => {
-		this.windowWidth = this.#window.container.clientWidth;
-		this.windowHeight = this.#window.container.clientHeight;
+		const start = performance.now();
+
+		this.windowWidth = this.#window.body.clientWidth;
+		this.windowHeight = this.#window.body.clientHeight;
 
 		if (this.#creators.textboxElem !== undefined) {
 			if (focus == this.#window.winID) this.#creators.textboxElem.focus();
 		}
 
-		if (!this.#mustRedraw) {
-			if (this.#steps.length === this.#displayedSteps.length) {
-				const steps = JSON.stringify(this.#steps);
+		function objectEquality(
+			object1: Record<string, any>,
+			object2: Record<string, any>
+		) {
+			const keys1 = Object.keys(object1);
+			const keys2 = Object.keys(object2);
 
-				const displayedSteps = JSON.stringify(this.#displayedSteps);
+			if (keys1 !== keys2) return false;
 
-				if (steps === displayedSteps) {
-					return;
+			for (const key in object1) {
+				const val1 = object1[key];
+				const val2 = object2[key];
+
+				if (typeof val1 !== typeof val2) return false;
+
+				switch (typeof val1) {
+					case "object": {
+						const same = objectEquality(val1, val2);
+						if (!same) return false;
+						break;
+					}
+					case "function": {
+						const fn1 = val1.toString();
+						const fn2 = val2.toString();
+
+						if (fn1 !== fn2) return false;
+						break;
+					}
+					default: {
+						const same = val1 == val2;
+						if (!same) return false;
+					}
 				}
 			}
 		}
+
+		if (!this.#mustRedraw) {
+			if (this.#steps.length === this.#displayedSteps.length) {
+				let same = true;
+
+				for (let i = 0; i < this.#steps.length; i++) {
+					const st = this.#steps[i];
+					const ds = this.#steps[i];
+
+					if (st.type !== ds.type) {
+						same = false;
+						break;
+					}
+
+					const argsSame = objectEquality(st.args, ds.args);
+					if (!argsSame) {
+						same = false;
+						break;
+					}
+				}
+
+				if (same) return;
+			}
+		}
+
 		// prevent infinite redraws
 		this.#mustRedraw = false;
 
