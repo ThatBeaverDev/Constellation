@@ -72,7 +72,7 @@ export function getProcessFromID(id: number) {
 type executionFiletype = "js";
 
 /**
- * 
+ *
  * @param directory - Directory of the root of the application to execute from
  * @param args - Arguements to be passed to the process
  * @returns an Object containing a promise with the Process Waiting object - this promise will resolve when the process exits, and return the value the process exited with.

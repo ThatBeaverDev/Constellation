@@ -2,7 +2,7 @@ import fs from "../io/fs.js";
 import { sha512 } from "../lib/crypto.js";
 import { securityTimestamp } from "./definitions.js";
 
-const start = performance.now()
+const start = performance.now();
 const name = "/System/users.js";
 
 export const usersDirectory = "/System/users.json";
@@ -75,4 +75,4 @@ export async function newUser(username: string, password: string) {
 	void (await onUsersUpdate());
 }
 
-securityTimestamp("Startup /src/security/users.ts", start)
+securityTimestamp("Startup /src/security/users.ts", start);
