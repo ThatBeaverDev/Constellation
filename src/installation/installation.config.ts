@@ -90,11 +90,6 @@ export const files: any = {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreExecutables/Library.appl"
 	},
-	// Template
-	"/build/apps/com.constellation.app-template.idx": {
-		type: "jsonFilesIndex",
-		directory: "/Applications/Template.appl"
-	},
 
 	// windowing files
 	"/src/windows/flick.css": "/System/windows/flick.css",
