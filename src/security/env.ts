@@ -42,7 +42,7 @@ type directoryPointType =
 	| "symbolicLink"
 	| "none";
 
-export type windowAlias = {
+export type WindowAlias = {
 	move: Function;
 	resize: Function;
 	close: Function;
@@ -123,6 +123,11 @@ export class ApplicationAuthorisationAPI {
 		console.error("[" + initiator + "] -", ...content);
 	}
 
+	/**
+	 * Shows a graphical prompt onscreen
+	 * @param text - the main statement
+	 * @param reason - the description of this statement
+	 */
 	prompt(text: string, reason = "") {
 		showPrompt("log", text, reason);
 	}
@@ -404,6 +409,11 @@ export class ApplicationAuthorisationAPI {
 		await setDirectoryPermission(directory, permission, value);
 	}
 
+	/**
+	 * Provides the user a prompt to request a permission
+	 * @param permission - the permission to request
+	 * @returns Nothing - throws an error if the request is denied.
+	 */
 	async requestUserPermission(permission: Permission) {
 		if (permissionsMetadata[permission].requestable == false) {
 			this.error(
@@ -441,15 +451,13 @@ export class ApplicationAuthorisationAPI {
 				return true;
 			case "Deny":
 				throw new PermissionsError(
-					"Permission request for permission " +
-						permission +
-						" denied."
+					`Permission request for permission ${permission} denied.`
 				);
 		}
 	}
 
-	#windowToAlias = (win: GraphicalWindow): windowAlias => {
-		const obj: windowAlias = {
+	#windowToAlias = (win: GraphicalWindow): WindowAlias => {
+		const obj: WindowAlias = {
 			move: win.move.bind(win),
 			resize: win.resize.bind(win),
 			close: win.remove.bind(win),
@@ -479,10 +487,13 @@ export class ApplicationAuthorisationAPI {
 	};
 
 	windows = {
-		all: (): windowAlias[] => {
+		/**
+		 * @returns an array for every window's WindowAlias
+		 */
+		all: (): WindowAlias[] => {
 			checkDirectoryPermission(this.directory, "windows");
 
-			const obj: windowAlias[] = [];
+			const obj: WindowAlias[] = [];
 
 			for (const win of windows) {
 				const wn = this.#windowToAlias(win);
@@ -492,7 +503,10 @@ export class ApplicationAuthorisationAPI {
 
 			return obj;
 		},
-		getFocus: (): windowAlias | undefined => {
+		/**
+		 * @returns WindowAlias of the focused window
+		 */
+		getFocus: (): WindowAlias | undefined => {
 			checkDirectoryPermission(this.directory, "windows");
 
 			const target = getWindowOfId(focus);

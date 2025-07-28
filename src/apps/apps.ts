@@ -8,7 +8,7 @@ import * as uikit from "../lib/uiKit/uiKit.js";
 import { blobify, translateAllBlobURIsToDirectories } from "../lib/blobify.js";
 import { focus, GraphicalWindow, windows } from "../windows/windows.js";
 import { AppInitialisationError, ImportError } from "../errors.js";
-import AppWaitingObject from "./appWaitingObject.js";
+import ProcessWaitingObject from "./appWaitingObject.js";
 import { ApplicationAuthorisationAPI } from "../security/env.js";
 import { defaultUser } from "../security/users.js";
 import { rewriteImportsAsync } from "./appsImportReplacements.js";
@@ -60,6 +60,12 @@ export function getProcessFromID(id: number) {
 
 type executionFiletype = "js";
 
+/**
+ * 
+ * @param directory - Directory of the root of the application to execute from
+ * @param args - Arguements to be passed to the process
+ * @returns an Object containing a promise with the Process Waiting object - this promise will resolve when the process exits, and return the value the process exited with.
+ */
 export async function execute(directory: string, args: any[] = []) {
 	const get = async (dir: string, throwIfEmpty: Boolean = true) => {
 		const rel = fs.resolve(directory, dir);
@@ -142,7 +148,7 @@ export async function execute(directory: string, args: any[] = []) {
 	await procExec(live, "init");
 
 	return {
-		promise: AppWaitingObject(live)
+		promise: ProcessWaitingObject(live)
 	};
 }
 
@@ -195,6 +201,11 @@ export async function showPrompt(
 	}
 }
 
+/**
+ * Removes a process from execution
+ * @param proc - the Process object of the process
+ * @param isDueToCrash - whether this is from a crash - true means the process' terminate function is not called.
+ */
 export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
 	const idx = processes.indexOf(proc);
 

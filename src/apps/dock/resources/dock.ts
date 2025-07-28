@@ -1,7 +1,7 @@
 import { Renderer } from "../../../lib/uiKit/uiKit";
 import {
 	ApplicationAuthorisationAPI,
-	windowAlias
+	WindowAlias
 } from "../../../security/env";
 import dockAndDesktop from "../tcpsys/app";
 
@@ -13,7 +13,7 @@ export default class dock {
 
 	dockHeight: number = 50;
 	dockPadding: number = 10;
-	wins: windowAlias[] = [];
+	wins: WindowAlias[] = [];
 	ok: boolean = false;
 
 	constructor(parent: dockAndDesktop) {
