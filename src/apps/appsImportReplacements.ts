@@ -7,7 +7,7 @@ const blobCache = new Map<string, string>();
 
 /**
  *
- * @param path The directory which should be converted to a blob, assuming it's not cached.
+ * @param - path The directory which should be converted to a blob, assuming it's not cached.
  * @returns The contents of the directory, as a blob.
  */
 async function blobifyModule(path: string): Promise<string> {
@@ -30,8 +30,8 @@ async function blobifyModule(path: string): Promise<string> {
 }
 
 /**
- * @param code the code which import replacements should be applied to
- * @param currentPath the directory from which relative imports will be resolved from
+ * @param - code the code which import replacements should be applied to
+ * @param - currentPath the directory from which relative imports will be resolved from
  * @returns the code with all imports resolved to blobs.
  */
 export async function rewriteImportsAsync(
@@ -67,6 +67,7 @@ export async function rewriteImportsAsync(
 /**
  *
  * @param path The path to return the imports of
+ * @param - path The path to return the imports of
  * @returns the exports of the path
  */
 export async function include(path: string): Promise<any> {

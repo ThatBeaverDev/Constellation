@@ -22,7 +22,7 @@ export class InstallationError extends Error {
 export class UIError extends Error {
 	constructor(message: string) {
 		super(message);
-		this.name = "ImportError";
+		this.name = "UIError";
 	}
 }
 

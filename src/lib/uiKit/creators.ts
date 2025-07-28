@@ -34,12 +34,11 @@ export default class uiKitCreators {
 		icon.style.cssText = `left: ${x}px; top: ${y}px; width: ${24 * scale}px; height: ${24 * scale}px;`;
 
 		this.#window.body.appendChild(icon);
-		const live = document.getElementById(icon.id);
 
-		if (live == null)
+		if (icon == null)
 			throw new UIError("uikit element has disappeared in processing");
 
-		return live;
+		return icon;
 	};
 
 	uikitText = (x = 0, y = 0, string = "", size: number) => {
@@ -51,12 +50,11 @@ export default class uiKitCreators {
 		text.style.cssText = `left: ${x}px; top: ${y}px; font-size: ${size}px;`;
 
 		this.#window.body.appendChild(text);
-		const live = document.getElementById(text.id);
 
-		if (live == null)
+		if (text == null)
 			throw new UIError("uikit element has disappeared in processing");
 
-		return live;
+		return text;
 	};
 
 	uikitButton = (
@@ -75,13 +73,11 @@ export default class uiKitCreators {
 		button.style.cssText = `left: ${x}px; top: ${y}px; font-size: ${size}px;`;
 
 		this.#window.body.appendChild(button);
-		// @ts-ignore // query selector doesn't work for this since we have numbers in the ID
-		const live: HTMLButtonElement = document.getElementById(button.id);
 
-		if (live == null)
+		if (button == null)
 			throw new UIError("uikit element has disappeared in processing");
 
-		live.addEventListener(
+		button.addEventListener(
 			"pointerdown",
 			(event: MouseEvent) => {
 				event.preventDefault();
@@ -105,7 +101,7 @@ export default class uiKitCreators {
 			}
 		);
 
-		return live;
+		return button;
 	};
 
 	uikitTextbox = (
@@ -141,17 +137,15 @@ export default class uiKitCreators {
 		}
 
 		this.#window.body.appendChild(textbox);
-		// @ts-expect-error
-		const live: HTMLInputElement = document.getElementById(textbox.id);
 
-		if (live == null)
+		if (textbox == null)
 			throw new UIError("uikit element has disappeared in processing");
 
-		live.addEventListener(
+		textbox.addEventListener(
 			"keydown",
 			(event) =>
 				setTimeout(() => {
-					const val = String(live.value);
+					const val = String(textbox.value);
 					if (event.code == "Enter") {
 						if (typeof callbacks.enter !== "function") return;
 
@@ -167,9 +161,9 @@ export default class uiKitCreators {
 
 		if (options.isEmpty == false)
 			textbox.value = String(this.textboxElem?.value || ""); // make the value stay
-		this.textboxElem = live;
+		this.textboxElem = textbox;
 
-		return live;
+		return textbox;
 	};
 
 	uikitVerticalLine = (x: number, y: number, height: number) => {
@@ -180,12 +174,11 @@ export default class uiKitCreators {
 		line.style.cssText = `left: ${x}px; top: ${y}px; height: ${height}px;`;
 
 		this.#window.body.appendChild(line);
-		const live = document.getElementById(line.id);
 
-		if (live == null)
+		if (line == null)
 			throw new UIError("uikit element has disappeared in processing");
 
-		return live;
+		return line;
 	};
 
 	uikitHorizontalLine = (x: number, y: number, width: number) => {
@@ -196,12 +189,11 @@ export default class uiKitCreators {
 		line.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px;`;
 
 		this.#window.body.appendChild(line);
-		const live = document.getElementById(line.id);
 
-		if (live == null)
+		if (line == null)
 			throw new UIError("uikit element has disappeared in processing");
 
-		return live;
+		return line;
 	};
 
 	uikitProgressBar = (
@@ -226,12 +218,11 @@ export default class uiKitCreators {
 		bar.innerHTML = progressor.outerHTML;
 
 		this.#window.body.appendChild(bar);
-		const live = document.getElementById(bar.id);
 
-		if (live == null)
+		if (bar == null)
 			throw new UIError("uikit element has disappeared in processing");
 
-		return live;
+		return bar;
 	};
 
 	uikitTextarea = (
@@ -256,16 +247,14 @@ export default class uiKitCreators {
 		}
 
 		this.#window.body.appendChild(area);
-		// @ts-expect-error
-		const live: HTMLTextAreaElement = document.getElementById(area.id);
 
-		if (live == null)
+		if (area == null)
 			throw new UIError("uikit element has disappeared in processing");
 
-		live.addEventListener(
+		area.addEventListener(
 			"keydown",
 			(event) => {
-				const val = String(live.value);
+				const val = String(area.value);
 
 				if (event.code == "Enter") {
 					if (typeof callbacks.enter !== "function") return;
@@ -280,12 +269,12 @@ export default class uiKitCreators {
 			{ signal: this.#signal }
 		);
 
-		if (focus == this.#window.winID) live.focus();
+		if (focus == this.#window.winID) area.focus();
 
 		area.value = String(this.textboxElem?.value || ""); // make the value stay
-		this.textboxElem = live;
+		this.textboxElem = area;
 
-		return live;
+		return area;
 	};
 
 	uikitBox = (
@@ -301,12 +290,11 @@ export default class uiKitCreators {
 		box.className = "uikitBox";
 
 		this.#window.body.appendChild(box);
-		const live = document.getElementById(box.id);
 
-		if (live == null)
+		if (box == null)
 			throw new UIError("uikit element has disappeared in processing");
 
-		return live;
+		return box;
 	};
 	uikitCanvas2D = (
 		x: number,
