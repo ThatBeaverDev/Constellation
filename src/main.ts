@@ -82,8 +82,12 @@ async function main() {
 	setDirectoryPermission(coreExecDirectory, "managePermissions", true);
 	await apps.execute(coreExecDirectory);
 
+	let ok = true;
 	setInterval(async () => {
+		if (ok == false) return;
+		ok = false;
 		await apps.run();
+		ok = true;
 	}, 50);
 }
 
