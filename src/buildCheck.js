@@ -1,7 +1,32 @@
 // importer system
 // made to inform the user the system is not built yet and needs to be built to prevent an error.
 
+function SystemInitialiserTimestamp(
+	label,
+	start,
+	subset = "undefined",
+	colour = "primary"
+) {
+	if (console.timeStamp == undefined) return;
+
+	const end = performance.now();
+
+	// @ts-expect-error
+	console.timeStamp(
+		label,
+		start,
+		end,
+		"SystemInitialiser",
+		"ConstellationCore",
+		colour
+	);
+}
+
+const start = performance.now();
+
 async function check() {
+	const start = performance.now();
+
 	const src = await fetch("/build/date.txt");
 
 	if (src.status !== 200) {
@@ -52,6 +77,8 @@ async function check() {
 		style.textContent =
 			':root {--wallpaper-url: "/wallpapers/Sahara Night Sky.jpg"}';
 		document.body.appendChild(style);
+
+		SystemInitialiserTimestamp("Report no Build", start);
 	} else {
 		const main = document.createElement("script");
 		main.type = "module";
@@ -59,7 +86,11 @@ async function check() {
 		main.defer = "true";
 
 		document.body.appendChild(main);
+
+		SystemInitialiserTimestamp("Trigger system Startup", start);
 	}
 }
 
 check();
+
+SystemInitialiserTimestamp("Startup /src/buildCheck.js", start);

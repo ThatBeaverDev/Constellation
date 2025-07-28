@@ -1,6 +1,7 @@
 import { setStatus } from "../constellation.config.js";
 import { InstallationError } from "../errors.js";
 import fs from "../io/fs.js";
+import { installationTimestamp } from "./index.js";
 
 import { files } from "./installation.config.js";
 
@@ -15,6 +16,8 @@ function blobToDataURL(blob: Blob) {
 }
 
 async function downloadAndConvert(URL: string) {
+	const start = performance.now();
+
 	try {
 		const response = await fetch(URL);
 		if (!response.ok) {
@@ -30,6 +33,8 @@ async function downloadAndConvert(URL: string) {
 }
 
 export async function writeFiles() {
+	const start = performance.now();
+
 	setStatus(`Installation : Writing Files...`);
 
 	for (const location in files) {
@@ -51,17 +56,43 @@ export async function writeFiles() {
 		let content;
 		let json;
 		switch (type) {
-			case "text":
+			case "text": {
+				const start = performance.now();
+
 				setStatus(`Installation : Cloning ${location}`);
+
+				const startNetwork = performance.now();
 				content = await (await fetch(location)).text();
+				installationTimestamp(
+					"Download File",
+					startNetwork,
+					"tertiary-dark"
+				);
 
 				await fs.writeFile(directory, content);
 
+				installationTimestamp(
+					`Copy text file to ${directory}`,
+					start,
+					"secondary-light"
+				);
+
 				break;
+			}
 			case "jsonFilesIndex": {
+				const start = performance.now();
+
 				setStatus(`Installation : Unpackaging ${location}`);
 
+				const startNetwork = performance.now();
 				content = await (await fetch(location)).text();
+				installationTimestamp(
+					"Download package",
+					startNetwork,
+					"tertiary-dark"
+				);
+
+				const startDirectories = performance.now();
 
 				await fs.mkdir(directory);
 
@@ -78,6 +109,13 @@ export async function writeFiles() {
 
 					await fs.mkdir(relative);
 				}
+
+				installationTimestamp(
+					"Create directories",
+					startDirectories,
+					"secondary-dark"
+				);
+				const startFiles = performance.now();
 
 				const awaitFiles = [];
 				for (const path in json.files) {
@@ -106,7 +144,15 @@ export async function writeFiles() {
 					await item;
 				}
 
+				installationTimestamp(
+					"Write Files",
+					startFiles,
+					"secondary-dark"
+				);
+
 				if (json.files["postunpkg.js"] !== undefined) {
+					const startPostUnpackagejs = performance.now();
+
 					const incl = await env.include(
 						fs.resolve(directory, "postunpkg.js")
 					);
@@ -116,16 +162,42 @@ export async function writeFiles() {
 					if (typeof fnc == "function") {
 						fnc(directory);
 					}
+
+					installationTimestamp(
+						"Execute postunpkg.js file",
+						startPostUnpackagejs,
+						"secondary-dark"
+					);
 				}
+
+				installationTimestamp(
+					`Unpackage idx for ${directory}`,
+					start,
+					"secondary-light"
+				);
 
 				break;
 			}
 			case "binary": {
+				const start = performance.now();
+
 				setStatus(`Installation : Cloning and Encoding ${location}`);
 
+				const startNetwork = performance.now();
 				content = await downloadAndConvert(location);
+				installationTimestamp(
+					"Download package",
+					startNetwork,
+					"tertiary-dark"
+				);
 
 				await fs.writeFile(directory, content);
+
+				installationTimestamp(
+					`Copy binary file to ${directory}`,
+					start,
+					"secondary-light"
+				);
 
 				break;
 			}
@@ -133,4 +205,6 @@ export async function writeFiles() {
 				throw new InstallationError("Unknown filetype: " + type);
 		}
 	}
+
+	installationTimestamp("Write Files", start, "secondary");
 }

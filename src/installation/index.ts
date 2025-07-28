@@ -4,8 +4,10 @@ import { writeFiles } from "./files.js";
 
 import { reapplyStyles } from "../windows/windows.js";
 import { setStatus } from "../constellation.config.js";
+import { DevToolsColor, performanceLog } from "../lib/debug.js";
 
 export async function install() {
+	const start = performance.now();
 	setStatus(`Installation : Initialising`);
 
 	try {
@@ -20,4 +22,14 @@ export async function install() {
 	}
 
 	setStatus("Installation : Complete");
+
+	installationTimestamp("Install System", start, "primary");
+}
+
+export function installationTimestamp(
+	label: string,
+	start: DOMHighResTimeStamp,
+	colour: DevToolsColor = "secondary"
+) {
+	performanceLog(label, start, "SystemInstallation", colour);
 }

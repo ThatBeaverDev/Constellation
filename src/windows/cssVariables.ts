@@ -1,4 +1,5 @@
 import * as conf from "../constellation.config.js";
+import { windowsTimestamp } from "./windows.js";
 
 let live: HTMLElement;
 
@@ -26,6 +27,8 @@ export function setCSSVariable(key: string, value: string) {
 }
 
 function refreshCSS() {
+	const start = performance.now();
+
 	// construct css
 	let css = ":root {\n";
 	for (const [key, value] of Object.entries(vars)) {
@@ -34,4 +37,6 @@ function refreshCSS() {
 	}
 	css += "}";
 	live.textContent = css;
+
+	windowsTimestamp("Refresh Variable CSS", start);
 }

@@ -2,6 +2,17 @@ import { getIcon } from "../lib/icons.js";
 import { Application } from "../apps/executables.js";
 import { terminate } from "../apps/apps.js";
 import * as css from "./cssVariables.js";
+import { DevToolsColor, performanceLog } from "../lib/debug.js";
+
+const start = performance.now();
+
+export function windowsTimestamp(
+	label: string,
+	start: DOMHighResTimeStamp,
+	colour: DevToolsColor = "secondary"
+) {
+	performanceLog(label, start, "WindowSystem", colour);
+}
 
 // constants
 
@@ -243,6 +254,7 @@ export class GraphicalWindow {
 	iconName: string = "app-window-mac";
 
 	reposition() {
+		const start = performance.now();
 		const c = this.container;
 
 		const width = c.dataset.width + "px";
@@ -270,6 +282,8 @@ export class GraphicalWindow {
 		if (c.style.zIndex !== zIndex) {
 			c.style.zIndex = zIndex;
 		}
+
+		windowsTimestamp(`Reposition window ${this.winID}`, start);
 	}
 
 	move(x?: number, y?: number, z?: number) {
@@ -369,6 +383,8 @@ export class GraphicalWindow {
 	}
 
 	remove() {
+		const start = performance.now();
+
 		// animate the window's removal
 		this.container.animate(
 			[
@@ -392,6 +408,8 @@ export class GraphicalWindow {
 			windows.splice(idx, 1);
 
 			updateWindows();
+
+			windowsTimestamp(`Close Window ${this.winID}`, start);
 		};
 
 		setTimeout(del, 150);
@@ -411,6 +429,7 @@ export function getWindowOfId(id: number) {
 }
 
 export function focusWindow(id: number) {
+	const start = performance.now();
 	const target = getWindowOfId(id);
 
 	if (target == undefined) {
@@ -433,6 +452,8 @@ export function focusWindow(id: number) {
 		target.position.top,
 		windowTilingNumber++
 	);
+
+	windowsTimestamp(`Focus window ${id}`, start);
 }
 
 export function setMinimiseEffect(effect: string) {
@@ -440,6 +461,8 @@ export function setMinimiseEffect(effect: string) {
 }
 
 function updateWindows() {
+	const start = performance.now();
+
 	let x = 0;
 	let y = 0;
 
@@ -467,6 +490,8 @@ function updateWindows() {
 
 		win.reposition();
 	});
+
+	windowsTimestamp("Update Windows", start);
 }
 
 window.addEventListener("resize", () => updateWindows());
@@ -478,11 +503,15 @@ function preventBehavior(e: TouchEvent) {
 document.addEventListener("touchmove", preventBehavior, { passive: false });
 
 export function newWindow(title: string, ApplicationObject: Application) {
+	const start = performance.now();
+
 	const win = new GraphicalWindow(title, ApplicationObject);
 
 	focusWindow(win.winID);
 
 	updateWindows();
+
+	windowsTimestamp("Create new Window", start);
 
 	return {
 		id: win.winID,
@@ -500,34 +529,33 @@ styleElem.id = String(window.renderID++);
 styleElem.className = "windowsAnimationStyles";
 
 document.body.appendChild(styleElem);
-const live = document.getElementById(styleElem.id)!;
 
 async function updateLiveStyling() {
-	const fnc = async () => {
-		console.debug(
-			"Loading windowing CSS for minimise animation: " + minimiseAnimation
-		);
+	const start = performance.now();
 
-		const css = await env.fs.readFile(
-			"/System/windows/" + minimiseAnimation + ".css"
-		);
+	console.debug(
+		"Loading windowing CSS for minimise animation: " + minimiseAnimation
+	);
 
-		if (!css.ok) {
-			return;
-		}
-		if (css.data == undefined) {
-			return;
-		}
+	const css = await env.fs.readFile(
+		"/System/windows/" + minimiseAnimation + ".css"
+	);
 
-		console.debug(
-			"CSS retrieved successfully for minimise animation: " +
-				minimiseAnimation
-		);
+	if (!css.ok) {
+		return;
+	}
+	if (css.data == undefined) {
+		return;
+	}
 
-		live.textContent = css.data;
-	};
+	console.debug(
+		"CSS retrieved successfully for minimise animation: " +
+			minimiseAnimation
+	);
 
-	setTimeout(fnc, 500);
+	styleElem.textContent = css.data;
+
+	windowsTimestamp("Update CSS Styling", start);
 }
 
 setInterval(() => {
@@ -536,3 +564,5 @@ setInterval(() => {
 		updateLiveStyling();
 	}
 });
+
+windowsTimestamp("Startup of src/windows/windows.ts", start, "primary");

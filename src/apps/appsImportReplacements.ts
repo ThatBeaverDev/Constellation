@@ -1,4 +1,5 @@
 import { default as fs, readFile, resolve } from "../io/fs.js";
+import { AppsTimeStamp } from "./apps.js";
 
 /**
  * a Cache of blobs which *never* invalidates! this will surely cause a some problems.
@@ -38,6 +39,8 @@ export async function rewriteImportsAsync(
 	code: string,
 	currentPath: string
 ): Promise<string> {
+	const start = performance.now();
+
 	// regex
 	const importRegex = /import\s+(.*?)\s+from\s+["'](.+?)["']/g;
 
@@ -61,12 +64,14 @@ export async function rewriteImportsAsync(
 	for (const { full, replacement } of rewritten) {
 		code = code.replace(full, replacement);
 	}
+
+	AppsTimeStamp(`Rewrite imports of code at ${currentPath}`, start);
+
 	return code;
 }
 
 /**
  *
- * @param path The path to return the imports of
  * @param - path The path to return the imports of
  * @returns the exports of the path
  */
