@@ -36,11 +36,7 @@ export function newContext(
 	newTextButton(container, 0);
 
 	document.body.appendChild(container);
-	const live = document.getElementById(container.id)!;
-
-	console.log(live);
-
-	return live;
+	return container;
 }
 
 export class ContextMenu {

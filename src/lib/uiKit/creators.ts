@@ -1,9 +1,12 @@
 import { UIError } from "../../errors.js";
 import { GraphicalWindow, focus } from "../../windows/windows.js";
+import { dataUriToBlobUrl } from "../blobify.js";
 import { getIcon } from "../icons.js";
 import {
+	canvasPosition,
 	canvasRenderingStep,
 	step,
+	uiKitTimestamp,
 	uikitBoxConfig,
 	uikitCanvasOptions
 } from "./definitions.js";
@@ -306,29 +309,29 @@ export default class uiKitCreators {
 	) => {
 		const canvas = document.createElement("canvas");
 		canvas.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;`;
+		canvas.width = width;
+		canvas.height = height;
 		canvas.id = String(window.renderID++);
 		canvas.className = "uikitCanvas";
 
 		this.#window.body.append(canvas);
-		const live: HTMLCanvasElement | null = document.querySelector(
-			"canvas.uikitCanvas#" + canvas.id
-		);
 
-		if (live == null)
-			throw new UIError("uikit element has disappeared in processing");
-
-		const ctx = live.getContext("2d");
+		const ctx = canvas.getContext("2d");
 
 		if (ctx == null) throw new Error("canvas ctx is null");
 
 		for (const st of renderingSteps) {
 			const d = st.data;
 
+			const start = performance.now();
+
 			switch (st.type) {
 				case "line":
 					const start = d.start;
 					const mids = d.mids;
 					const end = d.end;
+
+					ctx.strokeStyle = d.colour;
 
 					ctx.beginPath();
 					ctx.moveTo(start.x, start.y);
@@ -341,9 +344,63 @@ export default class uiKitCreators {
 					ctx.stroke();
 
 					break;
+				case "rectangle":
+					const pos1: canvasPosition = d.position1;
+					const pos2: canvasPosition = d.position2;
+
+					const width = Math.abs(pos2.x - pos1.x);
+					const height = Math.abs(pos2.y - pos1.y);
+
+					const anchor: canvasPosition = {
+						x: Math.min(pos1.x, pos2.x),
+						y: Math.min(pos1.y, pos2.y)
+					};
+
+					ctx.fillStyle = d.backgroundColour;
+					ctx.strokeStyle = d.borderColour;
+
+					ctx.fillRect(anchor.x, anchor.y, width, height);
+					ctx.strokeRect(anchor.x, anchor.y, width, height);
+
+					break;
+				case "image": {
+					const pos: canvasPosition = d.position;
+					const url = d.url;
+
+					function getDataUriKey(uri: string): string {
+						if (dataUriKeyMap[uri]) return dataUriKeyMap[uri];
+						const key = `d${dataUriCounter++}`;
+						dataUriKeyMap[uri] = key;
+						return key;
+					}
+
+					const key = getDataUriKey(url);
+
+					let image;
+					if (imageCache[key] == undefined) {
+						image = new Image();
+						image.src = dataUriToBlobUrl(d.url);
+						imageCache[key] = image;
+					} else {
+						image = imageCache[key];
+					}
+
+					ctx.drawImage(image, pos.x, pos.y, d.width, d.height);
+
+					break;
+				}
 			}
+
+			uiKitTimestamp(`uikitCanvas2D ${st.type} update`, start);
 		}
 
-		return live;
+		return canvas;
 	};
 }
+
+const imageCache: Record<string, HTMLImageElement> = {};
+const dataUriKeyMap: Record<string, string> = {};
+let dataUriCounter = 0;
+
+// @ts-expect-error
+window.imageCache = imageCache;
