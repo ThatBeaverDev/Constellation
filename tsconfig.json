@@ -21,7 +21,8 @@
 	"exclude": [
 		"build",
 		"src/apps/app-template",
-		"src/apps/types"
+		"src/apps/types",
+		"src/lib/external/browserfs.*"
 	],
 	"watchOptions": {
 		"watchFile": "useFsEvents",
