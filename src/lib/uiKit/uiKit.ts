@@ -126,6 +126,10 @@ export class Renderer {
 	}
 	restoreWindow() {
 		this.#window.unminimise();
+		this.#window.unfullscreen();
+	}
+	maximiseWindow() {
+		this.#window.fullscreen();
 	}
 
 	#items: any[] = [];
