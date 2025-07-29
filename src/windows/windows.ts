@@ -214,6 +214,17 @@ export class GraphicalWindow {
 		// buttons
 		const closePointerDown = () => this.close();
 		this.closeButton.addEventListener("pointerdown", closePointerDown);
+		const fullscreenPointerDown = () => {
+			if (this.fullscreened) {
+				this.unfullscreen();
+			} else {
+				this.fullscreen();
+			}
+		};
+		this.maximiseButton.addEventListener(
+			"pointerdown",
+			fullscreenPointerDown
+		);
 
 		const minimisePointerDown = () => this.minimise();
 		this.minimiseButton.addEventListener(
@@ -348,10 +359,29 @@ export class GraphicalWindow {
 		}
 	}
 	minimise() {
+		this.unfullscreen();
 		this.container.classList.add("gone");
 	}
 	unminimise() {
 		this.container.classList.remove("gone");
+	}
+
+	fullscreen() {
+		this.unminimise();
+		this.container.classList.add("fullscreenedWindow");
+	}
+	unfullscreen() {
+		this.container.classList.remove("fullscreenedWindow");
+	}
+	get fullscreened() {
+		return this.container.classList.contains("fullscreenedWindow");
+	}
+	set fullscreened(value: boolean) {
+		if (value == true) {
+			this.fullscreen();
+		} else {
+			this.unfullscreen();
+		}
 	}
 
 	visible: boolean = true;
