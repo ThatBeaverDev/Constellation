@@ -1,6 +1,7 @@
 import { setStatus } from "../constellation.config.js";
 import { InstallationError } from "../errors.js";
 import fs from "../io/fs.js";
+import uiKitCreators from "../lib/uiKit/creators.js";
 import { installationTimestamp } from "./index.js";
 
 import { files } from "./installation.config.js";
@@ -25,9 +26,15 @@ async function downloadAndConvert(URL: string) {
 		}
 		const blob = await response.blob();
 		const dataURL = await blobToDataURL(blob);
+		installationTimestamp(`Download and Convert ${URL}`, start);
 		return dataURL;
 	} catch (error) {
 		console.warn(error);
+		installationTimestamp(
+			`Download and Convert ${URL} [failed]`,
+			start,
+			"error"
+		);
 		return null;
 	}
 }
@@ -36,6 +43,35 @@ export async function writeFiles() {
 	const start = performance.now();
 
 	setStatus(`Installation : Writing Files...`);
+
+	// download everything simultaneously
+	const downloadingContents: Record<string, Promise<Response>> = {};
+	for (const location in files) {
+		downloadingContents[location] = fetch(location);
+	}
+
+	// wait for it all to download and become text simultaneously
+	const downloadedContents: Record<string, string> = {};
+	for (const location in files) {
+		const start = performance.now();
+
+		const response = await downloadingContents[location];
+
+		if (!response.ok) {
+			installationTimestamp("Download File [failed]", start, "error");
+			throw new Error(`File failed to download: ${location}`);
+		}
+
+		downloadedContents[location] = await response.text();
+
+		installationTimestamp(
+			`Download File (${location})`,
+			start,
+			"tertiary-dark"
+		);
+	}
+
+	const writingWaitlist: Promise<any>[] = [];
 
 	for (const location in files) {
 		let directory;
@@ -61,15 +97,9 @@ export async function writeFiles() {
 
 				setStatus(`Installation : Cloning ${location}`);
 
-				const startNetwork = performance.now();
-				content = await (await fetch(location)).text();
-				installationTimestamp(
-					"Download File",
-					startNetwork,
-					"tertiary-dark"
-				);
+				content = downloadedContents[location];
 
-				await fs.writeFile(directory, content);
+				writingWaitlist.push(fs.writeFile(directory, content));
 
 				installationTimestamp(
 					`Copy text file to ${directory}`,
@@ -84,13 +114,7 @@ export async function writeFiles() {
 
 				setStatus(`Installation : Unpackaging ${location}`);
 
-				const startNetwork = performance.now();
-				content = await (await fetch(location)).text();
-				installationTimestamp(
-					"Download package",
-					startNetwork,
-					"tertiary-dark"
-				);
+				content = downloadedContents[location];
 
 				const startDirectories = performance.now();
 
@@ -117,7 +141,6 @@ export async function writeFiles() {
 				);
 				const startFiles = performance.now();
 
-				const awaitFiles = [];
 				for (const path in json.files) {
 					const data = json.files[path];
 					const relative = fs.resolve(directory, path);
@@ -126,10 +149,12 @@ export async function writeFiles() {
 
 					switch (type) {
 						case "string":
-							awaitFiles.push(fs.writeFile(relative, data));
+							writingWaitlist.push(fs.writeFile(relative, data));
 							break;
 						case "binary":
-							awaitFiles.push(fs.writeFile(relative, data.data));
+							writingWaitlist.push(
+								fs.writeFile(relative, data.data)
+							);
 							break;
 						default:
 							throw new Error(
@@ -140,35 +165,11 @@ export async function writeFiles() {
 					}
 				}
 
-				for (const item of awaitFiles) {
-					await item;
-				}
-
 				installationTimestamp(
 					"Write Files",
 					startFiles,
 					"secondary-dark"
 				);
-
-				if (json.files["postunpkg.js"] !== undefined) {
-					const startPostUnpackagejs = performance.now();
-
-					const incl = await env.include(
-						fs.resolve(directory, "postunpkg.js")
-					);
-
-					const fnc = incl.default;
-
-					if (typeof fnc == "function") {
-						fnc(directory);
-					}
-
-					installationTimestamp(
-						"Execute postunpkg.js file",
-						startPostUnpackagejs,
-						"secondary-dark"
-					);
-				}
 
 				installationTimestamp(
 					`Unpackage idx for ${directory}`,
@@ -183,15 +184,9 @@ export async function writeFiles() {
 
 				setStatus(`Installation : Cloning and Encoding ${location}`);
 
-				const startNetwork = performance.now();
 				content = await downloadAndConvert(location);
-				installationTimestamp(
-					"Download package",
-					startNetwork,
-					"tertiary-dark"
-				);
 
-				await fs.writeFile(directory, content);
+				writingWaitlist.push(fs.writeFile(directory, content));
 
 				installationTimestamp(
 					`Copy binary file to ${directory}`,
@@ -204,6 +199,10 @@ export async function writeFiles() {
 			default:
 				throw new InstallationError("Unknown filetype: " + type);
 		}
+	}
+
+	for (const i in writingWaitlist) {
+		await writingWaitlist[i];
 	}
 
 	installationTimestamp("Write Files", start, "secondary");

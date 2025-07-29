@@ -61,15 +61,6 @@ export const files: any = {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreExecutables/Popup.appl"
 	},
-	// Rotur
-	"/build/apps/com.rotur.appl.idx": {
-		type: "jsonFilesIndex",
-		directory: "/Applications/Rotur.appl"
-	},
-	"/build/apps/com.rotur.backgr.idx": {
-		type: "jsonFilesIndex",
-		directory: "/Applications/Rotur.backgr"
-	},
 	// Settings
 	"/build/apps/com.constellation.settings.idx": {
 		type: "jsonFilesIndex",

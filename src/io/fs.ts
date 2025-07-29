@@ -213,7 +213,26 @@ const stat = async (directory: string): Promise<any> => {
 		});
 	});
 };
+const rmdir = async (directory: string): Promise<any> => {
+	const start = performance.now();
 
+	return new Promise((resolve: Function) =>
+		fs.rmdir(directory, () => {
+			filesystemTimestamp(`rmdir ${directory}`, start);
+			resolve();
+		})
+	);
+};
+const unlink = async (directory: string): Promise<any> => {
+	const start = performance.now();
+
+	return new Promise((resolve: Function) => {
+		fs.unless(directory, () => {
+			filesystemTimestamp(`unlink ${directory}`, start);
+			resolve();
+		});
+	});
+};
 export const resolve = (base = "/", target: string) => {
 	if (target.startsWith("/")) return target;
 
@@ -281,7 +300,9 @@ const main = {
 	normalize,
 	stat,
 	rename,
-	mkdir
+	mkdir,
+	rmdir,
+	unlink
 };
 
 export default main;
