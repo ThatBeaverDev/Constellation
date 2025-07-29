@@ -15,21 +15,13 @@ import { Renderer } from "./uiKit.js";
 export default class uiKitCreators {
 	#parent: Renderer;
 	#window: GraphicalWindow;
-	#controller: AbortController;
-	#signal: AbortSignal;
 	textboxElem: HTMLInputElement | HTMLTextAreaElement | undefined;
 	hasTextbox: boolean = false;
 
-	constructor(
-		parent: Renderer,
-		window: GraphicalWindow,
-		controller: AbortController
-	) {
+	constructor(parent: Renderer, window: GraphicalWindow) {
 		this.#parent = parent;
 
 		this.#window = window;
-		this.#controller = controller;
-		this.#signal = controller.signal;
 	}
 
 	uikitIcon = (x = 0, y = 0, name = "circle-help", scale = 1) => {
@@ -80,30 +72,6 @@ export default class uiKitCreators {
 		if (button == null)
 			throw new UIError("uikit element has disappeared in processing");
 
-		button.addEventListener(
-			"pointerdown",
-			(event: MouseEvent) => {
-				event.preventDefault();
-				switch (event.button) {
-					case 0:
-						// left click
-						leftClickCallback();
-						break;
-					case 1:
-						// middle click
-						// unused
-						break;
-					case 2:
-						// right click
-						rightClickCallback();
-						break;
-				}
-			},
-			{
-				signal: this.#signal
-			}
-		);
-
 		return button;
 	};
 
@@ -143,24 +111,6 @@ export default class uiKitCreators {
 
 		if (textbox == null)
 			throw new UIError("uikit element has disappeared in processing");
-
-		textbox.addEventListener(
-			"keydown",
-			(event) =>
-				setTimeout(() => {
-					const val = String(textbox.value);
-					if (event.code == "Enter") {
-						if (typeof callbacks.enter !== "function") return;
-
-						callbacks.enter(val);
-					} else {
-						if (typeof callbacks.update !== "function") return;
-
-						callbacks.update(event.key, val);
-					}
-				}, 2),
-			{ signal: this.#signal }
-		);
 
 		if (options.isEmpty == false)
 			textbox.value = String(this.textboxElem?.value || ""); // make the value stay
@@ -253,24 +203,6 @@ export default class uiKitCreators {
 
 		if (area == null)
 			throw new UIError("uikit element has disappeared in processing");
-
-		area.addEventListener(
-			"keydown",
-			(event) => {
-				const val = String(area.value);
-
-				if (event.code == "Enter") {
-					if (typeof callbacks.enter !== "function") return;
-
-					callbacks.enter(val);
-				} else {
-					if (typeof callbacks.update !== "function") return;
-
-					callbacks.update(event.key, val);
-				}
-			},
-			{ signal: this.#signal }
-		);
 
 		if (focus == this.#window.winID) area.focus();
 

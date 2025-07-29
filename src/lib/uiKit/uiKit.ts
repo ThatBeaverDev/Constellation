@@ -16,6 +16,7 @@ import {
 	uikitTextboxConfig
 } from "./definitions.js";
 import canvasKit from "./canvasKit.js";
+import uikitEventCreators from "./eventCreators.js";
 
 const uiKitStart = performance.now();
 
@@ -68,8 +69,8 @@ export class Renderer {
 	#displayedSteps: step[] = [];
 	elemID: number = 0;
 	// add abort controller to remove event listeners
-	#controller = new AbortController();
-	#signal: AbortSignal = this.#controller.signal;
+	controller = new AbortController();
+	signal: AbortSignal = this.controller.signal;
 	#context?: ContextMenu;
 
 	// window stuff
@@ -144,11 +145,9 @@ export class Renderer {
 		// @ts-ignore
 		this.#window = newWindow(this.#process.directory, process).data;
 
-		this.#creators = new uiKitCreators(
-			this,
-			this.#window,
-			this.#controller
-		);
+		this.#creators = new uiKitCreators(this, this.#window);
+
+		this.#eventCreators = new uikitEventCreators(this);
 	}
 
 	clear = () => {
@@ -380,6 +379,7 @@ export class Renderer {
 	};
 
 	readonly #creators: uiKitCreators;
+	readonly #eventCreators: uikitEventCreators;
 	readonly setContextMenu = (
 		x: number,
 		y: number,
@@ -404,11 +404,11 @@ export class Renderer {
 
 	#deleteElements() {
 		// remove all event listeners
-		this.#controller.abort();
+		this.controller.abort();
 
 		// recreate the AbortController so the next set can be bulk removed
-		this.#controller = new AbortController();
-		this.#signal = this.#controller.signal;
+		this.controller = new AbortController();
+		this.signal = this.controller.signal;
 
 		this.#displayedSteps = [];
 
@@ -513,9 +513,9 @@ export class Renderer {
 		this.#mustRedraw = false;
 
 		// Abort all listeners, but keep the elements unless they are removed
-		this.#controller.abort();
-		this.#controller = new AbortController();
-		this.#signal = this.#controller.signal;
+		this.controller.abort();
+		this.controller = new AbortController();
+		this.signal = this.controller.signal;
 
 		const newItems: HTMLElement[] = [];
 		const newDisplayedSteps: step[] = [];
@@ -548,15 +548,16 @@ export class Renderer {
 			if (stepChanged) {
 				if (oldElement) oldElement.remove();
 
-				const creator: (...args: any) => HTMLElement =
-					this.#creators[newStep.type];
+				const creator: (...args: any) => HTMLElement = this.#creators[
+					newStep.type
+				].bind(this.#creators);
 				if (!creator) {
 					throw new UIError(
 						`Creator is not defined for ${newStep.type}`
 					);
 				}
 
-				// Create fresh element
+				// run the creator
 				element = creator(...newStep.args);
 			} else {
 				element = oldElement!;
@@ -564,6 +565,19 @@ export class Renderer {
 
 			// add event listeners to the element
 			// the old element had all uiKit event listeners removed by the AbortController
+
+			// event creators manage element-type specific events
+			const eventCreator:
+				| ((element: HTMLElement, ...args: any) => void)
+				// @ts-expect-error
+				| undefined = this.#eventCreators[newStep.type];
+
+			if (typeof eventCreator === "function")
+				eventCreator.bind(this.#eventCreators)(
+					element,
+					...newStep.args
+				);
+
 			if (newStep.onClick !== undefined) {
 				element.classList.add("clickable");
 				element.style.setProperty(
@@ -603,7 +617,7 @@ export class Renderer {
 							return; // Skip mouse clicks on touch/pen
 						}
 					},
-					{ signal: this.#signal }
+					{ signal: this.signal }
 				);
 
 				element.addEventListener(
@@ -635,7 +649,7 @@ export class Renderer {
 								break;
 						}
 					},
-					{ signal: this.#signal }
+					{ signal: this.signal }
 				);
 
 				// Clear timer on end/cancel/leave
@@ -647,7 +661,7 @@ export class Renderer {
 				["pointerup", "pointercancel", "pointerleave"].forEach(
 					(eventName) => {
 						element.addEventListener(eventName, clearLongPress, {
-							signal: this.#signal
+							signal: this.signal
 						});
 					}
 				);
@@ -673,7 +687,7 @@ export class Renderer {
 							newStep.onClick.right(event.clientX, event.clientY);
 						}
 					},
-					{ signal: this.#signal }
+					{ signal: this.signal }
 				);
 			}
 
