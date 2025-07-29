@@ -10,6 +10,7 @@ export default class library extends Application {
 
 		this.renderer.setIcon("square-library");
 		this.renderer.windowName = "Library";
+		this.renderer.maximiseWindow();
 	}
 
 	async refresh() {
