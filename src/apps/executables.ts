@@ -7,7 +7,7 @@ import { defaultUser } from "../security/users.js";
 
 export let nextPID = 0;
 
-export interface ApplicationManifest {
+export interface ProgramManifest {
 	name: string;
 	description: string;
 	category:
