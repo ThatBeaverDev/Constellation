@@ -53,6 +53,10 @@ export type WindowAlias = {
 	unminimise: Function;
 	minimised: boolean;
 
+	fullscreen: Function;
+	unfullscreen: Function;
+	fullscreened: boolean;
+
 	show: Function;
 	hide: Function;
 
@@ -477,6 +481,10 @@ export class ApplicationAuthorisationAPI {
 			minimise: win.minimise.bind(win),
 			unminimise: win.unminimise.bind(win),
 			minimised: win.minimised,
+
+			fullscreen: win.fullscreen.bind(win),
+			unfullscreen: win.unfullscreen.bind(win),
+			fullscreened: win.fullscreened,
 
 			show: win.show.bind(win),
 			hide: win.hide.bind(win),
