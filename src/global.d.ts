@@ -39,5 +39,5 @@ declare global {
 	const Popup: new (directory: string, args: any[]) => executables.Popup;
 	const Module: new (directory: string, args: any[]) => executables.Module;
 
-	type ApplicationManifest = executables.ApplicationManifest;
+	type ApplicationManifest = executables.ProgramManifest;
 }
