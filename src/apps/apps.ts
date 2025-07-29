@@ -1,12 +1,11 @@
-import * as conf from "../constellation.config.js";
-
 import { Process } from "./executables.js";
 import * as executables from "./executables.js";
 
 import fs from "../io/fs.js";
 import * as uikit from "../lib/uiKit/uiKit.js";
-import { blobify, translateAllBlobURIsToDirectories } from "../lib/blobify.js";
 import { focus, GraphicalWindow, windows } from "../windows/windows.js";
+
+import { blobify, translateAllBlobURIsToDirectories } from "../lib/blobify.js";
 import { AppInitialisationError, ImportError } from "../errors.js";
 import ProcessWaitingObject from "./appWaitingObject.js";
 import { ApplicationAuthorisationAPI } from "../security/env.js";
