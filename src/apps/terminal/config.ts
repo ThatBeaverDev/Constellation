@@ -1,4 +1,4 @@
-export default {
+const manifest: ApplicationManifest = {
 	name: "Terminal",
 	description: "Constellation's builtin Terminal",
 	category: "Productivity",
@@ -6,3 +6,5 @@ export default {
 	version: 1,
 	icon: "square-terminal"
 };
+
+export default manifest;

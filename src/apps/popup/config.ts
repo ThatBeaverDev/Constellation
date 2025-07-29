@@ -1,4 +1,4 @@
-export default {
+const manifest: ApplicationManifest = {
 	name: "GraphicalPopup",
 	description: "a GUI Popup",
 	category: "Developer",
@@ -7,3 +7,5 @@ export default {
 	icon: "scroll-text",
 	userspace: false
 };
+
+export default ApplicationManifest;

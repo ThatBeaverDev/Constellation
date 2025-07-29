@@ -1,14 +1,13 @@
-import { MessageError } from "../errors.js";
 import { registerKeyboardShortcut } from "../io/keyboardShortcuts.js";
 import { Renderer } from "../lib/uiKit/uiKit.js";
 import { ApplicationAuthorisationAPI, associations } from "../security/env.js";
-import { execute, processes, terminate } from "./apps.js";
+import { terminate } from "./apps.js";
 import { IPCMessage, replyCallback, sendMessage } from "./messages.js";
 import { defaultUser } from "../security/users.js";
 
 export let nextPID = 0;
 
-interface ApplicationManifest {
+export interface ApplicationManifest {
 	name: string;
 	description: string;
 	category:
@@ -23,7 +22,12 @@ interface ApplicationManifest {
 		| "Utilities";
 	author: string;
 	version: number;
-	icon: string;
+	icon?: string;
+	dependencies?: string[];
+	/**
+	 * Whether this application should be exposed to the user and displayed in search etc.
+	 */
+	userspace?: boolean;
 }
 
 export class Framework {

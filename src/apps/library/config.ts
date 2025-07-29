@@ -1,4 +1,4 @@
-export default {
+const manifest = {
 	name: "Library",
 	description: "Constellation's App Manager and Launcher'",
 	category: "Productivity",
@@ -7,3 +7,5 @@ export default {
 	icon: "square-library",
 	userspace: false
 };
+
+export default manifest;

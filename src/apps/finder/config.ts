@@ -1,4 +1,4 @@
-export default {
+const manifest: ApplicationManifest = {
 	name: "Finder",
 	description: "Constellation's Default Files Explorer",
 	category: "Productivity",
@@ -6,3 +6,5 @@ export default {
 	version: 1,
 	icon: "folder-open"
 };
+
+export default manifest;

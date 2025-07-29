@@ -1,4 +1,4 @@
-export default {
+const manifest = {
 	name: "CoreExecutable",
 	description:
 		"Constellation's initialisation process, used to start the system.",
@@ -8,3 +8,5 @@ export default {
 	icon: "binary",
 	userspace: false
 };
+
+export default manifest;
