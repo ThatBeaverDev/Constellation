@@ -8,4 +8,4 @@ const manifest: ApplicationManifest = {
 	userspace: false
 };
 
-export default ApplicationManifest;
+export default manifest;
