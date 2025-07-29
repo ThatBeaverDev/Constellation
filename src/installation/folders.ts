@@ -9,7 +9,9 @@ export async function createFolders() {
 	setStatus(`Installation : Creating Folders...`);
 
 	for (const directory of folders) {
+		const start = performance.now();
 		await fs.mkdir(directory);
+		installationTimestamp(`Create ${directory}`, start);
 	}
 
 	installationTimestamp("Create Directories", start, "secondary");

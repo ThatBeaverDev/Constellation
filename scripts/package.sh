@@ -20,10 +20,6 @@ compile() {
     # Build Popup
     ./scripts/tcpkg build/apps/popup build/apps/com.constellation.popup.idx -override=true
 
-    # Build Rotur
-    ./scripts/tcpkg build/apps/rotur/appl build/apps/com.rotur.appl.idx -override=true
-    ./scripts/tcpkg build/apps/rotur/backgr build/apps/com.rotur.backgr.idx -override=true
-
     # Build System Settings
     ./scripts/tcpkg build/apps/settings build/apps/com.constellation.settings.idx -override=true
 

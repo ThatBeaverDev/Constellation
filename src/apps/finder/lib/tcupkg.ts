@@ -52,16 +52,4 @@ export default async function tcupkg(
 	for (const item of awaitFiles) {
 		await item;
 	}
-
-	if (json.files["postunpkg.js"] !== undefined) {
-		const incl = await env.include(
-			env.fs.resolve(directory, "postunpkg.js")
-		);
-
-		const fnc = incl.default;
-
-		if (typeof fnc == "function") {
-			fnc(directory);
-		}
-	}
 }
