@@ -192,6 +192,9 @@ body {
 
 	position: absolute;
 
+	min-width: 300px;
+	min-height: var(--window-header-height);
+
 	border-radius: var(--window-border-radius);
 	overflow: hidden;
 
@@ -225,11 +228,12 @@ body {
 	padding: 0;
 	margin: 0;
 	box-shadow: none;
-	
+
 	resize: none !important;
 }
 
 .invisible>.windowHeader {
+	min-height: 0px !important;
 	opacity: 0%;
 }
 
@@ -238,6 +242,7 @@ body {
 
 	width: 100%;
 	height: var(--window-header-height);
+	min-height: var(--window-header-height);
 	overflow: hidden;
 
 	position: relative;
