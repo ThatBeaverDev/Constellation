@@ -1,4 +1,4 @@
-export default {
+const manifest: ApplicationManifest = {
 	name: "Dock and Desktop",
 	description: "Constellation's Dock and Desktop",
 	category: "Productivity",
@@ -7,3 +7,5 @@ export default {
 	icon: "dock",
 	userspace: false
 };
+
+export default manifest;

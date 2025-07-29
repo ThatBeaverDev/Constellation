@@ -1,8 +1,10 @@
-export default {
+const manifest: ApplicationManifest = {
 	name: "System Settings",
 	description: "System Configuration Settings",
-	category: "System",
+	category: "Utilities",
 	author: "ThatBeaverDev",
 	version: 1,
 	icon: "cog"
 };
+
+export default manifest;

@@ -1,4 +1,4 @@
-export default {
+const manifest = {
 	name: "Keystone Search",
 	description: "Application Search UI",
 	category: "Productivity",
@@ -7,3 +7,5 @@ export default {
 	icon: "search",
 	userspace: false
 };
+
+export default manifest;

@@ -12,7 +12,8 @@
 		"lib": ["esnext", "ES2022", "DOM", "DOM.Iterable", "ES5", "ES6"],
 		"sourceMap": false,
 		"declaration": true,
-		"declarationDir": "types"
+		"declarationDir": "types",
+		"types": ["src/global.d.ts"]
 	},
 	"include": [
 		"src",
