@@ -180,6 +180,7 @@ body {
 * {
 	font-family: monospace;
 	white-space: pre;
+	line-height: 1.2;
 }
 
 .hidden {
