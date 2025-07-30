@@ -141,7 +141,9 @@ export default class KeystoneSearch extends Popup {
 			"Search for apps...",
 			{
 				update: () => this.search,
-				enter: () => {}
+				enter: () => {
+					this.selectItem(this.selector);
+				}
 			}
 		);
 
