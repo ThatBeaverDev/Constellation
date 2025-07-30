@@ -74,6 +74,7 @@ const windowPointerMove = (e: PointerEvent) => {
 	const y = e.clientY - offsetY;
 
 	target.move(x, y);
+	target.unfullscreen();
 };
 window.addEventListener("pointermove", windowPointerMove);
 
