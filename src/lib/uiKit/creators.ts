@@ -5,7 +5,6 @@ import { getIcon } from "../icons.js";
 import {
 	canvasPosition,
 	canvasRenderingStep,
-	step,
 	uiKitTimestamp,
 	uikitBoxConfig,
 	uikitCanvasOptions

@@ -22,63 +22,14 @@ import {
 import { Framework, Process } from "../apps/executables.js";
 import Shell from "../lib/shell.js";
 import { include } from "../apps/appsImportReplacements.js";
-import { securityTimestamp } from "./definitions.js";
+import {
+	directoryPointType as directoryPoint,
+	fsResponse,
+	securityTimestamp,
+	WindowAlias
 
 const start = performance.now();
 const name = "/System/security/env.js";
-
-// Types
-
-type fsResponse = {
-	data: any;
-	ok: Boolean;
-};
-
-type directoryPointType =
-	| "blockDevice"
-	| "characterDevice"
-	| "directory"
-	| "FIFO"
-	| "file"
-	| "socket"
-	| "symbolicLink"
-	| "none";
-
-export type WindowAlias = {
-	move: Function;
-	resize: Function;
-	close: Function;
-
-	minimise: Function;
-	unminimise: Function;
-	minimised: boolean;
-
-	fullscreen: Function;
-	unfullscreen: Function;
-	fullscreened: boolean;
-
-	show: Function;
-	hide: Function;
-
-	showHeader: Function;
-	hideHeader: Function;
-
-	name: string;
-	shortName?: string;
-	iconName: string;
-	winID: number;
-	applicationDirectory: string;
-
-	position: {
-		left: number;
-		top: number;
-		zIndex: number;
-	};
-	dimensions: {
-		width: number;
-		height: number;
-	};
-};
 
 export const associations: any = {};
 
@@ -313,7 +264,7 @@ export class ApplicationAuthorisationAPI {
 				};
 			}
 		},
-		typeOfFile: async (directory: string): Promise<directoryPointType> => {
+		typeOfFile: async (directory: string): Promise<directoryPoint> => {
 			const stat = await this.fs.stat(directory);
 
 			if (!stat.ok) {
@@ -364,7 +315,7 @@ export class ApplicationAuthorisationAPI {
 
 	expectFileType = async (
 		directory: string,
-		expectedType: directoryPointType
+		expectedType: directoryPoint
 	) => {
 		const fileType = await this.fs.typeOfFile(directory);
 
