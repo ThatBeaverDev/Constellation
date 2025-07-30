@@ -1,8 +1,6 @@
 import { Renderer } from "../../../lib/uiKit/uiKit";
-import {
-	ApplicationAuthorisationAPI,
-	WindowAlias
-} from "../../../security/env";
+import { ApplicationAuthorisationAPI } from "../../../security/env";
+import { WindowAlias } from "../../../security/definitions";
 import dockAndDesktop from "../tcpsys/app";
 
 export default class dock {
