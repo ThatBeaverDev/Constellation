@@ -71,7 +71,9 @@ async function main() {
 		"/System/CoreAssets/Sounds/boot/iMacG3.mp3"
 	);
 	const sound = new Audio(bootSound);
-	sound.play();
+	try {
+		sound.play();
+	} catch {}
 	sound.remove();
 
 	await users.init();
