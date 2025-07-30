@@ -1,5 +1,4 @@
 import fs from "../io/fs.js";
-import * as log from "../lib/logging.js";
 import { setStatus } from "../constellation.config.js";
 import { installationTimestamp } from "./index.js";
 
@@ -23,10 +22,12 @@ export async function rm_rf() {
 
 			const stats = await fs.stat(resolved);
 
-			const isFolder = stats.isDirectory();
+			const isFolder = await stats.isDirectory();
 
 			if (isFolder) {
 				directories.push(resolved);
+
+				await walk(resolved);
 			} else {
 				files.push(resolved);
 			}

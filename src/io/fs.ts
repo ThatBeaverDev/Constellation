@@ -227,7 +227,7 @@ const unlink = async (directory: string): Promise<any> => {
 	const start = performance.now();
 
 	return new Promise((resolve: Function) => {
-		fs.unless(directory, () => {
+		fs.unlink(directory, () => {
 			filesystemTimestamp(`unlink ${directory}`, start);
 			resolve();
 		});
