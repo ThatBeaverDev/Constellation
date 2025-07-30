@@ -169,11 +169,12 @@ export class Renderer {
 		x: number = 0,
 		y: number = 0,
 		name: string = "circle-help",
-		scale: number = 1
+		scale: number = 1,
+		colour: string = ""
 	) => {
 		const obj: step = {
 			type: "uikitIcon",
-			args: [x, y, name, scale]
+			args: [x, y, name, scale, colour]
 		};
 
 		return this.#steps.push(obj);
@@ -183,11 +184,12 @@ export class Renderer {
 		x: number,
 		y: number,
 		string: string,
-		size: number = 15
+		size: number = 15,
+		colour: string = ""
 	) => {
 		const obj: step = {
 			type: "uikitText",
-			args: [x, y, string, size]
+			args: [x, y, string, size, colour]
 		};
 		return this.#steps.push(obj);
 	};

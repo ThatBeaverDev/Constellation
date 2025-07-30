@@ -23,9 +23,19 @@ export default class uiKitCreators {
 		this.#window = window;
 	}
 
-	uikitIcon = (x = 0, y = 0, name = "circle-help", scale = 1) => {
+	uikitIcon = (
+		x = 0,
+		y = 0,
+		name = "circle-help",
+		scale = 1,
+		colour: string
+	) => {
 		const icon = getIcon(name);
-		icon.style.cssText = `left: ${x}px; top: ${y}px; width: ${24 * scale}px; height: ${24 * scale}px;`;
+		icon.style.left = `${x}px`;
+		icon.style.top = `${y}px`;
+		icon.style.width = `${scale * 24}px`;
+		icon.style.height = `${scale * 24}px`;
+		icon.style.color = colour;
 
 		this.#window.body.appendChild(icon);
 
@@ -35,13 +45,16 @@ export default class uiKitCreators {
 		return icon;
 	};
 
-	uikitText = (x = 0, y = 0, string = "", size: number) => {
+	uikitText = (x = 0, y = 0, string = "", size: number, colour: string) => {
 		const text = document.createElement("p");
 		text.className = "uikitText";
 
 		text.id = String(window.renderID++);
 		text.innerText = string;
-		text.style.cssText = `left: ${x}px; top: ${y}px; font-size: ${size}px;`;
+		text.style.left = `${x}px`;
+		text.style.top = `${y}px`;
+		text.style.fontSize = `${size}px`;
+		text.style.color = colour;
 
 		this.#window.body.appendChild(text);
 
