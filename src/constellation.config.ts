@@ -33,6 +33,8 @@ export const userDirectories = [
 	"Media/Pictures",
 	"Media/Videos"
 ];
+export const isDevmode =
+	new URL(window.location.href).searchParams.get("dev") !== null;
 
 export let status = "";
 export function setStatus(
@@ -40,9 +42,9 @@ export function setStatus(
 	state: "working" | "error" = "working"
 ) {
 	if (state == "error") {
-		console.error("BootStatus:", text);
+		console.error("[/System/installer.js] - ", text);
 	} else {
-		console.log("BootStatus:", text);
+		console.log("[/System/installer.js] - ", text);
 	}
 
 	status = String(text);
