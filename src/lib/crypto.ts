@@ -23,7 +23,7 @@ export async function sha512(text: string) {
 	const Uint16 = Uint16Array.from(
 		text.split("").map((letter) => letter.charCodeAt(0))
 	);
-	const hash = await window.crypto.subtle.digest("sha-256", Uint16);
+	const hash = await window.crypto.subtle.digest("sha-512", Uint16);
 
 	return _arrayBufferToBase64(hash);
 }
