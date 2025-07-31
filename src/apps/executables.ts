@@ -3,7 +3,7 @@ import { Renderer } from "../lib/uiKit/uiKit.js";
 import { ApplicationAuthorisationAPI, associations } from "../security/env.js";
 import { terminate } from "./apps.js";
 import { IPCMessage, replyCallback, sendMessage } from "./messages.js";
-import { defaultUser } from "../security/users.js";
+import { defaultUser, validatePassword } from "../security/users.js";
 
 export let nextPID = 0;
 
@@ -31,11 +31,17 @@ export interface ProgramManifest {
 }
 
 export class Framework {
-	constructor(directory: string, args: any[]) {
+	constructor(
+		directory: string,
+		args: any[],
+		user: string,
+		password: string
+	) {
 		this.directory = directory;
 		this.env = new ApplicationAuthorisationAPI(
 			directory,
-			defaultUser,
+			user,
+			password,
 			this
 		);
 		this.id = nextPID++;
@@ -43,6 +49,10 @@ export class Framework {
 		this.args = args;
 
 		this.sendmessage = this.sendmessage.bind(this);
+	}
+
+	async validateCredentials(user: string, password: string) {
+		await validatePassword(user, password);
 	}
 
 	readonly directory: string;
@@ -76,8 +86,13 @@ export class Framework {
 }
 
 export class Process extends Framework {
-	constructor(directory: string, args: any[]) {
-		super(directory, args);
+	constructor(
+		directory: string,
+		args: any[],
+		user: string,
+		password: string
+	) {
+		super(directory, args, user, password);
 	}
 
 	name: string | undefined; // use to name an app without including a temporary window header
@@ -142,21 +157,28 @@ export class Process extends Framework {
 	};
 
 	exit(value?: Exclude<any, null>) {
+		this.data = value;
+
 		terminate(this);
 
 		for (const i in this) {
+			if (i == "data") continue;
+
 			delete this[i];
 		}
-
-		this.data = value;
 	}
 }
 
 export class Module extends Framework {}
 
 export class Application extends Process {
-	constructor(directory: string, args: any[]) {
-		super(directory, args);
+	constructor(
+		directory: string,
+		args: any[],
+		user: string,
+		password: string
+	) {
+		super(directory, args, user, password);
 		this.renderer = new Renderer(this);
 	}
 
@@ -173,8 +195,13 @@ export class BackgroundProcess extends Process {}
 
 let popupNo = 25000;
 export class Popup extends Application {
-	constructor(directory: string, args: any[]) {
-		super(directory, args);
+	constructor(
+		directory: string,
+		args: any[],
+		user: string,
+		password: string
+	) {
+		super(directory, args, user, password);
 
 		const no = popupNo++;
 
@@ -187,7 +214,7 @@ export class Popup extends Application {
 
 	#windowPositioningInterval: number;
 
-	exit(value?: any) {
+	exit(value?: Exclude<any, null>) {
 		clearInterval(this.#windowPositioningInterval);
 
 		super.exit(value);

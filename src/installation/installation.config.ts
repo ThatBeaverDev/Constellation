@@ -1,4 +1,10 @@
 // /Users, /System, /Applications and /Temporary are premounted and don't need to be created.
+
+const url = new URL(window.location.href);
+const params = url.searchParams;
+
+const isAppdev = params.get("appdev") !== null;
+
 export const folders: string[] = [
 	"/System/CoreExecutables",
 	"/System/CoreComponents",
@@ -23,8 +29,6 @@ export const files: any = {
 	// libraries
 	"/build/syslib/pathinf.js": "/System/CoreLibraries/pathinf.js",
 	"/build/syslib/keyboardUtils.js": "/System/CoreLibraries/keyboardUtils.js",
-	"/build/syslib/userFileSelector.js":
-		"/System/CoreLibraries/userFileSelector.js",
 	"/build/syslib/blob.js": "/System/CoreLibraries/blob.js",
 	"/build/lib/external/fzf.js": "/System/CoreLibraries/fzf.js",
 	"/build/lib/external/flubber.min.js": "/System/CoreLibraries/flubber.js",
@@ -90,13 +94,13 @@ export const files: any = {
 	"/build/assets/sounds.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreAssets/Sounds"
+	},
+
+	"/build/apps/com.constellation.systemLoginInterface.idx": {
+		type: "jsonFilesIndex",
+		directory: "/System/CoreExecutables/systemLoginInterface.appl"
 	}
 };
-
-const url = new URL(window.location.href);
-const params = url.searchParams;
-
-const isAppdev = params.get("appdev") !== null;
 
 if (isAppdev) {
 	files["http://localhost:5172/app.idx"] = {
@@ -104,3 +108,28 @@ if (isAppdev) {
 		directory: "/Applications/developerApplication.appl"
 	};
 }
+
+/**
+ * Options for the user
+ */
+export interface options {
+	user: {
+		username: string;
+		displayName: string;
+		password: string;
+		profilePicture: string;
+		//language: string
+		//wallpaper: string
+	};
+}
+
+export const developmentOptions: options = {
+	user: {
+		username: "dev",
+		displayName: "Developer",
+		password: "dev",
+		profilePicture: "hammer"
+		//language: "",
+		//wallpaper: ""
+	}
+};

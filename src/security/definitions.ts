@@ -58,3 +58,15 @@ export type WindowAlias = {
 		height: number;
 	};
 };
+
+export type UserAlias = {
+	name: string;
+	fullName: string;
+	pictures: {
+		profile: string;
+	};
+	id: string;
+	directory: string;
+	lastLogin: number;
+	allowGraphicalLogin: boolean;
+};

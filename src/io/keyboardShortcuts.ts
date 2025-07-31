@@ -73,16 +73,6 @@ document.addEventListener("keydown", (e) => {
 
 		// insure the right main key is pressed
 		if (keyCode == cut.key) {
-			// insure the process is allowed to execute shortcuts
-			const isBackground = cut?.process instanceof BackgroundProcess;
-			const isFocused = cut?.process?.renderer?.window?.winID == focus;
-
-			const allowed = isBackground || isFocused;
-
-			if (!allowed) {
-				continue;
-			}
-
 			// loop through all the necessary modifiers to insure they are all pressed
 			let ok = true;
 			for (const i in cut.modifiers) {

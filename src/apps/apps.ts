@@ -26,16 +26,10 @@ const appsStart = performance.now();
 declare global {
 	interface Window {
 		renderID: number;
-		Application: new (
-			directory: string,
-			args: any[]
-		) => executables.Application;
-		BackgroundProcess: new (
-			directory: string,
-			args: any[]
-		) => executables.BackgroundProcess;
-		Popup: new (directory: string, args: any[]) => executables.Popup;
-		Module: new (directory: string, args: any[]) => executables.Module;
+		Application: typeof executables.Application;
+		BackgroundProcess: typeof executables.BackgroundProcess;
+		Popup: typeof executables.Popup;
+		Module: typeof executables.Module;
 		processes: executables.Process[];
 		env: ApplicationAuthorisationAPI;
 		windows: GraphicalWindow[];
@@ -43,7 +37,8 @@ declare global {
 }
 window.env = new ApplicationAuthorisationAPI(
 	"/System/globalPermissionsHost.js",
-	defaultUser
+	"guest",
+	""
 );
 (window as any).env = window.env;
 
@@ -74,11 +69,24 @@ type executionFiletype = "js";
  *
  * @param directory - Directory of the root of the application to execute from
  * @param args - Arguements to be passed to the process
+ * @param isPackage - Whether this file is in a 'package'.
  * @returns an Object containing a promise with the Process Waiting object - this promise will resolve when the process exits, and return the value the process exited with.
  */
-export async function execute(directory: string, args: any[] = []) {
+export async function execute(
+	directory: string,
+	args: any[] = [],
+	user: string,
+	password: string,
+	isPackage: boolean = true
+) {
 	const start = performance.now();
 
+	/**
+	 * Reads a file from an application package
+	 * @param dir - Relative directory of the file from the app's base
+	 * @param throwIfEmpty - Whether to throw an error if the file is empty.
+	 * @returns Contents of the file OR an error if the file isn't present and throwIfEmpty is true (default)
+	 */
 	const get = async (dir: string, throwIfEmpty: Boolean = true) => {
 		const rel = fs.resolve(directory, dir);
 
@@ -148,11 +156,19 @@ export async function execute(directory: string, args: any[] = []) {
 	// import from the script BLOB
 	const exports = await import(blob);
 
-	// get the constructor
-	const Application = exports.default;
+	// get the class constructor
+	const Executable: typeof Process = exports.default;
 
 	// create the process
-	const live = new Application(directory, args);
+	const live = new Executable(directory, args, user, password);
+	try {
+		await live.validateCredentials(user, password);
+	} catch (e: any) {
+		const error = new AppInitialisationError("error");
+		error.message = e.message;
+		error.stack = e.stack;
+		throw error;
+	}
 
 	// add to the processes list
 	processes.push(live);
@@ -162,7 +178,7 @@ export async function execute(directory: string, args: any[] = []) {
 	AppsTimeStamp(`Open program from ${directory}`, start);
 
 	return {
-		promise: ProcessWaitingObject(live)
+		promise: ProcessWaitingObject(live) as Promise<Exclude<any, null>>
 	};
 }
 
@@ -179,14 +195,12 @@ export async function showPrompt(
 		throw new Error("Popupapp at " + popupDirectory + " does not exist?");
 	} else {
 		const pipe: any[] = [];
-		await execute(popupDirectory, [
-			type,
-			title,
-			title,
-			description,
-			buttons,
-			pipe
-		]);
+		await execute(
+			popupDirectory,
+			[type, title, title, description, buttons, pipe],
+			"guest",
+			""
+		);
 
 		if (buttons !== undefined) {
 			return await new Promise((resolve: Function) => {
@@ -237,7 +251,11 @@ export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
 			proc?.renderer?.terminate();
 		} catch {}
 	}
-	proc.data = undefined; // insure the respective AppWaitingObject can resolve itself.
+
+	if (proc.data == null) {
+		// insure the respective AppWaitingObject can resolve itself.
+		proc.data = undefined;
+	}
 
 	processes.splice(idx, 1);
 

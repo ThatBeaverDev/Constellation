@@ -6,10 +6,8 @@ import { fsLoaded } from "./io/fs.js";
 import * as apps from "./apps/apps.js";
 import * as users from "./security/users.js";
 import { setDirectoryPermission } from "./security/permissions.js";
-import * as panic from "./lib/panic.js";
-import { status } from "./constellation.config.js";
-
-panic.init();
+import panic from "./lib/panic.js";
+import { status, systemPassword } from "./constellation.config.js";
 
 declare global {
 	interface String {
@@ -82,7 +80,12 @@ async function main() {
 
 	setDirectoryPermission(coreExecDirectory, "operator", true);
 	setDirectoryPermission(coreExecDirectory, "managePermissions", true);
-	await apps.execute(coreExecDirectory);
+
+	try {
+		await apps.execute(coreExecDirectory, [], "system", systemPassword);
+	} catch (e) {
+		panic(e, "executeCoreExecutableDuringStartup");
+	}
 
 	let ok = true;
 	setInterval(async () => {
@@ -108,5 +111,9 @@ let bootScreenVerboseInterval = setInterval(() => {
 });
 
 if (!bootScreenTest) {
-	main();
+	try {
+		main();
+	} catch (e) {
+		panic(e, "systemMain");
+	}
 }

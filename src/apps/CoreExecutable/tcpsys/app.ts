@@ -2,39 +2,103 @@ import { IPCMessage } from "../../messages";
 
 export default class initialiser extends BackgroundProcess {
 	windows?: typeof import("../../../windows/windows");
-	async init() {
-		const onstart = ["/System/CoreExecutables/Dock.appl"];
+	loginCompleted: boolean = false;
+	loginDirectory: string =
+		"/System/CoreExecutables/systemLoginInterface.appl";
+	onLogin = [];
 
+	async init() {
 		this.env.setDirectoryPermission(
 			"/System/CoreExecutables/Dock.appl",
 			"windows",
 			true
 		);
-
-		for (const app of onstart) {
-			this.env.exec(app);
-		}
-
-		// TODO: remove once applications menu is done // working on that applications menu
-
-		setTimeout(() => {
-			const isAppdev =
-				new URL(window.location.href).searchParams.get("appdev") !==
-				null;
-
-			if (isAppdev) {
-				this.env.exec("/Applications/developerApplication.appl");
-			} else {
-				this.env.exec("/System/CoreExecutables/Library.appl");
-			}
-		}, 50);
+		this.env.setDirectoryPermission(
+			"/System/CoreExecutables/systemLoginInterface.appl",
+			"users",
+			true
+		);
 
 		this.windows = await this.env.include("/System/windows.js");
 
-		this.registerKeyboardShortcut("Search", "KeyZ", ["AltLeft"]);
-		this.registerKeyboardShortcut("Library", "KeyX", ["AltLeft"]);
 		// this.windows
 		this.registerKeyboardShortcut("Close Window", "KeyW", ["AltLeft"]);
+
+		const params = new URL(window.location.href).searchParams;
+		if (params.get("postinstall") == "true") {
+			await this.runPostinstaller();
+		}
+
+		this.startLoginProcess();
+	}
+
+	async runPostinstaller() {
+		// TODO: Graphical Postinstall
+
+		// remove postinstall indicator
+		const params = new URL(window.location.href).searchParams;
+		params.delete("postinstall");
+		window.history.pushState({}, "", "?" + params.toString());
+	}
+
+	/**
+	 * Login process, including starting the login UI and handling recieving the target user from it.
+	 */
+	async startLoginProcess() {
+		const login = await this.env.exec(this.loginDirectory, undefined);
+
+		setTimeout(async () => {
+			const loginUser = (await login.promise) as
+				| undefined
+				| {
+						username: string;
+						password: string;
+				  };
+
+			if (loginUser == undefined) {
+				throw new Error("Login returned undefined?");
+			}
+
+			this.loginComplete(loginUser.username, loginUser.password);
+		}, 5);
+	}
+
+	/**
+	 * Postlogin code executed to start the dock etc.
+	 * @param {string} user - Username we're logging into
+	 */
+	async loginComplete(user: string, password: string) {
+		const dock = await this.env.exec(
+			"/System/CoreExecutables/Dock.appl",
+			[],
+			user,
+			password
+		);
+
+		for (const directory of this.onLogin) {
+			await this.env.exec(directory);
+		}
+
+		// start the dev app if required.
+		const isAppdev =
+			new URL(window.location.href).searchParams.get("appdev") !== null;
+
+		if (isAppdev) {
+			await this.env.exec("/Applications/developerApplication.appl");
+		}
+
+		this.loginCompleted = true;
+
+		// wait to prevent the app freezing.
+		await new Promise((resolve: Function) => setTimeout(resolve, 5));
+		console.log("Login Complete");
+
+		// regardless we should logout, dock crashing makes the OS hard to use.
+		await dock.promise;
+		console.log("Dock exited, opening login panel.");
+
+		// restart the login flow.
+		this.startLoginProcess();
 	}
 
 	onmessage(msg: IPCMessage) {
@@ -42,16 +106,11 @@ export default class initialiser extends BackgroundProcess {
 		const origin = msg.originDirectory;
 
 		if (this.windows == undefined) return;
+		if (this.loginCompleted == false) return;
 
 		switch (origin) {
 			case "/System/keyboardShortcuts.js":
 				switch (intent) {
-					case "keyboardShortcutTrigger-Search":
-						this.search();
-						break;
-					case "keyboardShortcutTrigger-Library":
-						this.env.exec("/System/CoreExecutables/Library.appl");
-						break;
 					// windows shortcuts
 					case "keyboardShortcutTrigger-Close Window": {
 						// Close Window!
@@ -84,9 +143,5 @@ export default class initialiser extends BackgroundProcess {
 			default:
 				console.warn("Unknown message sender: " + origin);
 		}
-	}
-
-	async search() {
-		await this.env.exec("/Applications/Search.appl");
 	}
 }
