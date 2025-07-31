@@ -308,7 +308,6 @@ export default class uiKitCreators {
 
 					break;
 				case "image": {
-					const pos: canvasPosition = d.position;
 					const url = d.url;
 
 					function getDataUriKey(uri: string): string {
@@ -329,7 +328,8 @@ export default class uiKitCreators {
 						image = imageCache[key];
 					}
 
-					ctx.drawImage(image, pos.x, pos.y, d.width, d.height);
+					// @ts-expect-error // doesn't understand, mere program.
+					ctx.drawImage(image, ...d.args);
 
 					break;
 				}

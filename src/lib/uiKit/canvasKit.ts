@@ -1,5 +1,26 @@
 import { canvasPosition, canvasRenderingStep, step } from "./definitions";
 
+type canvasImageArgs =
+	| [dx: number, dy: number, imageURL: string]
+	| [
+			dx: number,
+			dy: number,
+			dWidth: number,
+			dHeight: number,
+			imageURL: string
+	  ]
+	| [
+			sx: number,
+			sy: number,
+			sWidth: number,
+			sHeight: number,
+			dx: number,
+			dy: number,
+			dWidth: number,
+			yHeight: number,
+			imageURL: string
+	  ];
+
 export default class canvasKit {
 	#steps: step[];
 
@@ -49,22 +70,16 @@ export default class canvasKit {
 		canvas.args[4] = renderingSteps;
 	}
 
-	image(
-		canvasID: number,
-		position: canvasPosition,
-		width: number,
-		height: number,
-		url: string
-	) {
+	image(canvasID: number, ...args: canvasImageArgs) {
 		const canvas = this.#steps[canvasID - 1];
 		const renderingSteps = canvas.args[4] || {};
+
+		const url = args.pop();
 
 		const obj: canvasRenderingStep = {
 			type: "image",
 			data: {
-				position,
-				width,
-				height,
+				args,
 				url
 			}
 		};
