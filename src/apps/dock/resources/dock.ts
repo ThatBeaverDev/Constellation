@@ -13,6 +13,7 @@ export default class dock {
 	dockPadding: number = 10;
 	wins: WindowAlias[] = [];
 	ok: boolean = false;
+	width: number = 0;
 
 	constructor(parent: dockAndDesktop) {
 		this.parent = parent;
@@ -41,33 +42,59 @@ export default class dock {
 		this.wins = this.parent.env.windows.all();
 	}
 
+	calculateDockWidth(scale: number = 1) {
+		const iconWidth = this.dockHeight - this.dockPadding * 2;
+		const iconGap = iconWidth + this.dockPadding;
+
+		return iconGap * this.wins.length + this.dockPadding;
+	}
+
 	async render() {
 		if (this.ok !== true) return;
 		if (this.winAPI == undefined) return;
 
 		this.refresh();
 
+		const wins = this.wins;
+
+		const iconWidth = this.dockHeight - this.dockPadding * 2;
+		const iconScale = iconWidth / 24;
+
+		const iconGap = iconWidth + this.dockPadding;
+		const targetWidth = this.calculateDockWidth();
+		this.width = Math.round(this.width + (targetWidth - this.width) / 5);
+
+		let scale = 1;
+		if (this.width > this.renderer.windowWidth) {
+			scale = this.renderer.windowWidth / this.width;
+		}
+
+		const dockLeft = (this.renderer.windowWidth - this.width * scale) / 2;
+
+		const dockPadding = this.dockPadding * scale;
+
+		let x = dockLeft + this.dockPadding * scale;
+		let y =
+			this.renderer.windowHeight - this.dockHeight * scale + dockPadding;
+
 		this.renderer.box(
-			125,
-			this.renderer.windowHeight - this.dockHeight,
-			this.renderer.windowWidth - 250,
-			this.dockHeight,
+			dockLeft,
+			this.renderer.windowHeight - this.dockHeight * scale,
+			this.width * scale,
+			this.dockHeight * scale,
 			{
 				background: "var(--main-theme-secondary)",
 				borderRadius: "10"
 			}
 		);
 
-		const wins = this.wins;
-
-		let x = 125 + this.dockPadding;
-		let y = this.renderer.windowHeight - this.dockHeight + this.dockPadding;
-
-		const iconWidth = this.dockHeight - this.dockPadding * 2;
-		const iconScale = iconWidth / 24;
-
 		for (const win of wins) {
-			const iconID = this.renderer.icon(x, y, win.iconName, iconScale);
+			const iconID = this.renderer.icon(
+				x,
+				y,
+				win.iconName,
+				iconScale * scale
+			);
 
 			this.renderer.onClick(
 				iconID,
@@ -110,7 +137,7 @@ export default class dock {
 				}
 			);
 
-			x += iconWidth + this.dockPadding;
+			x += iconGap * scale;
 		}
 	}
 }
