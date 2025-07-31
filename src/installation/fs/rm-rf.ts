@@ -1,6 +1,6 @@
-import fs from "../io/fs.js";
-import { setStatus } from "../constellation.config.js";
-import { installationTimestamp } from "./index.js";
+import fs from "../../io/fs.js";
+import { setStatus } from "../../constellation.config.js";
+import { installationTimestamp } from "../index.js";
 
 export async function rm_rf() {
 	const start = performance.now();
@@ -40,7 +40,7 @@ export async function rm_rf() {
 		);
 	}
 
-	setStatus(`Installation : Deleting Files...`);
+	setStatus(`Installation: Deleting Files...`);
 	await walk("/");
 
 	const startDeleteFiles = performance.now();

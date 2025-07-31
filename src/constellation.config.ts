@@ -77,3 +77,5 @@ export function setStatus(
 		}, 5000);
 	}
 }
+
+export const systemPassword = "systemPasswordThatNeedsToBeChanged";

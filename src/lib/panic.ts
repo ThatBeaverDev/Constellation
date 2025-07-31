@@ -1,10 +1,6 @@
 import * as conf from "../constellation.config.js";
 import { processes } from "../apps/apps.js";
 
-export function init() {
-	// Used to ensure TypeScript doesn't tree-shake this import
-}
-
 // Global error handler
 window.onerror = function (
 	message: string | Event,

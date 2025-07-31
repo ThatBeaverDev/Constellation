@@ -26,7 +26,10 @@ import {
 	directoryPointType as directoryPoint,
 	fsResponse,
 	securityTimestamp,
+	UserAlias,
 	WindowAlias
+} from "./definitions.js";
+import { User, users, validatePassword } from "./users.js";
 
 const start = performance.now();
 const name = "/System/security/env.js";
@@ -34,7 +37,12 @@ const name = "/System/security/env.js";
 export const associations: any = {};
 
 export class ApplicationAuthorisationAPI {
-	constructor(directory: string, user: string, process?: Framework) {
+	constructor(
+		directory: string,
+		user: string,
+		password: string,
+		process?: Framework
+	) {
 		const start = performance.now();
 
 		this.#permissions = getDirectoryPermissions(directory);
@@ -42,7 +50,8 @@ export class ApplicationAuthorisationAPI {
 		this.shell.index();
 
 		this.directory = directory;
-		this.user = user;
+		this.#user = user;
+		this.#password = password;
 		this.#process = process;
 
 		this.debug(
@@ -54,15 +63,23 @@ export class ApplicationAuthorisationAPI {
 
 	readonly directory: string;
 	readonly #permissions: DirectoryPermissionStats;
-	readonly user: string;
+	#user: string;
+	#password: string;
+	get user() {
+		return String(this.#user);
+	}
 	readonly #process?: Framework;
 
 	#checkPermission(permission: Permission) {
-		if (this.#permissions.operator == true)
+		if (this.#permissions.operator !== true)
 			if (this.#permissions[permission] !== true) {
-				throw new PermissionsError(
-					`Permission denied - permission ${permission} is not held by the actor.`
-				);
+				const userinfo = users[this.#user];
+
+				if (userinfo.operator !== "true") {
+					throw new PermissionsError(
+						`Permission denied - permission ${permission} is not held by the actor file or actor file's user.`
+					);
+				}
 			}
 	}
 
@@ -93,7 +110,7 @@ export class ApplicationAuthorisationAPI {
 	}
 
 	#directoryActionCheck(directory: string, isWriteOperation: boolean) {
-		const domainType = getFilesDomainOfDirectory(directory, this.user);
+		const domainType = getFilesDomainOfDirectory(directory, this.#user);
 		switch (domainType) {
 			case "global":
 				// all good
@@ -354,7 +371,14 @@ export class ApplicationAuthorisationAPI {
 		}
 	}
 
-	exec = execute;
+	exec = async (
+		directory: string,
+		args: any[] = [],
+		user: string = String(this.#user),
+		password: string = String(this.#password)
+	) => {
+		return execute(directory, args, user, password);
+	};
 	getPIDOfName(name: string): number | undefined {
 		return associations[name];
 	}
@@ -423,6 +447,11 @@ export class ApplicationAuthorisationAPI {
 		);
 	}
 
+	/**
+	 *
+	 * @param {GraphicalWindow} win - Window to create alias of
+	 * @returns WindowAlias for the provided window
+	 */
 	#windowToAlias = (win: GraphicalWindow): WindowAlias => {
 		const obj: WindowAlias = {
 			move: win.move.bind(win),
@@ -452,6 +481,25 @@ export class ApplicationAuthorisationAPI {
 			dimensions: win.dimensions,
 
 			winID: win.winID
+		};
+
+		return obj;
+	};
+
+	/**
+	 *
+	 * @param {User} user - User to create alias of
+	 * @returns UserAlias for the provided user
+	 */
+	#userToAlias = (user: User): UserAlias => {
+		const obj: UserAlias = {
+			name: user.name,
+			fullName: user.fullName,
+			pictures: { profile: user.profilePicture },
+			directory: user.directory,
+			id: user.id,
+			lastLogin: Number(user.lastLogin),
+			allowGraphicalLogin: user.allowGraphicalLogin == "true"
 		};
 
 		return obj;
@@ -497,8 +545,82 @@ export class ApplicationAuthorisationAPI {
 			return obj;
 		}
 	};
+
+	/**
+	 * Functions related to system users
+	 */
+	users = {
+		/**
+		 * @returns an array for every users's UserAlias
+		 */
+		all: () => {
+			const start = performance.now();
+
+			checkDirectoryPermission(this.directory, "users");
+
+			const obj: Record<UserAlias["name"], UserAlias> = {};
+
+			for (const user in users) {
+				const userData = users[user];
+
+				obj[user] = this.#userToAlias(userData);
+			}
+
+			securityTimestamp(`Env ${this.directory} get all users`, start);
+
+			return obj;
+		},
+
+		userInfo: (name: UserAlias["name"]) => {
+			const start = performance.now();
+
+			const userData = users[name];
+
+			if (userData == undefined) return;
+
+			const obj = this.#userToAlias(userData);
+
+			securityTimestamp(`Env ${this.directory} get user info.`, start);
+
+			return obj;
+		},
+
+		switch: async (user: string, password: string) => {
+			const start = performance.now();
+
+			let ok;
+			try {
+				ok = await validatePassword(user, password);
+			} catch (e) {
+				securityTimestamp(
+					`Env ${this.directory} switch user.`,
+					start,
+					"error"
+				);
+				return {
+					ok: false,
+					data: e
+				};
+			}
+
+			if (ok) {
+				this.#user = String(user);
+			}
+
+			securityTimestamp(`Env ${this.directory} switch user.`, start);
+
+			return {
+				ok: true,
+				data: undefined
+			};
+		}
+	};
 }
 
-export const systemEnv = new ApplicationAuthorisationAPI("/System", "operator");
+export const systemEnv = new ApplicationAuthorisationAPI(
+	"/System",
+	"system",
+	conf.systemPassword
+);
 
 securityTimestamp("Startup /src/security/env.ts", start);

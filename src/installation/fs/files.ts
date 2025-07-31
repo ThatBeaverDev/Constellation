@@ -1,10 +1,10 @@
-import { setStatus } from "../constellation.config.js";
-import { InstallationError } from "../errors.js";
-import fs from "../io/fs.js";
-import uiKitCreators from "../lib/uiKit/creators.js";
-import { installationTimestamp } from "./index.js";
+import { setStatus } from "../../constellation.config.js";
+import { InstallationError } from "../../errors.js";
+import fs from "../../io/fs.js";
+import uiKitCreators from "../../lib/uiKit/creators.js";
+import { installationTimestamp } from "../index.js";
 
-import { files } from "./installation.config.js";
+import { files } from "../installation.config.js";
 
 function blobToDataURL(blob: Blob) {
 	return new Promise((resolve, reject) => {
@@ -42,7 +42,7 @@ async function downloadAndConvert(URL: string) {
 export async function writeFiles() {
 	const start = performance.now();
 
-	setStatus(`Installation : Writing Files...`);
+	setStatus(`Installation: Writing Files...`);
 
 	// download everything simultaneously
 	const downloadingContents: Record<string, Promise<Response>> = {};
@@ -95,7 +95,7 @@ export async function writeFiles() {
 			case "text": {
 				const start = performance.now();
 
-				setStatus(`Installation : Cloning ${location}`);
+				setStatus(`Installation: Cloning ${location}`);
 
 				content = downloadedContents[location];
 
@@ -112,7 +112,7 @@ export async function writeFiles() {
 			case "jsonFilesIndex": {
 				const start = performance.now();
 
-				setStatus(`Installation : Unpackaging ${location}`);
+				setStatus(`Installation: Unpackaging ${location}`);
 
 				content = downloadedContents[location];
 
@@ -182,7 +182,7 @@ export async function writeFiles() {
 			case "binary": {
 				const start = performance.now();
 
-				setStatus(`Installation : Cloning and Encoding ${location}`);
+				setStatus(`Installation: Cloning and Encoding ${location}`);
 
 				content = await downloadAndConvert(location);
 

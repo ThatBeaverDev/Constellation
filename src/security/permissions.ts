@@ -7,13 +7,16 @@ const start = performance.now();
 
 export const permissionsDirectory = "/System/applicationPermissions.json";
 
+/**
+ * A Permission for a process from the respective directory.
+ */
 export type Permission =
 	| "windows"
 	| "systemControl"
 	| "containers"
 	| "systemFiles"
 	| "userFiles"
-	| "customPermissions"
+	| "users"
 	| "network"
 	| "audioPlayback"
 	| "microphone"
@@ -21,6 +24,9 @@ export type Permission =
 	| "managePermissions"
 	| "operator";
 
+/**
+ * Permissions associated with the directory and the owner.
+ */
 export type DirectoryPermissionStats = Record<Permission, boolean> & {
 	user: string;
 };
@@ -52,9 +58,9 @@ export const permissionsMetadata: Record<
 		description:
 			"Allow the application to edit and delete all user files. This means apps can delete ALL your files!"
 	},
-	customPermissions: {
+	users: {
 		description:
-			"Allows the application to create custom permissions and therefore popups for controlling other applications' access to data."
+			"Allows the application to view and edit users. DO NOT PROVIDE TO UNKNOWN APPS."
 	},
 	network: {
 		description:
@@ -111,7 +117,7 @@ function createDefaultPermissions(): DirectoryPermissionStats {
 		containers: false,
 		systemFiles: false,
 		userFiles: false,
-		customPermissions: false,
+		users: false,
 		network: false,
 		audioPlayback: false,
 		microphone: false,
@@ -139,6 +145,12 @@ export function getDirectoryPermission(
 		return permissionsData[directory][permission];
 	}
 }
+/**
+ * Sets the value of a permission on a directory.
+ * @param directory - Directory to modify permission on
+ * @param permission - Permission to modify
+ * @param value - Value to set the permission to
+ */
 export async function setDirectoryPermission(
 	directory: string,
 	permission: Permission,
@@ -155,6 +167,11 @@ export async function setDirectoryPermission(
 
 	void (await onPermissionsUpdate());
 }
+/**
+ * Throws an error if the permission is not true on a directory.
+ * @param directory - Directory to check permission on
+ * @param permission - the specific permission
+ */
 export function checkDirectoryPermission(
 	directory: string,
 	permission: Permission
@@ -163,7 +180,7 @@ export function checkDirectoryPermission(
 
 	if (val !== true) {
 		throw new PermissionsError(
-			`Application at ${directory} does not have permission ${permission}`
+			`Application at '${directory}' does not have permission '${permission}'`
 		);
 	}
 }

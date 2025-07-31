@@ -7,16 +7,10 @@ export {}; // mark as module to allow global augment
 declare global {
 	interface Window {
 		env: ApplicationAuthorisationAPI;
-		Application: new (
-			directory: string,
-			args: any[]
-		) => executables.Application;
-		BackgroundProcess: new (
-			directory: string,
-			args: any[]
-		) => executables.BackgroundProcess;
-		Popup: new (directory: string, args: any[]) => executables.Popup;
-		Module: new (directory: string, args: any[]) => executables.Module;
+		Application: typeof executables.Application;
+		BackgroundProcess: typeof executables.BackgroundProcess;
+		Popup: typeof executables.Popup;
+		Module: typeof executables.Module;
 	}
 
 	interface String {
