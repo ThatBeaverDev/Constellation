@@ -82,7 +82,7 @@ export class Process extends Framework {
 
 	name: string | undefined; // use to name an app without including a temporary window header
 
-	data: any;
+	data: any = null;
 
 	// program flow
 	async init() {}
@@ -141,7 +141,7 @@ export class Process extends Framework {
 		registerKeyboardShortcut(this, name, key, modifiers);
 	};
 
-	exit(value?: any) {
+	exit(value?: Exclude<any, null>) {
 		terminate(this);
 
 		for (const i in this) {

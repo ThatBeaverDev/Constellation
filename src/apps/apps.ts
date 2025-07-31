@@ -237,6 +237,7 @@ export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
 			proc?.renderer?.terminate();
 		} catch {}
 	}
+	proc.data = undefined; // insure the respective AppWaitingObject can resolve itself.
 
 	processes.splice(idx, 1);
 
