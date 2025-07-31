@@ -1,11 +1,13 @@
-export const icons = {};
-
 const div = document.createElement("div");
 div.id = "lucideIconCache";
 
-document.getElementsByClassName("hidden")[0].appendChild(div);
+const hidden = document.getElementsByClassName("hidden")[0];
+if (!hidden) {
+	throw new Error("Hidden container not found.");
+}
+hidden.appendChild(div);
 
-const cache: any = {};
+const cache: Record<string, HTMLImageElement> = {};
 
 function initIcon(name: string) {
 	const icon = document.createElement("img");
@@ -16,69 +18,69 @@ function initIcon(name: string) {
 
 	div.appendChild(icon);
 
-	cache[name] = document.getElementById(icon.id)!;
+	cache[name] = icon;
 }
 
-export function getIcon(name: string): HTMLElement {
-	let icon: HTMLImageElement;
+export function getIcon(name: string): HTMLImageElement {
 	const id = String(window.renderID++);
-	if (name[0] == "/" || name.startsWith("http")) {
-		// this is a path, which must be loaded.
+	const icon = document.createElement("img");
 
-		icon = document.createElement("img");
-		icon.dataset.directory = name;
-
-		// async function called in a syncronous function, this continues after the initial call.
-		applySource(id, name);
-	} else {
-		// this is a lucide icon.
-		if (cache[name] == undefined) {
-			initIcon(name);
-		}
-
-		icon = cache[name].cloneNode(true);
-	}
-
+	icon.id = id;
 	icon.className = "uikitIcon";
 	icon.width = 24;
 	icon.height = 24;
-
-	icon.id = id;
 	icon.alt = name;
+
+	if (name[0] == "/" || name.startsWith("http")) {
+		if (!cache[name]) {
+			// load from url or fs
+			icon.dataset.directory = name;
+			icon.src = ""; // placeholder
+			applySourceAndCache(icon, name);
+		} else {
+			const clone = cache[name].cloneNode(true) as HTMLImageElement;
+			clone.id = id;
+			clone.className = icon.className;
+			return clone;
+		}
+	} else {
+		// cached
+		if (!cache[name]) initIcon(name);
+		const clone = cache[name].cloneNode(true) as HTMLImageElement;
+		clone.id = id;
+		clone.className = icon.className;
+		return clone;
+	}
 
 	return icon;
 }
 
-async function applySource(id: string, directory: string) {
-	let dataURI;
-
-	// generate the data-uri
+async function applySourceAndCache(icon: HTMLImageElement, directory: string) {
 	const content = await env.fs.readFile(directory);
-
 	if (!content.ok) {
-		throw content.data;
+		console.warn(`Failed to load icon from ${directory}:`, content.data);
+		icon.alt = "[!]";
+		return;
 	}
 
-	if (directory.startsWith("https://") || directory.startsWith("http://")) {
-		// it's just a URL.
-		dataURI = directory;
-	} else {
-		const type = directory.textAfterAll(".");
+	if (directory.startsWith("http://") || directory.startsWith("https://")) {
+		icon.src = directory;
+		return;
+	}
 
-		switch (type) {
-			case "svg":
-				// base64 it
-				const base64 = btoa(content.data);
-				// make the uri
-				dataURI = `data:image/svg+xml;base64,${base64}`;
-				break;
-			default:
-				dataURI = content.data;
+	const type = directory.textAfterAll(".");
+	switch (type) {
+		case "svg": {
+			const base64 = btoa(content.data);
+			icon.src = `data:image/svg+xml;base64,${base64}`;
+			break;
 		}
+		default:
+			icon.src = content.data; // fallback to text
 	}
 
-	// @ts-expect-error // this will return an image element, trust me.
-	const icon: HTMLImageElement = document.getElementById(id);
-
-	icon.src = dataURI;
+	// cache a clone once loaded.
+	icon.addEventListener("load", () => {
+		cache[directory] = icon.cloneNode(true) as HTMLImageElement;
+	});
 }
