@@ -1,3 +1,5 @@
+import fs from "../io/fs.js";
+
 const div = document.createElement("div");
 div.id = "lucideIconCache";
 
@@ -56,9 +58,9 @@ export function getIcon(name: string): HTMLImageElement {
 }
 
 async function applySourceAndCache(icon: HTMLImageElement, directory: string) {
-	const content = await env.fs.readFile(directory);
-	if (!content.ok) {
-		console.warn(`Failed to load icon from ${directory}:`, content.data);
+	const content = await fs.readFile(directory);
+	if (content == undefined) {
+		console.warn(`Failed to load icon from ${directory}:`, content);
 		icon.alt = "[!]";
 		return;
 	}
@@ -71,12 +73,12 @@ async function applySourceAndCache(icon: HTMLImageElement, directory: string) {
 	const type = directory.textAfterAll(".");
 	switch (type) {
 		case "svg": {
-			const base64 = btoa(content.data);
+			const base64 = btoa(content);
 			icon.src = `data:image/svg+xml;base64,${base64}`;
 			break;
 		}
 		default:
-			icon.src = content.data; // fallback to text
+			icon.src = content; // fallback to text
 	}
 
 	// cache a clone once loaded.

@@ -1,5 +1,6 @@
 import fs from "../io/fs.js";
 import { sha512 } from "../lib/crypto.js";
+import { log } from "../lib/logging.js";
 import { securityTimestamp } from "./definitions.js";
 import { DirectoryPermissionStats } from "./permissions.js";
 
@@ -92,7 +93,7 @@ export async function newUser(
 	password: string,
 	extraOptions?: Partial<Record<keyof User, string>>
 ) {
-	env.log(name, `Creating user by name ${username}.`);
+	log(name, `Creating user by name ${username}.`);
 	const user = await createUser(username, password);
 
 	if (extraOptions !== undefined) {

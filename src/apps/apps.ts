@@ -35,12 +35,6 @@ declare global {
 		windows: GraphicalWindow[];
 	}
 }
-window.env = new ApplicationAuthorisationAPI(
-	"/System/globalPermissionsHost.js",
-	"guest",
-	""
-);
-(window as any).env = window.env;
 
 export const processes: executables.Process[] = [];
 window.processes = processes;
@@ -54,6 +48,10 @@ window.Application = executables.Application;
 window.BackgroundProcess = executables.BackgroundProcess;
 window.Popup = executables.Popup;
 window.Module = executables.Module;
+
+// @ts-expect-error
+window.env = {};
+(window as any).env = window.env;
 
 export function getProcessFromID(id: number) {
 	for (const proc of processes) {
@@ -189,9 +187,9 @@ export async function showPrompt(
 	description?: any,
 	buttons?: String[]
 ) {
-	const popup = await env.fs.readFile(popupDirectory + "/config.js");
+	const popup = await fs.readFile(popupDirectory + "/config.js");
 
-	if (popup.data == undefined) {
+	if (popup == undefined) {
 		throw new Error("Popupapp at " + popupDirectory + " does not exist?");
 	} else {
 		const pipe: any[] = [];
@@ -433,3 +431,16 @@ export function run() {
 }
 
 AppsTimeStamp("Startup of src/apps/apps.ts", appsStart, "primary");
+
+export function init() {
+	const startEnvInit = performance.now();
+
+	window.env = new ApplicationAuthorisationAPI(
+		"/System/globalPermissionsHost.js",
+		"guest",
+		""
+	);
+	(window as any).env = window.env;
+
+	AppsTimeStamp("Creation of global env", startEnvInit);
+}

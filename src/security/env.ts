@@ -1,5 +1,4 @@
 import * as conf from "../constellation.config.js";
-import { blobifyDirectory } from "../lib/blobify.js";
 import realFS from "../io/fs.js";
 import { appName, execute, showPrompt } from "../apps/apps.js";
 import { ImportError, PermissionsError } from "../errors.js";
@@ -46,6 +45,14 @@ export class ApplicationAuthorisationAPI {
 		const start = performance.now();
 
 		this.#permissions = getDirectoryPermissions(directory);
+		this.userID = users[this.#permissions.user]?.id;
+
+		if (this.userID == undefined) {
+			throw new Error(
+				`User ${user} either doesn't exist or users.js hasn't initialised properly.`
+			);
+		}
+
 		this.shell = new Shell(directory, this);
 		this.shell.index();
 
@@ -63,6 +70,7 @@ export class ApplicationAuthorisationAPI {
 
 	readonly directory: string;
 	readonly #permissions: DirectoryPermissionStats;
+	readonly userID: string;
 	#user: string;
 	#password: string;
 	get user() {
@@ -616,11 +624,5 @@ export class ApplicationAuthorisationAPI {
 		}
 	};
 }
-
-export const systemEnv = new ApplicationAuthorisationAPI(
-	"/System",
-	"system",
-	conf.systemPassword
-);
 
 securityTimestamp("Startup /src/security/env.ts", start);

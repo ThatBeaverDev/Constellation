@@ -12,10 +12,9 @@ export function blobify(text: string, mime = "text/plain") {
 }
 
 export async function blobifyDirectory(location: string, mime = "text/plain") {
-	const read = await env.fs.readFile(location);
-	if (!read.ok) throw read.data;
-
-	const text = read.data;
+	const text = await fs.readFile(location);
+	if (text == undefined)
+		throw new Error(`${location} is empty and cannot be 'blobified'`);
 
 	const blob = new Blob([text], {
 		type: mime

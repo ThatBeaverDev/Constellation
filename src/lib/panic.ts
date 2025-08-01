@@ -9,11 +9,7 @@ window.onerror = function (
 	colno?: number,
 	error?: Error
 ) {
-	if (source?.startsWith("window.location.origin")) {
-		panic(error || message, source);
-		return;
-	}
-
+	panic(error, source);
 	console.error(error);
 };
 
@@ -70,12 +66,17 @@ const snappyMessages = [
 	"this will be reported"
 ];
 
+const noPanic =
+	new URL(window.location.href).searchParams.get("nopanic") == null;
+
 export default async function panic(error: any, source?: string) {
+	if (noPanic) return;
+
 	// Wait briefly to allow any last async logs to flush or UI updates
 	await new Promise((resolve) => setTimeout(resolve, 500));
 
 	// Stop all intervals and timeouts
-	const highestTimerId = window.setTimeout(() => {}, 0);
+	const highestTimerId = setTimeout(() => {}, 0);
 	for (let i = 0; i <= highestTimerId; i++) {
 		clearInterval(i);
 		clearTimeout(i);
