@@ -1,6 +1,6 @@
 const applicationExtensions = ["appl", "backgr"];
 
-async function getAppConfig(directory: string) {
+export async function getAppConfig(directory: string) {
 	const appConf = await env.include(env.fs.resolve(directory, "config.js"));
 	// get the real data
 	return appConf?.default;
