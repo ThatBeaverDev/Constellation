@@ -53,6 +53,9 @@ String.prototype.map = function (mappings) {
 async function main() {
 	await fsLoaded();
 
+	await users.init();
+	await apps.init();
+
 	//const firstBoot = (await fs.readFile("/System/arc.json")) == undefined;
 	//if (firstBoot) {
 	await installer.install();
@@ -73,8 +76,6 @@ async function main() {
 		sound.play();
 	} catch {}
 	sound.remove();
-
-	await users.init();
 
 	const coreExecDirectory = "/System/CoreExecutables/launchd.backgr";
 

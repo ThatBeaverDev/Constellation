@@ -1,3 +1,4 @@
+import fs from "../io/fs.js";
 import { getIcon } from "../lib/icons.js";
 import { Application } from "../apps/executables.js";
 import { terminate } from "../apps/apps.js";
@@ -568,14 +569,11 @@ async function updateLiveStyling() {
 		"Loading windowing CSS for minimise animation: " + minimiseAnimation
 	);
 
-	const css = await env.fs.readFile(
+	const css = await fs.readFile(
 		"/System/windows/" + minimiseAnimation + ".css"
 	);
 
-	if (!css.ok) {
-		return;
-	}
-	if (css.data == undefined) {
+	if (css == undefined) {
 		return;
 	}
 
@@ -584,7 +582,7 @@ async function updateLiveStyling() {
 			minimiseAnimation
 	);
 
-	styleElem.textContent = css.data;
+	styleElem.textContent = css;
 
 	windowsTimestamp("Update CSS Styling", start);
 }
