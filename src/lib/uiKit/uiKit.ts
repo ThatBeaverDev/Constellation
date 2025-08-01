@@ -493,7 +493,7 @@ export class Renderer {
 
 				for (let i = 0; i < this.#steps.length; i++) {
 					const st = this.#steps[i];
-					const ds = this.#steps[i];
+					const ds = this.#displayedSteps[i];
 
 					if (st.type !== ds.type) {
 						same = false;
@@ -550,16 +550,20 @@ export class Renderer {
 			if (stepChanged) {
 				if (oldElement) oldElement.remove();
 
-				const creator: (...args: any) => HTMLElement = this.#creators[
-					newStep.type
-				].bind(this.#creators);
+				const creator: (
+					x: number,
+					y: number,
+					...args: any
+				) => HTMLElement = this.#creators[newStep.type].bind(
+					this.#creators
+				);
 				if (!creator) {
 					throw new UIError(
 						`Creator is not defined for ${newStep.type}`
 					);
 				}
 
-				// run the creator
+				// @ts-expect-error // run the creator
 				element = creator(...newStep.args);
 			} else {
 				element = oldElement!;
