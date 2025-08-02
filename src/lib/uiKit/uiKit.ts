@@ -1,7 +1,7 @@
 import { focus, newWindow, GraphicalWindow } from "../../windows/windows.js";
 import { getIcon } from "../icons.js";
 import { getTextWidth } from "./calcWidth.js";
-import { Process } from "../../apps/executables.js";
+import { Process } from "../../runtime/executables.js";
 import { UIError } from "../../errors.js";
 import { ContextMenu } from "./contexts.js";
 import uiKitCreators from "./creators.js";

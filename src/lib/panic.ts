@@ -1,5 +1,5 @@
 import * as conf from "../constellation.config.js";
-import { processes } from "../apps/apps.js";
+import { processes } from "../runtime/runtime.js";
 
 // Global error handler
 window.onerror = function (message: string | Event, source?: string, lineno?: number, colno?: number, error?: Error) {

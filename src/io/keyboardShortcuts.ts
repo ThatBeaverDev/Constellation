@@ -1,5 +1,5 @@
-import { BackgroundProcess, Process } from "../apps/executables.js";
-import { sendMessage } from "../apps/messages.js";
+import { BackgroundProcess, Process } from "../runtime/executables.js";
+import { sendMessage } from "../runtime/messages.js";
 import { focus, windows } from "../windows/windows.js";
 
 export const keyboardShortcuts: Map<[Process, string], keyboardShortcut> = new Map()
