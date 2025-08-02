@@ -1,6 +1,6 @@
 import fs from "../io/fs.js";
 import { sha512 } from "../lib/crypto.js";
-import { log } from "../lib/logging.js";
+import { debug, log } from "../lib/logging.js";
 import { securityTimestamp } from "./definitions.js";
 import { DirectoryPermissionStats } from "./permissions.js";
 
@@ -28,6 +28,8 @@ export const defaultUser = "guest";
  * Initialises the user system, such as loading users from the user file and creating guest and sys if needed
  */
 export async function init() {
+	debug(name, "Users initialising.");
+
 	// check if there's already a permissions file
 	const permissionsFileExists = (await fs.stat(usersDirectory)) !== undefined;
 	// if the permissions file exists, use it, else use {}
@@ -35,6 +37,8 @@ export async function init() {
 
 	// put data into the permissions storage variable
 	Object.assign(users, fileData);
+
+	debug(name, "Users initialised.");
 }
 
 /**
@@ -62,10 +66,6 @@ async function createUser(username: string, password: string): Promise<User> {
 		operator: "false",
 		allowGraphicalLogin: "false"
 	};
-}
-
-export function listUsers(): string[] {
-	return Object.keys(users);
 }
 
 export function getUser(username: string): User {

@@ -12,6 +12,9 @@ import { ApplicationAuthorisationAPI } from "../security/env.js";
 import { defaultUser } from "../security/users.js";
 import { rewriteImportsAsync } from "./appsImportReplacements.js";
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
+import { debug } from "../lib/logging.js";
+
+const name = "/System/apps.js";
 
 export function AppsTimeStamp(label: string, start: DOMHighResTimeStamp, colour: DevToolsColor = "secondary") {
 	performanceLog(label, start, "AppsRuntime", colour);
@@ -376,11 +379,13 @@ export function run() {
 
 AppsTimeStamp("Startup of src/apps/apps.ts", appsStart, "primary");
 
-export function init() {
+export async function init() {
 	const startEnvInit = performance.now();
+	debug(name, "Apps initialising.");
 
 	window.env = new ApplicationAuthorisationAPI("/System/globalPermissionsHost.js", "guest", "");
 	(window as any).env = window.env;
 
+	debug(name, "Apps initialised.");
 	AppsTimeStamp("Creation of global env", startEnvInit);
 }
