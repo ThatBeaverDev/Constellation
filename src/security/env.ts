@@ -31,8 +31,10 @@ const name = "/System/security/env.js";
 export const associations: any = {};
 
 export class ApplicationAuthorisationAPI {
-	constructor(directory: string, user: string, password: string, process?: Framework) {
+	constructor(directory: string, user: string, password: string, process?: Framework, isGlobal: boolean = false) {
 		const start = performance.now();
+
+		this.#isGlobal = isGlobal;
 
 		this.#permissions = getDirectoryPermissions(directory);
 		this.userID = users[this.#permissions.user]?.id;
@@ -62,6 +64,7 @@ export class ApplicationAuthorisationAPI {
 		return String(this.#user);
 	}
 	readonly #process?: Framework;
+	readonly #isGlobal: boolean;
 
 	#checkPermission(permission: Permission) {
 		if (this.#permissions.operator !== true)
@@ -371,7 +374,14 @@ export class ApplicationAuthorisationAPI {
 		user: string = String(this.#user),
 		password: string = String(this.#password)
 	) => {
-		return execute(directory, args, user, password);
+		if (this.#isGlobal)
+			throw new Error(
+				"Global env cannot be used to start applications to insure applications are properly parented."
+			);
+
+		if (this.#process instanceof Process) return execute(directory, args, user, password, this.#process);
+
+		throw new Error("Framework may not execute processes.");
 	};
 	getPIDOfName(name: string): number | undefined {
 		return associations[name];
