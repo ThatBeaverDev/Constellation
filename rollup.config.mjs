@@ -5,12 +5,12 @@ export default {
 	input: "types/global.d.ts",
 	output: {
 		file: "src/apps/types/constellation.d.ts",
-		format: "es",
+		format: "es"
 	},
 	plugins: [dts()],
 	onwarn(warning, warn) {
 		// suppress "Circular dependency" warnings
-		if (warning.code === 'CIRCULAR_DEPENDENCY') return;
+		if (warning.code === "CIRCULAR_DEPENDENCY") return;
 		warn(warning);
-	},
+	}
 };

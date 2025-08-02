@@ -1,52 +1,56 @@
 <!doctype html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="icon" type="image/svg+xml" href="/logos/Web.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Constellation</title>
 
-<head>
-	<meta charset="UTF-8" />
-	<link rel="icon" type="image/svg+xml" href="/logos/Web.svg" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Constellation</title>
+		<!-- https://realfavicongenerator.net/ useful site-->
+		<link rel="icon" type="image/png" href="/favicons/favicon-96x96.png" sizes="96x96" />
+		<link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
+		<link rel="shortcut icon" href="/favicons/favicon.ico" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
+		<meta name="apple-mobile-web-app-title" content="Constellation" />
+		<link rel="manifest" href="/manifest.webmanifest" />
 
-	<!-- https://realfavicongenerator.net/ useful site-->
-	<link rel="icon" type="image/png" href="/favicons/favicon-96x96.png" sizes="96x96" />
-	<link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
-	<link rel="shortcut icon" href="/favicons/favicon.ico" />
-	<link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
-	<meta name="apple-mobile-web-app-title" content="Constellation" />
-	<link rel="manifest" href="/manifest.webmanifest" />
+		<!-- boot.css -->
+		<link rel="stylesheet" href="/styles/boot.css" />
+		<link rel="stylesheet" href="/styles/styles.css" />
+	</head>
 
-	<!-- boot.css -->
-	<link rel="stylesheet" href="/styles/boot.css">
-	<link rel="stylesheet" href="/styles/styles.css" />
-</head>
+	<body>
+		<div class="wallpaper"></div>
+		<div class="hidden">
+			<canvas id="hiddenCanvas"></canvas>
+		</div>
 
-<body>
+		<div class="bootCover">
+			<img class="bootImage" src="/favicons/favicon.svg" />
+			<span class="loader"></span>
+			<p class="bootText">Initialising...</p>
+		</div>
 
-	<div class="wallpaper"></div>
-	<div class="hidden">
-		<canvas id="hiddenCanvas"></canvas>
-	</div>
+		<!-- Vercel general -->
+		<script>
+			window.si =
+				window.si ||
+				function () {
+					(window.siq = window.siq || []).push(arguments);
+				};
+			window.va =
+				window.va ||
+				function () {
+					(window.vaq = window.vaq || []).push(arguments);
+				};
+		</script>
 
-	<div class="bootCover">
-		<img class="bootImage" src="/favicons/favicon.svg"></img>
-		<span class="loader"></span>
-		<p class="bootText">Initialising...</p>
-	</div>
+		<!-- Vercel speed analytics -->
+		<script defer src="/_vercel/speed-insights/script.js"></script>
 
+		<!-- Vercel Analytics -->
+		<script defer src="/_vercel/insights/script.js"></script>
 
-	<!-- Vercel general -->
-	<script>
-		window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
-		window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-	</script>
-
-	<!-- Vercel speed analytics -->
-	<script defer src="/_vercel/speed-insights/script.js"></script>
-
-	<!-- Vercel Analytics -->
-	<script defer src="/_vercel/insights/script.js"></script>
-
-	<script defer type="module" src="src/buildCheck.js"></script>
-</body>
-
+		<script defer type="module" src="src/buildCheck.js"></script>
+	</body>
 </html>

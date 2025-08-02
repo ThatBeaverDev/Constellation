@@ -68,7 +68,7 @@
 }
 
 .loader::after {
-	content: '';
+	content: "";
 
 	width: 50%;
 	height: 100%;
