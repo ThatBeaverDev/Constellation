@@ -1,8 +1,4 @@
-import {
-	isDevmode,
-	setStatus,
-	systemPassword
-} from "../constellation.config.js";
+import { isDevmode, setStatus, systemPassword } from "../constellation.config.js";
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
 import { preinstall } from "./fs.js";
 import devinstall from "./devinstall.js";
@@ -54,10 +50,6 @@ export async function install() {
 	installationTimestamp("Install System", start, "primary");
 }
 
-export function installationTimestamp(
-	label: string,
-	start: DOMHighResTimeStamp,
-	colour: DevToolsColor = "secondary"
-) {
+export function installationTimestamp(label: string, start: DOMHighResTimeStamp, colour: DevToolsColor = "secondary") {
 	performanceLog(label, start, "SystemInstallation", colour);
 }

@@ -33,11 +33,7 @@ export async function rm_rf() {
 			}
 		}
 
-		installationTimestamp(
-			`Walk directory ${dir}`,
-			start,
-			"secondary-light"
-		);
+		installationTimestamp(`Walk directory ${dir}`, start, "secondary-light");
 	}
 
 	setStatus(`Installation: Deleting Files...`);

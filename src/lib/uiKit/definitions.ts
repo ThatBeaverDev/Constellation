@@ -13,6 +13,7 @@ export type uikitCreatorName = {
 	[K in keyof uiKitCreators]: K extends `uikit${string}` ? K : never;
 }[keyof uiKitCreators];
 
+// onClick types
 export interface onClickOptions {
 	scale?: number;
 	origin?: string;
@@ -22,6 +23,7 @@ export interface clickReference extends onClickOptions {
 	right?: Function;
 }
 
+// steps
 export interface step {
 	type: uikitCreatorName;
 	args: any[];
@@ -37,6 +39,7 @@ export interface canvasRenderingStep {
 	data: any;
 }
 
+// configs and options
 export type uikitTextboxConfig = {
 	isInvisible?: boolean;
 	isEmpty?: boolean;
@@ -63,10 +66,6 @@ export type canvasPosition = {
 export type canvasLineOptions = {
 	colour?: string;
 };
-export function uiKitTimestamp(
-	label: string,
-	start: DOMHighResTimeStamp,
-	colour: DevToolsColor = "secondary"
-) {
+export function uiKitTimestamp(label: string, start: DOMHighResTimeStamp, colour: DevToolsColor = "secondary") {
 	performanceLog(label, start, "uiKit", colour);
 }

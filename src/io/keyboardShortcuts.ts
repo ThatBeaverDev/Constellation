@@ -46,11 +46,7 @@ export function registerKeyboardShortcut(
 	keyboardShortcuts[process.directory + "://" + name] = cut;
 }
 
-export function updateKeyboardShortcut(
-	id: string,
-	key: string,
-	modifiers: string[]
-) {
+export function updateKeyboardShortcut(id: string, key: string, modifiers: string[]) {
 	const k = keyboardShortcuts[id];
 	k.key = key;
 	k.modifiers = modifiers;
@@ -109,12 +105,7 @@ document.addEventListener("keydown", (e) => {
 
 			if (ok) {
 				// trigger the shortcut
-				sendMessage(
-					"/System/keyboardShortcuts.js",
-					0,
-					cut.process.id,
-					"keyboardShortcutTrigger-" + cut.name
-				);
+				sendMessage("/System/keyboardShortcuts.js", 0, cut.process.id, "keyboardShortcutTrigger-" + cut.name);
 
 				e.preventDefault();
 			}

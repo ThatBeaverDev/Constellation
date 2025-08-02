@@ -1,25 +1,13 @@
 // importer system
 // made to inform the user the system is not built yet and needs to be built to prevent an error.
 
-function SystemInitialiserTimestamp(
-	label,
-	start,
-	subset = "undefined",
-	colour = "primary"
-) {
+function SystemInitialiserTimestamp(label, start, subset = "undefined", colour = "primary") {
 	if (console.timeStamp == undefined) return;
 
 	const end = performance.now();
 
 	// @ts-expect-error
-	console.timeStamp(
-		label,
-		start,
-		end,
-		"SystemInitialiser",
-		"ConstellationCore",
-		colour
-	);
+	console.timeStamp(label, start, end, "SystemInitialiser", "ConstellationCore", colour);
 }
 
 const start = performance.now();
@@ -74,8 +62,7 @@ async function check() {
 		document.body.appendChild(div);
 
 		const style = document.createElement("style");
-		style.textContent =
-			':root {--wallpaper-url: "/wallpapers/Sahara Night Sky.jpg"}';
+		style.textContent = ':root {--wallpaper-url: "/wallpapers/Sahara Night Sky.jpg"}';
 		document.body.appendChild(style);
 
 		SystemInitialiserTimestamp("Report no Build", start);

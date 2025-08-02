@@ -97,17 +97,13 @@ export default async function tcpkg(
 				try {
 					const type = mimeLib.getType(dir.textAfterAll("."));
 
-					if (verbose)
-						logs.push(`Packaging ${dir} with mime ${type}...`);
+					if (verbose) logs.push(`Packaging ${dir} with mime ${type}...`);
 
 					if (type == null) {
-						throw new Error(
-							`Mime type for file at '${dir}' has returned null.`
-						);
+						throw new Error(`Mime type for file at '${dir}' has returned null.`);
 					}
 
-					const isText =
-						type.startsWith("text/") || type == "image/svg+xml";
+					const isText = type.startsWith("text/") || type == "image/svg+xml";
 
 					if (isText) {
 						const read = await env.fs.readFile(dir);

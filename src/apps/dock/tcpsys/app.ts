@@ -57,9 +57,7 @@ export default class dockAndDesktop extends Application {
 						break;
 
 					default:
-						throw new Error(
-							"Unknown keyboard shortcut name (intent): " + intent
-						);
+						throw new Error("Unknown keyboard shortcut name (intent): " + intent);
 				}
 				break;
 			default:

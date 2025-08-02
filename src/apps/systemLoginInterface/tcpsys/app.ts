@@ -156,22 +156,10 @@ export default class systemLoginInterface extends Application {
 		const timeFontSize = 45;
 		const timeHeight = timeFontSize * 1.2; /* 1.2 is the line height */
 
-		const {
-			hours,
-			minutes,
-			seconds,
-			weekdayName,
-			dayOfMonth,
-			afterDate,
-			monthName
-		} = this.timeInfo();
+		const { hours, minutes, seconds, weekdayName, dayOfMonth, afterDate, monthName } = this.timeInfo();
 
 		this.renderer.text(9, 9, `${hours}:${minutes}:${seconds}`, 45);
-		this.renderer.text(
-			9,
-			9 + timeHeight,
-			`${weekdayName}, ${dayOfMonth}${afterDate} of ${monthName}`
-		);
+		this.renderer.text(9, 9 + timeHeight, `${weekdayName}, ${dayOfMonth}${afterDate} of ${monthName}`);
 
 		const textboxWidth = this.renderer.windowWidth / 4;
 		const textboxHeight = 25;
@@ -189,21 +177,11 @@ export default class systemLoginInterface extends Application {
 		const iconScale = 5;
 		const iconSize = 24 * iconScale;
 		const iconLeft = (this.renderer.windowWidth - iconSize) / 2;
-		const iconTop =
-			(this.renderer.windowHeight - iconSize - (textboxHeight + gap)) / 2;
+		const iconTop = (this.renderer.windowHeight - iconSize - (textboxHeight + gap)) / 2;
 
 		// render the middle
-		this.renderer.icon(
-			iconLeft,
-			iconTop,
-			userInfo.pictures.profile,
-			iconScale
-		);
-		this.renderer.text(
-			nameLeft,
-			iconTop + iconSize + gap,
-			userInfo.fullName
-		);
+		this.renderer.icon(iconLeft, iconTop, userInfo.pictures.profile, iconScale);
+		this.renderer.text(nameLeft, iconTop + iconSize + gap, userInfo.fullName);
 
 		this.renderer.textbox(
 			textboxLeft,
@@ -244,23 +222,12 @@ export default class systemLoginInterface extends Application {
 		const fontSize = 15;
 		const gapBetweenUsers = 10;
 		const yPerUser = fontSize * 1.2 + gapBetweenUsers;
-		let y =
-			this.renderer.windowHeight -
-			yPerUser * (Object.keys(this.users).length - 1);
+		let y = this.renderer.windowHeight - yPerUser * (Object.keys(this.users).length - 1);
 
 		const draw = (user: UserAlias) => {
 			const iconScale = 0.75;
-			const icon = this.renderer.icon(
-				9,
-				y,
-				user.pictures.profile,
-				iconScale
-			);
-			const text = this.renderer.text(
-				9 + (24 + iconScale),
-				y,
-				user.fullName
-			);
+			const icon = this.renderer.icon(9, y, user.pictures.profile, iconScale);
+			const text = this.renderer.text(9 + (24 + iconScale), y, user.fullName);
 
 			const onClick = () => {
 				this.user = user.name;

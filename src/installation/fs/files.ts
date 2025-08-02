@@ -30,11 +30,7 @@ async function downloadAndConvert(URL: string) {
 		return dataURL;
 	} catch (error) {
 		console.warn(error);
-		installationTimestamp(
-			`Download and Convert ${URL} [failed]`,
-			start,
-			"error"
-		);
+		installationTimestamp(`Download and Convert ${URL} [failed]`, start, "error");
 		return null;
 	}
 }
@@ -64,11 +60,7 @@ export async function writeFiles() {
 
 		downloadedContents[location] = await response.text();
 
-		installationTimestamp(
-			`Download File (${location})`,
-			start,
-			"tertiary-dark"
-		);
+		installationTimestamp(`Download File (${location})`, start, "tertiary-dark");
 	}
 
 	const writingWaitlist: Promise<any>[] = [];
@@ -101,11 +93,7 @@ export async function writeFiles() {
 
 				writingWaitlist.push(fs.writeFile(directory, content));
 
-				installationTimestamp(
-					`Copy text file to ${directory}`,
-					start,
-					"secondary-light"
-				);
+				installationTimestamp(`Copy text file to ${directory}`, start, "secondary-light");
 
 				break;
 			}
@@ -134,11 +122,7 @@ export async function writeFiles() {
 					await fs.mkdir(relative);
 				}
 
-				installationTimestamp(
-					"Create directories",
-					startDirectories,
-					"secondary-dark"
-				);
+				installationTimestamp("Create directories", startDirectories, "secondary-dark");
 				const startFiles = performance.now();
 
 				for (const path in json.files) {
@@ -152,30 +136,16 @@ export async function writeFiles() {
 							writingWaitlist.push(fs.writeFile(relative, data));
 							break;
 						case "binary":
-							writingWaitlist.push(
-								fs.writeFile(relative, data.data)
-							);
+							writingWaitlist.push(fs.writeFile(relative, data.data));
 							break;
 						default:
-							throw new Error(
-								"Unknown key type within files object: '" +
-									type +
-									"'"
-							);
+							throw new Error("Unknown key type within files object: '" + type + "'");
 					}
 				}
 
-				installationTimestamp(
-					"Write Files",
-					startFiles,
-					"secondary-dark"
-				);
+				installationTimestamp("Write Files", startFiles, "secondary-dark");
 
-				installationTimestamp(
-					`Unpackage idx for ${directory}`,
-					start,
-					"secondary-light"
-				);
+				installationTimestamp(`Unpackage idx for ${directory}`, start, "secondary-light");
 
 				break;
 			}
@@ -188,11 +158,7 @@ export async function writeFiles() {
 
 				writingWaitlist.push(fs.writeFile(directory, content));
 
-				installationTimestamp(
-					`Copy binary file to ${directory}`,
-					start,
-					"secondary-light"
-				);
+				installationTimestamp(`Copy binary file to ${directory}`, start, "secondary-light");
 
 				break;
 			}

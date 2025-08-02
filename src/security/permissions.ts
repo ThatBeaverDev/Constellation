@@ -47,8 +47,7 @@ export const permissionsMetadata: Record<
 			"Allows the application to to control Constellation through system APIs. DO NOT PROVIDE TO UNKNOWN APPS."
 	},
 	containers: {
-		description:
-			"Allows the application to run other applications within sandboxed environments"
+		description: "Allows the application to run other applications within sandboxed environments"
 	},
 	systemFiles: {
 		description:
@@ -59,31 +58,26 @@ export const permissionsMetadata: Record<
 			"Allow the application to edit and delete all user files. This means apps can delete ALL your files!"
 	},
 	users: {
-		description:
-			"Allows the application to view and edit users. DO NOT PROVIDE TO UNKNOWN APPS."
+		description: "Allows the application to view and edit users. DO NOT PROVIDE TO UNKNOWN APPS."
 	},
 	network: {
-		description:
-			"Allows the application to access the wider internet and therefore share data to malicious actors."
+		description: "Allows the application to access the wider internet and therefore share data to malicious actors."
 	},
 	audioPlayback: {
 		description: "Allows the application to play sound from your device."
 	},
 	microphone: {
-		description:
-			"Allows the application to access the microphone and therefore listen to you."
+		description: "Allows the application to access the microphone and therefore listen to you."
 	},
 	camera: {
-		description:
-			"Allows the application to access the camera and therefore see you."
+		description: "Allows the application to access the camera and therefore see you."
 	},
 	managePermissions: {
 		description:
 			"Allows the application to edit other applications' or it's own permissions. DO NOT PROVIDE TO UNKNOWN APPS."
 	},
 	operator: {
-		description:
-			"Allows the application access to ALL permissions. This permission is NOT requestable.",
+		description: "Allows the application access to ALL permissions. This permission is NOT requestable.",
 		requestable: false
 	}
 };
@@ -95,12 +89,9 @@ type DirectoryDomain = "system" | "user" | "global";
 export const permissionsData: PermissionsStore = {};
 
 // check if there's already a permissions file
-const permissionsFileExists =
-	(await fs.stat(permissionsDirectory)) !== undefined;
+const permissionsFileExists = (await fs.stat(permissionsDirectory)) !== undefined;
 // if the permissions file exists, use it, else use {}
-const fileData = permissionsFileExists
-	? JSON.parse(await fs.readFile(permissionsDirectory))
-	: {};
+const fileData = permissionsFileExists ? JSON.parse(await fs.readFile(permissionsDirectory)) : {};
 
 // put data into the permissions storage variable
 Object.assign(permissionsData, fileData);
@@ -127,9 +118,7 @@ function createDefaultPermissions(): DirectoryPermissionStats {
 	};
 }
 
-export function getDirectoryPermissions(
-	directory: string
-): DirectoryPermissionStats {
+export function getDirectoryPermissions(directory: string): DirectoryPermissionStats {
 	if (!permissionsData[directory]) {
 		permissionsData[directory] = createDefaultPermissions();
 		void onPermissionsUpdate();
@@ -137,10 +126,7 @@ export function getDirectoryPermissions(
 	return permissionsData[directory];
 }
 
-export function getDirectoryPermission(
-	directory: string,
-	permission: Permission
-) {
+export function getDirectoryPermission(directory: string, permission: Permission) {
 	{
 		return permissionsData[directory][permission];
 	}
@@ -151,11 +137,7 @@ export function getDirectoryPermission(
  * @param permission - Permission to modify
  * @param value - Value to set the permission to
  */
-export async function setDirectoryPermission(
-	directory: string,
-	permission: Permission,
-	value: boolean
-) {
+export async function setDirectoryPermission(directory: string, permission: Permission, value: boolean) {
 	let perm = permissionsData[directory];
 
 	if (perm == undefined) {
@@ -172,23 +154,15 @@ export async function setDirectoryPermission(
  * @param directory - Directory to check permission on
  * @param permission - the specific permission
  */
-export function checkDirectoryPermission(
-	directory: string,
-	permission: Permission
-) {
+export function checkDirectoryPermission(directory: string, permission: Permission) {
 	const val = getDirectoryPermission(directory, permission);
 
 	if (val !== true) {
-		throw new PermissionsError(
-			`Application at '${directory}' does not have permission '${permission}'`
-		);
+		throw new PermissionsError(`Application at '${directory}' does not have permission '${permission}'`);
 	}
 }
 
-export function getFilesDomainOfDirectory(
-	directory: string,
-	user: string
-): DirectoryDomain {
+export function getFilesDomainOfDirectory(directory: string, user: string): DirectoryDomain {
 	const rootPrefix = directory.split("/")[0];
 
 	switch (rootPrefix) {

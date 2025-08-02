@@ -27,9 +27,7 @@ export default class remapper extends Application {
 		await this.refresh();
 		this.refreshLoop = setInterval(this.refresh, 1000);
 
-		const keyboardUtils = await this.env.include(
-			"/System/CoreLibraries/keyboardUtils.js"
-		);
+		const keyboardUtils = await this.env.include("/System/CoreLibraries/keyboardUtils.js");
 
 		this.translateKeyName = keyboardUtils.translateKeyName;
 	}
@@ -71,9 +69,7 @@ export default class remapper extends Application {
 						this.refresh();
 						break;
 					default:
-						throw new Error(
-							"Unknown keyboard shortcut name (intent): " + intent
-						);
+						throw new Error("Unknown keyboard shortcut name (intent): " + intent);
 				}
 				break;
 			default:
@@ -107,9 +103,7 @@ export default class remapper extends Application {
 					const k = this.arr[this.selector];
 					k.key = key;
 					k.modifiers = [...modifiers];
-					this.updateKeyboardShortcut(k.app + "://" + k.name, key, [
-						...modifiers
-					]);
+					this.updateKeyboardShortcut(k.app + "://" + k.name, key, [...modifiers]);
 
 					this.mode = "listing";
 				}
@@ -143,9 +137,7 @@ export default class remapper extends Application {
 
 					let modifierText = "";
 					if (k.modifiers.length !== 0) {
-						modifierText +=
-							k.modifiers.map(this.translateKeyName).join(" + ") +
-							" + ";
+						modifierText += k.modifiers.map(this.translateKeyName).join(" + ") + " + ";
 					}
 					modifierText += this.translateKeyName(k.key);
 

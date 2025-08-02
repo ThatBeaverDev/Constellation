@@ -2,13 +2,7 @@ import * as conf from "../constellation.config.js";
 import realFS from "../io/fs.js";
 import { appName, execute, showPrompt } from "../apps/apps.js";
 import { ImportError, PermissionsError } from "../errors.js";
-import {
-	focus,
-	focusWindow,
-	getWindowOfId,
-	GraphicalWindow,
-	windows
-} from "../windows/windows.js";
+import { focus, focusWindow, getWindowOfId, GraphicalWindow, windows } from "../windows/windows.js";
 import {
 	DirectoryPermissionStats,
 	getDirectoryPermissions,
@@ -36,21 +30,14 @@ const name = "/System/security/env.js";
 export const associations: any = {};
 
 export class ApplicationAuthorisationAPI {
-	constructor(
-		directory: string,
-		user: string,
-		password: string,
-		process?: Framework
-	) {
+	constructor(directory: string, user: string, password: string, process?: Framework) {
 		const start = performance.now();
 
 		this.#permissions = getDirectoryPermissions(directory);
 		this.userID = users[this.#permissions.user]?.id;
 
 		if (this.userID == undefined) {
-			throw new Error(
-				`User ${user} either doesn't exist or users.js hasn't initialised properly.`
-			);
+			throw new Error(`User ${user} either doesn't exist or users.js hasn't initialised properly.`);
 		}
 
 		this.shell = new Shell(directory, this);
@@ -61,10 +48,7 @@ export class ApplicationAuthorisationAPI {
 		this.#password = password;
 		this.#process = process;
 
-		this.debug(
-			name,
-			`ApplicationAuthorisationAPI created as ${user} for ${directory}`
-		);
+		this.debug(name, `ApplicationAuthorisationAPI created as ${user} for ${directory}`);
 		securityTimestamp(`Create env for ${directory}`, start);
 	}
 
@@ -131,10 +115,7 @@ export class ApplicationAuthorisationAPI {
 				}
 				break;
 			case "system":
-				if (
-					isWriteOperation &&
-					this.#permissions.systemFiles == false
-				) {
+				if (isWriteOperation && this.#permissions.systemFiles == false) {
 					throw new PermissionsError(
 						`Permission denied in action upon ${directory} - domain ${domainType}, isWriteOperation: ${isWriteOperation}`
 					);
@@ -201,10 +182,7 @@ export class ApplicationAuthorisationAPI {
 			}
 		},
 
-		writeFile: async (
-			directory: string,
-			contents: string
-		): Promise<fsResponse> => {
+		writeFile: async (directory: string, contents: string): Promise<fsResponse> => {
 			try {
 				this.#directoryActionCheck(directory, true);
 
@@ -249,10 +227,7 @@ export class ApplicationAuthorisationAPI {
 				};
 			}
 		},
-		move: async (
-			oldDirectory: string,
-			newDirectory: string
-		): Promise<fsResponse> => {
+		move: async (oldDirectory: string, newDirectory: string): Promise<fsResponse> => {
 			try {
 				return {
 					data: await realFS.rename(oldDirectory, newDirectory),
@@ -273,9 +248,7 @@ export class ApplicationAuthorisationAPI {
 				const stat = await realFS.stat(directory);
 
 				if (stat == undefined) {
-					throw new Error(
-						directory + " has no file and cannot be 'statted'"
-					);
+					throw new Error(directory + " has no file and cannot be 'statted'");
 				}
 
 				return {
@@ -338,20 +311,12 @@ export class ApplicationAuthorisationAPI {
 		}
 	};
 
-	expectFileType = async (
-		directory: string,
-		expectedType: directoryPoint
-	) => {
+	expectFileType = async (directory: string, expectedType: directoryPoint) => {
 		const fileType = await this.fs.typeOfFile(directory);
 
 		if (fileType !== expectedType) {
 			throw new Error(
-				"Filetype of " +
-					directory +
-					" (" +
-					fileType +
-					") does not match expected: " +
-					expectedType
+				"Filetype of " + directory + " (" + fileType + ") does not match expected: " + expectedType
 			);
 		}
 	};
@@ -391,11 +356,7 @@ export class ApplicationAuthorisationAPI {
 		return associations[name];
 	}
 
-	async setDirectoryPermission(
-		directory: string,
-		permission: Permission,
-		value: boolean
-	) {
+	async setDirectoryPermission(directory: string, permission: Permission, value: boolean) {
 		this.#checkPermission("managePermissions");
 
 		await setDirectoryPermission(directory, permission, value);
@@ -410,15 +371,8 @@ export class ApplicationAuthorisationAPI {
 		const start = performance.now();
 
 		if (permissionsMetadata[permission].requestable == false) {
-			this.error(
-				name,
-				"Permission by name " +
-					permission +
-					" requested, which is not allowed."
-			);
-			throw new PermissionsError(
-				`Permission '${permission}' is not requestable.`
-			);
+			this.error(name, "Permission by name " + permission + " requested, which is not allowed.");
+			throw new PermissionsError(`Permission '${permission}' is not requestable.`);
 		}
 
 		if (this.#permissions[permission] == true) return true;
@@ -444,15 +398,10 @@ export class ApplicationAuthorisationAPI {
 				this.#permissions[permission] = true;
 				return true;
 			case "Deny":
-				throw new PermissionsError(
-					`Permission request for permission ${permission} denied.`
-				);
+				throw new PermissionsError(`Permission request for permission ${permission} denied.`);
 		}
 
-		securityTimestamp(
-			`${this.directory} request permission ${permission} from user (${ok})`,
-			start
-		);
+		securityTimestamp(`${this.directory} request permission ${permission} from user (${ok})`, start);
 	}
 
 	/**
@@ -600,11 +549,7 @@ export class ApplicationAuthorisationAPI {
 			try {
 				ok = await validatePassword(user, password);
 			} catch (e) {
-				securityTimestamp(
-					`Env ${this.directory} switch user.`,
-					start,
-					"error"
-				);
+				securityTimestamp(`Env ${this.directory} switch user.`, start, "error");
 				return {
 					ok: false,
 					data: e

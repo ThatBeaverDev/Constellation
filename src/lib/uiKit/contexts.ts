@@ -2,12 +2,7 @@ import { getTextWidth } from "./calcWidth.js";
 
 const padding = 10;
 
-export function newContext(
-	x: number = 0,
-	y: number = 0,
-	headerText: string = "",
-	items: string[] = []
-) {
+export function newContext(x: number = 0, y: number = 0, headerText: string = "", items: string[] = []) {
 	const container = document.createElement("div");
 	container.id = String(window.renderID++);
 	container.className = "uikitContextContainer";
@@ -40,12 +35,7 @@ export function newContext(
 }
 
 export class ContextMenu {
-	constructor(
-		x: number,
-		y: number,
-		headerText: string,
-		items: Record<string, Function>
-	) {
+	constructor(x: number, y: number, headerText: string, items: Record<string, Function>) {
 		let maxWidth = 0;
 		let maxWidthString = "";
 		for (const i of [headerText, ...Object.keys(items)]) {

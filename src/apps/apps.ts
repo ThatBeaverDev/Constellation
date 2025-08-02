@@ -13,11 +13,7 @@ import { defaultUser } from "../security/users.js";
 import { rewriteImportsAsync } from "./appsImportReplacements.js";
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
 
-export function AppsTimeStamp(
-	label: string,
-	start: DOMHighResTimeStamp,
-	colour: DevToolsColor = "secondary"
-) {
+export function AppsTimeStamp(label: string, start: DOMHighResTimeStamp, colour: DevToolsColor = "secondary") {
 	performanceLog(label, start, "AppsRuntime", colour);
 }
 
@@ -117,8 +113,7 @@ export async function execute(
 		}
 	}
 
-	if (executableDirectory == undefined)
-		throw new Error("No Executable found.");
+	if (executableDirectory == undefined) throw new Error("No Executable found.");
 
 	let data: string = "";
 
@@ -129,23 +124,17 @@ export async function execute(
 
 				if (content == undefined) {
 					throw new AppInitialisationError(
-						fs.resolve(directory, "tcpsys/app.[js / sjs]") +
-							" is empty and cannot be executed"
+						fs.resolve(directory, "tcpsys/app.[js / sjs]") + " is empty and cannot be executed"
 					);
 				}
 
-				const importsResolved = await rewriteImportsAsync(
-					content,
-					executableDirectory
-				);
+				const importsResolved = await rewriteImportsAsync(content, executableDirectory);
 
 				data = importsResolved;
 			}
 			break;
 		default:
-			throw new AppInitialisationError(
-				"Type '" + type + "' is not executable."
-			);
+			throw new AppInitialisationError("Type '" + type + "' is not executable.");
 	}
 
 	// create a blob of the content
@@ -193,12 +182,7 @@ export async function showPrompt(
 		throw new Error("Popupapp at " + popupDirectory + " does not exist?");
 	} else {
 		const pipe: any[] = [];
-		await execute(
-			popupDirectory,
-			[type, title, title, description, buttons, pipe],
-			"guest",
-			""
-		);
+		await execute(popupDirectory, [type, title, title, description, buttons, pipe], "guest", "");
 
 		if (buttons !== undefined) {
 			return await new Promise((resolve: Function) => {
@@ -260,10 +244,7 @@ export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
 	AppsTimeStamp(`Terminate process ${procDir}`, start);
 }
 
-const activeIterators = new WeakMap<
-	Process,
-	Iterator<any> | AsyncIterator<any>
->();
+const activeIterators = new WeakMap<Process, Iterator<any> | AsyncIterator<any>>();
 
 export function appName(proc: executables.Framework) {
 	// @ts-expect-error
@@ -272,19 +253,14 @@ export function appName(proc: executables.Framework) {
 	// @ts-expect-error
 	const windowName = proc?.renderer?.window?.name;
 
-	if (windowName !== undefined && windowName !== proc.directory)
-		return windowName;
+	if (windowName !== undefined && windowName !== proc.directory) return windowName;
 
 	const constructorName = Object.getPrototypeOf(proc).constructor.name;
 
 	return constructorName;
 }
 
-async function procExec(
-	proc: Process,
-	subset: "init" | "frame" | "terminate" = "frame",
-	catchError: boolean = true
-) {
+async function procExec(proc: Process, subset: "init" | "frame" | "terminate" = "frame", catchError: boolean = true) {
 	if (proc.executing) return;
 
 	try {
@@ -350,15 +326,7 @@ document.addEventListener("keydown", (event) => {
 	const fnc = proc.keydown;
 
 	if (typeof fnc == "function") {
-		fnc.call(
-			proc,
-			event.code,
-			event.metaKey,
-			event.altKey,
-			event.ctrlKey,
-			event.shiftKey,
-			event.repeat
-		);
+		fnc.call(proc, event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
 	}
 
 	for (const proc of processes) {
@@ -366,15 +334,7 @@ document.addEventListener("keydown", (event) => {
 			const fnc = proc.keydown;
 
 			if (typeof fnc == "function") {
-				fnc.call(
-					proc,
-					event.code,
-					event.metaKey,
-					event.altKey,
-					event.ctrlKey,
-					event.shiftKey,
-					event.repeat
-				);
+				fnc.call(proc, event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
 			}
 		}
 	}
@@ -388,15 +348,7 @@ document.addEventListener("keyup", (event) => {
 	const fnc = proc.keyup;
 
 	if (typeof fnc == "function") {
-		fnc.call(
-			proc,
-			event.code,
-			event.metaKey,
-			event.altKey,
-			event.ctrlKey,
-			event.shiftKey,
-			event.repeat
-		);
+		fnc.call(proc, event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
 	}
 
 	for (const proc of processes) {
@@ -404,15 +356,7 @@ document.addEventListener("keyup", (event) => {
 			const fnc = proc.keyup;
 
 			if (typeof fnc == "function") {
-				fnc.call(
-					proc,
-					event.code,
-					event.metaKey,
-					event.altKey,
-					event.ctrlKey,
-					event.shiftKey,
-					event.repeat
-				);
+				fnc.call(proc, event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
 			}
 		}
 	}
@@ -435,11 +379,7 @@ AppsTimeStamp("Startup of src/apps/apps.ts", appsStart, "primary");
 export function init() {
 	const startEnvInit = performance.now();
 
-	window.env = new ApplicationAuthorisationAPI(
-		"/System/globalPermissionsHost.js",
-		"guest",
-		""
-	);
+	window.env = new ApplicationAuthorisationAPI("/System/globalPermissionsHost.js", "guest", "");
 	(window as any).env = window.env;
 
 	AppsTimeStamp("Creation of global env", startEnvInit);

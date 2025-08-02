@@ -27,22 +27,12 @@ export default class menubar {
 		const textPadding = (this.barHeight - (fontSize + 3)) / 2;
 
 		let x = iconPadding;
-		this.renderer.icon(
-			x,
-			iconPadding,
-			"/System/CoreAssets/Logos/Constellation-White.svg"
-		);
+		this.renderer.icon(x, iconPadding, "/System/CoreAssets/Logos/Constellation-White.svg");
 		x += 24 + iconPadding;
 
 		x += textPadding;
 		const focus = this.env.windows.getFocus();
-		this.renderer.text(
-			x,
-			textPadding,
-			String(
-				focus?.shortName || focus?.name || focus?.applicationDirectory
-			)
-		);
+		this.renderer.text(x, textPadding, String(focus?.shortName || focus?.name || focus?.applicationDirectory));
 		x += textPadding;
 
 		const date = new Date();
@@ -86,10 +76,6 @@ export default class menubar {
 		const time = timemap.map(mappings);
 		const timeWidth = this.renderer.getTextWidth(time);
 
-		this.renderer.text(
-			window.innerWidth - timeWidth - textPadding,
-			textPadding,
-			time
-		);
+		this.renderer.text(window.innerWidth - timeWidth - textPadding, textPadding, time);
 	}
 }
