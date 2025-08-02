@@ -1,5 +1,5 @@
 import { uikitTextboxConfig } from "../../../lib/uiKit/definitions";
-import { IPCMessage } from "../../messages";
+import { IPCMessage } from "../../../runtime/messages";
 
 // convert anything to a string, NICELY (no [object Object] here)
 function stringify(content: object, fancy: boolean = false) {

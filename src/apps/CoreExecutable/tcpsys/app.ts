@@ -1,4 +1,4 @@
-import { IPCMessage } from "../../messages";
+import { IPCMessage } from "../../../runtime/messages";
 
 export default class initialiser extends BackgroundProcess {
 	windows?: typeof import("../../../windows/windows");

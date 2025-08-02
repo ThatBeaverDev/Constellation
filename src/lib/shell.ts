@@ -1,5 +1,5 @@
 import TerminalAlias from "./terminalAlias.js";
-import { Application } from "../apps/executables.js";
+import { Application } from "../runtime/executables.js";
 import fs from "../io/fs.js";
 import { ApplicationAuthorisationAPI } from "../security/env.js";
 

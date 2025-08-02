@@ -10,7 +10,7 @@ import { AppInitialisationError, ImportError } from "../errors.js";
 import ProcessWaitingObject from "./appWaitingObject.js";
 import { ApplicationAuthorisationAPI } from "../security/env.js";
 import { defaultUser } from "../security/users.js";
-import { rewriteImportsAsync } from "./appsImportReplacements.js";
+import { rewriteImportsAsync } from "./importRewrites.js";
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
 import { debug } from "../lib/logging.js";
 

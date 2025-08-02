@@ -3,7 +3,7 @@ import * as installer from "./installation/index.js";
 import fs from "./io/fs.js";
 import { fsLoaded } from "./io/fs.js";
 
-import * as apps from "./apps/apps.js";
+import * as apps from "./runtime/runtime.js";
 import * as users from "./security/users.js";
 import { setDirectoryPermission } from "./security/permissions.js";
 import panic from "./lib/panic.js";
