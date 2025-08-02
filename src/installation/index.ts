@@ -27,7 +27,7 @@ export async function install() {
 		allowGraphicalLogin: "true"
 	});
 	await newUser("system", systemPassword, {
-		profilePicture: "/System/CoreAssets/Logos/Constellation-White.svg",
+		profilePicture: "/System/CoreAssets/Logos/Constellation-lucide.svg",
 		directory: "/System/user",
 		operator: "true"
 	});

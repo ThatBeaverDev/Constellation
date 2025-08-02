@@ -38,8 +38,8 @@ export const files: any = {
 
 	// logos
 	"/logos/Constellation.svg": "/System/CoreAssets/Logos/Constellation.svg",
+	"/logos/Lucide.svg": "/System/CoreAssets/Logos/Constellation-lucide.svg",
 	"/logos/Web.svg": "/System/CoreAssets/Logos/Constellation-Web.svg",
-	"/logos/White.svg": "/System/CoreAssets/Logos/Constellation-White.svg",
 
 	// init system
 	"/build/apps/com.constellation.CoreExecutable.idx": {

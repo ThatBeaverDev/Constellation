@@ -1,10 +1,8 @@
 /* uiKit styling */
 
 @media (prefers-color-scheme: dark) {
-	img[src$=".svg"],
-	img[type^="data:image/svg+xml;base64,"],
-	img[src^="/icons/icons"] {
-		filter: invert(100%) brightness(10000%);
+	.uikitIcon {
+		filter: invert(100%) brightness(10000%) !important;
 	}
 }
 
@@ -35,7 +33,10 @@ body {
 }
 
 .clickable:active {
+	--click-scale: 1.5;
+
 	filter: brightness(110%);
+	transform: scale(var(--click-scale));
 }
 
 .uiKit {

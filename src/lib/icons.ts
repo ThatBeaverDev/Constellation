@@ -62,6 +62,12 @@ async function applySourceAndCache(icon: HTMLImageElement, directory: string) {
 	if (content == undefined) {
 		console.warn(`Failed to load icon from ${directory}:`, content);
 		icon.alt = "[!]";
+
+		// cache a clone once loaded.
+		icon.addEventListener("load", () => {
+			cache[directory] = icon.cloneNode(true) as HTMLImageElement;
+		});
+
 		return;
 	}
 

@@ -318,6 +318,15 @@ export async function pathIcon(directory: string) {
 		case "idx": // constellation native format
 			return "package";
 
+		// # PREVIEWABLE IMAGES
+		case "png":
+		case "gif":
+		case "jpg":
+		case "jpeg":
+		case "webp":
+		case "svg":
+			return directory;
+
 		// # RASTER IMAGES
 		case "art":
 		case "blp":
