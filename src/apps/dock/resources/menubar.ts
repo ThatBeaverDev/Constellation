@@ -27,7 +27,28 @@ export default class menubar {
 		const textPadding = (this.barHeight - (fontSize + 3)) / 2;
 
 		let x = iconPadding;
-		this.renderer.icon(x, iconPadding, "/System/CoreAssets/Logos/Constellation-White.svg");
+		const constellationIcon = this.renderer.icon(
+			x,
+			iconPadding,
+			"/System/CoreAssets/Logos/Constellation-lucide.svg"
+		);
+
+		const buttons: Record<string, Function> = {};
+		buttons[`book-open-text-:-About ${this.parent.config.name}`] = () => {
+			// about page
+		};
+		buttons[`cog-:-Settings`] = () => this.env.exec("/Applications/Settings.appl");
+		buttons["rotate-cw-:-Restart"] = () => {}; // TODO: restart
+		buttons["power-:-Shut Down"] = () => {}; // TODO: Power off
+		buttons["lock-:-Lock"] = () => {}; // TODO: lock, somehow.
+		buttons[`log-out-:-Logout from ${this.env.user}`] = () => this.parent.exit();
+
+		const constellationMenu = () => {
+			this.renderer.setContextMenu(0, 0, this.parent.config.name, buttons);
+		};
+
+		this.renderer.onClick(constellationIcon, constellationMenu, constellationMenu);
+
 		x += 24 + iconPadding;
 
 		x += textPadding;
