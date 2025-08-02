@@ -31,7 +31,6 @@ export const files: any = {
 	"/build/syslib/keyboardUtils.js": "/System/CoreLibraries/keyboardUtils.js",
 	"/build/syslib/blob.js": "/System/CoreLibraries/blob.js",
 	"/build/lib/external/fzf.js": "/System/CoreLibraries/fzf.js",
-	"/build/lib/external/flubber.min.js": "/System/CoreLibraries/flubber.js",
 
 	// mime library
 	"/build/syslib/mime/mimes.js": "/System/CoreLibraries/mimeFiles/mimes.js",
