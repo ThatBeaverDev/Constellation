@@ -1,3 +1,4 @@
+import { getIcon } from "../icons.js";
 import { getTextWidth } from "./calcWidth.js";
 
 const padding = 10;
@@ -90,14 +91,39 @@ export class ContextMenu {
 			elem.style.left = `${padding}px`;
 
 			elem.style.width = `${maxWidth}px`;
+			elem.style.height = `20px`;
 			elem.style.textAlign = "left";
 
-			elem.innerText = text;
+			const iconName = text.textBefore("-:-");
+			const afterIcon = text.textAfter("-:-");
+
+			let icon;
+			let txt = text;
+			if (afterIcon !== "") {
+				txt = afterIcon;
+				icon = getIcon(iconName);
+
+				elem.style.left = `${padding + 24}px`;
+				elem.style.width = `${maxWidth - 24}px`;
+
+				icon.style.top = `${yPos}px`;
+				icon.style.left = `${padding}px`;
+
+				icon.style.width = "20px";
+				icon.style.height = "20px";
+			}
+
+			const beforeSemicolon = txt.textBeforeLast(";");
+			if (beforeSemicolon !== "") {
+				txt = beforeSemicolon;
+			}
+
+			elem.innerText = txt;
 			elem.dataset.index = String(index);
 
 			yPos += padding * 2 + 5;
 
-			return elem;
+			return { text: elem, icon };
 		});
 
 		document.body.appendChild(this.container);
@@ -110,15 +136,15 @@ export class ContextMenu {
 		this.divider = document.querySelector("div#" + this.divider.id)!;
 
 		for (const i in this.items) {
-			const elem = this.items[i];
+			const elems: { text: HTMLButtonElement; icon?: HTMLImageElement } = this.items[i];
 
-			this.container.appendChild(elem);
+			this.container.appendChild(elems.text);
+			if (elems.icon !== undefined) this.container.appendChild(elems.icon);
 
-			this.items[i] = document.querySelector("button#" + elem.id)!;
-			this.items[i].addEventListener(
+			this.items[i].text.addEventListener(
 				"pointerdown",
 				() => {
-					const index = Number(this.items[i].dataset.index);
+					const index = Number(this.items[i].text.dataset.index);
 
 					const text = Object.keys(items)[index];
 
@@ -145,7 +171,7 @@ export class ContextMenu {
 	container: HTMLDivElement;
 	divider: HTMLDivElement;
 	header: HTMLParagraphElement;
-	items: HTMLButtonElement[];
+	items: { text: HTMLButtonElement; icon?: HTMLImageElement }[];
 
 	// add abort controller to remove event listeners
 	#controller = new AbortController();
@@ -156,7 +182,8 @@ export class ContextMenu {
 
 		this.header.remove();
 		for (const i in this.items) {
-			this.items[i].remove;
+			this.items[i].text.remove();
+			if (this.items[i].icon !== undefined) this.items[i].icon.remove();
 		}
 		this.container.remove();
 	};

@@ -350,6 +350,23 @@ export class Renderer {
 	readonly #creators: uiKitCreators;
 	readonly #eventCreators: uikitEventCreators;
 	readonly setContextMenu = (x: number, y: number, header: string, buttons: Record<string, Function>) => {
+
+	/**
+	 * Sets the displayed context menu of the window. use .removeContextMenu() to remove it.
+	 * @param {number} x - the X position of the context.
+	 * @param {number} y - the Y position of the context.
+	 * @param {string} header - the header text of the context
+	 * @param {Record<string | `${string}-:-${string}` | `${string};${string}` | `${string}-:-${string};${string}`, Function>} buttons - an object of the context's buttons and the function to execute when clicked. Displayed in order that they are assigned. Key names can also use icon-:-text to display an icon with the text, and text after the last semicolon is ignored so that two buttons with the same text can exist.
+	 */
+	readonly setContextMenu = (
+		x: number,
+		y: number,
+		header: string,
+		buttons: Record<
+			string | `${string}-:-${string}` | `${string};${number}` | `${string}-:-${string};${number}`,
+			Function
+		>
+	) => {
 		this.removeContextMenu();
 
 		this.#context = new ContextMenu(x, y, header, buttons);
