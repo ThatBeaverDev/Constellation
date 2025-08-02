@@ -51,7 +51,7 @@ async function checkOutput() {
 	} catch (e) {}
 
 	if (content !== undefined) {
-		console.error("\x1b[31mOutput directory isn't empty!\x1b[0m");
+		console.error(`\x1b[31mOutput directory isn't empty! (Packaging ${output})\x1b[0m`);
 		process.exit();
 	}
 }

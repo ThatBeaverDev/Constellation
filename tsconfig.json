@@ -3,27 +3,48 @@
 		"allowJs": true,
 		"checkJs": false,
 		"esModuleInterop": true,
+		
+		// modules
 		"target": "esnext",
 		"module": "esnext",
 		"moduleResolution": "bundler",
-		"rootDir": "src",
-		"outDir": "build",
+
+		// input and output
+		"rootDir": "./src",
+		"outDir": "./build",
 		"strict": true,
-		"lib": ["esnext", "ES2022", "DOM", "DOM.Iterable", "ES5", "ES6"],
+
+		// libraries
+		"lib": [
+			"esnext",
+			"ES2022",
+			"DOM",
+			"DOM.Iterable",
+			"ES5",
+			"ES6"
+		],
+
+		// types
 		"sourceMap": false,
 		"declaration": true,
 		"declarationDir": "types",
-		"types": ["src/global.d.ts"]
+		"emitDeclarationOnly": false,
+
+		// incremental
+		"incremental": true,
+		"tsBuildInfoFile": "build/.tsbuildinfo",
+		"composite": true,
+		"noEmit": false
 	},
 	"include": [
-		"src",
-		"src/lib/external/flubber.min.js"
+		"./src",
+		"./src/global.d.ts"
 	],
 	"exclude": [
-		"build",
-		"src/apps/app-template",
-		"src/apps/types",
-		"src/lib/external/browserfs.*"
+		"./build",
+		"./src/apps/app-template",
+		"./src/apps/types",
+		"./src/lib/external/browserfs.*"
 	],
 	"watchOptions": {
 		"watchFile": "useFsEvents",
@@ -32,9 +53,9 @@
 		"synchronousWatchDirectory": true,
 		"excludeDirectories": [
 			"**/node_modules",
-			"build",
-			"src/apps/app-template/constellation.d.ts",
-			"src/apps/types/constellation.d.ts"
+			"./build",
+			"./src/apps/app-template/constellation.d.ts",
+			"./src/apps/types/constellation.d.ts"
 		]
 	}
 }
