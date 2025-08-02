@@ -1,7 +1,7 @@
 import fs from "../io/fs.js";
 import { getIcon } from "../lib/icons.js";
-import { Application } from "../apps/executables.js";
-import { terminate } from "../apps/apps.js";
+import { Application } from "../runtime/executables.js";
+import { terminate } from "../runtime/runtime.js";
 import * as css from "./cssVariables.js";
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
 import { debug } from "../lib/logging.js";

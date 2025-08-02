@@ -1,7 +1,7 @@
 import { registerKeyboardShortcut } from "../io/keyboardShortcuts.js";
 import { Renderer } from "../lib/uiKit/uiKit.js";
 import { ApplicationAuthorisationAPI, associations } from "../security/env.js";
-import { terminate } from "./apps.js";
+import { terminate } from "./runtime.js";
 import { IPCMessage, replyCallback, sendMessage } from "./messages.js";
 import { defaultUser, validatePassword } from "../security/users.js";
 

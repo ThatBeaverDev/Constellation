@@ -1,4 +1,4 @@
-import { IPCMessage } from "../../messages";
+import { IPCMessage } from "../../../runtime/messages";
 import { fileInfo } from "../lib/appfind";
 
 export default class KeystoneSearch extends Popup {

@@ -1,5 +1,5 @@
 import { onClickOptions } from "../../../lib/uiKit/definitions";
-import { IPCMessage } from "../../messages";
+import { IPCMessage } from "../../../runtime/messages";
 
 const clamp = (n: number, min: number, max: number) => {
 	if (n < min) {
