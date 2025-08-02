@@ -71,6 +71,7 @@ export class Process extends Framework {
 	name: string | undefined; // use to name an app without including a temporary window header
 
 	data: any = null;
+	children: Process[] = [];
 
 	// program flow
 	async init() {}

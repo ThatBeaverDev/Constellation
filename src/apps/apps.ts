@@ -74,6 +74,7 @@ export async function execute(
 	args: any[] = [],
 	user: string,
 	password: string,
+	parent?: Process,
 	isPackage: boolean = true
 ) {
 	const start = performance.now();
@@ -160,6 +161,8 @@ export async function execute(
 		throw error;
 	}
 
+	if (parent?.children !== undefined) parent.children.push(live);
+
 	// add to the processes list
 	processes.push(live);
 
@@ -235,6 +238,10 @@ export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
 		try {
 			proc?.renderer?.terminate();
 		} catch {}
+	}
+
+	for (const process of processes) {
+		if (process.children instanceof Array) process.children = process.children.filter((child) => child !== proc);
 	}
 
 	if (proc.data == null) {
@@ -383,7 +390,7 @@ export async function init() {
 	const startEnvInit = performance.now();
 	debug(name, "Apps initialising.");
 
-	window.env = new ApplicationAuthorisationAPI("/System/globalPermissionsHost.js", "guest", "");
+	window.env = new ApplicationAuthorisationAPI("/System/globalPermissionsHost.js", "guest", "", undefined, true);
 	(window as any).env = window.env;
 
 	debug(name, "Apps initialised.");
