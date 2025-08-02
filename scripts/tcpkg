@@ -10,10 +10,13 @@ import otherTypes from "mime/types/other.js";
 const mime = new Mime(standardTypes, otherTypes);
 
 // custom types
-mime.define({
-	"text/javascript": ["sjs"],
-	"text/x.typescript": ["ts", "tsx"]
-}, true);
+mime.define(
+	{
+		"text/javascript": ["sjs"],
+		"text/x.typescript": ["ts", "tsx"]
+	},
+	true
+);
 
 const params = {};
 const args = process.argv
@@ -82,35 +85,38 @@ async function walk(directory) {
 			await walk(dir, false);
 		} else {
 			// file
-			
+
 			try {
+				const type = mime.getType(dir);
 
-			const type = mime.getType(dir);
-			
-			if (type == null) {
-				throw new Error("Mime type for file at '" + dir + "' has returned null.")
-			}
-			
-			const isText = type.startsWith("text/") || type == "image/svg+xml"
-			
-			if (isText) {
-				const content = await fs.readFile(dir, { encoding: "utf8" });
-
-				pkg.files[relative] = content;
-			} else {
-				// encode to dataURI
-				const content = await fs.readFile(dir)
-				const b64 = content.toString("base64")
-				const uri = `data:${type};base64,${b64}`
-
-				pkg.files[relative] = {
-					type: "binary",
-					data: uri
+				if (type == null) {
+					throw new Error("Mime type for file at '" + dir + "' has returned null.");
 				}
+
+				const isText = type.startsWith("text/") || type == "image/svg+xml";
+
+				if (isText) {
+					const content = await fs.readFile(dir, { encoding: "utf8" });
+
+					pkg.files[relative] = content;
+				} else {
+					// encode to dataURI
+					const content = await fs.readFile(dir);
+					const b64 = content.toString("base64");
+					const uri = `data:${type};base64,${b64}`;
+
+					pkg.files[relative] = {
+						type: "binary",
+						data: uri
+					};
+				}
+			} catch (e) {
+				console.error(
+					"Error",
+					e,
+					"occurred when packaging " + dir + ". it has not been included in the index."
+				);
 			}
-		} catch(e) {
-			console.error("Error", e, "occurred when packaging " + dir + ". it has not been included in the index.")
-		}
 		}
 	}
 }
