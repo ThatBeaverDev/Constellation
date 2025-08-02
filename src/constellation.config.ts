@@ -1,8 +1,10 @@
+import { error, log } from "./lib/logging.js";
+
 const isLocalhost = window.location.hostname == "localhost";
 const baseWallpaperURL = isLocalhost ? "/wallpapers/Originals/" : "/wallpapers/";
 
 if (isLocalhost) {
-	console.log("localhost detected - using 4K wallpapers.");
+	log("localhost detected - using 4K wallpapers.");
 }
 
 export const name = "Constellation";
@@ -36,9 +38,9 @@ export const isDevmode = new URL(window.location.href).searchParams.get("dev") !
 export let status = "";
 export function setStatus(text: string | Error, state: "working" | "error" = "working") {
 	if (state == "error") {
-		console.error("[/System/installer.js] - ", text);
+		error(name, text);
 	} else {
-		console.log("[/System/installer.js] - ", text);
+		log(name, text);
 	}
 
 	status = String(text);
