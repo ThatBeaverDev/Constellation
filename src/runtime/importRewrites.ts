@@ -1,5 +1,5 @@
 import { default as fs, readFile, resolve } from "../io/fs.js";
-import { AppsTimeStamp } from "./apps.js";
+import { AppsTimeStamp } from "./runtime.js";
 
 /**
  * a Cache of blobs which *never* invalidates! this will surely cause a some problems.

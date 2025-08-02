@@ -1,4 +1,4 @@
-import { IPCMessage } from "../../messages.js";
+import { IPCMessage } from "../../../runtime/messages.js";
 import dock, { dockConfig } from "../resources/dock.js";
 import menubar from "../resources/menubar.js";
 

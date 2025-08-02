@@ -1,6 +1,6 @@
 import * as conf from "../constellation.config.js";
 import realFS from "../io/fs.js";
-import { appName, execute, showPrompt } from "../apps/apps.js";
+import { appName, execute, showPrompt } from "../runtime/runtime.js";
 import { ImportError, PermissionsError } from "../errors.js";
 import { focus, focusWindow, getWindowOfId, GraphicalWindow, windows } from "../windows/windows.js";
 import {
@@ -12,9 +12,9 @@ import {
 	permissionsMetadata,
 	checkDirectoryPermission
 } from "../security/permissions.js";
-import { Framework, Process } from "../apps/executables.js";
+import { Framework, Process } from "../runtime/executables.js";
 import Shell from "../lib/shell.js";
-import { include } from "../apps/appsImportReplacements.js";
+import { include } from "../runtime/importRewrites.js";
 import {
 	directoryPointType as directoryPoint,
 	fsResponse,

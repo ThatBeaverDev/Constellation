@@ -23,9 +23,6 @@ export const files: any = {
 		directory: "/Applications/Finder.appl"
 	},
 
-	// apps system
-	"/build/apps/apps.js": "/System/CoreComponents/apps.js",
-
 	// libraries
 	"/build/syslib/pathinf.js": "/System/CoreLibraries/pathinf.js",
 	"/build/syslib/keyboardUtils.js": "/System/CoreLibraries/keyboardUtils.js",
