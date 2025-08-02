@@ -84,6 +84,8 @@ export default class KeystoneSearch extends Popup {
 	}
 
 	selectItem(index = this.selector) {
+		if (this.selector == undefined || this.renderer == undefined) return;
+
 		const item = this.rendering[index];
 
 		this.env.exec(item.directory);

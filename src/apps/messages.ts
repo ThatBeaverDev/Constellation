@@ -1,34 +1,43 @@
 import { MessageError } from "../errors.js";
 import { getProcessFromID, processes } from "./apps.js";
+import { Process } from "./executables.js";
 
 export type replyCallback = (data: any) => void | undefined;
 
 export function sendMessage(
 	originDirectory: string,
 	originID: number,
-	targetID: number,
+	target: Process | number,
 	intent: string,
 	data: any = {},
 	replyCallback?: replyCallback
 ) {
-	const target = getProcessFromID(targetID);
-	if (target == undefined)
-		throw new MessageError(
-			`Process with PID of '${target}' is not running. (sending message with intent '${intent}')`
-		);
+	let targetProcess
 
-	const onmessageFunction = target?.onmessage;
+	if (target instanceof Process) {
+		targetProcess = target;
+	} else {
+		targetProcess = getProcessFromID(target);
 
-	const onmessage = onmessageFunction.bind(target);
+		if (targetProcess == undefined)
+			throw new MessageError(
+				`Process with PID of '${target}' is not running. (sending message with intent '${intent}')`
+			);
+	}
 
-	const msg = new IPCMessage(originDirectory, originID, targetID, intent, data, replyCallback);
+
+	const onmessageFunction = targetProcess?.onmessage;
+
+	const onmessage = onmessageFunction.bind(targetProcess);
+
+	const msg = new IPCMessage(originDirectory, originID, targetProcess, intent, data, replyCallback);
 	onmessage(msg);
 }
 
 export class IPCMessage {
 	origin: `${string}:${number}`;
 	originDirectory: string;
-	target: number;
+	target: Process;
 	data: any;
 	intent: string;
 	#replyCallback?: replyCallback;
@@ -37,7 +46,7 @@ export class IPCMessage {
 	constructor(
 		originDirectory: string,
 		originID: number,
-		target: number,
+		target: Process,
 		intent: string,
 		data: any,
 		replyCallback?: replyCallback
