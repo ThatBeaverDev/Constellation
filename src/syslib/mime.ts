@@ -2,9 +2,7 @@ const mimeData = await env.include("/System/CoreLibraries/mimeFiles/mimes.js");
 const mimes = mimeData.default;
 
 if (mimes == undefined) {
-	throw new Error(
-		"Mimes file is empty and therefore mime types cannot be processed."
-	);
+	throw new Error("Mimes file is empty and therefore mime types cannot be processed.");
 }
 
 export function getType(extension: string): string | null {

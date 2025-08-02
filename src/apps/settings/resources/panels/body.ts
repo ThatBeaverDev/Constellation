@@ -11,10 +11,7 @@ export default class body {
 	initialised: boolean = false;
 
 	async init() {
-		const dir = env.fs.resolve(
-			this.parent.directory,
-			"resources/pages/index.js"
-		);
+		const dir = env.fs.resolve(this.parent.directory, "resources/pages/index.js");
 		const include = await env.include(dir);
 		this.pages = await include.default(this.parent);
 
@@ -78,9 +75,7 @@ export default class body {
 					break;
 
 				default:
-					throw new Error(
-						"Unknown jsonRenderStructure type: '" + item.type + "'"
-					);
+					throw new Error("Unknown jsonRenderStructure type: '" + item.type + "'");
 			}
 
 			y += 15;

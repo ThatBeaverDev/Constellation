@@ -13,17 +13,11 @@ const clamp = (n: number, min: number, max: number) => {
 };
 
 // https://stackoverflow.com/questions/39494689/is-it-possible-to-restrict-number-to-a-certain-range
-type Enumerate<
-	N extends number,
-	Acc extends number[] = []
-> = Acc["length"] extends N
+type Enumerate<N extends number, Acc extends number[] = []> = Acc["length"] extends N
 	? Acc[number]
 	: Enumerate<N, [...Acc, Acc["length"]]>;
 
-type IntRange<F extends number, T extends number> = Exclude<
-	Enumerate<T>,
-	Enumerate<F>
->;
+type IntRange<F extends number, T extends number> = Exclude<Enumerate<T>, Enumerate<F>>;
 
 type T = IntRange<20, 300>;
 
@@ -82,16 +76,9 @@ export default class finder extends Application {
 	ok: boolean = false;
 
 	async init() {
-		const [
-			initialDirectory = "/",
-			mode = "app",
-			recievingPipe,
-			sendingPipe
-		] = this.args;
+		const [initialDirectory = "/", mode = "app", recievingPipe, sendingPipe] = this.args;
 
-		this.pathinf = await this.env.include(
-			"/System/CoreLibraries/pathinf.js"
-		);
+		this.pathinf = await this.env.include("/System/CoreLibraries/pathinf.js");
 		await this.cd(initialDirectory);
 		this.type = mode;
 		this.pipes = {
@@ -102,13 +89,9 @@ export default class finder extends Application {
 		this.renderer.setIcon("folder");
 
 		this.registerKeyboardShortcut("Scroll Down", "ArrowDown", []);
-		this.registerKeyboardShortcut("Scroll Down (Fast)", "ArrowDown", [
-			"ShiftLeft"
-		]);
+		this.registerKeyboardShortcut("Scroll Down (Fast)", "ArrowDown", ["ShiftLeft"]);
 		this.registerKeyboardShortcut("Scroll Up", "ArrowUp", []);
-		this.registerKeyboardShortcut("Scroll Up (Fast)", "ArrowUp", [
-			"ShiftLeft"
-		]);
+		this.registerKeyboardShortcut("Scroll Up (Fast)", "ArrowUp", ["ShiftLeft"]);
 		this.registerKeyboardShortcut("Descend Directory", "Enter", []);
 		this.registerKeyboardShortcut("Ascend Directory", "Escape", []);
 		this.registerKeyboardShortcut("Select Directory", "KeyG", ["AltLeft"]);
@@ -128,32 +111,16 @@ export default class finder extends Application {
 			case "/System/keyboardShortcuts.js":
 				switch (intent) {
 					case "keyboardShortcutTrigger-Scroll Down":
-						this.selector = clamp(
-							this.selector + 1,
-							0,
-							this.listing.length - 1
-						);
+						this.selector = clamp(this.selector + 1, 0, this.listing.length - 1);
 						break;
 					case "keyboardShortcutTrigger-Scroll Down (Fast)":
-						this.selector = clamp(
-							this.selector + 2,
-							0,
-							this.listing.length - 1
-						);
+						this.selector = clamp(this.selector + 2, 0, this.listing.length - 1);
 						break;
 					case "keyboardShortcutTrigger-Scroll Up":
-						this.selector = clamp(
-							this.selector - 1,
-							0,
-							this.listing.length - 1
-						);
+						this.selector = clamp(this.selector - 1, 0, this.listing.length - 1);
 						break;
 					case "keyboardShortcutTrigger-Scroll Up (Fast)":
-						this.selector = clamp(
-							this.selector - 2,
-							0,
-							this.listing.length - 1
-						);
+						this.selector = clamp(this.selector - 2, 0, this.listing.length - 1);
 						break;
 					case "keyboardShortcutTrigger-Descend Directory": {
 						const obj = this.listing[this.selector];
@@ -171,9 +138,7 @@ export default class finder extends Application {
 						this.cd(prompt("Select a directory") || "");
 						break;
 					default:
-						throw new Error(
-							"Unknown keyboard shortcut name (intent): " + intent
-						);
+						throw new Error("Unknown keyboard shortcut name (intent): " + intent);
 				}
 				break;
 			default:
@@ -197,8 +162,7 @@ export default class finder extends Application {
 		if (this.path == "/") {
 			this.location = "Constellation";
 		} else {
-			this.location =
-				"Constellation" + String(this.path).replaceAll("/", " > ");
+			this.location = "Constellation" + String(this.path).replaceAll("/", " > ");
 		}
 
 		const directoryContents = await this.env.fs.listDirectory(dir);
@@ -329,10 +293,7 @@ export default class finder extends Application {
 
 							break;
 						default:
-							throw new Error(
-								"Unknown filetype cannot be handled for action: " +
-									obj.type
-							);
+							throw new Error("Unknown filetype cannot be handled for action: " + obj.type);
 					}
 				} else {
 					this.selector = Number(i);
@@ -352,33 +313,24 @@ export default class finder extends Application {
 						if (obj.path.endsWith(".appl")) {
 							context["Show Contents"] = openDirectory.bind(this);
 						} else {
-							context["Open Directory"] =
-								openDirectory.bind(this);
+							context["Open Directory"] = openDirectory.bind(this);
 						}
 						break;
 				}
 
 				context["Rename"] = () => {
 					/* TODO: RENAME THE FILE! */
-					this.env.prompt(
-						"Functionality not implemented: renaming files"
-					);
+					this.env.prompt("Functionality not implemented: renaming files");
 					/* TODO: RENAME THE FILE! */
-					this.env.prompt(
-						"Functionality not implemented: renaming files"
-					);
+					this.env.prompt("Functionality not implemented: renaming files");
 				};
 				context["Move to Bin"] = () => {
 					/* TODO: MOVE THE FILE! */
-					this.env.prompt(
-						"Functionality not implemented: trashing files"
-					);
+					this.env.prompt("Functionality not implemented: trashing files");
 				};
 				context["Copy"] = () => {
 					/* TODO: COPY THE FILE! */
-					this.env.prompt(
-						"Functionality not implemented: copying files"
-					);
+					this.env.prompt("Functionality not implemented: copying files");
 				};
 
 				this.renderer.setContextMenu(x, y, obj.name, context);
@@ -402,10 +354,7 @@ export default class finder extends Application {
 			// get the name
 			const itemName = this.listing[this.selector].name;
 			// get the path
-			const path =
-				itemName == ".."
-					? this.path
-					: this.env.fs.resolve(this.path, itemName);
+			const path = itemName == ".." ? this.path : this.env.fs.resolve(this.path, itemName);
 
 			this.renderer.button(
 				5,
@@ -420,15 +369,9 @@ export default class finder extends Application {
 
 	pickerSubmit() {
 		const itemName = this.listing[this.selector].name;
-		const path =
-			itemName == ".."
-				? this.path
-				: this.env.fs.resolve(this.path, itemName);
+		const path = itemName == ".." ? this.path : this.env.fs.resolve(this.path, itemName);
 
-		this.env.debug(
-			this.name,
-			"Submitting '" + path + "' for file picker result."
-		);
+		this.env.debug(this.name, "Submitting '" + path + "' for file picker result.");
 
 		// send it to the caller and exit
 		this.pipes.send.push({ intent: "selectionComplete", data: path });

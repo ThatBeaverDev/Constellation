@@ -13,8 +13,7 @@ export function blobify(text: string, mime = "text/plain") {
 
 export async function blobifyDirectory(location: string, mime = "text/plain") {
 	const text = await fs.readFile(location);
-	if (text == undefined)
-		throw new Error(`${location} is empty and cannot be 'blobified'`);
+	if (text == undefined) throw new Error(`${location} is empty and cannot be 'blobified'`);
 
 	const blob = new Blob([text], {
 		type: mime
@@ -53,8 +52,7 @@ export async function readAndBlobify(directory: string, mime = "text/plain") {
 
 export function dataUriToBlobUrl(dataUri: string): string {
 	const [meta, base64] = dataUri.split(",");
-	const mime =
-		meta.match(/data:(.*?);base64/)?.[1] || "application/octet-stream";
+	const mime = meta.match(/data:(.*?);base64/)?.[1] || "application/octet-stream";
 	const binary = atob(base64);
 	const array = new Uint8Array(binary.length);
 

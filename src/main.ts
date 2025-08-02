@@ -31,13 +31,7 @@ String.prototype.textBefore = function (before) {
 };
 
 String.prototype.textBeforeLast = function (before) {
-	return this.split("")
-		.reverse()
-		.join("")
-		.textAfter(before)
-		.split("")
-		.reverse()
-		.join("");
+	return this.split("").reverse().join("").textAfter(before).split("").reverse().join("");
 };
 
 String.prototype.map = function (mappings) {
@@ -68,9 +62,7 @@ async function main() {
 
 	setTimeout(() => bootBackground.remove(), 5000);
 
-	const bootSound = await fs.readFile(
-		"/System/CoreAssets/Sounds/boot/iMacG3.mp3"
-	);
+	const bootSound = await fs.readFile("/System/CoreAssets/Sounds/boot/iMacG3.mp3");
 	const sound = new Audio(bootSound);
 	try {
 		sound.play();

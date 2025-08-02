@@ -1,10 +1,6 @@
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
 
-export function filesystemTimestamp(
-	label: string,
-	start: DOMHighResTimeStamp,
-	colour: DevToolsColor = "secondary"
-) {
+export function filesystemTimestamp(label: string, start: DOMHighResTimeStamp, colour: DevToolsColor = "secondary") {
 	performanceLog(label, start, "FileSystemManager", colour);
 }
 
@@ -104,9 +100,7 @@ const writeFile = async (directory: string, content: string) => {
 	});
 };
 
-export const readFile = async (
-	directory: string
-): Promise<string | undefined> => {
+export const readFile = async (directory: string): Promise<string | undefined> => {
 	const start = performance.now();
 
 	return new Promise((resolve: Function) =>
@@ -176,11 +170,7 @@ const mkdir = async (directory: string): Promise<undefined> => {
 	const start = performance.now();
 
 	if (isRoot(directory)) {
-		filesystemTimestamp(
-			`mkdir ${directory} - failed (no new children of root)`,
-			start,
-			"error"
-		);
+		filesystemTimestamp(`mkdir ${directory} - failed (no new children of root)`, start, "error");
 		throw new Error("Directories cannot be created under root.");
 	}
 
@@ -250,8 +240,7 @@ export const resolve = (base = "/", target: string) => {
 
 	return "/" + baseParts.join("/");
 };
-const normalize = (path: string) =>
-	path.replace(/\/+/g, "/").replace(/\/$/, "") || "/";
+const normalize = (path: string) => path.replace(/\/+/g, "/").replace(/\/$/, "") || "/";
 export function relative(from: string, to: string) {
 	from = normalize(from);
 	to = normalize(to);

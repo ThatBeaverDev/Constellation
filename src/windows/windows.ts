@@ -7,11 +7,7 @@ import { DevToolsColor, performanceLog } from "../lib/debug.js";
 
 const start = performance.now();
 
-export function windowsTimestamp(
-	label: string,
-	start: DOMHighResTimeStamp,
-	colour: DevToolsColor = "secondary"
-) {
+export function windowsTimestamp(label: string, start: DOMHighResTimeStamp, colour: DevToolsColor = "secondary") {
 	performanceLog(label, start, "WindowSystem", colour);
 }
 
@@ -139,32 +135,20 @@ export class GraphicalWindow {
 		this.iconDiv.style.height = "25px";
 
 		this.closeButton = windowButton(document.createElement("div"), "x");
-		this.maximiseButton = windowButton(
-			document.createElement("div"),
-			"maximize",
-			0.75
-		);
-		this.minimiseButton = windowButton(
-			document.createElement("div"),
-			"minimize-2"
-		);
+		this.maximiseButton = windowButton(document.createElement("div"), "maximize", 0.75);
+		this.minimiseButton = windowButton(document.createElement("div"), "minimize-2");
 
 		this.buttons = document.createElement("div");
 		this.buttons.id = String(window.renderID++);
 		this.buttons.className = "windowButtons";
 		this.buttons.innerHTML =
-			this.closeButton.outerHTML +
-			this.minimiseButton.outerHTML +
-			this.maximiseButton.outerHTML;
+			this.closeButton.outerHTML + this.minimiseButton.outerHTML + this.maximiseButton.outerHTML;
 
 		this.header = document.createElement("div");
 		const h = this.header;
 		h.className = "windowHeader";
 		h.id = String(window.renderID++);
-		h.innerHTML =
-			this.iconDiv.outerHTML +
-			this.title.outerHTML +
-			this.buttons.outerHTML;
+		h.innerHTML = this.iconDiv.outerHTML + this.title.outerHTML + this.buttons.outerHTML;
 
 		this.body = document.createElement("div");
 		const b = this.body;
@@ -223,16 +207,10 @@ export class GraphicalWindow {
 				this.fullscreen();
 			}
 		};
-		this.maximiseButton.addEventListener(
-			"pointerdown",
-			fullscreenPointerDown
-		);
+		this.maximiseButton.addEventListener("pointerdown", fullscreenPointerDown);
 
 		const minimisePointerDown = () => this.minimise();
-		this.minimiseButton.addEventListener(
-			"pointerdown",
-			minimisePointerDown
-		);
+		this.minimiseButton.addEventListener("pointerdown", minimisePointerDown);
 
 		this.setIcon("app-window-mac");
 
@@ -479,11 +457,7 @@ export function focusWindow(id: number) {
 	// focus our window
 	focus = id;
 	target.container.classList.add("focused");
-	target.move(
-		target.position.left,
-		target.position.top,
-		windowTilingNumber++
-	);
+	target.move(target.position.left, target.position.top, windowTilingNumber++);
 
 	windowsTimestamp(`Focus window ${id}`, start);
 }
@@ -565,22 +539,15 @@ document.body.appendChild(styleElem);
 async function updateLiveStyling() {
 	const start = performance.now();
 
-	console.debug(
-		"Loading windowing CSS for minimise animation: " + minimiseAnimation
-	);
+	console.debug("Loading windowing CSS for minimise animation: " + minimiseAnimation);
 
-	const css = await fs.readFile(
-		"/System/windows/" + minimiseAnimation + ".css"
-	);
+	const css = await fs.readFile("/System/windows/" + minimiseAnimation + ".css");
 
 	if (css == undefined) {
 		return;
 	}
 
-	console.debug(
-		"CSS retrieved successfully for minimise animation: " +
-			minimiseAnimation
-	);
+	console.debug("CSS retrieved successfully for minimise animation: " + minimiseAnimation);
 
 	styleElem.textContent = css;
 

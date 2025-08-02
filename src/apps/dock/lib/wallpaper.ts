@@ -1,11 +1,7 @@
 import TerminalAlias from "../../../lib/terminalAlias";
 const windowsAPI = await env.include("/System/windows.js");
 
-export default async function wallpaper(
-	parent: TerminalAlias,
-	intent: string,
-	...args: string[]
-): Promise<string> {
+export default async function wallpaper(parent: TerminalAlias, intent: string, ...args: string[]): Promise<string> {
 	switch (intent) {
 		case "set": {
 			const dir = env.fs.resolve(parent.path, args[0]);

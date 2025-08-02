@@ -115,14 +115,7 @@ export default {
 	"application/oebps-package+xml": ["opf"],
 	"application/ogg": ["ogx"],
 	"application/omdoc+xml": ["omdoc"],
-	"application/onenote": [
-		"onetoc",
-		"onetoc2",
-		"onetmp",
-		"onepkg",
-		"one",
-		"onea"
-	],
+	"application/onenote": ["onetoc", "onetoc2", "onetmp", "onepkg", "one", "onea"],
 	"application/oxps": ["oxps"],
 	"application/p2p-overlay+xml": ["relo"],
 	"application/patch-ops-error+xml": ["xer"],
@@ -644,29 +637,14 @@ export default {
 	"application/vnd.openblox.game+xml": ["obgx"],
 	"application/vnd.openofficeorg.extension": ["oxt"],
 	"application/vnd.openstreetmap.data+xml": ["osm"],
-	"application/vnd.openxmlformats-officedocument.presentationml.presentation":
-		["pptx"],
-	"application/vnd.openxmlformats-officedocument.presentationml.slide": [
-		"sldx"
-	],
-	"application/vnd.openxmlformats-officedocument.presentationml.slideshow": [
-		"ppsx"
-	],
-	"application/vnd.openxmlformats-officedocument.presentationml.template": [
-		"potx"
-	],
-	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
-		"xlsx"
-	],
-	"application/vnd.openxmlformats-officedocument.spreadsheetml.template": [
-		"xltx"
-	],
-	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
-		"docx"
-	],
-	"application/vnd.openxmlformats-officedocument.wordprocessingml.template": [
-		"dotx"
-	],
+	"application/vnd.openxmlformats-officedocument.presentationml.presentation": ["pptx"],
+	"application/vnd.openxmlformats-officedocument.presentationml.slide": ["sldx"],
+	"application/vnd.openxmlformats-officedocument.presentationml.slideshow": ["ppsx"],
+	"application/vnd.openxmlformats-officedocument.presentationml.template": ["potx"],
+	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ["xlsx"],
+	"application/vnd.openxmlformats-officedocument.spreadsheetml.template": ["xltx"],
+	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": ["docx"],
+	"application/vnd.openxmlformats-officedocument.wordprocessingml.template": ["dotx"],
 	"application/vnd.osgeo.mapguide.package": ["mgp"],
 	"application/vnd.osgi.dp": ["dp"],
 	"application/vnd.osgi.subsystem": ["esa"],
@@ -686,14 +664,7 @@ export default {
 	"application/vnd.publishare-delta-tree": ["qps"],
 	"application/vnd.pvi.ptid1": ["ptid"],
 	"application/vnd.pwg-xhtml-print+xml": ["xhtm"],
-	"application/vnd.quark.quarkxpress": [
-		"qxd",
-		"qxt",
-		"qwd",
-		"qwt",
-		"qxl",
-		"qxb"
-	],
+	"application/vnd.quark.quarkxpress": ["qxd", "qxt", "qwd", "qwt", "qxl", "qxb"],
 	"application/vnd.rar": ["rar"],
 	"application/vnd.realvnc.bed": ["bed"],
 	"application/vnd.recordare.musicxml": ["mxl"],
@@ -808,17 +779,7 @@ export default {
 	"application/x-csh": ["csh"],
 	"application/x-debian-package": ["*deb", "udeb"],
 	"application/x-dgc-compressed": ["dgc"],
-	"application/x-director": [
-		"dir",
-		"dcr",
-		"dxr",
-		"cst",
-		"cct",
-		"cxt",
-		"w3d",
-		"fgd",
-		"swa"
-	],
+	"application/x-director": ["dir", "dcr", "dxr", "cst", "cct", "cxt", "w3d", "fgd", "swa"],
 	"application/x-doom": ["wad"],
 	"application/x-dtbncx+xml": ["ncx"],
 	"application/x-dtbook+xml": ["dtb"],
