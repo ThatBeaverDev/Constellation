@@ -76,11 +76,11 @@ export default class initialiser extends BackgroundProcess {
 
 		// wait to prevent the app freezing.
 		await new Promise((resolve: Function) => setTimeout(resolve, 5));
-		console.log("Login Complete");
+		this.env.log("Login Complete");
 
 		// regardless we should logout, dock crashing makes the OS hard to use.
 		await dock.promise;
-		console.log("Dock exited, opening login panel.");
+		this.env.log("Dock exited, opening login panel.");
 
 		// restart the login flow.
 		this.startLoginProcess();

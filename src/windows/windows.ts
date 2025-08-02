@@ -4,8 +4,10 @@ import { Application } from "../apps/executables.js";
 import { terminate } from "../apps/apps.js";
 import * as css from "./cssVariables.js";
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
+import { debug } from "../lib/logging.js";
 
 const start = performance.now();
+const name = "/System/windows.js";
 
 export function windowsTimestamp(label: string, start: DOMHighResTimeStamp, colour: DevToolsColor = "secondary") {
 	performanceLog(label, start, "WindowSystem", colour);
@@ -539,7 +541,7 @@ document.body.appendChild(styleElem);
 async function updateLiveStyling() {
 	const start = performance.now();
 
-	console.debug("Loading windowing CSS for minimise animation: " + minimiseAnimation);
+	debug(name, "Loading windowing CSS for minimise animation: " + minimiseAnimation);
 
 	const css = await fs.readFile("/System/windows/" + minimiseAnimation + ".css");
 
@@ -547,7 +549,7 @@ async function updateLiveStyling() {
 		return;
 	}
 
-	console.debug("CSS retrieved successfully for minimise animation: " + minimiseAnimation);
+	debug(name, "CSS retrieved successfully for minimise animation: " + minimiseAnimation);
 
 	styleElem.textContent = css;
 

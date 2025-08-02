@@ -23,6 +23,7 @@ import {
 	WindowAlias
 } from "./definitions.js";
 import { User, users, validatePassword } from "./users.js";
+import { debug, error, log, warn } from "../lib/logging.js";
 
 const start = performance.now();
 const name = "/System/security/env.js";
@@ -48,7 +49,7 @@ export class ApplicationAuthorisationAPI {
 		this.#password = password;
 		this.#process = process;
 
-		this.debug(name, `ApplicationAuthorisationAPI created as ${user} for ${directory}`);
+		debug(name, `ApplicationAuthorisationAPI created as ${user} for ${directory}`);
 		securityTimestamp(`Create env for ${directory}`, start);
 	}
 
@@ -79,17 +80,37 @@ export class ApplicationAuthorisationAPI {
 	shell: Shell;
 
 	// logging
-	debug(initiator: string, ...content: any): undefined {
-		console.debug("[" + initiator + "] -", ...content);
+	debug(...content: any): undefined {
+		const initiator = this.directory;
+		if (initiator == "/System/globalPermissionsHost.js") {
+			throw new Error(`globalEnv cannot be used to log. (${this.directory})`);
+		}
+
+		debug(initiator, ...content);
 	}
-	log(initiator: string, ...content: any): undefined {
-		console.log("[" + initiator + "] -", ...content);
+	log(...content: any): undefined {
+		const initiator = this.directory;
+		if (initiator == "/System/globalPermissionsHost.js") {
+			throw new Error(`globalEnv cannot be used to log. (${this.directory})`);
+		}
+
+		log(initiator, ...content);
 	}
-	warn(initiator: string, ...content: any): undefined {
-		console.warn("[" + initiator + "] -", ...content);
+	warn(...content: any): undefined {
+		const initiator = this.directory;
+		if (initiator == "/System/globalPermissionsHost.js") {
+			throw new Error(`globalEnv cannot be used to log. (${this.directory})`);
+		}
+
+		warn(initiator, ...content);
 	}
-	error(initiator: string, ...content: any): undefined {
-		console.error("[" + initiator + "] -", ...content);
+	error(...content: any): undefined {
+		const initiator = this.directory;
+		if (initiator == "/System/globalPermissionsHost.js") {
+			throw new Error(`globalEnv cannot be used to log. (${this.directory})`);
+		}
+
+		error(initiator, ...content);
 	}
 
 	/**
@@ -384,7 +405,7 @@ export class ApplicationAuthorisationAPI {
 			appname = appName(this.#process);
 		}
 
-		this.log(name, "Permission by name " + permission + " requested.");
+		this.log("Permission by name " + permission + " requested.");
 		const ok = await showPrompt(
 			"log",
 			appname + " is requesting permission for " + permission,
