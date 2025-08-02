@@ -47,13 +47,13 @@ String.prototype.map = function (mappings) {
 async function main() {
 	await fsLoaded();
 
-	await users.init();
-	await apps.init();
-
 	//const firstBoot = (await fs.readFile("/System/arc.json")) == undefined;
 	//if (firstBoot) {
 	await installer.install();
 	//}
+
+	await users.init();
+	await apps.init();
 
 	const bootBackground = document.querySelector("div.bootCover")!;
 	bootBackground.classList.add("fadeOut");
