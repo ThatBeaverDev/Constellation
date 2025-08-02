@@ -2,7 +2,7 @@ import { BackgroundProcess, Process } from "../apps/executables.js";
 import { sendMessage } from "../apps/messages.js";
 import { focus, windows } from "../windows/windows.js";
 
-export const keyboardShortcuts: any = {};
+export const keyboardShortcuts: Map<[Process, string], keyboardShortcut> = new Map()
 
 declare global {
 	interface Window {
@@ -43,13 +43,9 @@ export function registerKeyboardShortcut(
 		modifiers: modifiers
 	};
 
-	keyboardShortcuts[process.directory + "://" + name] = cut;
-}
+	const map: [Process, string] = [process, name]
 
-export function updateKeyboardShortcut(id: string, key: string, modifiers: string[]) {
-	const k = keyboardShortcuts[id];
-	k.key = key;
-	k.modifiers = modifiers;
+	keyboardShortcuts.set(map,cut);
 }
 
 document.addEventListener("keydown", (e) => {
@@ -61,11 +57,8 @@ document.addEventListener("keydown", (e) => {
 	const shift = e.shiftKey;
 	const ctrl = e.ctrlKey;
 
-	//console.log(keyCode, meta, option, shift, ctrl);
-	const k = keyboardShortcuts;
 
-	for (const i in k) {
-		const cut = k[i];
+	for (const [shortcutName, cut] of keyboardShortcuts.entries()) {
 
 		// insure the right main key is pressed
 		if (keyCode == cut.key) {
@@ -105,7 +98,7 @@ document.addEventListener("keydown", (e) => {
 
 			if (ok) {
 				// trigger the shortcut
-				sendMessage("/System/keyboardShortcuts.js", 0, cut.process.id, "keyboardShortcutTrigger-" + cut.name);
+				sendMessage("/System/keyboardShortcuts.js", 0, cut.process, "keyboardShortcutTrigger-" + cut.name);
 
 				e.preventDefault();
 			}
