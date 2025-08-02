@@ -82,6 +82,8 @@ export class ContextMenu {
 		this.divider.style.width = `${maxWidth}px`;
 		yPos += 5;
 
+		const widthOfSpace = getTextWidth(" ");
+
 		this.items = Object.keys(items).map((text: string, index: number) => {
 			const elem = document.createElement("button");
 			elem.className = "uikitButton noBackground";
@@ -100,17 +102,15 @@ export class ContextMenu {
 			let icon;
 			let txt = text;
 			if (afterIcon !== "") {
-				txt = afterIcon;
+				txt = " ".repeat(Math.ceil(24 / widthOfSpace)) + afterIcon;
 				icon = getIcon(iconName);
-
-				elem.style.left = `${padding + 24}px`;
-				elem.style.width = `${maxWidth - 24}px`;
 
 				icon.style.top = `${yPos}px`;
 				icon.style.left = `${padding}px`;
 
 				icon.style.width = "20px";
 				icon.style.height = "20px";
+				icon.style.pointerEvents = "none";
 			}
 
 			const beforeSemicolon = txt.textBeforeLast(";");
@@ -144,6 +144,7 @@ export class ContextMenu {
 			this.items[i].text.addEventListener(
 				"pointerdown",
 				() => {
+					this.remove()
 					const index = Number(this.items[i].text.dataset.index);
 
 					const text = Object.keys(items)[index];
@@ -151,6 +152,7 @@ export class ContextMenu {
 					const callback = items[text];
 
 					callback();
+
 				},
 				{
 					signal: this.#signal
