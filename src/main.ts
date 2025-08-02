@@ -19,7 +19,7 @@ declare global {
 	}
 }
 String.prototype.textAfter = function (after) {
-	return this.substring(this.indexOf(after) + String(after).length);
+	return this.split(after).splice(1, Infinity).join(after);
 };
 
 String.prototype.textAfterAll = function (after) {
