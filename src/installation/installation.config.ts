@@ -92,9 +92,15 @@ export const files: any = {
 		directory: "/System/CoreAssets/Sounds"
 	},
 
+	// LoginUI
 	"/build/apps/com.constellation.systemLoginInterface.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreExecutables/systemLoginInterface.appl"
+	},
+	// Calculator
+	"/build/apps/com.constellation.calculator.idx": {
+		type: "jsonFilesIndex",
+		directory: "/Applications/calculator.appl"
 	}
 };
 

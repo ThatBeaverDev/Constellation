@@ -67,9 +67,13 @@ export default class initialiser extends BackgroundProcess {
 
 		// start the dev app if required.
 		const isAppdev = new URL(window.location.href).searchParams.get("appdev") !== null;
+		const openFlag = new URL(window.location.href).searchParams.get("open");
 
 		if (isAppdev) {
 			await this.env.exec("/Applications/developerApplication.appl");
+		}
+		if (openFlag) {
+			await this.env.exec(openFlag);
 		}
 
 		this.loginCompleted = true;
