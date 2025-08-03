@@ -217,6 +217,8 @@ export default class dock {
 
 						this.winAPI.focusWindow(win.winID);
 					}
+
+					this.refresh();
 				},
 				(left: number, top: number) => {
 					// menu items
@@ -247,6 +249,8 @@ export default class dock {
 
 					// show menu
 					this.renderer.setContextMenu(left, top, name, contextMenuItems);
+
+					this.refresh();
 				}
 			);
 
