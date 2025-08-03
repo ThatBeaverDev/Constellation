@@ -32,15 +32,15 @@ compile() {
     # Build app library
     ./scripts/tcpkg build/apps/library build/apps/com.constellation.library.idx -override=true
 
-    # Build the systemLoginInterface
-    ./scripts/tcpkg build/apps/systemLoginInterface build/apps/com.constellation.systemLoginInterface.idx -override=true
-
-    # Build the app-template
-    #packageSDKapp src/apps/app-template com.constellation.app-template
-
     # Package audio files
     mkdir -p build/assets
     ./scripts/tcpkg assets/sounds build/assets/sounds.idx -override=true
+
+    # Build the systemLoginInterface
+    ./scripts/tcpkg build/apps/systemLoginInterface build/apps/com.constellation.systemLoginInterface.idx -override=true
+
+    # Build the calculator
+    ./scripts/tcpkg build/apps/calculator build/apps/com.constellation.calculator.idx -override=true
 }
 
 # first param is directory, second param is name
