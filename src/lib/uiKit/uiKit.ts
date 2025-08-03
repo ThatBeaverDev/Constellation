@@ -354,9 +354,8 @@ export class Renderer {
 	 * @param {number} x - the X position of the context.
 	 * @param {number} y - the Y position of the context.
 	 * @param {string} header - the header text of the context
-	 * @param {Record<string | `${string}-:-${string}` | `${string};${string}` | `${string}-:-${string};${string}`, Function>} buttons - an object of the context's buttons and the function to execute when clicked. Displayed in order that they are assigned. Key names can also use icon-:-text to display an icon with the text, and text after the last semicolon is ignored so that two buttons with the same text can exist.
+	 * @param {Record<string, Function>} buttons - an object of the context's buttons and the function to execute when clicked. Displayed in order that they are assigned. Key names can also use icon-:-text to display an icon with the text, and text after the last semicolon is ignored so that two buttons with the same text can exist.
 	 */
-		x: number,
 	setContextMenu(x: number, y: number, header: string, buttons: Record<string, Function>) {
 		this.removeContextMenu();
 
