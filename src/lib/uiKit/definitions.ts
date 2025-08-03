@@ -16,6 +16,7 @@ export type uikitCreatorName = {
 // onClick types
 export interface onClickOptions {
 	scale?: number;
+	clickScale?: number;
 	origin?: string;
 }
 export interface clickReference extends onClickOptions {
@@ -28,6 +29,7 @@ export interface step {
 	type: uikitCreatorName;
 	args: any[];
 	onClick?: clickReference;
+	passthrough?: boolean;
 }
 
 export interface textboxCallbackObject {

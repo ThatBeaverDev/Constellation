@@ -311,6 +311,19 @@ export class Renderer {
 			throw new UIError(`onClick called with invalid elemID: ${elemID}`);
 		}
 	}
+	/**
+	 * Makes an element invisible to clicks, allowing elements behind to be clicked.
+	 * @param elemID - the ID of the element. this is returned from the creator (eg: `this.renderer.icon()` is a creator.)
+	 */
+	passthrough(elemID: number) {
+		// insure elemID is valid
+		if (elemID > 0 && elemID <= this.#steps.length) {
+			// assign data
+			this.#steps[elemID - 1].passthrough = true;
+		} else {
+			throw new UIError(`onClick called with invalid elemID: ${elemID}`);
+		}
+	}
 
 	async awaitClick(callback: () => void | Promise<void>) {
 		const init = Date.now();
@@ -523,7 +536,13 @@ export class Renderer {
 					}
 
 					// @ts-expect-error // run the creator
-					return creator(...newStep.args);
+					const element = creator(...newStep.args);
+
+					if (newStep.passthrough == true) {
+						element.style.pointerEvents = "none";
+					}
+
+					return element;
 				};
 
 				// use a transitioner to simply modify properties if possible.
@@ -569,6 +588,7 @@ export class Renderer {
 			if (newStep.onClick !== undefined) {
 				element.classList.add("clickable");
 				element.style.setProperty("--scale", String(newStep.onClick.scale || 1.3));
+				element.style.setProperty("--click-scale", String(newStep.onClick.clickScale || 1.5));
 				element.style.setProperty("--origin", newStep.onClick.origin || "center");
 
 				let pressTimer: ReturnType<typeof setTimeout> | null = null;
