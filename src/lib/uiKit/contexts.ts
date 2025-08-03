@@ -144,7 +144,7 @@ export class ContextMenu {
 			this.items[i].text.addEventListener(
 				"pointerdown",
 				() => {
-					this.remove()
+					this.remove();
 					const index = Number(this.items[i].text.dataset.index);
 
 					const text = Object.keys(items)[index];
@@ -152,7 +152,6 @@ export class ContextMenu {
 					const callback = items[text];
 
 					callback();
-
 				},
 				{
 					signal: this.#signal

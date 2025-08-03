@@ -2,7 +2,7 @@ import { BackgroundProcess, Process } from "../runtime/executables.js";
 import { sendMessage } from "../runtime/messages.js";
 import { focus, windows } from "../windows/windows.js";
 
-export const keyboardShortcuts: Map<[Process, string], keyboardShortcut> = new Map()
+export const keyboardShortcuts: Map<[Process, string], keyboardShortcut> = new Map();
 
 declare global {
 	interface Window {
@@ -43,9 +43,9 @@ export function registerKeyboardShortcut(
 		modifiers: modifiers
 	};
 
-	const map: [Process, string] = [process, name]
+	const map: [Process, string] = [process, name];
 
-	keyboardShortcuts.set(map,cut);
+	keyboardShortcuts.set(map, cut);
 }
 
 document.addEventListener("keydown", (e) => {
@@ -57,9 +57,7 @@ document.addEventListener("keydown", (e) => {
 	const shift = e.shiftKey;
 	const ctrl = e.ctrlKey;
 
-
 	for (const [shortcutName, cut] of keyboardShortcuts.entries()) {
-
 		// insure the right main key is pressed
 		if (keyCode == cut.key) {
 			// loop through all the necessary modifiers to insure they are all pressed
