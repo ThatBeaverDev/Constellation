@@ -12,7 +12,7 @@ export function sendMessage(
 	data: any = {},
 	replyCallback?: replyCallback
 ) {
-	let targetProcess
+	let targetProcess;
 
 	if (target instanceof Process) {
 		targetProcess = target;
@@ -24,7 +24,6 @@ export function sendMessage(
 				`Process with PID of '${target}' is not running. (sending message with intent '${intent}')`
 			);
 	}
-
 
 	const onmessageFunction = targetProcess?.onmessage;
 

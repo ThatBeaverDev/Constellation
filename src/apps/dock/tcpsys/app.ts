@@ -50,7 +50,7 @@ export default class dockAndDesktop extends Application {
 		const list = await this.env.fs.listDirectory(env.fs.resolve(this.directory, "./data"));
 		if (!list.ok) throw list.data;
 
-		if (list.data == undefined) setTimeout(this.loadConfig, 100)
+		if (list.data == undefined) setTimeout(this.loadConfig, 100);
 
 		const configs = list.data;
 
