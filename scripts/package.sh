@@ -9,7 +9,7 @@ compile() {
     ./scripts/tcpkg build/apps/finder build/apps/com.constellation.finder.idx -override=true
 
     # Build the CoreExecutable
-    ./scripts/tcpkg build/apps/CoreExecutable build/apps/com.constellation.CoreExecutable.idx -override=true
+    ./scripts/tcpkg build/apps/launch build/apps/com.constellation.launcher.idx -override=true
 
     # Build Terminal
     ./scripts/tcpkg build/apps/terminal build/apps/com.constellation.terminal.idx -override=true
