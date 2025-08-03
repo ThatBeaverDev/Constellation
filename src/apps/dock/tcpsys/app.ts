@@ -47,12 +47,21 @@ export default class dockAndDesktop extends Application {
 	}
 
 	async loadConfig() {
-		const list = await this.env.fs.listDirectory(env.fs.resolve(this.directory, "./data"));
+		const dir = env.fs.resolve(this.directory, "./data");
+		const list = await this.env.fs.listDirectory(dir);
 		if (!list.ok) throw list.data;
+		let configs = list.data;
 
-		if (list.data == undefined) setTimeout(this.loadConfig, 100);
+		if (configs == undefined) {
+			// the directory doesn't exist.
+			const mkdir = await env.fs.createDirectory(dir);
 
-		const configs = list.data;
+			if (!mkdir.ok) throw mkdir.data;
+
+			const list = await this.env.fs.listDirectory(dir);
+			if (!list.ok) throw list.data;
+			configs = list.data;
+		}
 
 		if (configs.includes(this.env.userID + ".json")) {
 			// we have the config, let's load it.
