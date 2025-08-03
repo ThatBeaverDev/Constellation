@@ -36,6 +36,8 @@ export function newContext(x: number = 0, y: number = 0, headerText: string = ""
 }
 
 export class ContextMenu {
+	#start = Date.now();
+
 	constructor(x: number, y: number, headerText: string, items: Record<string, Function>) {
 		let maxWidth = 0;
 		let maxWidthString = "";
@@ -142,13 +144,15 @@ export class ContextMenu {
 			if (elems.icon !== undefined) this.container.appendChild(elems.icon);
 
 			this.items[i].text.addEventListener(
-				"pointerdown",
+				"pointerup",
 				() => {
+					const age = Date.now() - this.#start;
+					if (age < 500) return;
+
 					this.remove();
+
 					const index = Number(this.items[i].text.dataset.index);
-
 					const text = Object.keys(items)[index];
-
 					const callback = items[text];
 
 					callback();
@@ -159,14 +163,17 @@ export class ContextMenu {
 			);
 		}
 
-		document.addEventListener(
-			"pointerdown",
-			(e: PointerEvent) => {
-				this.remove();
-				e.stopImmediatePropagation();
-			},
-			{ once: true }
-		);
+		const pointerup = (e: PointerEvent) => {
+			const age = Date.now() - this.#start;
+			if (age < 500) return;
+
+			this.remove();
+			e.stopImmediatePropagation();
+
+			document.removeEventListener("pointerup", pointerup);
+		};
+
+		document.addEventListener("pointerup", pointerup);
 	}
 
 	container: HTMLDivElement;
