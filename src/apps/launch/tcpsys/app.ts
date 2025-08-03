@@ -1,6 +1,6 @@
 import { IPCMessage } from "../../../runtime/messages";
 
-export default class initialiser extends BackgroundProcess {
+export default class launch extends BackgroundProcess {
 	windows?: typeof import("../../../windows/windows");
 	loginCompleted: boolean = false;
 	loginDirectory: string = "/System/CoreExecutables/systemLoginInterface.appl";

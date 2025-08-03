@@ -39,7 +39,7 @@ export const files: any = {
 	"/logos/Web.svg": "/System/CoreAssets/Logos/Constellation-Web.svg",
 
 	// init system
-	"/build/apps/com.constellation.CoreExecutable.idx": {
+	"/build/apps/com.constellation.launcher.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreExecutables/launchd.backgr"
 	},
