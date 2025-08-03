@@ -59,6 +59,8 @@ export default class menubar {
 		const date = new Date();
 		let weekDay = (() => {
 			switch (date.getDay()) {
+				case 0:
+					return "Sunday";
 				case 1:
 					return "Monday";
 				case 2:
@@ -71,8 +73,6 @@ export default class menubar {
 					return "Friday";
 				case 6:
 					return "Saturday";
-				case 7:
-					return "Sunday";
 			}
 		})();
 		const day = date.getDate();
