@@ -228,6 +228,7 @@ export default class dock {
 					if (win !== undefined) {
 						contextMenuItems = {
 							...contextMenuItems,
+							"app-window-mac-:-New Window": () => this.env.exec(directory),
 							"minimize-2-:-Minimise": () => win.minimise(),
 							"expand-:-Restore": () => win.unminimise(),
 							"x-:-Close": () => win.close()
@@ -235,7 +236,7 @@ export default class dock {
 					} else {
 						contextMenuItems = {
 							...contextMenuItems,
-							"app-window-mac-:-Open": () => env.exec(directory)
+							"app-window-mac-:-Open": () => this.env.exec(directory)
 						};
 					}
 
