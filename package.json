@@ -24,7 +24,8 @@
 		"linux"
 	],
 	"dependencies": {
-		"mime": "4.0.7"
+		"mime": "4.0.7",
+		"remove-empty-directories": "^0.0.1"
 	},
 	"engines": {
 		"node": "22.x"
