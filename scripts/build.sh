@@ -8,6 +8,9 @@ clean() {
 
     # delete .DS_Store files since they mess up .idx packaging
     find . -name .DS_Store -exec rm {} +
+
+    # delete empty directories. I know what they did.
+    npx remove-empty-directories src
 }
 
 build_tsc() {
