@@ -17,6 +17,7 @@ import {
 } from "./definitions.js";
 import canvasKit from "./canvasKit.js";
 import uikitEventCreators from "./eventCreators.js";
+import uiKitTransitioners from "./transitioners.js";
 
 const uiKitStart = performance.now();
 
@@ -147,6 +148,8 @@ export class Renderer {
 
 		this.#creators = new uiKitCreators(this, this.#window);
 		this.#eventCreators = new uikitEventCreators(this);
+
+		this.#transitioners = new uiKitTransitioners(this, this.#window);
 	}
 
 	clear = () => {
@@ -179,10 +182,10 @@ export class Renderer {
 		return this.#steps.push(obj);
 	};
 
-	readonly text = (x: number, y: number, string: string, size: number = 15, colour: string = "") => {
+	readonly text = (x: number, y: number, string: string, fontSize: number = 15, colour: string = "") => {
 		const obj: step = {
 			type: "uikitText",
-			args: [x, y, string, size, colour]
+			args: [x, y, string, fontSize, colour]
 		};
 		return this.#steps.push(obj);
 	};
@@ -348,6 +351,8 @@ export class Renderer {
 
 	readonly #creators: uiKitCreators;
 	readonly #eventCreators: uikitEventCreators;
+	readonly #transitioners: uiKitTransitioners;
+	useTransitioners: boolean = true;
 
 	/**
 	 * Sets the displayed context menu of the window. use .removeContextMenu() to remove it.
@@ -404,8 +409,6 @@ export class Renderer {
 			this.#creators.textboxElem.focus();
 		}
 	}
-
-	#compareSteps() {}
 
 	/**
 	 * Commits all UI elements since the last `renderer.clear()` call.
@@ -503,24 +506,51 @@ export class Renderer {
 
 			let element: HTMLElement;
 
-			const stepChanged =
+			let stepChanged =
 				!oldStep ||
 				oldStep.type !== newStep.type ||
 				JSON.stringify(oldStep.args) !== JSON.stringify(newStep.args);
 
-			// inside your commit() loop where you create new elements
 			if (stepChanged) {
-				if (oldElement) oldElement.remove();
+				const applyCreator = () => {
+					if (oldElement) oldElement.remove();
 
-				const creator: (x: number, y: number, ...args: any) => HTMLElement = this.#creators[newStep.type].bind(
-					this.#creators
-				);
-				if (!creator) {
-					throw new UIError(`Creator is not defined for ${newStep.type}`);
+					const creator: (x: number, y: number, ...args: any) => HTMLElement = this.#creators[
+						newStep.type
+					].bind(this.#creators);
+					if (!creator) {
+						throw new UIError(`Creator is not defined for ${newStep.type}`);
+					}
+
+					// @ts-expect-error // run the creator
+					return creator(...newStep.args);
+				};
+
+				// use a transitioner to simply modify properties if possible.
+				if (oldStep?.type === newStep?.type) {
+					// get the transitioner
+					const transitioner: (element: HTMLElement, oldStep: step, newStep: step) => boolean =
+						// @ts-expect-error
+						this.#transitioners[oldStep?.type];
+
+					// prevent trying to apply a transitioner on an element that doesn't exist.
+					if (transitioner == undefined) {
+						element = applyCreator();
+					} else {
+						// apply the transitioner
+						const result = transitioner(oldElement, oldStep, newStep);
+
+						// if it returns false, it can't manage that particular transition.
+						if (result == false) {
+							element = applyCreator();
+						} else {
+							stepChanged = false;
+							element = oldElement;
+						}
+					}
+				} else {
+					element = applyCreator();
 				}
-
-				// @ts-expect-error // run the creator
-				element = creator(...newStep.args);
 			} else {
 				element = oldElement!;
 			}
@@ -624,6 +654,9 @@ export class Renderer {
 					{ signal: this.signal }
 				);
 			}
+
+			// prevent layering issues from lower elements being recreated.
+			element.style.zIndex = String(i);
 
 			newItems.push(element);
 			newDisplayedSteps.push(newStep);
