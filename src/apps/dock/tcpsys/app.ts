@@ -36,6 +36,8 @@ export default class dockAndDesktop extends Application {
 		this.registerKeyboardShortcut("Search", "KeyZ", ["AltLeft"]);
 		this.registerKeyboardShortcut("Library", "KeyX", ["AltLeft"]);
 
+		this.registerKeyboardShortcut("Lock", "KeyQ", ["AltLeft"]);
+
 		await this.loadConfig();
 
 		this.dock = new dock(this);
@@ -115,6 +117,9 @@ export default class dockAndDesktop extends Application {
 						break;
 					case "keyboardShortcutTrigger-Library":
 						this.env.exec("/System/CoreExecutables/Library.appl");
+						break;
+					case "keyboardShortcutTrigger-Lock":
+						this.exit();
 						break;
 
 					default:
