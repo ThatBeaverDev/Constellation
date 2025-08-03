@@ -166,7 +166,7 @@ export default class dock {
 
 				this.renderer.box(x + 0.5 * iconWidth - 2.5, y + iconWidth + 3, 5, 5, {
 					borderRadius: 100,
-					background: "white"
+					background: "var(--main-theme-inverse)"
 				});
 			}
 
@@ -236,10 +236,32 @@ export default class dock {
 							"x-:-Close": () => win.close()
 						};
 					} else {
-						contextMenuItems = {
-							...contextMenuItems,
-							"app-window-mac-:-Open": () => this.env.exec(directory)
-						};
+						if (program.windows.length == 0) {
+							contextMenuItems = {
+								...contextMenuItems,
+								"app-window-mac-:-Open": () => this.env.exec(directory)
+							};
+						} else {
+							contextMenuItems = {
+								...contextMenuItems,
+								"app-window-mac-:-New Window": () => this.env.exec(directory),
+								"minimize-2-:-Minimise All": () => {
+									for (const win of program.windows) {
+										win.minimise();
+									}
+								},
+								"expand-:-Restore All": () => {
+									for (const win of program.windows) {
+										win.unminimise();
+									}
+								},
+								"x-:-Close All Windows": () => {
+									for (const win of program.windows) {
+										win.close();
+									}
+								}
+							};
+						}
 					}
 
 					contextMenuItems = {
