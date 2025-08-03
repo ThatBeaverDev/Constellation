@@ -38,7 +38,7 @@ export default class uiKitCreators {
 		return icon;
 	};
 
-	uikitText = (x = 0, y = 0, string = "", size: number, colour: string) => {
+	uikitText = (x = 0, y = 0, string = "", fontSize: number, colour: string) => {
 		const text = document.createElement("p");
 		text.className = "uikitText";
 
@@ -46,7 +46,7 @@ export default class uiKitCreators {
 		text.innerText = string;
 		text.style.left = `${x}px`;
 		text.style.top = `${y}px`;
-		text.style.fontSize = `${size}px`;
+		text.style.fontSize = `${fontSize}px`;
 		text.style.color = colour;
 
 		this.#window.body.appendChild(text);
