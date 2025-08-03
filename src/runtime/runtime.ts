@@ -219,7 +219,7 @@ export async function showPrompt(
 
 /**
  * Removes a process from execution
- * @param proc - the Process object of the process
+ * @param proc - the Process object of the target to terminate.
  * @param isDueToCrash - whether this is from a crash - true means the process' terminate function is not called.
  */
 export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
