@@ -2,7 +2,13 @@ import * as conf from "../constellation.config.js";
 import { processes } from "../runtime/runtime.js";
 
 // Global error handler
-window.onerror = function (message: string | Event, source?: string, lineno?: number, colno?: number, error?: Error) {
+window.onerror = function (
+	message: string | Event,
+	source?: string,
+	lineno?: number,
+	colno?: number,
+	error?: Error
+) {
 	panic(error, source);
 	console.error(error);
 };
@@ -60,7 +66,8 @@ const snappyMessages = [
 	"this will be reported"
 ];
 
-const noPanic = new URL(window.location.href).searchParams.get("nopanic") == null;
+const noPanic =
+	new URL(window.location.href).searchParams.get("nopanic") == null;
 
 export default async function panic(error: any, source?: string) {
 	if (noPanic) return;
@@ -128,7 +135,8 @@ export default async function panic(error: any, source?: string) {
 	const ascii = "\n" + asciiName + "[" + conf.keyword + "]\n\n";
 	const json = "\n```JSON\n" + JSON.stringify(conf, null, 4) + "\n```";
 
-	const description = "```" + ascii + txt + "```\nSystem Configuration:" + json;
+	const description =
+		"```" + ascii + txt + "```\nSystem Configuration:" + json;
 	const githubReportLink =
 		"https://github.com/ThatBeaverDev/Constellation/issues/new?title=" +
 		encodeURIComponent(title) +

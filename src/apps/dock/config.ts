@@ -4,7 +4,7 @@ const manifest: ApplicationManifest = {
 	category: "Productivity",
 	author: "ThatBeaverDev",
 	version: 1,
-	icon: "/System/CoreAssets/Logos/Constellation-lucide.svg",
+	icon: "./resources/icon.svg",
 	userspace: false
 };
 

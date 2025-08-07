@@ -55,6 +55,7 @@ export type uikitTextareaConfig = {
 };
 export type uikitBoxConfig = {
 	borderRadius?: number | string;
+	blur?: number;
 	background?: string;
 };
 export type uikitCanvasOptions = {
@@ -68,6 +69,16 @@ export type canvasPosition = {
 export type canvasLineOptions = {
 	colour?: string;
 };
-export function uiKitTimestamp(label: string, start: DOMHighResTimeStamp, colour: DevToolsColor = "secondary") {
+export function uiKitTimestamp(
+	label: string,
+	start: DOMHighResTimeStamp,
+	colour: DevToolsColor = "secondary"
+) {
 	performanceLog(label, start, "uiKit", colour);
 }
+
+export interface uikitIconOptions {
+	noProcess?: boolean;
+}
+
+export const font = "Inter";

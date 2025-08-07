@@ -3,7 +3,12 @@ import { getTextWidth } from "./calcWidth.js";
 
 const padding = 10;
 
-export function newContext(x: number = 0, y: number = 0, headerText: string = "", items: string[] = []) {
+export function newContext(
+	x: number = 0,
+	y: number = 0,
+	headerText: string = "",
+	items: string[] = []
+) {
 	const container = document.createElement("div");
 	container.id = String(window.renderID++);
 	container.className = "uikitContextContainer";
@@ -38,7 +43,12 @@ export function newContext(x: number = 0, y: number = 0, headerText: string = ""
 export class ContextMenu {
 	#start = Date.now();
 
-	constructor(x: number, y: number, headerText: string, items: Record<string, Function>) {
+	constructor(
+		x: number,
+		y: number,
+		headerText: string,
+		items: Record<string, Function>
+	) {
 		let maxWidth = 0;
 		let maxWidthString = "";
 		for (const i of [headerText, ...Object.keys(items)]) {
@@ -138,10 +148,12 @@ export class ContextMenu {
 		this.divider = document.querySelector("div#" + this.divider.id)!;
 
 		for (const i in this.items) {
-			const elems: { text: HTMLButtonElement; icon?: HTMLImageElement } = this.items[i];
+			const elems: { text: HTMLButtonElement; icon?: HTMLImageElement } =
+				this.items[i];
 
 			this.container.appendChild(elems.text);
-			if (elems.icon !== undefined) this.container.appendChild(elems.icon);
+			if (elems.icon !== undefined)
+				this.container.appendChild(elems.icon);
 
 			this.items[i].text.addEventListener(
 				"pointerup",

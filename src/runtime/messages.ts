@@ -29,7 +29,14 @@ export function sendMessage(
 
 	const onmessage = onmessageFunction.bind(targetProcess);
 
-	const msg = new IPCMessage(originDirectory, originID, targetProcess, intent, data, replyCallback);
+	const msg = new IPCMessage(
+		originDirectory,
+		originID,
+		targetProcess,
+		intent,
+		data,
+		replyCallback
+	);
 	onmessage(msg);
 }
 

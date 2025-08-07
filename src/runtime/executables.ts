@@ -61,9 +61,19 @@ export class Framework {
 	 * @param user - the username of the executable
 	 * @param password - the password for the executable's user
 	 */
-	constructor(directory: string, args: any[], user: string, password: string) {
+	constructor(
+		directory: string,
+		args: any[],
+		user: string,
+		password: string
+	) {
 		this.directory = directory;
-		this.env = new ApplicationAuthorisationAPI(directory, user, password, this);
+		this.env = new ApplicationAuthorisationAPI(
+			directory,
+			user,
+			password,
+			this
+		);
 		this.id = nextPID++;
 		this.identifier = this.directory + ":" + this.id;
 		this.args = args;
@@ -108,8 +118,20 @@ export class Framework {
 	 * @param data - Data to send, such as a password.
 	 * @param replyCallback - a Function to be called if the other process replies.
 	 */
-	sendmessage(targetID: number, intent: string, data: any, replyCallback?: replyCallback) {
-		sendMessage(this.directory, this.id, targetID, intent, data, replyCallback);
+	sendmessage(
+		targetID: number,
+		intent: string,
+		data: any,
+		replyCallback?: replyCallback
+	) {
+		sendMessage(
+			this.directory,
+			this.id,
+			targetID,
+			intent,
+			data,
+			replyCallback
+		);
 	}
 
 	/**
@@ -125,7 +147,12 @@ export class Framework {
  * An entity with access to system APIs and a startup, repeating 'frame' loop and terminator function.
  */
 export class Process extends Framework {
-	constructor(directory: string, args: any[], user: string, password: string) {
+	constructor(
+		directory: string,
+		args: any[],
+		user: string,
+		password: string
+	) {
 		super(directory, args, user, password);
 	}
 
@@ -163,7 +190,9 @@ export class Process extends Framework {
 			associations[name] = this.id;
 		} else {
 			throw new Error(
-				"Association by name '" + name + "' is already taken. is another instance of your app already using it?"
+				"Association by name '" +
+					name +
+					"' is already taken. is another instance of your app already using it?"
 			);
 		}
 	}
@@ -225,7 +254,11 @@ export class Process extends Framework {
 	 * @param key - Main key of the shortcut, as declared [here](https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_code_values).
 	 * @param modifiers - Modifiers which must be held to trigger the shortcut, as [here](https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_code_values) again.
 	 */
-	registerKeyboardShortcut = (name: string, key: string, modifiers: string[]) => {
+	registerKeyboardShortcut = (
+		name: string,
+		key: string,
+		modifiers: string[]
+	) => {
 		registerKeyboardShortcut(this, name, key, modifiers);
 	};
 
@@ -252,7 +285,12 @@ export class Module extends Framework {}
  * A Process but with builtin APIs for graphical output, like a pre-created window and uiKit instance.
  */
 export class Application extends Process {
-	constructor(directory: string, args: any[], user: string, password: string) {
+	constructor(
+		directory: string,
+		args: any[],
+		user: string,
+		password: string
+	) {
 		super(directory, args, user, password);
 		this.renderer = new Renderer(this);
 	}
@@ -273,7 +311,12 @@ let popupNo = 25000;
  * An application made for acting on a higher level of the layering. Not to be used in normal applications.
  */
 export class Popup extends Application {
-	constructor(directory: string, args: any[], user: string, password: string) {
+	constructor(
+		directory: string,
+		args: any[],
+		user: string,
+		password: string
+	) {
 		super(directory, args, user, password);
 
 		const no = popupNo++;

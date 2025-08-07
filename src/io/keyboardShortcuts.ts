@@ -1,8 +1,9 @@
-import { BackgroundProcess, Process } from "../runtime/executables.js";
+import { Process } from "../runtime/executables.js";
 import { sendMessage } from "../runtime/messages.js";
-import { focus, windows } from "../windows/windows.js";
+import { focusedWindow, getWindowOfId } from "../windows/windows.js";
 
-export const keyboardShortcuts: Map<[Process, string], keyboardShortcut> = new Map();
+export const keyboardShortcuts: Map<[Process, string], keyboardShortcut> =
+	new Map();
 
 declare global {
 	interface Window {
@@ -49,7 +50,7 @@ export function registerKeyboardShortcut(
 }
 
 document.addEventListener("keydown", (e) => {
-	const targetWindow = windows[focus];
+	const targetWindow = getWindowOfId(focusedWindow);
 	const keyCode = e.code;
 
 	const meta = e.metaKey;
@@ -96,7 +97,12 @@ document.addEventListener("keydown", (e) => {
 
 			if (ok) {
 				// trigger the shortcut
-				sendMessage("/System/keyboardShortcuts.js", 0, cut.process, "keyboardShortcutTrigger-" + cut.name);
+				sendMessage(
+					"/System/keyboardShortcuts.js",
+					0,
+					cut.process,
+					"keyboardShortcutTrigger-" + cut.name
+				);
 
 				e.preventDefault();
 			}

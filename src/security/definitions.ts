@@ -1,13 +1,19 @@
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
 
-export function securityTimestamp(label: string, start: DOMHighResTimeStamp, colour: DevToolsColor = "secondary") {
+export function securityTimestamp(
+	label: string,
+	start: DOMHighResTimeStamp,
+	colour: DevToolsColor = "secondary"
+) {
 	performanceLog(label, start, "SystemSecurity", colour);
 }
 
-export type fsResponse = {
-	data: any;
-	ok: Boolean;
-};
+export type fsResponse<T> =
+	| {
+			data: Error;
+			ok: false;
+	  }
+	| { data: T; ok: true };
 
 export type directoryPointType =
 	| "blockDevice"

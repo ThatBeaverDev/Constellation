@@ -1,4 +1,3 @@
-import { IPCMessage } from "../../../runtime/messages.js";
 import dock, { dockConfig } from "../resources/dock.js";
 import menubar from "../resources/menubar.js";
 
@@ -15,7 +14,11 @@ export default class dockAndDesktop extends Application {
 		icon: string;
 	} = {
 		dock: {
-			pins: ["/Applications/Finder.appl", "/Applications/Settings.appl", "/Applications/Search.appl"]
+			pins: [
+				"/Applications/Finder.appl",
+				"/Applications/Settings.appl",
+				"/Applications/Search.appl"
+			]
 		},
 		menubar: {},
 		name: "Constellation",
@@ -32,6 +35,16 @@ export default class dockAndDesktop extends Application {
 		//this.renderer.setIcon("dock")
 		this.renderer.setIcon(this.config.icon);
 		this.renderer.windowName = this.config.name;
+
+		// ask to listen to every key pressed if we're not allowed :>
+		let getPerms: boolean | undefined = false;
+		try {
+			getPerms = await this.env.requestUserPermission("keylogger");
+		} catch {}
+		if (getPerms !== true) {
+			this.exit();
+			return;
+		}
 
 		this.registerKeyboardShortcut("Search", "KeyZ", ["AltLeft"]);
 		this.registerKeyboardShortcut("Library", "KeyX", ["AltLeft"]);
@@ -68,10 +81,13 @@ export default class dockAndDesktop extends Application {
 		if (configs.includes(this.env.userID + ".json")) {
 			// we have the config, let's load it.
 			const read = await this.env.fs.readFile(
-				env.fs.resolve(this.directory, "./data/" + this.env.userID + ".json")
+				env.fs.resolve(
+					this.directory,
+					"./data/" + this.env.userID + ".json"
+				)
 			);
 			if (!read.ok) throw read.data;
-			const config = JSON.parse(read.data);
+			const config = JSON.parse(read.data || "{}");
 
 			this.config = config;
 		} else {
@@ -82,7 +98,10 @@ export default class dockAndDesktop extends Application {
 	async commitConfig() {
 		const configString = JSON.stringify(this.config);
 
-		const configDirectory = env.fs.resolve(this.directory, "./data/" + this.env.userID + ".json");
+		const configDirectory = env.fs.resolve(
+			this.directory,
+			"./data/" + this.env.userID + ".json"
+		);
 		await env.fs.writeFile(configDirectory, configString);
 	}
 
@@ -105,29 +124,48 @@ export default class dockAndDesktop extends Application {
 		this.renderer.commit();
 	}
 
-	onmessage(msg: IPCMessage) {
-		const intent = msg.intent;
-		const origin = msg.originDirectory;
-
-		switch (origin) {
-			case "/System/keyboardShortcuts.js":
-				switch (intent) {
-					case "keyboardShortcutTrigger-Search":
-						this.search();
-						break;
-					case "keyboardShortcutTrigger-Library":
-						this.env.exec("/System/CoreExecutables/Library.appl");
-						break;
-					case "keyboardShortcutTrigger-Lock":
-						this.exit();
-						break;
-
-					default:
-						throw new Error("Unknown keyboard shortcut name (intent): " + intent);
+	keydown(
+		code: string,
+		metaKey: boolean,
+		altKey: boolean,
+		ctrlKey: boolean,
+		shiftKey: boolean,
+		repeat: boolean
+	): void | undefined | null {
+		switch (code) {
+			case "KeyZ":
+				if (altKey) {
+					this.search();
 				}
 				break;
-			default:
-				console.warn("Unknown message sender: " + origin);
+			case "KeyX":
+				if (altKey) {
+					this.env.exec("/System/CoreExecutables/Library.appl");
+				}
+				break;
+			case "KeyL":
+				if (altKey) {
+					this.exit();
+				}
+				break;
+			case "Enter":
+				if (this == undefined) return;
+				if (altKey) {
+					const focusedWindow = this.env.windows.getFocus();
+
+					if (focusedWindow == undefined) return;
+					if (this.menubar == undefined) return;
+					if (this.dock == undefined) return;
+
+					focusedWindow.resize(
+						window.innerWidth,
+						window.innerHeight -
+							this.menubar.barHeight -
+							this.dock.dockHeight
+					);
+					focusedWindow.move(0, this.menubar.barHeight);
+				}
+				break;
 		}
 	}
 

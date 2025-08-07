@@ -22,8 +22,14 @@ declare global {
 	}
 
 	const env: ApplicationAuthorisationAPI;
-	const Application: new (directory: string, args: any[]) => executables.Application;
-	const BackgroundProcess: new (directory: string, args: any[]) => executables.BackgroundProcess;
+	const Application: new (
+		directory: string,
+		args: any[]
+	) => executables.Application;
+	const BackgroundProcess: new (
+		directory: string,
+		args: any[]
+	) => executables.BackgroundProcess;
 	const Popup: new (directory: string, args: any[]) => executables.Popup;
 	const Module: new (directory: string, args: any[]) => executables.Module;
 

@@ -103,14 +103,28 @@ type Token = { token: string; type: characterType };
 
 type ASTNode =
 	| { type: "literal"; value: number }
-	| { type: "binaryExpression"; operator: binaryOperator; left: ASTNode; right: ASTNode }
+	| {
+			type: "binaryExpression";
+			operator: binaryOperator;
+			left: ASTNode;
+			right: ASTNode;
+	  }
 	| { type: "unaryExpression"; operator: unaryOperator; value: ASTNode }
 	| { type: "variable"; value: string };
 
 type ASTStaticNode =
 	| { type: "literal"; value: number }
-	| { type: "binaryExpression"; operator: binaryOperator; left: ASTStaticNode; right: ASTStaticNode }
-	| { type: "unaryExpression"; operator: unaryOperator; value: ASTStaticNode };
+	| {
+			type: "binaryExpression";
+			operator: binaryOperator;
+			left: ASTStaticNode;
+			right: ASTStaticNode;
+	  }
+	| {
+			type: "unaryExpression";
+			operator: unaryOperator;
+			value: ASTStaticNode;
+	  };
 
 // Get tokens with types
 function tokeniseAndType(input: string): Token[] {
@@ -150,7 +164,8 @@ export function generateAST(input: string): ASTNode {
 		if (token.token === "(") {
 			consume(); // consume "("
 			const expression = parseExpression();
-			if (!peek() || peek()?.token !== ")") throw new Error("Expected ')'");
+			if (!peek() || peek()?.token !== ")")
+				throw new Error("Expected ')'");
 			consume(); // consume ")"
 			return expression;
 		}
@@ -314,11 +329,17 @@ export function evaluate(calculation: string) {
 					case "/":
 						return calculateBit(bit.left) / calculateBit(bit.right);
 					case "^":
-						return Math.pow(calculateBit(bit.left), calculateBit(bit.right));
+						return Math.pow(
+							calculateBit(bit.left),
+							calculateBit(bit.right)
+						);
 					case "%":
 						return calculateBit(bit.left) % calculateBit(bit.right);
 					case "√":
-						return Math.pow(calculateBit(bit.left), 1 / calculateBit(bit.right));
+						return Math.pow(
+							calculateBit(bit.left),
+							1 / calculateBit(bit.right)
+						);
 					default:
 						console.warn("[!] zeroing for ", bit);
 						return 0;

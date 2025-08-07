@@ -1,8 +1,13 @@
 import * as conf from "../constellation.config.js";
 import realFS from "../io/fs.js";
 import { appName, execute, showPrompt } from "../runtime/runtime.js";
-import { ImportError, PermissionsError } from "../errors.js";
-import { focus, focusWindow, getWindowOfId, GraphicalWindow, windows } from "../windows/windows.js";
+import { PermissionsError } from "../errors.js";
+import {
+	allWindows,
+	focusedWindow,
+	getWindowOfId,
+	GraphicalWindow
+} from "../windows/windows.js";
 import {
 	DirectoryPermissionStats,
 	getDirectoryPermissions,
@@ -24,6 +29,7 @@ import {
 } from "./definitions.js";
 import { User, users, validatePassword } from "./users.js";
 import { debug, error, log, warn } from "../lib/logging.js";
+import { FS, Stats } from "../io/browserfs.js";
 
 const start = performance.now();
 const name = "/System/security/env.js";
@@ -31,7 +37,13 @@ const name = "/System/security/env.js";
 export const associations: any = {};
 
 export class ApplicationAuthorisationAPI {
-	constructor(directory: string, user: string, password: string, process?: Framework, isGlobal: boolean = false) {
+	constructor(
+		directory: string,
+		user: string,
+		password: string,
+		process?: Framework,
+		isGlobal: boolean = false
+	) {
 		const start = performance.now();
 
 		this.#isGlobal = isGlobal;
@@ -40,7 +52,9 @@ export class ApplicationAuthorisationAPI {
 		this.userID = users[this.#permissions.user]?.id;
 
 		if (this.userID == undefined) {
-			throw new Error(`User ${user} either doesn't exist or users.js hasn't initialised properly.`);
+			throw new Error(
+				`User ${user} either doesn't exist or users.js hasn't initialised properly.`
+			);
 		}
 
 		this.shell = new Shell(directory, this);
@@ -51,7 +65,10 @@ export class ApplicationAuthorisationAPI {
 		this.#password = password;
 		this.#process = process;
 
-		debug(name, `ApplicationAuthorisationAPI created as ${user} for ${directory}`);
+		debug(
+			name,
+			`ApplicationAuthorisationAPI created as ${user} for ${directory}`
+		);
 		securityTimestamp(`Create env for ${directory}`, start);
 	}
 
@@ -67,16 +84,7 @@ export class ApplicationAuthorisationAPI {
 	readonly #isGlobal: boolean;
 
 	#checkPermission(permission: Permission) {
-		if (this.#permissions.operator !== true)
-			if (this.#permissions[permission] !== true) {
-				const userinfo = users[this.#user];
-
-				if (userinfo.operator !== "true") {
-					throw new PermissionsError(
-						`Permission denied - permission ${permission} is not held by the actor file or actor file's user.`
-					);
-				}
-			}
+		checkDirectoryPermission(this.directory, permission);
 	}
 
 	// shell
@@ -86,7 +94,9 @@ export class ApplicationAuthorisationAPI {
 	debug(...content: any): undefined {
 		const initiator = this.directory;
 		if (initiator == "/System/globalPermissionsHost.js") {
-			throw new Error(`globalEnv cannot be used to log. (${this.directory})`);
+			throw new Error(
+				`globalEnv cannot be used to log. (${this.directory})`
+			);
 		}
 
 		debug(initiator, ...content);
@@ -94,7 +104,9 @@ export class ApplicationAuthorisationAPI {
 	log(...content: any): undefined {
 		const initiator = this.directory;
 		if (initiator == "/System/globalPermissionsHost.js") {
-			throw new Error(`globalEnv cannot be used to log. (${this.directory})`);
+			throw new Error(
+				`globalEnv cannot be used to log. (${this.directory})`
+			);
 		}
 
 		log(initiator, ...content);
@@ -102,7 +114,9 @@ export class ApplicationAuthorisationAPI {
 	warn(...content: any): undefined {
 		const initiator = this.directory;
 		if (initiator == "/System/globalPermissionsHost.js") {
-			throw new Error(`globalEnv cannot be used to log. (${this.directory})`);
+			throw new Error(
+				`globalEnv cannot be used to log. (${this.directory})`
+			);
 		}
 
 		warn(initiator, ...content);
@@ -110,7 +124,9 @@ export class ApplicationAuthorisationAPI {
 	error(...content: any): undefined {
 		const initiator = this.directory;
 		if (initiator == "/System/globalPermissionsHost.js") {
-			throw new Error(`globalEnv cannot be used to log. (${this.directory})`);
+			throw new Error(
+				`globalEnv cannot be used to log. (${this.directory})`
+			);
 		}
 
 		error(initiator, ...content);
@@ -139,7 +155,10 @@ export class ApplicationAuthorisationAPI {
 				}
 				break;
 			case "system":
-				if (isWriteOperation && this.#permissions.systemFiles == false) {
+				if (
+					isWriteOperation &&
+					this.#permissions.systemFiles == false
+				) {
 					throw new PermissionsError(
 						`Permission denied in action upon ${directory} - domain ${domainType}, isWriteOperation: ${isWriteOperation}`
 					);
@@ -149,40 +168,44 @@ export class ApplicationAuthorisationAPI {
 	}
 
 	fs = {
-		createDirectory: async (directory: string): Promise<fsResponse> => {
+		createDirectory: async (
+			directory: string
+		): Promise<fsResponse<Error | true>> => {
 			try {
 				this.#directoryActionCheck(directory, true);
 
 				await realFS.mkdir(directory);
 				return { data: true, ok: true };
-			} catch (error) {
+			} catch (error: any) {
 				return {
 					data: error,
 					ok: false
 				};
 			}
 		},
-		listDirectory: async (directory: string = "/"): Promise<fsResponse> => {
+		listDirectory: async (
+			directory: string = "/"
+		): Promise<fsResponse<string[]>> => {
 			try {
 				this.#directoryActionCheck(directory, false);
 
 				const list = await realFS.readdir(directory);
 				return { data: list, ok: true };
-			} catch (error) {
+			} catch (error: any) {
 				return {
 					data: error,
 					ok: false
 				};
 			}
 		},
-		deleteDirectory: async (directory: string): Promise<fsResponse> => {
+		deleteDirectory: async (
+			directory: string
+		): Promise<fsResponse<true>> => {
 			try {
 				this.#directoryActionCheck(directory, true);
 
 				let err: Error | undefined;
-				await realFS.rmdir(directory, (e: Error) => {
-					err = e;
-				});
+				await realFS.rmdir(directory);
 
 				if (err !== undefined && err !== null) {
 					// @ts-expect-error
@@ -198,7 +221,7 @@ export class ApplicationAuthorisationAPI {
 					data: true,
 					ok: true
 				};
-			} catch (error) {
+			} catch (error: any) {
 				return {
 					data: error,
 					ok: false
@@ -206,7 +229,10 @@ export class ApplicationAuthorisationAPI {
 			}
 		},
 
-		writeFile: async (directory: string, contents: string): Promise<fsResponse> => {
+		writeFile: async (
+			directory: string,
+			contents: string
+		): Promise<fsResponse<true>> => {
 			try {
 				this.#directoryActionCheck(directory, true);
 
@@ -215,14 +241,14 @@ export class ApplicationAuthorisationAPI {
 					data: true,
 					ok: true
 				};
-			} catch (error) {
+			} catch (error: any) {
 				return {
 					data: error,
 					ok: false
 				};
 			}
 		},
-		deleteFile: async (directory: string): Promise<fsResponse> => {
+		deleteFile: async (directory: string): Promise<fsResponse<true>> => {
 			try {
 				this.#directoryActionCheck(directory, true);
 
@@ -231,33 +257,42 @@ export class ApplicationAuthorisationAPI {
 					data: true,
 					ok: true
 				};
-			} catch (error) {
+			} catch (error: any) {
 				return {
 					data: error,
 					ok: false
 				};
 			}
 		},
-		readFile: async (directory: string): Promise<fsResponse> => {
+		readFile: async (directory: string): Promise<fsResponse<string>> => {
 			try {
+				const content = await realFS.readFile(directory);
+
+				if (content == undefined) {
+					throw new Error(`File at ${directory} does not exist!`);
+				}
+
 				return {
-					data: await realFS.readFile(directory),
+					data: content,
 					ok: true
 				};
-			} catch (error) {
+			} catch (error: any) {
 				return {
 					data: error,
 					ok: false
 				};
 			}
 		},
-		move: async (oldDirectory: string, newDirectory: string): Promise<fsResponse> => {
+		move: async (
+			oldDirectory: string,
+			newDirectory: string
+		): Promise<fsResponse<void>> => {
 			try {
 				return {
 					data: await realFS.rename(oldDirectory, newDirectory),
 					ok: true
 				};
-			} catch (error) {
+			} catch (error: any) {
 				return {
 					data: error,
 					ok: false
@@ -265,21 +300,23 @@ export class ApplicationAuthorisationAPI {
 			}
 		},
 
-		stat: async (directory: string): Promise<fsResponse> => {
+		stat: async (directory: string): Promise<fsResponse<Stats>> => {
 			try {
 				this.#directoryActionCheck(directory, false);
 
 				const stat = await realFS.stat(directory);
 
 				if (stat == undefined) {
-					throw new Error(directory + " has no file and cannot be 'statted'");
+					throw new Error(
+						directory + " has no file and cannot be 'statted'"
+					);
 				}
 
 				return {
 					data: stat,
 					ok: true
 				};
-			} catch (error) {
+			} catch (error: any) {
 				return {
 					data: error,
 					ok: false
@@ -335,12 +372,20 @@ export class ApplicationAuthorisationAPI {
 		}
 	};
 
-	expectFileType = async (directory: string, expectedType: directoryPoint) => {
+	expectFileType = async (
+		directory: string,
+		expectedType: directoryPoint
+	) => {
 		const fileType = await this.fs.typeOfFile(directory);
 
 		if (fileType !== expectedType) {
 			throw new Error(
-				"Filetype of " + directory + " (" + fileType + ") does not match expected: " + expectedType
+				"Filetype of " +
+					directory +
+					" (" +
+					fileType +
+					") does not match expected: " +
+					expectedType
 			);
 		}
 	};
@@ -379,7 +424,8 @@ export class ApplicationAuthorisationAPI {
 				"Global env cannot be used to start applications to insure applications are properly parented."
 			);
 
-		if (this.#process instanceof Process) return execute(directory, args, user, password, this.#process);
+		if (this.#process instanceof Process)
+			return execute(directory, args, user, password, this.#process);
 
 		throw new Error("Framework may not execute processes.");
 	};
@@ -387,10 +433,31 @@ export class ApplicationAuthorisationAPI {
 		return associations[name];
 	}
 
-	async setDirectoryPermission(directory: string, permission: Permission, value: boolean) {
-		this.#checkPermission("managePermissions");
+	/**
+	 *
+	 * @param directory - Target Directory
+	 * @param permission
+	 * @param value
+	 */
+	async setDirectoryPermission(
+		directory: string,
+		permission: Permission,
+		value: boolean
+	) {
+		checkDirectoryPermission(this.directory, "managePermissions");
 
 		await setDirectoryPermission(directory, permission, value);
+	}
+
+	async hasPermission(permission: Permission) {
+		try {
+			// this will error if we don't have the permission
+			checkDirectoryPermission(this.directory, permission);
+
+			return true;
+		} catch {}
+
+		return false;
 	}
 
 	/**
@@ -402,8 +469,15 @@ export class ApplicationAuthorisationAPI {
 		const start = performance.now();
 
 		if (permissionsMetadata[permission].requestable == false) {
-			this.error(name, "Permission by name " + permission + " requested, which is not allowed.");
-			throw new PermissionsError(`Permission '${permission}' is not requestable.`);
+			this.error(
+				name,
+				"Permission by name " +
+					permission +
+					" requested, which is not allowed."
+			);
+			throw new PermissionsError(
+				`Permission '${permission}' is not requestable.`
+			);
 		}
 
 		if (this.#permissions[permission] == true) return true;
@@ -429,10 +503,15 @@ export class ApplicationAuthorisationAPI {
 				this.#permissions[permission] = true;
 				return true;
 			case "Deny":
-				throw new PermissionsError(`Permission request for permission ${permission} denied.`);
+				throw new PermissionsError(
+					`Permission request for permission ${permission} denied.`
+				);
 		}
 
-		securityTimestamp(`${this.directory} request permission ${permission} from user (${ok})`, start);
+		securityTimestamp(
+			`${this.directory} request permission ${permission} from user (${ok})`,
+			start
+		);
 	}
 
 	/**
@@ -504,7 +583,7 @@ export class ApplicationAuthorisationAPI {
 
 			const obj: WindowAlias[] = [];
 
-			for (const win of windows) {
+			for (const win of allWindows()) {
 				const wn = this.#windowToAlias(win);
 
 				obj.push(wn);
@@ -522,7 +601,7 @@ export class ApplicationAuthorisationAPI {
 
 			checkDirectoryPermission(this.directory, "windows");
 
-			const target = getWindowOfId(focus);
+			const target = getWindowOfId(focusedWindow);
 
 			if (target == undefined) return undefined; // no window is focused
 
@@ -559,15 +638,13 @@ export class ApplicationAuthorisationAPI {
 			return obj;
 		},
 
-		userInfo: (name: UserAlias["name"]) => {
+		userInfo: (name: UserAlias["name"] = this.user) => {
 			const start = performance.now();
 
 			const userData = users[name];
-
 			if (userData == undefined) return;
 
 			const obj = this.#userToAlias(userData);
-
 			securityTimestamp(`Env ${this.directory} get user info.`, start);
 
 			return obj;
@@ -580,7 +657,11 @@ export class ApplicationAuthorisationAPI {
 			try {
 				ok = await validatePassword(user, password);
 			} catch (e) {
-				securityTimestamp(`Env ${this.directory} switch user.`, start, "error");
+				securityTimestamp(
+					`Env ${this.directory} switch user.`,
+					start,
+					"error"
+				);
 				return {
 					ok: false,
 					data: e
@@ -599,6 +680,10 @@ export class ApplicationAuthorisationAPI {
 			};
 		}
 	};
+}
+
+export function processCanKeylog(process: Process): boolean {
+	return true;
 }
 
 securityTimestamp("Startup /src/security/env.ts", start);

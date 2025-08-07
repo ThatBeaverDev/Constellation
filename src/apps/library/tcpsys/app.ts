@@ -16,7 +16,8 @@ export default class library extends Application {
 	async refresh() {
 		const result = await this.env.shell.exec("appfind");
 		const data: appFindResult = result?.result;
-		if (data == undefined) throw new Error("Undefined result from appfind.");
+		if (data == undefined)
+			throw new Error("Undefined result from appfind.");
 
 		data.files = data.files.filter((item: fileInfo) => item.visible);
 
@@ -64,7 +65,12 @@ export default class library extends Application {
 
 			const textWidth = this.renderer.getTextWidth(nameShortened, 10);
 
-			this.renderer.text(iconCenterX - textWidth / 2, iconTopY, nameShortened, 10);
+			this.renderer.text(
+				iconCenterX - textWidth / 2,
+				iconTopY,
+				nameShortened,
+				10
+			);
 
 			x += iconSize + padding + padding;
 			if (x + iconSize + padding > this.renderer.windowWidth) {

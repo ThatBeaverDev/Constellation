@@ -1,8 +1,9 @@
 /* uiKit styling */
 
 @media (prefers-color-scheme: dark) {
-	.uikitIcon {
-		filter: invert(100%) brightness(10000%) !important;
+	/* lucide */
+	img[src^="/icons/icons"] {
+		filter: invert(100%) brightness(10000%) drop-shadow(0px 4px 4px black);
 	}
 }
 
@@ -10,9 +11,14 @@
 	--uikitClickableExpandDuration: 0.15s;
 }
 
+@font-face {
+	font-family: "Inter";
+	src: url(/assets/fonts/Inter-VariableFont_opsz\,wght.ttf);
+}
+
 * {
 	font-size: 15px;
-	font-family: monospace;
+	font-family: "Inter", sans-serif;
 }
 
 body {

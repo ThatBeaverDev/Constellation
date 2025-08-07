@@ -2,7 +2,13 @@ import { canvasPosition, canvasRenderingStep, step } from "./definitions";
 
 type canvasImageArgs =
 	| [dx: number, dy: number, imageURL: string]
-	| [dx: number, dy: number, dWidth: number, dHeight: number, imageURL: string]
+	| [
+			dx: number,
+			dy: number,
+			dWidth: number,
+			dHeight: number,
+			imageURL: string
+	  ]
 	| [
 			sx: number,
 			sy: number,
@@ -22,7 +28,12 @@ export default class canvasKit {
 		this.#steps = steps;
 	}
 
-	line(canvasID: number, colour: string, startingPosition: canvasPosition, ...otherPositions: canvasPosition[]) {
+	line(
+		canvasID: number,
+		colour: string,
+		startingPosition: canvasPosition,
+		...otherPositions: canvasPosition[]
+	) {
 		const canvas = this.#steps[canvasID - 1];
 		const renderingSteps = canvas.args[4] || [];
 

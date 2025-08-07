@@ -3,12 +3,26 @@ import { IPCMessage } from "../../../runtime/messages";
 export default class launch extends BackgroundProcess {
 	windows?: typeof import("../../../windows/windows");
 	loginCompleted: boolean = false;
-	loginDirectory: string = "/System/CoreExecutables/systemLoginInterface.appl";
+	loginDirectory: string =
+		"/System/CoreExecutables/systemLoginInterface.appl";
 	onLogin = [];
 
 	async init() {
-		this.env.setDirectoryPermission("/System/CoreExecutables/Dock.appl", "windows", true);
-		this.env.setDirectoryPermission("/System/CoreExecutables/systemLoginInterface.appl", "users", true);
+		this.env.setDirectoryPermission(
+			"/System/CoreExecutables/Dock.appl",
+			"windows",
+			true
+		);
+		this.env.setDirectoryPermission(
+			"/System/CoreExecutables/Dock.appl",
+			"keylogger",
+			true
+		);
+		this.env.setDirectoryPermission(
+			"/System/CoreExecutables/systemLoginInterface.appl",
+			"users",
+			true
+		);
 
 		this.windows = await this.env.include("/System/windows.js");
 
@@ -59,21 +73,23 @@ export default class launch extends BackgroundProcess {
 	 * @param {string} user - Username we're logging into
 	 */
 	async loginComplete(user: string, password: string) {
-		const dock = await this.env.exec("/System/CoreExecutables/Dock.appl", [], user, password);
+		const dock = await this.env.exec(
+			"/System/CoreExecutables/Dock.appl",
+			[],
+			user,
+			password
+		);
 
 		for (const directory of this.onLogin) {
 			await this.env.exec(directory);
 		}
 
 		// start the dev app if required.
-		const isAppdev = new URL(window.location.href).searchParams.get("appdev") !== null;
-		const openFlag = new URL(window.location.href).searchParams.get("open");
+		const isAppdev =
+			new URL(window.location.href).searchParams.get("appdev") !== null;
 
 		if (isAppdev) {
 			await this.env.exec("/Applications/developerApplication.appl");
-		}
-		if (openFlag) {
-			await this.env.exec(openFlag);
 		}
 
 		this.loginCompleted = true;
@@ -104,23 +120,20 @@ export default class launch extends BackgroundProcess {
 					case "keyboardShortcutTrigger-Close Window": {
 						// Close Window!
 
-						const win = this.windows.getWindowOfId(this.windows.focus);
+						const win = this.windows.getWindowOfId(
+							this.windows.focusedWindow
+						);
 
 						if (win == undefined) return;
 
 						win.remove();
-
-						setTimeout(() => {
-							if (this.windows == undefined) return;
-
-							const last = this.windows.windows.length - 1;
-							this.windows.focusWindow(Math.max(0, Math.min(this.windows.focus, last)));
-						}, 160); // wait for animation + layoutTiling
 						break;
 					}
 
 					default:
-						throw new Error("Unknown keyboard shortcut name (intent): " + intent);
+						throw new Error(
+							"Unknown keyboard shortcut name (intent): " + intent
+						);
 				}
 				break;
 			default:

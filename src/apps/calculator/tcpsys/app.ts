@@ -29,7 +29,11 @@ export default class calc extends Application {
 		if (this.mode == "answer") {
 			const result = String(this.result);
 
-			this.renderer.text(0, (baseY - textHeight) / 2, `${this.text} = ${result}`);
+			this.renderer.text(
+				0,
+				(baseY - textHeight) / 2,
+				`${this.text} = ${result}`
+			);
 		} else {
 			this.renderer.text(0, (baseY - textHeight) / 2, this.text);
 		}
@@ -47,7 +51,11 @@ export default class calc extends Application {
 
 			grid = [
 				{
-					DEL: () => (this.text = this.text.substring(0, this.text.length - 1)),
+					DEL: () =>
+						(this.text = this.text.substring(
+							0,
+							this.text.length - 1
+						)),
 					CLEAR: () => (this.text = ""),
 					SPACE: () => (this.text += " "),
 					x: () => (this.text += "x"),
@@ -106,7 +114,11 @@ export default class calc extends Application {
 
 			grid = [
 				{
-					DEL: () => (this.text = this.text.substring(0, this.text.length - 1)),
+					DEL: () =>
+						(this.text = this.text.substring(
+							0,
+							this.text.length - 1
+						)),
 					CLEAR: () => (this.text = ""),
 					"%": () => (this.text += "%"),
 					"/": () => (this.text += "/")
@@ -184,13 +196,22 @@ export default class calc extends Application {
 		for (const i in grid) {
 			let x = 0;
 			for (const text in grid[i]) {
-				const box = this.renderer.box(x, y, boxWidth - padding, boxHeight - padding, {
-					borderRadius,
-					background: colours[text]
-				});
+				const box = this.renderer.box(
+					x,
+					y,
+					boxWidth - padding,
+					boxHeight - padding,
+					{
+						borderRadius,
+						background: colours[text]
+					}
+				);
 
 				if (this.mode == "type") {
-					this.renderer.onClick(box, grid[i][text], undefined, { scale: 1.05, clickScale: 1.1 });
+					this.renderer.onClick(box, grid[i][text], undefined, {
+						scale: 1.05,
+						clickScale: 1.1
+					});
 				} else {
 					this.renderer.onClick(
 						box,

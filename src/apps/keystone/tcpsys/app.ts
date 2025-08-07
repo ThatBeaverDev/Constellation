@@ -23,7 +23,9 @@ export default class KeystoneSearch extends Popup {
 		this.registerKeyboardShortcut("Open", "Enter", []);
 
 		this.fzfLib = await this.env.include("/System/CoreLibraries/fzf.js");
-		this.pathinf = await this.env.include("/System/CoreLibraries/pathinf.js");
+		this.pathinf = await this.env.include(
+			"/System/CoreLibraries/pathinf.js"
+		);
 
 		await this.env.shell.index();
 
@@ -61,7 +63,9 @@ export default class KeystoneSearch extends Popup {
 		const entries = fzf.find(term);
 
 		// just names
-		const results: string[] = entries.map((result: { item: string }): string => result.item);
+		const results: string[] = entries.map(
+			(result: { item: string }): string => result.item
+		);
 
 		// prevent rendering
 		this.ok = false;
@@ -110,7 +114,9 @@ export default class KeystoneSearch extends Popup {
 						break;
 					}
 					default:
-						throw new Error("Unknown keyboard shortcut name (intent): " + intent);
+						throw new Error(
+							"Unknown keyboard shortcut name (intent): " + intent
+						);
 				}
 				break;
 			default:
@@ -129,24 +135,38 @@ export default class KeystoneSearch extends Popup {
 
 		this.renderer.clear();
 
-		this.renderer.textbox(0, 0, this.renderer.windowWidth, 40, "Search for apps...", {
-			update: () => this.search,
-			enter: () => {
-				this.selectItem(this.selector);
+		this.renderer.textbox(
+			0,
+			0,
+			this.renderer.windowWidth,
+			40,
+			"Search for apps...",
+			{
+				update: () => this.search,
+				enter: () => {
+					this.selectItem(this.selector);
+				}
 			}
-		});
+		);
 
 		let y = 50;
 		for (const idx in this.rendering) {
 			const itm = this.rendering[idx];
 
-			this.renderer.icon(10, y, itm.icon);
+			this.renderer.icon(10, y, itm.icon, undefined, undefined, {
+				noProcess: true
+			});
 
 			const pre = this.selector == Number(idx) ? "> " : "  ";
 
-			this.renderer.button(40, y, pre + (itm.name || itm.directory), async () => {
-				this.selectItem(Number(idx));
-			});
+			this.renderer.button(
+				40,
+				y,
+				pre + (itm.name || itm.directory),
+				async () => {
+					this.selectItem(Number(idx));
+				}
+			);
 			y += 27.5;
 		}
 

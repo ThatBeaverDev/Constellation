@@ -50,20 +50,45 @@ export async function pathIcon(directory: string) {
 				}
 
 				if (name.endsWith(".backgr")) {
-					return "file-terminal";
+					return "/System/CoreAssets/Vectors/files/file-code.svg";
 				}
 
-				return "folder";
+				return "/System/CoreAssets/Vectors/files/folder.svg";
 			}
 		}
 	}
 
 	if (directory.split(".").length == 1) {
 		// no file extension
-		return "file";
+		return "/System/CoreAssets/Vectors/files/file.svg";
 	}
 
 	switch (extension) {
+		case "txt":
+		case "md":
+		case "rtf":
+		case "doc":
+		case "docx":
+		case "gdoc":
+		case "pdf":
+		case "log":
+			return "/System/CoreAssets/Vectors/files/file-text.svg";
+
+		case "js":
+		case "mjs":
+		case "cjs":
+		case "jsx":
+		case "sjs":
+			// javascript
+			return "/System/CoreAssets/Vectors/files/file-code-javascript.svg";
+
+		case "ts":
+		case "tsx":
+		case "mts":
+		case "cts":
+			// typescript
+			return "/System/CoreAssets/Vectors/files/file-code-typescript.svg";
+
 		case "py":
 		case "pyw":
 		case "pyz":
@@ -79,13 +104,6 @@ export async function pathIcon(directory: string) {
 		case "war":
 		// java
 
-		case "js":
-		case "mjs":
-		case "cjs":
-		case "jsx":
-		case "sjs":
-		// javascript
-
 		case "C":
 		case "cc":
 		case "cpp":
@@ -99,12 +117,6 @@ export async function pathIcon(directory: string) {
 		case "cppm":
 		case "ixx":
 		// C++
-
-		case "ts":
-		case "tsx":
-		case "mts":
-		case "cts":
-		// typescript
 
 		case "php":
 		case "phar":
@@ -259,17 +271,20 @@ export async function pathIcon(directory: string) {
 		case "cmd":
 		case "btm":
 			// windows command prompt
-			return "file-code";
+			return "/System/CoreAssets/Vectors/files/file-code.svg";
 
 		case "app":
-		// macOS App
+			// macOS App
+			return "/System/CoreAssets/Vectors/files/file-executable-macOS.svg";
 		case "exe":
-		// windows executable
+			// windows executable
+			return "/System/CoreAssets/Vectors/files/file-executable-windows.svg";
 		case "ipa":
-		// iOS / iPadOS App
+			// iOS / iPadOS App
+			return "/System/CoreAssets/Vectors/files/file-executable-iOS.svg";
 		case "apk":
 			// Android App
-			return "book-x";
+			return "/System/CoreAssets/Vectors/files/file-executable-android.svg";
 
 		case "?Q?":
 		case "7z":
@@ -316,7 +331,7 @@ export async function pathIcon(directory: string) {
 		case "zoo":
 		case "zip":
 		case "idx": // constellation native format
-			return "package";
+			return "/System/CoreAssets/Vectors/files/file-archive.svg";
 
 		// # PREVIEWABLE IMAGES
 		case "png":
@@ -449,7 +464,7 @@ export async function pathIcon(directory: string) {
 		case "wmf":
 		case "emf":
 		case "xar":
-			return "file-image";
+			return "/System/CoreAssets/Vectors/files/file-image-vector.svg";
 
 		// # 3D GRAPHICS
 		case "3dmf":
@@ -555,22 +570,90 @@ export async function pathIcon(directory: string) {
 		case "desktop":
 			return "file-shortcut";
 
+		case "4db":
+		case "4dc":
+		case "4dd":
+		case "4dindy":
+		case "4dindx":
+		case "4dr":
+		case "4dz":
+		case "accdb":
+		case "accde":
+		case "adt":
+		case "apr":
+		case "box":
+		case "chml":
+		case "daf":
+		case "dat":
+		case "db":
+		case "dbf":
+		case "dta":
+		case "egt":
+		case "ess":
+		case "eap":
+		case "fdb":
+		case "fp":
+		case "fp3":
+		case "fp5":
+		case "fp7":
+		case "frm":
+		case "gdb":
+		case "gtable":
+		case "kexi":
+		case "kexic":
+		case "kexis":
+		case "ldb":
+		case "lirs":
+		case "mda":
+		case "mdb":
+		case "adp":
+		case "mde":
+		case "mdf":
+		case "myd":
+		case "myi":
+		case "mcf":
+		case "nsf":
+		case "ntf":
+		case "nv2":
+		case "odb":
+		case "ora":
+		case "pcontact":
+		case "pdb":
+		case "pdi":
+		case "pdx":
+		case "[rc":
+		case "sql":
+		case "rec":
+		case "rel":
+		case "rin":
+		case "sdb":
+		case "sdf":
+		case "sqlite":
+		case "udl":
+		case "wadata":
+		case "waindx":
+		case "wamodel":
+		case "wajournal":
+		case "wdb":
+		case "wmdb":
+			return "/System/CoreAssets/Vectors/files/file-database.svg";
+
 		case "json":
-			return "file-json";
+			return "/System/CoreAssets/Vectors/files/file-database-json.svg";
 
 		case "mp3":
 		case "ogg":
 		case "m4a":
 		case "flac":
-			return "file-music";
+			return "/System/CoreAssets/Vectors/files/file-media-audio.svg";
 
 		case "mp4":
 		case "mov":
 		case "webm":
-			return "file-video";
+			return "/System/CoreAssets/Vectors/files/file-media-video.svg";
 
 		default:
-			return "file";
+			return "/System/CoreAssets/Vectors/files/file.svg";
 	}
 }
 
@@ -644,6 +727,7 @@ export async function pathMime(directory: string) {
 
 export async function pathSize(directory: string) {
 	const stat = await env.fs.stat(directory);
+	if (!stat.ok) throw stat.data;
 
 	const original = Number(stat.data.size) / 8;
 	let size = Number(original);

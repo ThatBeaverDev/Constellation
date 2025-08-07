@@ -35,7 +35,10 @@ async function blobifyModule(path: string): Promise<string> {
  * @param - currentPath the directory from which relative imports will be resolved from
  * @returns the code with all imports resolved to blobs.
  */
-export async function rewriteImportsAsync(code: string, currentPath: string): Promise<string> {
+export async function rewriteImportsAsync(
+	code: string,
+	currentPath: string
+): Promise<string> {
 	const start = performance.now();
 
 	// regex
@@ -45,7 +48,10 @@ export async function rewriteImportsAsync(code: string, currentPath: string): Pr
 		[...code.matchAll(importRegex)].map(async (match) => {
 			const [full, bindings, specifier] = match;
 			// resolve the path
-			const resolved = resolve(currentPath.textBeforeLast("/"), specifier);
+			const resolved = resolve(
+				currentPath.textBeforeLast("/"),
+				specifier
+			);
 			// blobify it
 			const blobUrl = await blobifyModule(resolved);
 			return {
