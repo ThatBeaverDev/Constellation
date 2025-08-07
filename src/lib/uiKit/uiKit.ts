@@ -1,4 +1,9 @@
-import { focus, newWindow, GraphicalWindow } from "../../windows/windows.js";
+import {
+	focusedWindow,
+	newWindow,
+	GraphicalWindow,
+	getWindowOfId
+} from "../../windows/windows.js";
 import { getIcon } from "../icons.js";
 import { getTextWidth } from "./calcWidth.js";
 import { Process } from "../../runtime/executables.js";
@@ -12,6 +17,7 @@ import {
 	uiKitTimestamp,
 	uikitBoxConfig,
 	uikitCanvasOptions,
+	uikitIconOptions,
 	uikitTextareaConfig,
 	uikitTextboxConfig
 } from "./definitions.js";
@@ -20,8 +26,6 @@ import uikitEventCreators from "./eventCreators.js";
 import uiKitTransitioners from "./transitioners.js";
 
 const uiKitStart = performance.now();
-
-export const font = "monospace";
 
 export async function init() {
 	const styles = await (await fetch("/src/lib/uiKit/styles.css")).text();
@@ -58,6 +62,7 @@ export class Renderer {
 		},
 		uikitBox: {
 			borderRadius: 5,
+			blur: 0,
 			background: "rgb(155, 155, 155)"
 		},
 		uikitCanvasStep: {
@@ -172,17 +177,24 @@ export class Renderer {
 		y: number = 0,
 		name: string = "circle-help",
 		scale: number = 1,
-		colour: string = ""
+		colour: string = "",
+		options: uikitIconOptions = {}
 	) => {
 		const obj: step = {
 			type: "uikitIcon",
-			args: [x, y, name, scale, colour]
+			args: [x, y, name, scale, colour, options]
 		};
 
 		return this.#steps.push(obj);
 	};
 
-	readonly text = (x: number, y: number, string: string, fontSize: number = 15, colour: string = "") => {
+	readonly text = (
+		x: number,
+		y: number,
+		string: string,
+		fontSize: number = 15,
+		colour: string = ""
+	) => {
 		const obj: step = {
 			type: "uikitText",
 			args: [x, y, string, fontSize, colour]
@@ -249,7 +261,13 @@ export class Renderer {
 		return this.#steps.push(obj);
 	};
 
-	readonly progressBar = (x: number, y: number, width: number, height: number, progress: number | "throb") => {
+	readonly progressBar = (
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		progress: number | "throb"
+	) => {
 		const obj: step = {
 			type: "uikitProgressBar",
 			args: [x, y, width, height, progress]
@@ -278,7 +296,13 @@ export class Renderer {
 		return this.#steps.push(obj);
 	};
 
-	readonly box = (x: number, y: number, width: number, height: number, config?: uikitBoxConfig) => {
+	readonly box = (
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		config?: uikitBoxConfig
+	) => {
 		const obj: step = {
 			type: "uikitBox",
 			args: [x, y, width, height, config]
@@ -287,7 +311,12 @@ export class Renderer {
 		return this.#steps.push(obj);
 	};
 
-	readonly canvas2D = (x: number, y: number, width: number, height: number) => {
+	readonly canvas2D = (
+		x: number,
+		y: number,
+		width: number,
+		height: number
+	) => {
 		const obj: step = {
 			type: "uikitCanvas2D",
 			args: [x, y, width, height, []] // last arguement (the []) is the list of drawing commands
@@ -295,9 +324,20 @@ export class Renderer {
 		return this.#steps.push(obj);
 	};
 
-	onClick(elemID: number, leftClickCallback?: Function, rightClickCallback?: Function, otherConfig?: onClickOptions) {
-		const left = leftClickCallback == undefined ? undefined : leftClickCallback.bind(this.#process);
-		const right = rightClickCallback == undefined ? undefined : rightClickCallback.bind(this.#process);
+	onClick(
+		elemID: number,
+		leftClickCallback?: Function,
+		rightClickCallback?: Function,
+		otherConfig?: onClickOptions
+	) {
+		const left =
+			leftClickCallback == undefined
+				? undefined
+				: leftClickCallback.bind(this.#process);
+		const right =
+			rightClickCallback == undefined
+				? undefined
+				: rightClickCallback.bind(this.#process);
 
 		// insure elemID is valid
 		if (elemID > 0 && elemID <= this.#steps.length) {
@@ -362,6 +402,13 @@ export class Renderer {
 		return null;
 	};
 
+	get darkmode() {
+		return (
+			window.matchMedia &&
+			window.matchMedia("(prefers-color-scheme: dark)").matches
+		);
+	}
+
 	readonly #creators: uiKitCreators;
 	readonly #eventCreators: uikitEventCreators;
 	readonly #transitioners: uiKitTransitioners;
@@ -374,7 +421,12 @@ export class Renderer {
 	 * @param {string} header - the header text of the context
 	 * @param {Record<string, Function>} buttons - an object of the context's buttons and the function to execute when clicked. Displayed in order that they are assigned. Key names can also use icon-:-text to display an icon with the text, and text after the last semicolon is ignored so that two buttons with the same text can exist.
 	 */
-	setContextMenu(x: number, y: number, header: string, buttons: Record<string, Function>) {
+	setContextMenu(
+		x: number,
+		y: number,
+		header: string,
+		buttons: Record<string, Function>
+	) {
 		this.removeContextMenu();
 
 		this.#context = new ContextMenu(x, y, header, buttons);
@@ -418,8 +470,11 @@ export class Renderer {
 	}
 
 	#focusTextbox() {
-		if (this.#creators.textboxElem !== undefined) {
-			this.#creators.textboxElem.focus();
+		const windowFocus = getWindowOfId(focusedWindow);
+		if (windowFocus == this.#window) {
+			if (this.#creators.textboxElem !== undefined) {
+				this.#creators.textboxElem.focus();
+			}
 		}
 	}
 
@@ -433,10 +488,14 @@ export class Renderer {
 		this.windowHeight = this.#window.body.clientHeight;
 
 		if (this.#creators.textboxElem !== undefined) {
-			if (focus == this.#window.winID) this.#creators.textboxElem.focus();
+			if (focusedWindow == this.#window.winID)
+				this.#creators.textboxElem.focus();
 		}
 
-		function objectEquality(object1: Record<string, any>, object2: Record<string, any>) {
+		function objectEquality(
+			object1: Record<string, any>,
+			object2: Record<string, any>
+		) {
 			const keys1 = Object.keys(object1);
 			const keys2 = Object.keys(object2);
 
@@ -504,7 +563,11 @@ export class Renderer {
 		const newItems: HTMLElement[] = [];
 		const newDisplayedSteps: step[] = [];
 
-		for (let i = 0; i < Math.max(this.#steps.length, this.#displayedSteps.length); i++) {
+		for (
+			let i = 0;
+			i < Math.max(this.#steps.length, this.#displayedSteps.length);
+			i++
+		) {
 			const start = performance.now();
 
 			const newStep = this.#steps[i];
@@ -528,11 +591,17 @@ export class Renderer {
 				const applyCreator = () => {
 					if (oldElement) oldElement.remove();
 
-					const creator: (x: number, y: number, ...args: any) => HTMLElement = this.#creators[
-						newStep.type
-					].bind(this.#creators);
+					const creator: (
+						x: number,
+						y: number,
+						...args: any
+					) => HTMLElement = this.#creators[newStep.type].bind(
+						this.#creators
+					);
 					if (!creator) {
-						throw new UIError(`Creator is not defined for ${newStep.type}`);
+						throw new UIError(
+							`Creator is not defined for ${newStep.type}`
+						);
 					}
 
 					// @ts-expect-error // run the creator
@@ -548,7 +617,11 @@ export class Renderer {
 				// use a transitioner to simply modify properties if possible.
 				if (oldStep?.type === newStep?.type) {
 					// get the transitioner
-					const transitioner: (element: HTMLElement, oldStep: step, newStep: step) => boolean =
+					const transitioner: (
+						element: HTMLElement,
+						oldStep: step,
+						newStep: step
+					) => boolean =
 						// @ts-expect-error
 						this.#transitioners[oldStep?.type];
 
@@ -557,7 +630,11 @@ export class Renderer {
 						element = applyCreator();
 					} else {
 						// apply the transitioner
-						const result = transitioner(oldElement, oldStep, newStep);
+						const result = transitioner(
+							oldElement,
+							oldStep,
+							newStep
+						);
 
 						// if it returns false, it can't manage that particular transition.
 						if (result == false) {
@@ -583,13 +660,26 @@ export class Renderer {
 				// @ts-expect-error
 				| undefined = this.#eventCreators[newStep.type];
 
-			if (typeof eventCreator === "function") eventCreator.bind(this.#eventCreators)(element, ...newStep.args);
+			if (typeof eventCreator === "function")
+				eventCreator.bind(this.#eventCreators)(
+					element,
+					...newStep.args
+				);
 
 			if (newStep.onClick !== undefined) {
 				element.classList.add("clickable");
-				element.style.setProperty("--scale", String(newStep.onClick.scale || 1.3));
-				element.style.setProperty("--click-scale", String(newStep.onClick.clickScale || 1.5));
-				element.style.setProperty("--origin", newStep.onClick.origin || "center");
+				element.style.setProperty(
+					"--scale",
+					String(newStep.onClick.scale || 1.3)
+				);
+				element.style.setProperty(
+					"--click-scale",
+					String(newStep.onClick.clickScale || 1.5)
+				);
+				element.style.setProperty(
+					"--origin",
+					newStep.onClick.origin || "center"
+				);
 
 				let pressTimer: ReturnType<typeof setTimeout> | null = null;
 				let longPressTriggered = false;
@@ -600,12 +690,20 @@ export class Renderer {
 						if (!newStep.onClick) return;
 						longPressTriggered = false;
 
-						if (event.pointerType === "touch" || event.pointerType === "pen") {
+						if (
+							event.pointerType === "touch" ||
+							event.pointerType === "pen"
+						) {
 							pressTimer = setTimeout(() => {
 								longPressTriggered = true;
-								if (typeof newStep.onClick?.right === "function") {
+								if (
+									typeof newStep.onClick?.right === "function"
+								) {
 									event.preventDefault();
-									newStep.onClick.right(event.clientX, event.clientY);
+									newStep.onClick.right(
+										event.clientX,
+										event.clientY
+									);
 								}
 							}, 500);
 							return; // Skip mouse clicks on touch/pen
@@ -619,7 +717,10 @@ export class Renderer {
 					(event: PointerEvent) => {
 						if (!newStep.onClick) return;
 
-						if (event.pointerType === "touch" || event.pointerType === "pen") {
+						if (
+							event.pointerType === "touch" ||
+							event.pointerType === "pen"
+						) {
 							if (longPressTriggered) {
 								event.preventDefault();
 								return; // skip click after long press
@@ -628,9 +729,14 @@ export class Renderer {
 
 						switch (event.button) {
 							case 0:
-								if (typeof newStep.onClick.left === "function") {
+								if (
+									typeof newStep.onClick.left === "function"
+								) {
 									event.preventDefault();
-									newStep.onClick.left(event.clientX, event.clientY);
+									newStep.onClick.left(
+										event.clientX,
+										event.clientY
+									);
 								}
 								break;
 						}
@@ -644,11 +750,13 @@ export class Renderer {
 					pressTimer = null;
 				};
 
-				["pointerup", "pointercancel", "pointerleave"].forEach((eventName) => {
-					element.addEventListener(eventName, clearLongPress, {
-						signal: this.signal
-					});
-				});
+				["pointerup", "pointercancel", "pointerleave"].forEach(
+					(eventName) => {
+						element.addEventListener(eventName, clearLongPress, {
+							signal: this.signal
+						});
+					}
+				);
 
 				// Always prevent contextmenu for touch/pen
 				element.addEventListener(

@@ -9,7 +9,11 @@ import { debug } from "../lib/logging.js";
 const start = performance.now();
 const name = "/System/windows.js";
 
-export function windowsTimestamp(label: string, start: DOMHighResTimeStamp, colour: DevToolsColor = "secondary") {
+export function windowsTimestamp(
+	label: string,
+	start: DOMHighResTimeStamp,
+	colour: DevToolsColor = "secondary"
+) {
 	performanceLog(label, start, "WindowSystem", colour);
 }
 
@@ -18,8 +22,10 @@ export function windowsTimestamp(label: string, start: DOMHighResTimeStamp, colo
 export const EDGE_THRESHOLD = 8;
 export const minHeight = 25;
 export const minWidth = 100;
+export const windowHeaderHeight = 25;
 
-export const windows: GraphicalWindow[] = [];
+const windows: GraphicalWindow[] = [];
+export const allWindows = () => windows;
 declare global {
 	interface Window {
 		windows: GraphicalWindow[];
@@ -29,7 +35,10 @@ window.windows = windows;
 
 // variables
 export let minimiseAnimation = "flick";
-export let focus: number;
+/**
+ * ID of the currently focused window
+ */
+export let focusedWindow: number;
 export let target: GraphicalWindow | undefined = undefined;
 let startMouseX = 0;
 let startMouseY = 0;
@@ -87,24 +96,6 @@ window.addEventListener("resize", (e) => {
 	updateWindows();
 });
 
-function windowButton(elem: HTMLElement, svg: string, scale: number = 1) {
-	elem.className = "windowButton";
-
-	const icon = getIcon(svg);
-	icon.style.width = `calc(100% * ${scale})`;
-	icon.style.height = `calc(100% * ${scale})`;
-
-	const percent = Math.abs(100 - 100 * scale) / 2;
-
-	icon.style.left = `${percent}%`;
-	icon.style.top = `${percent}%`;
-
-	elem.innerHTML = icon.outerHTML;
-	elem.id = String(window.renderID++);
-
-	return elem;
-}
-
 let maxWinID = 0;
 export class GraphicalWindow {
 	constructor(name: string, Application: Application) {
@@ -129,28 +120,65 @@ export class GraphicalWindow {
 		t.innerText = name;
 
 		// window icon
-
 		this.iconDiv = document.createElement("div");
 		this.iconDiv.id = String(window.renderID++);
 		this.iconDiv.style.position = "static";
-		this.iconDiv.style.width = "25px";
-		this.iconDiv.style.height = "25px";
+		this.iconDiv.style.width = "20px";
+		this.iconDiv.style.height = "20px";
+		this.iconDiv.style.top = "3px";
 
-		this.closeButton = windowButton(document.createElement("div"), "x");
-		this.maximiseButton = windowButton(document.createElement("div"), "maximize", 0.75);
-		this.minimiseButton = windowButton(document.createElement("div"), "minimize-2");
+		let right = 3;
+		function windowButton(iconpath: string) {
+			const button = document.createElement("div");
+			button.id = String(window.renderID++);
+			button.classList.add("windowButton");
 
-		this.buttons = document.createElement("div");
-		this.buttons.id = String(window.renderID++);
-		this.buttons.className = "windowButtons";
-		this.buttons.innerHTML =
-			this.closeButton.outerHTML + this.minimiseButton.outerHTML + this.maximiseButton.outerHTML;
+			button.style.background = "#CCCCCC";
+			button.style.borderRadius = "7px";
+
+			button.style.position = "absolute";
+			button.style.top = "3px";
+			button.style.right = `${right}px`;
+
+			button.style.width = "20px";
+			button.style.height = "20px";
+
+			const icon = getIcon(iconpath);
+			icon.style.width = "16px";
+			icon.style.height = "16px";
+			icon.style.filter =
+				"drop-shadow(0px, 4px, 4px, rgba(0, 0, 0, 0.25))";
+			icon.classList.add("windowButtonIcon");
+
+			icon.style.left = "2px";
+			icon.style.top = "2px";
+			button.appendChild(icon);
+
+			right += 23;
+
+			return button;
+		}
+
+		this.closeButton = windowButton(
+			"/System/CoreAssets/Vectors/windows/close.svg"
+		);
+		this.minimiseButton = windowButton(
+			"/System/CoreAssets/Vectors/windows/minimise.svg"
+		);
+		this.maximiseButton = windowButton(
+			"/System/CoreAssets/Vectors/windows/fullscreen.svg"
+		);
 
 		this.header = document.createElement("div");
 		const h = this.header;
 		h.className = "windowHeader";
 		h.id = String(window.renderID++);
-		h.innerHTML = this.iconDiv.outerHTML + this.title.outerHTML + this.buttons.outerHTML;
+		h.innerHTML =
+			this.iconDiv.outerHTML +
+			this.title.outerHTML +
+			this.maximiseButton.outerHTML +
+			this.minimiseButton.outerHTML +
+			this.closeButton.outerHTML;
 
 		this.body = document.createElement("div");
 		const b = this.body;
@@ -209,10 +237,16 @@ export class GraphicalWindow {
 				this.fullscreen();
 			}
 		};
-		this.maximiseButton.addEventListener("pointerdown", fullscreenPointerDown);
+		this.maximiseButton.addEventListener(
+			"pointerdown",
+			fullscreenPointerDown
+		);
 
 		const minimisePointerDown = () => this.minimise();
-		this.minimiseButton.addEventListener("pointerdown", minimisePointerDown);
+		this.minimiseButton.addEventListener(
+			"pointerdown",
+			minimisePointerDown
+		);
 
 		this.setIcon("app-window-mac");
 
@@ -235,7 +269,6 @@ export class GraphicalWindow {
 	container: HTMLElement;
 	body: HTMLElement;
 	header: HTMLElement;
-	buttons: HTMLElement;
 	closeButton: HTMLElement;
 	maximiseButton: HTMLElement;
 	minimiseButton: HTMLElement;
@@ -387,10 +420,18 @@ export class GraphicalWindow {
 
 	async setIcon(loc: string) {
 		this.iconName = loc;
-		this.#setIcon(getIcon(loc));
+
+		const icon = getIcon(loc);
+
+		this.#setIcon(icon);
 	}
 
 	async #setIcon(element: HTMLElement) {
+		element.style.width = "20px";
+		element.style.height = "20px";
+
+		element.style.left = "";
+		element.style.top = "";
 		this.iconDiv.innerHTML = element.outerHTML;
 	}
 
@@ -424,6 +465,12 @@ export class GraphicalWindow {
 			windowsTimestamp(`Close Window ${this.winID}`, start);
 		};
 
+		if (this.winID == focusedWindow) {
+			// we're focused and need to pass the focus onto another window
+			const last = windows.length - 1;
+			focusWindow(Math.max(0, Math.min(focusedWindow, last)));
+		}
+
 		setTimeout(del, 150);
 	}
 
@@ -432,7 +479,12 @@ export class GraphicalWindow {
 	}
 }
 
-export function getWindowOfId(id: number) {
+/**
+ * Returns the window of the given ID, **or the focused window if unspecified.**
+ * @param id - the ID to search for
+ * @returns Window by the requested ID if found, else undefined.
+ */
+export function getWindowOfId(id: number = focusedWindow) {
 	for (const window of windows) {
 		if (window.winID == id) {
 			return window;
@@ -457,9 +509,13 @@ export function focusWindow(id: number) {
 	}
 
 	// focus our window
-	focus = id;
+	focusedWindow = id;
 	target.container.classList.add("focused");
-	target.move(target.position.left, target.position.top, windowTilingNumber++);
+	target.move(
+		target.position.left,
+		target.position.top,
+		windowTilingNumber++
+	);
 
 	windowsTimestamp(`Focus window ${id}`, start);
 }
@@ -486,8 +542,6 @@ function updateWindows() {
 			totalWindows++;
 		}
 	}
-
-	const windowHeaderHeight = 25;
 
 	const blankSpace = totalWindows * windowHeaderHeight;
 	const windowWidth = availableWidth - blankSpace;
@@ -541,15 +595,24 @@ document.body.appendChild(styleElem);
 async function updateLiveStyling() {
 	const start = performance.now();
 
-	debug(name, "Loading windowing CSS for minimise animation: " + minimiseAnimation);
+	debug(
+		name,
+		"Loading windowing CSS for minimise animation: " + minimiseAnimation
+	);
 
-	const css = await fs.readFile("/System/windows/" + minimiseAnimation + ".css");
+	const css = await fs.readFile(
+		"/System/windows/" + minimiseAnimation + ".css"
+	);
 
 	if (css == undefined) {
 		return;
 	}
 
-	debug(name, "CSS retrieved successfully for minimise animation: " + minimiseAnimation);
+	debug(
+		name,
+		"CSS retrieved successfully for minimise animation: " +
+			minimiseAnimation
+	);
 
 	styleElem.textContent = css;
 

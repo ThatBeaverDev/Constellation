@@ -52,45 +52,48 @@ export default class terminalUI extends Application {
 
 		this.renderer.windowName = "Terminal";
 		this.renderer.setIcon("square-terminal");
-
-		this.registerKeyboardShortcut("Scroll Down", "ArrowDown", []);
-		this.registerKeyboardShortcut("Scroll Down (Fast)", "ArrowDown", ["ShiftLeft"]);
-		this.registerKeyboardShortcut("Scroll Up", "ArrowUp", []);
-		this.registerKeyboardShortcut("Scroll Up (Fast)", "ArrowUp", ["ShiftLeft"]);
+		//this.renderer.setIcon(env.fs.resolve(this.directory, "./resources/icon.svg"));
 	}
 
-	onmessage(msg: IPCMessage) {
-		const origin = msg.originDirectory;
-		const intent = msg.intent;
-
-		switch (origin) {
-			case "/System/keyboardShortcuts.js":
-				switch (intent) {
-					case "keyboardShortcutTrigger-Scroll Down":
-						this.scroll = clamp(this.scroll - 1, 0, this.logs.length - this.displayedLogs);
-						break;
-					case "keyboardShortcutTrigger-Scroll Down (Fast)":
-						this.scroll = clamp(this.scroll - 2, 0, this.logs.length - this.displayedLogs);
-						break;
-					case "keyboardShortcutTrigger-Scroll Up":
-						this.scroll = clamp(this.scroll + 1, 0, this.logs.length - this.displayedLogs);
-						break;
-					case "keyboardShortcutTrigger-Scroll Up (Fast)":
-						this.scroll = clamp(this.scroll + 2, 0, this.logs.length - this.displayedLogs);
-						break;
-					default:
-						throw new Error("Unknown keyboard shortcut name (intent): " + intent);
-				}
-				break;
-			default:
-				console.warn("Unknown message sender: " + origin);
-		}
-	}
-
-	keydown(code: string, metaKey: boolean, altKey: boolean, ctrlKey: boolean, shiftKey: boolean, repeat: boolean) {
+	keydown(
+		code: string,
+		metaKey: boolean,
+		altKey: boolean,
+		ctrlKey: boolean,
+		shiftKey: boolean,
+		repeat: boolean
+	) {
 		switch (code) {
 			case "ArrowUp":
+				if (shiftKey) {
+					this.scroll = clamp(
+						this.scroll + 2,
+						0,
+						this.logs.length - this.displayedLogs
+					);
+				} else {
+					this.scroll = clamp(
+						this.scroll + 1,
+						0,
+						this.logs.length - this.displayedLogs
+					);
+				}
+				break;
 			case "ArrowDown":
+				if (shiftKey) {
+					this.scroll = clamp(
+						this.scroll - 1,
+						0,
+						this.logs.length - this.displayedLogs
+					);
+				} else {
+					this.scroll = clamp(
+						this.scroll - 1,
+						0,
+						this.logs.length - this.displayedLogs
+					);
+				}
+				break;
 			case "ControlLeft":
 			case "ControlRight":
 			case "ShiftLeft":
@@ -160,7 +163,10 @@ export default class terminalUI extends Application {
 		this.renderer.clear();
 
 		let y = 15;
-		const visibleLogs = this.logs.slice(-50 - this.scroll, -this.scroll || undefined);
+		const visibleLogs = this.logs.slice(
+			-50 - this.scroll,
+			-this.scroll || undefined
+		);
 
 		for (const i of this.logs) {
 			this.renderer.text(0, y, i);

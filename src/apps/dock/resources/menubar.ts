@@ -1,4 +1,4 @@
-import { font, Renderer } from "../../../lib/uiKit/uiKit";
+import { Renderer } from "../../../lib/uiKit/uiKit";
 import { ApplicationAuthorisationAPI } from "../../../security/env";
 import dockAndDesktop from "../tcpsys/app";
 
@@ -37,23 +37,40 @@ export default class menubar {
 		buttons[`book-open-text-:-About ${this.parent.config.name}`] = () => {
 			// about page
 		};
-		buttons[`cog-:-Settings`] = () => this.env.exec("/Applications/Settings.appl");
+		buttons[`cog-:-Settings`] = () =>
+			this.env.exec("/Applications/Settings.appl");
 		buttons["rotate-cw-:-Restart"] = () => {}; // TODO: restart
 		buttons["power-:-Shut Down"] = () => {}; // TODO: Power off
 		buttons["lock-:-Lock"] = () => {}; // TODO: lock, somehow.
-		buttons[`log-out-:-Logout from ${this.env.user}`] = () => this.parent.exit();
+		buttons[`log-out-:-Logout from ${this.env.user}`] = () =>
+			this.parent.exit();
 
 		const constellationMenu = () => {
-			this.renderer.setContextMenu(0, 0, this.parent.config.name, buttons);
+			this.renderer.setContextMenu(
+				0,
+				0,
+				this.parent.config.name,
+				buttons
+			);
 		};
 
-		this.renderer.onClick(constellationIcon, constellationMenu, constellationMenu);
+		this.renderer.onClick(
+			constellationIcon,
+			constellationMenu,
+			constellationMenu
+		);
 
 		x += 24 + iconPadding;
 
 		x += textPadding;
 		const focus = this.env.windows.getFocus();
-		this.renderer.text(x, textPadding, String(focus?.shortName || focus?.name || focus?.applicationDirectory));
+		this.renderer.text(
+			x,
+			textPadding,
+			String(
+				focus?.shortName || focus?.name || focus?.applicationDirectory
+			)
+		);
 		x += textPadding;
 
 		const date = new Date();
@@ -97,6 +114,10 @@ export default class menubar {
 		const time = timemap.map(mappings);
 		const timeWidth = this.renderer.getTextWidth(time);
 
-		this.renderer.text(window.innerWidth - timeWidth - textPadding, textPadding, time);
+		this.renderer.text(
+			window.innerWidth - timeWidth - textPadding,
+			textPadding,
+			time
+		);
 	}
 }

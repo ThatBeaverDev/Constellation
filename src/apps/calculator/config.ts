@@ -4,7 +4,8 @@ const manifest = {
 	category: "Productivity",
 	author: "ThatBeaverDev",
 	version: 1,
-	icon: "calculator",
+	//icon: "calculator",
+	icon: "./resources/icon.svg",
 	userspace: true
 };
 

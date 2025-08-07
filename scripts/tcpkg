@@ -93,9 +93,11 @@ async function walk(directory) {
 					throw new Error("Mime type for file at '" + dir + "' has returned null.");
 				}
 
-				const isText = type.startsWith("text/") || type == "image/svg+xml";
+				const textMimes = ["image/svg+xml", "application/json", "application/x-sh"]
+				const isText = type.startsWith("text/") || textMimes.includes(type);
 
 				if (isText) {
+					// text
 					const content = await fs.readFile(dir, { encoding: "utf8" });
 
 					pkg.files[relative] = content;

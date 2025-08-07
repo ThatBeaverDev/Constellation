@@ -4,7 +4,8 @@ const manifest = {
 	category: "Productivity",
 	author: "ThatBeaverDev",
 	version: 1,
-	icon: "search",
+	//icon: "search",
+	icon: "./resources/icon.svg",
 	userspace: false
 };
 

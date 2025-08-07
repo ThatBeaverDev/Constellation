@@ -1,6 +1,12 @@
+import { setStatus } from "../constellation.config.js";
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
+import { ApiError, BrowserFS } from "./browserfs.js";
 
-export function filesystemTimestamp(label: string, start: DOMHighResTimeStamp, colour: DevToolsColor = "secondary") {
+export function filesystemTimestamp(
+	label: string,
+	start: DOMHighResTimeStamp,
+	colour: DevToolsColor = "secondary"
+) {
 	performanceLog(label, start, "FileSystemManager", colour);
 }
 
@@ -19,13 +25,16 @@ bfs = new Function(bfsCode);
 await bfs(); // start browserFS
 
 // @ts-expect-error
-const BrowserFS = window.BrowserFS;
-// @ts-expect-error
-window.BrowserFS = undefined;
-// @ts-expect-error
-delete window.BrowserFS;
+const BrowserFS: BrowserFS = window.BrowserFS;
+//// @ts-expect-error
+//window.BrowserFS = undefined;
+//// @ts-expect-error
+//delete window.BrowserFS;
 
 filesystemTimestamp("Initialise BrowserFS", startInitBrowserFS);
+
+let hasInitialised = false;
+setStatus("Waiting for BrowserFS...");
 
 BrowserFS.configure(
 	{
@@ -60,12 +69,24 @@ BrowserFS.configure(
 			}
 		}
 	},
-	(e: Error) => {
+	(e?: ApiError | null) => {
 		if (e) {
 			console.error(e);
 		}
+		console.log("initialised innit.");
+		hasInitialised = true;
 	}
 );
+
+await new Promise((resolve: Function) => {
+	let interval = setInterval(() => {
+		if (hasInitialised == true) {
+			clearInterval(interval);
+			resolve();
+			return;
+		}
+	});
+});
 
 const fs = BrowserFS.BFSRequire("fs");
 
@@ -100,13 +121,15 @@ const writeFile = async (directory: string, content: string) => {
 	});
 };
 
-export const readFile = async (directory: string): Promise<string | undefined> => {
+export const readFile = async (
+	directory: string
+): Promise<string | undefined> => {
 	const start = performance.now();
 
 	return new Promise((resolve: Function) =>
-		fs.readFile(directory, "utf8", (e: any, data: string) => {
+		fs.readFile(directory, "utf8", (e: any, rv?: string) => {
 			filesystemTimestamp(`readFile ${directory}`, start);
-			resolve(data);
+			resolve(rv);
 		})
 	);
 };
@@ -134,7 +157,9 @@ const rename = async (oldPath: string, newPath: string): Promise<void> => {
 	const isDir = type.isDirectory();
 
 	if (isDir) {
-		await mkdir(newPath).catch(() => {});
+		await mkdir(newPath).catch((e: Error) => {
+			throw e;
+		});
 
 		const entries = await readdir(oldPath);
 
@@ -160,9 +185,9 @@ const readdir = async (directory: string): Promise<string[]> => {
 	const start = performance.now();
 
 	return new Promise((resolve: Function) =>
-		fs.readdir(directory, (e: any, data: string[]) => {
+		fs.readdir(directory, (e: any, rv?: string[]) => {
 			filesystemTimestamp(`readdir ${directory}`, start);
-			resolve(data);
+			resolve(rv);
 		})
 	);
 };
@@ -170,9 +195,24 @@ const mkdir = async (directory: string): Promise<undefined> => {
 	const start = performance.now();
 
 	if (isRoot(directory)) {
-		filesystemTimestamp(`mkdir ${directory} - failed (no new children of root)`, start, "error");
+		filesystemTimestamp(
+			`mkdir ${directory} - failed (no new children of root)`,
+			start,
+			"error"
+		);
 		throw new Error("Directories cannot be created under root.");
 	}
+
+	const parentDirectory = directory.textBeforeLast("/");
+	const parent = await stat(parentDirectory);
+	if (parent == undefined)
+		throw new Error(
+			`Parent directory, ${parentDirectory}, doesn't exist! (Creating ${directory})`
+		);
+	if (!parent.isDirectory())
+		throw new Error(
+			`Parent directory, ${parentDirectory}, doesn't exist! (Creating ${directory})`
+		);
 
 	return new Promise((resolve: Function) => {
 		fs.mkdir(directory, (e: any) => {
@@ -240,7 +280,8 @@ export const resolve = (base = "/", target: string) => {
 
 	return "/" + baseParts.join("/");
 };
-const normalize = (path: string) => path.replace(/\/+/g, "/").replace(/\/$/, "") || "/";
+const normalize = (path: string) =>
+	path.replace(/\/+/g, "/").replace(/\/$/, "") || "/";
 export function relative(from: string, to: string) {
 	from = normalize(from);
 	to = normalize(to);

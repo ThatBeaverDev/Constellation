@@ -13,7 +13,10 @@ export type appFindResult = { files: fileInfo[]; names: string[] };
 
 export default async function find(
 	parent: TerminalAlias,
-	directories: string[] = ["/System/CoreExecutables", "/Applications" /*,"~/Applications"*/]
+	directories: string[] = [
+		"/System/CoreExecutables",
+		"/Applications" /*,"~/Applications"*/
+	]
 ): Promise<appFindResult> {
 	let files: fileInfo[] = [];
 	let names: string[] = [];
@@ -22,7 +25,9 @@ export default async function find(
 		const list = await parent.env.fs.listDirectory(directory);
 		if (!list.ok) throw list.data;
 
-		const localNames = list.data.map((item: string) => parent.env.fs.resolve(directory, String(item)));
+		const localNames = list.data.map((item: string) =>
+			parent.env.fs.resolve(directory, String(item))
+		);
 		names = [...localNames, ...names];
 
 		// build file objects
@@ -35,7 +40,10 @@ export default async function find(
 				visible: await pathinf.pathVisible(dir)
 			};
 
-			if (obj.directory.endsWith(".backgr") || obj.directory.endsWith(".appl")) {
+			if (
+				obj.directory.endsWith(".backgr") ||
+				obj.directory.endsWith(".appl")
+			) {
 				if (obj.name.startsWith("/")) {
 					obj.name = obj.directory.textAfterAll("/");
 				}

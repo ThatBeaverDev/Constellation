@@ -6,7 +6,9 @@ export default async function (parent: systemSettings) {
 	const result: Record<string, any> = {};
 
 	for (const page of list) {
-		const data = await env.include(env.fs.resolve(parent.directory, "resources/pages/" + page + ".js"));
+		const data = await env.include(
+			env.fs.resolve(parent.directory, "resources/pages/" + page + ".js")
+		);
 
 		if (typeof data.init == "function") {
 			data.init(parent);

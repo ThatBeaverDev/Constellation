@@ -1,19 +1,24 @@
 import TerminalAlias from "../../../lib/terminalAlias";
 
-export default async function tcupkg(parent: TerminalAlias, target: string, output: string) {
+export default async function tcupkg(
+	parent: TerminalAlias,
+	target: string,
+	output: string
+) {
 	const targetRel = parent.env.fs.resolve(parent.path, target);
 	const directory = parent.env.fs.resolve(parent.path, output);
 
-	let content = await env.fs.readFile(targetRel);
-	if (!content.ok) throw content.data;
-	content = content.data;
+	let read = await env.fs.readFile(targetRel);
+	if (!read.ok) throw read.data;
+
+	const content = read.data;
 
 	let json;
 
 	await env.fs.createDirectory(directory);
 
 	try {
-		json = JSON.parse(content.data);
+		json = JSON.parse(content);
 	} catch {
 		throw new Error(`Package is not packaged properly.`);
 	}
@@ -39,7 +44,9 @@ export default async function tcupkg(parent: TerminalAlias, target: string, outp
 				awaitFiles.push(env.fs.writeFile(relative, data.data));
 				break;
 			default:
-				throw new Error("Unknown key type within files object: '" + type + "'");
+				throw new Error(
+					"Unknown key type within files object: '" + type + "'"
+				);
 		}
 	}
 

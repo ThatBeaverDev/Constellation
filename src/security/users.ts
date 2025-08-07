@@ -1,3 +1,4 @@
+import { userDirectories } from "../constellation.config.js";
 import fs from "../io/fs.js";
 import { sha512 } from "../lib/crypto.js";
 import { debug, log } from "../lib/logging.js";
@@ -33,7 +34,9 @@ export async function init() {
 	// check if there's already a permissions file
 	const permissionsFileExists = (await fs.stat(usersDirectory)) !== undefined;
 	// if the permissions file exists, use it, else use {}
-	const fileData = permissionsFileExists ? JSON.parse((await fs.readFile(usersDirectory)) || {}) : {};
+	const fileData = permissionsFileExists
+		? JSON.parse((await fs.readFile(usersDirectory)) || "{}")
+		: {};
 
 	// put data into the permissions storage variable
 	Object.assign(users, fileData);
@@ -86,7 +89,11 @@ export function setUserKey(username: string, key: keyof User, value: string) {
 	void onUsersUpdate();
 }
 
-export async function newUser(username: string, password: string, extraOptions?: Partial<Record<keyof User, string>>) {
+export async function newUser(
+	username: string,
+	password: string,
+	extraOptions?: Partial<Record<keyof User, string>>
+) {
 	log(name, `Creating user by name ${username}.`);
 	const user = await createUser(username, password);
 
@@ -99,6 +106,20 @@ export async function newUser(username: string, password: string, extraOptions?:
 	}
 
 	users[username] = user;
+
+	// make the user's home folder
+	await fs.mkdir(user.directory);
+
+	for (const i in userDirectories) {
+		// get absolute path
+		const directory = fs.resolve(user.directory, userDirectories[i]);
+
+		// create directory
+		await fs.mkdir(directory);
+
+		console.log(`Created directory ${directory} for user ${username}`);
+	}
+
 	void (await onUsersUpdate());
 }
 

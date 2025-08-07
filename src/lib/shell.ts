@@ -22,7 +22,9 @@ export default class Shell {
 		this.index();
 	}
 
-	index = async (directories: string[] = ["/System/CoreExecutables", "/Applications"]) => {
+	index = async (
+		directories: string[] = ["/System/CoreExecutables", "/Applications"]
+	) => {
 		const allApps: string[] = [];
 
 		for (const dir of directories) {
@@ -70,7 +72,9 @@ export default class Shell {
 		this.#terminalReference = ref;
 	}
 
-	async #getUtility(name: string): Promise<(parent: TerminalAlias, ...args: any[]) => any> {
+	async #getUtility(
+		name: string
+	): Promise<(parent: TerminalAlias, ...args: any[]) => any> {
 		for (const item of this.#index) {
 			const filename = item.textAfterAll("/").textBeforeLast(".");
 
@@ -78,12 +82,15 @@ export default class Shell {
 				// this is the one
 				const include = await this.#env.include(item);
 
-				if (include == undefined) throw new Error("File at include does not exist");
+				if (include == undefined)
+					throw new Error("File at include does not exist");
 
 				const fnc = include.default;
 
 				if (typeof fnc !== "function")
-					throw new Error("Default export of library file is not a function and is therefore invalid.");
+					throw new Error(
+						"Default export of library file is not a function and is therefore invalid."
+					);
 
 				return fnc;
 			}
@@ -93,7 +100,8 @@ export default class Shell {
 	}
 
 	async exec(name: string, ...args: any[]): Promise<shellResult | undefined> {
-		if (this.#terminalReference == undefined) throw new Error("Terminal reference must be defined!");
+		if (this.#terminalReference == undefined)
+			throw new Error("Terminal reference must be defined!");
 
 		const util = await this.#getUtility(name);
 

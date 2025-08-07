@@ -14,7 +14,11 @@ export default class uiKitTransitioners {
 		this.#window = window;
 	}
 
-	readonly uikitIcon = (icon: HTMLElement, oldStep: step, newStep: step): boolean => {
+	readonly uikitIcon = (
+		icon: HTMLElement,
+		oldStep: step,
+		newStep: step
+	): boolean => {
 		for (const i in newStep.args) {
 			const oldArg = oldStep.args[i];
 			const newArg = newStep.args[i];
@@ -45,13 +49,22 @@ export default class uiKitTransitioners {
 					// colour
 					icon.style.color = newArg;
 					break;
+				case 5:
+					// options
+					return false;
+				default:
+					throw new Error("Unknown key: " + i);
 			}
 		}
 
 		return true;
 	};
 
-	readonly uikitText = (text: HTMLElement, oldStep: step, newStep: step): boolean => {
+	readonly uikitText = (
+		text: HTMLElement,
+		oldStep: step,
+		newStep: step
+	): boolean => {
 		for (const i in newStep.args) {
 			const oldArg = oldStep.args[i];
 			const newArg = newStep.args[i];
@@ -81,6 +94,8 @@ export default class uiKitTransitioners {
 					// colour
 					text.style.color = newArg;
 					break;
+				default:
+					throw new Error("Unknown key: " + i);
 			}
 		}
 

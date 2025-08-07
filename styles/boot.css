@@ -40,6 +40,12 @@
 	top: calc(50vh - (100px / 2));
 }
 
+@media (prefers-color-scheme: dark) {
+	.bootImage {
+		filter: invert(100%) !important;
+	}
+}
+
 .bootText {
 	position: absolute;
 	text-align: center;

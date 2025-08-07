@@ -1,5 +1,5 @@
 import { UIError } from "../../errors.js";
-import { GraphicalWindow, focus } from "../../windows/windows.js";
+import { GraphicalWindow, focusedWindow } from "../../windows/windows.js";
 import { dataUriToBlobUrl } from "../blobify.js";
 import { getIcon } from "../icons.js";
 import {
@@ -7,7 +7,8 @@ import {
 	canvasRenderingStep,
 	uiKitTimestamp,
 	uikitBoxConfig,
-	uikitCanvasOptions
+	uikitCanvasOptions,
+	uikitIconOptions
 } from "./definitions.js";
 import { Renderer } from "./uiKit.js";
 
@@ -23,7 +24,14 @@ export default class uiKitCreators {
 		this.#window = window;
 	}
 
-	uikitIcon = (x = 0, y = 0, name = "circle-help", scale = 1, colour: string) => {
+	uikitIcon = (
+		x = 0,
+		y = 0,
+		name = "circle-help",
+		scale = 1,
+		colour: string,
+		options: uikitIconOptions
+	) => {
 		const icon = getIcon(name);
 		icon.style.left = `${x}px`;
 		icon.style.top = `${y}px`;
@@ -31,14 +39,25 @@ export default class uiKitCreators {
 		icon.style.height = `${scale * 24}px`;
 		icon.style.color = colour;
 
+		if (options.noProcess) {
+			icon.classList.add("darkmode");
+		}
+
 		this.#window.body.appendChild(icon);
 
-		if (icon == null) throw new UIError("uikit element has disappeared in processing");
+		if (icon == null)
+			throw new UIError("uikit element has disappeared in processing");
 
 		return icon;
 	};
 
-	uikitText = (x = 0, y = 0, string = "", fontSize: number, colour: string) => {
+	uikitText = (
+		x = 0,
+		y = 0,
+		string = "",
+		fontSize: number,
+		colour: string
+	) => {
 		const text = document.createElement("p");
 		text.className = "uikitText";
 
@@ -51,7 +70,8 @@ export default class uiKitCreators {
 
 		this.#window.body.appendChild(text);
 
-		if (text == null) throw new UIError("uikit element has disappeared in processing");
+		if (text == null)
+			throw new UIError("uikit element has disappeared in processing");
 
 		return text;
 	};
@@ -73,7 +93,8 @@ export default class uiKitCreators {
 
 		this.#window.body.appendChild(button);
 
-		if (button == null) throw new UIError("uikit element has disappeared in processing");
+		if (button == null)
+			throw new UIError("uikit element has disappeared in processing");
 
 		return button;
 	};
@@ -112,9 +133,11 @@ export default class uiKitCreators {
 
 		this.#window.body.appendChild(textbox);
 
-		if (textbox == null) throw new UIError("uikit element has disappeared in processing");
+		if (textbox == null)
+			throw new UIError("uikit element has disappeared in processing");
 
-		if (options.isEmpty == false) textbox.value = String(this.textboxElem?.value || ""); // make the value stay
+		if (options.isEmpty == false)
+			textbox.value = String(this.textboxElem?.value || ""); // make the value stay
 		this.textboxElem = textbox;
 
 		return textbox;
@@ -129,7 +152,8 @@ export default class uiKitCreators {
 
 		this.#window.body.appendChild(line);
 
-		if (line == null) throw new UIError("uikit element has disappeared in processing");
+		if (line == null)
+			throw new UIError("uikit element has disappeared in processing");
 
 		return line;
 	};
@@ -143,12 +167,19 @@ export default class uiKitCreators {
 
 		this.#window.body.appendChild(line);
 
-		if (line == null) throw new UIError("uikit element has disappeared in processing");
+		if (line == null)
+			throw new UIError("uikit element has disappeared in processing");
 
 		return line;
 	};
 
-	uikitProgressBar = (x: number, y: number, width: number, height: number, progress: number | "throb") => {
+	uikitProgressBar = (
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		progress: number | "throb"
+	) => {
 		const bar = document.createElement("div");
 		bar.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;`;
 		bar.id = String(window.renderID++);
@@ -165,7 +196,8 @@ export default class uiKitCreators {
 
 		this.#window.body.appendChild(bar);
 
-		if (bar == null) throw new UIError("uikit element has disappeared in processing");
+		if (bar == null)
+			throw new UIError("uikit element has disappeared in processing");
 
 		return bar;
 	};
@@ -193,9 +225,10 @@ export default class uiKitCreators {
 
 		this.#window.body.appendChild(area);
 
-		if (area == null) throw new UIError("uikit element has disappeared in processing");
+		if (area == null)
+			throw new UIError("uikit element has disappeared in processing");
 
-		if (focus == this.#window.winID) area.focus();
+		if (focusedWindow == this.#window.winID) area.focus();
 
 		area.value = String(this.textboxElem?.value || ""); // make the value stay
 		this.textboxElem = area;
@@ -203,15 +236,22 @@ export default class uiKitCreators {
 		return area;
 	};
 
-	uikitBox = (x: number = 0, y: number = 100, width: number = 100, height: number = 100, config?: uikitBoxConfig) => {
+	uikitBox = (
+		x: number = 0,
+		y: number = 100,
+		width: number = 100,
+		height: number = 100,
+		config?: uikitBoxConfig
+	) => {
 		const box = document.createElement("div");
-		box.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px; background: ${config?.background || "var(--main-theme-tertiary)"}; border-radius: ${config?.borderRadius}px;`;
+		box.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px; background: ${config?.background || "var(--main-theme-tertiary)"}; border-radius: ${config?.borderRadius}px; background-filter: blur(${config?.blur}px)`;
 		box.id = String(window.renderID++);
 		box.className = "uikitBox";
 
 		this.#window.body.appendChild(box);
 
-		if (box == null) throw new UIError("uikit element has disappeared in processing");
+		if (box == null)
+			throw new UIError("uikit element has disappeared in processing");
 
 		return box;
 	};

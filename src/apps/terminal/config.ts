@@ -4,7 +4,8 @@ const manifest: ApplicationManifest = {
 	category: "Productivity",
 	author: "ThatBeaverDev",
 	version: 1,
-	icon: "square-terminal"
+	//icon: "square-terminal"
+	icon: "./resources/icon.svg"
 };
 
 export default manifest;

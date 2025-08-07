@@ -3,7 +3,11 @@ import * as executables from "./executables.js";
 
 import fs from "../io/fs.js";
 import * as uikit from "../lib/uiKit/uiKit.js";
-import { focus, GraphicalWindow, windows } from "../windows/windows.js";
+import {
+	focusedWindow,
+	getWindowOfId,
+	GraphicalWindow
+} from "../windows/windows.js";
 
 import { blobify, translateAllBlobURIsToDirectories } from "../lib/blobify.js";
 import { AppInitialisationError, ImportError } from "../errors.js";
@@ -16,7 +20,11 @@ import { debug } from "../lib/logging.js";
 
 const name = "/System/apps.js";
 
-export function AppsTimeStamp(label: string, start: DOMHighResTimeStamp, colour: DevToolsColor = "secondary") {
+export function AppsTimeStamp(
+	label: string,
+	start: DOMHighResTimeStamp,
+	colour: DevToolsColor = "secondary"
+) {
 	performanceLog(label, start, "AppsRuntime", colour);
 }
 
@@ -79,19 +87,28 @@ export async function execute(
 ) {
 	const start = performance.now();
 
+	console.debug("Executing program from " + directory);
+
 	/**
 	 * Reads a file from an application package
 	 * @param dir - Relative directory of the file from the app's base
 	 * @param throwIfEmpty - Whether to throw an error if the file is empty.
 	 * @returns Contents of the file OR an error if the file isn't present and throwIfEmpty is true (default)
 	 */
-	const get = async (dir: string, throwIfEmpty: Boolean = true) => {
+	const get = async (
+		dir: string,
+		throwIfEmpty: Boolean = true
+	): Promise<string> => {
 		const rel = fs.resolve(directory, dir);
 
 		const content = await fs.readFile(rel);
 
-		if (throwIfEmpty && content == undefined) {
-			throw new Error(rel + " is empty!");
+		if (content == undefined) {
+			if (throwIfEmpty) {
+				throw new Error(rel + " is empty!");
+			} else {
+				return "";
+			}
 		}
 
 		return content;
@@ -117,7 +134,8 @@ export async function execute(
 		}
 	}
 
-	if (executableDirectory == undefined) throw new Error("No Executable found.");
+	if (executableDirectory == undefined)
+		throw new Error("No Executable found.");
 
 	let data: string = "";
 
@@ -128,17 +146,23 @@ export async function execute(
 
 				if (content == undefined) {
 					throw new AppInitialisationError(
-						fs.resolve(directory, "tcpsys/app.[js / sjs]") + " is empty and cannot be executed"
+						fs.resolve(directory, "tcpsys/app.[js / sjs]") +
+							" is empty and cannot be executed"
 					);
 				}
 
-				const importsResolved = await rewriteImportsAsync(content, executableDirectory);
+				const importsResolved = await rewriteImportsAsync(
+					content,
+					executableDirectory
+				);
 
 				data = importsResolved;
 			}
 			break;
 		default:
-			throw new AppInitialisationError("Type '" + type + "' is not executable.");
+			throw new AppInitialisationError(
+				"Type '" + type + "' is not executable."
+			);
 	}
 
 	// create a blob of the content
@@ -188,7 +212,12 @@ export async function showPrompt(
 		throw new Error("Popupapp at " + popupDirectory + " does not exist?");
 	} else {
 		const pipe: any[] = [];
-		await execute(popupDirectory, [type, title, title, description, buttons, pipe], "guest", "");
+		await execute(
+			popupDirectory,
+			[type, title, title, description, buttons, pipe],
+			"guest",
+			""
+		);
 
 		if (buttons !== undefined) {
 			return await new Promise((resolve: Function) => {
@@ -241,7 +270,10 @@ export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
 	}
 
 	for (const process of processes) {
-		if (process.children instanceof Array) process.children = process.children.filter((child) => child !== proc);
+		if (process.children instanceof Array)
+			process.children = process.children.filter(
+				(child) => child !== proc
+			);
 	}
 
 	if (proc.data == null) {
@@ -254,7 +286,10 @@ export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
 	AppsTimeStamp(`Terminate process ${procDir}`, start);
 }
 
-const activeIterators = new WeakMap<Process, Iterator<any> | AsyncIterator<any>>();
+const activeIterators = new WeakMap<
+	Process,
+	Iterator<any> | AsyncIterator<any>
+>();
 
 export function appName(proc: executables.Framework) {
 	// @ts-expect-error
@@ -263,14 +298,19 @@ export function appName(proc: executables.Framework) {
 	// @ts-expect-error
 	const windowName = proc?.renderer?.window?.name;
 
-	if (windowName !== undefined && windowName !== proc.directory) return windowName;
+	if (windowName !== undefined && windowName !== proc.directory)
+		return windowName;
 
 	const constructorName = Object.getPrototypeOf(proc).constructor.name;
 
 	return constructorName;
 }
 
-async function procExec(proc: Process, subset: "init" | "frame" | "terminate" = "frame", catchError: boolean = true) {
+async function procExec(
+	proc: Process,
+	subset: "init" | "frame" | "terminate" = "frame",
+	catchError: boolean = true
+) {
 	if (proc.executing) return;
 
 	try {
@@ -330,46 +370,58 @@ async function procExec(proc: Process, subset: "init" | "frame" | "terminate" = 
 document.addEventListener("keydown", (event) => {
 	//event.preventDefault()
 
-	const proc = windows[focus]?.Application;
-	if (proc == undefined) return;
+	const keylisteners = new Set([
+		getWindowOfId(focusedWindow)?.Application,
+		...processes.filter((proc) => proc.env.hasPermission("keylogger"))
+	]);
 
-	const fnc = proc.keydown;
+	const procKeydown = (proc?: Process) => {
+		if (proc == undefined) return;
 
-	if (typeof fnc == "function") {
-		fnc.call(proc, event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
-	}
+		const fnc = proc.keydown;
 
-	for (const proc of processes) {
-		if (proc instanceof BackgroundProcess) {
-			const fnc = proc.keydown;
-
-			if (typeof fnc == "function") {
-				fnc.call(proc, event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
-			}
+		if (typeof fnc == "function") {
+			fnc.call(
+				proc,
+				event.code,
+				event.metaKey,
+				event.altKey,
+				event.ctrlKey,
+				event.shiftKey,
+				event.repeat
+			);
 		}
-	}
+	};
+
+	keylisteners.forEach((item) => procKeydown(item));
 });
 document.addEventListener("keyup", (event) => {
 	//event.preventDefault()
 
-	const proc = windows[focus]?.Application;
-	if (proc == undefined) return;
+	const keylisteners = [
+		getWindowOfId(focusedWindow)?.Application,
+		...processes.filter((proc) => proc.env.hasPermission("keylogger"))
+	];
 
-	const fnc = proc.keyup;
+	const procKeyup = (proc?: Process) => {
+		if (proc == undefined) return;
 
-	if (typeof fnc == "function") {
-		fnc.call(proc, event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
-	}
+		const fnc = proc.keyup;
 
-	for (const proc of processes) {
-		if (proc instanceof BackgroundProcess) {
-			const fnc = proc.keyup;
-
-			if (typeof fnc == "function") {
-				fnc.call(proc, event.code, event.metaKey, event.altKey, event.ctrlKey, event.shiftKey, event.repeat);
-			}
+		if (typeof fnc == "function") {
+			fnc.call(
+				proc,
+				event.code,
+				event.metaKey,
+				event.altKey,
+				event.ctrlKey,
+				event.shiftKey,
+				event.repeat
+			);
 		}
-	}
+	};
+
+	keylisteners.forEach((item) => procKeyup(item));
 });
 
 export function run() {
@@ -390,7 +442,13 @@ export async function init() {
 	const startEnvInit = performance.now();
 	debug(name, "Apps initialising.");
 
-	window.env = new ApplicationAuthorisationAPI("/System/globalPermissionsHost.js", "guest", "", undefined, true);
+	window.env = new ApplicationAuthorisationAPI(
+		"/System/globalPermissionsHost.js",
+		"guest",
+		"",
+		undefined,
+		true
+	);
 	(window as any).env = window.env;
 
 	debug(name, "Apps initialised.");

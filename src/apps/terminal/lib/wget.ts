@@ -2,7 +2,11 @@ import TerminalAlias from "../../../lib/terminalAlias";
 
 const mime = await env.include("/System/CoreLibraries/mime.js");
 
-export default async function wget(parent: TerminalAlias, url: string, output: string) {
+export default async function wget(
+	parent: TerminalAlias,
+	url: string,
+	output: string
+) {
 	const out = output || env.fs.relative(parent.path, url.textAfterAll("/"));
 
 	const textCharacters: string[] =

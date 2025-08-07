@@ -20,10 +20,26 @@ function initIcon(name: string) {
 
 	div.appendChild(icon);
 
-	cache[name] = icon;
+	cache[name] = icon.cloneNode(true) as HTMLImageElement;
 }
 
-export function getIcon(name: string): HTMLImageElement {
+const iconsDirectory = "/System/CoreAssets/Vectors/icons";
+let iconsList: string[] = [];
+setInterval(async () => {
+	const result = await fs.readdir(iconsDirectory);
+
+	if (result !== undefined) {
+		iconsList = result;
+	}
+}, 1000);
+
+export function getIcon(providedName: string): HTMLImageElement {
+	let name = String(providedName);
+	const existsLocally = iconsList.includes(name + ".svg");
+	if (existsLocally) {
+		name = fs.resolve(iconsDirectory, name + ".svg");
+	}
+
 	const id = String(window.renderID++);
 	const icon = document.createElement("img");
 
@@ -46,7 +62,8 @@ export function getIcon(name: string): HTMLImageElement {
 			return clone;
 		}
 	} else {
-		// cached
+		// lucide
+		console.warn("Geticon for lucide icon " + name);
 		if (!cache[name]) initIcon(name);
 		const clone = cache[name].cloneNode(true) as HTMLImageElement;
 		clone.id = id;
@@ -58,14 +75,17 @@ export function getIcon(name: string): HTMLImageElement {
 }
 
 async function applySourceAndCache(icon: HTMLImageElement, directory: string) {
+	const clone = icon.cloneNode(true) as HTMLImageElement;
+
 	const content = await fs.readFile(directory);
 	if (content == undefined) {
 		console.warn(`Failed to load icon from ${directory}:`, content);
 		icon.alt = "[!]";
+		clone.alt = "[!]";
 
 		// cache a clone once loaded.
-		icon.addEventListener("load", () => {
-			cache[directory] = icon.cloneNode(true) as HTMLImageElement;
+		clone.addEventListener("load", () => {
+			cache[directory] = clone.cloneNode(true) as HTMLImageElement;
 		});
 
 		return;
@@ -73,6 +93,7 @@ async function applySourceAndCache(icon: HTMLImageElement, directory: string) {
 
 	if (directory.startsWith("http://") || directory.startsWith("https://")) {
 		icon.src = directory;
+		clone.src = directory;
 		return;
 	}
 
@@ -81,14 +102,16 @@ async function applySourceAndCache(icon: HTMLImageElement, directory: string) {
 		case "svg": {
 			const base64 = btoa(content);
 			icon.src = `data:image/svg+xml;base64,${base64}`;
+			clone.src = `data:image/svg+xml;base64,${base64}`;
 			break;
 		}
 		default:
 			icon.src = content; // fallback to text
+			clone.src = content;
 	}
 
-	// cache a clone once loaded.
-	icon.addEventListener("load", () => {
-		cache[directory] = icon.cloneNode(true) as HTMLImageElement;
+	// cache a clone once loaded. // this was the site of a bug, wherein uiKit modified the icon it requested BEFORE it was cached. the uiKit changes were cached and applied elsewhere. 🤦 (solved by caching the icon before we wait for the readFile.)
+	clone.addEventListener("load", () => {
+		cache[directory] = clone.cloneNode(true) as HTMLImageElement;
 	});
 }

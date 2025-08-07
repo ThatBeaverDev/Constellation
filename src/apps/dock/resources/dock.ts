@@ -3,7 +3,7 @@ import { ApplicationAuthorisationAPI } from "../../../security/env";
 import { WindowAlias } from "../../../security/definitions";
 import dockAndDesktop from "../tcpsys/app";
 // @ts-expect-error
-import { getAppConfig } from "/System/CoreLibraries/pathinf.js";
+import { getAppConfig, pathIcon } from "/System/CoreLibraries/pathinf.js";
 
 export interface dockConfig {
 	pins: string[];
@@ -12,6 +12,7 @@ interface Program {
 	windows: WindowAlias[];
 	isPinned: boolean;
 	manifest: ApplicationManifest;
+	icon: string;
 }
 
 export default class dock {
@@ -77,7 +78,8 @@ export default class dock {
 		programs[this.parent.directory] = {
 			windows: [],
 			isPinned: true,
-			manifest: await getAppConfig(this.parent.directory)
+			manifest: await getAppConfig(this.parent.directory),
+			icon: await pathIcon(this.parent.directory)
 		};
 
 		if (this.pinsInfo !== undefined) {
@@ -88,7 +90,8 @@ export default class dock {
 					programs[progDir] = {
 						windows: [],
 						isPinned: true,
-						manifest: await getAppConfig(progDir)
+						manifest: await getAppConfig(progDir),
+						icon: await pathIcon(progDir)
 					};
 				}
 			}
@@ -102,7 +105,8 @@ export default class dock {
 				programs[winDir] = {
 					windows: [],
 					isPinned: this.config.pins.includes(winDir),
-					manifest: await getAppConfig(winDir)
+					manifest: await getAppConfig(winDir),
+					icon: await pathIcon(winDir)
 				};
 			}
 
@@ -128,11 +132,12 @@ export default class dock {
 		const iconScale = iconWidth / 24;
 
 		const iconGap = iconWidth + this.dockPadding;
-		const targetWidth = iconGap * Object.keys(this.programs).length + this.dockPadding;
+		const targetWidth =
+			iconGap * Object.keys(this.programs).length + this.dockPadding;
 
 		this.width = Math.round(this.width + (targetWidth - this.width) / 5);
 
-		let scale = 1;
+		let scale = 1.25;
 		if (this.width > this.renderer.windowWidth) {
 			scale = this.renderer.windowWidth / this.width;
 		}
@@ -141,7 +146,8 @@ export default class dock {
 		const dockLeft = (this.renderer.windowWidth - this.width * scale) / 2;
 		const dockPadding = this.dockPadding * scale;
 		let x = dockLeft + this.dockPadding * scale;
-		let y = this.renderer.windowHeight - this.dockHeight * scale + dockPadding;
+		let y =
+			this.renderer.windowHeight - this.dockHeight * scale + dockPadding;
 
 		// render back
 		this.renderer.box(
@@ -150,30 +156,47 @@ export default class dock {
 			this.width * scale,
 			this.dockHeight * scale,
 			{
-				background: "var(--main-theme-secondary)",
+				background:
+					"rgba(var(--main-theme-primary-val), var(--main-theme-primary-val), var(--main-theme-primary-val), 0.25)",
+				blur: 10,
 				borderRadius: "10"
 			}
 		);
 
 		const drawIcon = (directory: string, program: Program) => {
 			const name = program.manifest.name;
-			const icon = program.manifest.icon;
+			const icon = program.icon;
 
-			const iconID = this.renderer.icon(x, y, program.manifest.icon, iconScale * scale);
+			const iconID = this.renderer.icon(
+				x,
+				y,
+				icon,
+				iconScale * scale,
+				undefined,
+				{ noProcess: true }
+			);
 
 			if (program.windows.length !== 0) {
 				// the app is running.
 
-				this.renderer.box(x + 0.5 * iconWidth - 2.5, y + iconWidth + 3, 5, 5, {
-					borderRadius: 100,
-					background: "var(--main-theme-inverse)"
-				});
+				this.renderer.box(
+					x + 0.5 * iconWidth,
+					y + iconWidth + 3,
+					5,
+					5,
+					{
+						borderRadius: 100,
+						background: "white"
+					}
+				);
 			}
 
 			let win: WindowAlias | undefined;
 			if (program.windows.length == 1) {
 				win = program.windows[0];
 			}
+
+			x += iconGap * scale;
 
 			this.renderer.onClick(
 				iconID,
@@ -192,7 +215,9 @@ export default class dock {
 							for (const i in program.windows) {
 								const win = program.windows[i];
 
-								contextMenuItems[`${win.iconName}-:-${win.name};${i}`] = () => {
+								contextMenuItems[
+									`${win.iconName}-:-${win.name};${i}`
+								] = () => {
 									if (this.winAPI == undefined) return;
 
 									if (win.minimised) {
@@ -205,7 +230,12 @@ export default class dock {
 								};
 							}
 
-							this.renderer.setContextMenu(left, top, `Windows of ${name}`, contextMenuItems);
+							this.renderer.setContextMenu(
+								left,
+								top,
+								`Windows of ${name}`,
+								contextMenuItems
+							);
 						}
 					} else {
 						// just focus the one window we have.
@@ -224,13 +254,16 @@ export default class dock {
 					// menu items
 					let contextMenuItems: Record<string, Function> = {
 						"folder-open-:-Show in Finder": () =>
-							this.env.exec("/Applications/Finder.appl", [env.fs.resolve(directory, "..")])
+							this.env.exec("/Applications/Finder.appl", [
+								env.fs.resolve(directory, "..")
+							])
 					};
 
 					if (win !== undefined) {
 						contextMenuItems = {
 							...contextMenuItems,
-							"app-window-mac-:-New Window": () => this.env.exec(directory),
+							"app-window-mac-:-New Window": () =>
+								this.env.exec(directory),
 							"minimize-2-:-Minimise": () => win.minimise(),
 							"expand-:-Restore": () => win.unminimise(),
 							"x-:-Close": () => win.close()
@@ -239,12 +272,14 @@ export default class dock {
 						if (program.windows.length == 0) {
 							contextMenuItems = {
 								...contextMenuItems,
-								"app-window-mac-:-Open": () => this.env.exec(directory)
+								"app-window-mac-:-Open": () =>
+									this.env.exec(directory)
 							};
 						} else {
 							contextMenuItems = {
 								...contextMenuItems,
-								"app-window-mac-:-New Window": () => this.env.exec(directory),
+								"app-window-mac-:-New Window": () =>
+									this.env.exec(directory),
 								"minimize-2-:-Minimise All": () => {
 									for (const win of program.windows) {
 										win.minimise();
@@ -270,13 +305,16 @@ export default class dock {
 					};
 
 					// show menu
-					this.renderer.setContextMenu(left, top, name, contextMenuItems);
+					this.renderer.setContextMenu(
+						left,
+						top,
+						name,
+						contextMenuItems
+					);
 
 					this.refresh();
 				}
 			);
-
-			x += iconGap * scale;
 		};
 
 		for (const directory in this.programs) {
