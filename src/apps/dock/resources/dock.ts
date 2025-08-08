@@ -181,7 +181,7 @@ export default class dock {
 
 				this.renderer.box(
 					x + 0.5 * iconWidth,
-					y + iconWidth + 3,
+					y + iconWidth + 10,
 					5,
 					5,
 					{
