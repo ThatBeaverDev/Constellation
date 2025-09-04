@@ -42,9 +42,9 @@ export const files: Record<
 	"/logos/Web.svg": "/System/CoreAssets/Logos/Constellation-Web.svg",
 
 	// init system
-	"/build/apps/com.constellation.launchd.idx": {
+	"/build/apps/com.constellation.CoreExecutable.idx": {
 		type: "jsonFilesIndex",
-		directory: "/System/CoreExecutables/launchd.backgr"
+		directory: "/System/CoreExecutables/CoreExecutable.backgr"
 	},
 
 	// terminal

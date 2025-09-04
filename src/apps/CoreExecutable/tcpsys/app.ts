@@ -1,6 +1,6 @@
 import { IPCMessage } from "../../../runtime/messages";
 
-export default class launch extends BackgroundProcess {
+export default class CoreExecutable extends BackgroundProcess {
 	windows?: typeof import("../../../windows/windows");
 	loginCompleted: boolean = false;
 	loginDirectory: string =
