@@ -8,21 +8,13 @@ export default class launch extends BackgroundProcess {
 	onLogin = [];
 
 	async init() {
-		this.env.setDirectoryPermission(
-			"/System/CoreExecutables/Dock.appl",
-			"windows",
-			true
-		);
-		this.env.setDirectoryPermission(
-			"/System/CoreExecutables/Dock.appl",
-			"keylogger",
-			true
-		);
-		this.env.setDirectoryPermission(
-			"/System/CoreExecutables/systemLoginInterface.appl",
-			"users",
-			true
-		);
+		const dockDirectory = "/System/CoreExecutables/Dock.appl";
+		const loginInterfaceDirectory =
+			"/System/CoreExecutables/systemLoginInterface.appl";
+
+		this.env.setDirectoryPermission(dockDirectory, "windows", true);
+		this.env.setDirectoryPermission(dockDirectory, "keylogger", true);
+		this.env.setDirectoryPermission(loginInterfaceDirectory, "users", true);
 
 		this.windows = await this.env.include("/System/windows.js");
 
@@ -39,6 +31,13 @@ export default class launch extends BackgroundProcess {
 
 	async runPostinstaller() {
 		// TODO: Graphical Postinstall
+
+		const oobe = await this.env.exec(
+			"/System/CoreExecutables/OOBEInstaller.appl"
+		);
+		console.log(oobe);
+		const result = await oobe.promise;
+		console.log(result);
 
 		// remove postinstall indicator
 		const params = new URL(window.location.href).searchParams;
@@ -109,12 +108,13 @@ export default class launch extends BackgroundProcess {
 	onmessage(msg: IPCMessage) {
 		const intent = msg.intent;
 		const origin = msg.originDirectory;
+		const keyboardAPI = "/System/io/keyboard.js";
 
 		if (this.windows == undefined) return;
 		if (this.loginCompleted == false) return;
 
 		switch (origin) {
-			case "/System/keyboardShortcuts.js":
+			case keyboardAPI:
 				switch (intent) {
 					// windows shortcuts
 					case "keyboardShortcutTrigger-Close Window": {
