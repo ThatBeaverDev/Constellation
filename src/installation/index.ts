@@ -6,9 +6,9 @@ import {
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
 import { preinstall } from "./fs.js";
 import devinstall from "./devinstall.js";
-import { newUser, setUserKey } from "../security/users.js";
+import ConstellationKernel from "../main.js";
 
-export async function install() {
+export async function install(ConstellationKernel: ConstellationKernel) {
 	const start = performance.now();
 	setStatus(`Installation: Initialising`);
 
@@ -21,23 +21,23 @@ export async function install() {
 
 	const initialisationStart = performance.now();
 
-	await newUser("guest", "", {
+	await ConstellationKernel.security.users.newUser("guest", "", {
 		fullName: "Guest",
 		allowGraphicalLogin: "true"
 	});
-	await newUser("admin", "administrator", {
+	await ConstellationKernel.security.users.newUser("admin", "administrator", {
 		profilePicture: "shield-user",
 		fullName: "Admin",
 		allowGraphicalLogin: "true"
 	});
-	await newUser("system", systemPassword, {
+	await ConstellationKernel.security.users.newUser("system", systemPassword, {
 		profilePicture: "/System/CoreAssets/Logos/Constellation-lucide.svg",
 		directory: "/System/user",
 		operator: "true"
 	});
 
 	if (isDevmode) {
-		await devinstall();
+		await devinstall(ConstellationKernel);
 	} else {
 		// TODO: download n execute the installer
 	}

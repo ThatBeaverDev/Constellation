@@ -52,14 +52,9 @@ export async function writeFiles() {
 
 	// wait for it all to download and become text simultaneously
 	const downloadedContents: Record<string, string> = {};
+
 	for (const location in files) {
 		const start = performance.now();
-		const parent = location.textBeforeLast("/");
-		const list = fs.readdir(parent);
-		if (list == undefined)
-			throw new Error(
-				`Parent directory of ${location} (${parent}) doesn't exist.`
-			);
 
 		const response = await downloadingContents[location];
 
@@ -80,19 +75,17 @@ export async function writeFiles() {
 	const writingWaitlist: Promise<any>[] = [];
 
 	for (const location in files) {
+		const obj = files[location];
 		let directory;
 		let type;
-		switch (typeof files[location]) {
-			case "string":
-				directory = files[location];
-				type = "text";
-				break;
-			case "object":
-				directory = files[location].directory;
-				type = files[location].type;
-				break;
-			default:
-				throw new InstallationError("Unknown typeof item: " + location);
+		if (typeof obj == "string") {
+			directory = obj;
+			type = "text";
+		} else if (typeof obj == "object") {
+			directory = obj.directory;
+			type = obj.type;
+		} else {
+			throw new InstallationError("Unknown typeof item: " + location);
 		}
 
 		let content;

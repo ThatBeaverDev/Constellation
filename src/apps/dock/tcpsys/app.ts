@@ -124,6 +124,8 @@ export default class dockAndDesktop extends Application {
 		this.renderer.commit();
 	}
 
+	dockFocus: boolean = false;
+
 	keydown(
 		code: string,
 		metaKey: boolean,
@@ -132,25 +134,24 @@ export default class dockAndDesktop extends Application {
 		shiftKey: boolean,
 		repeat: boolean
 	): void | undefined | null {
-		switch (code) {
-			case "KeyZ":
-				if (altKey) {
+		// dock focus code
+		if (this.dockFocus && code !== "KeyD") {
+			this.dockFocus = false;
+		}
+
+		if (altKey) {
+			switch (code) {
+				case "KeyZ":
 					this.search();
-				}
-				break;
-			case "KeyX":
-				if (altKey) {
+					break;
+				case "KeyX":
 					this.env.exec("/System/CoreExecutables/Library.appl");
-				}
-				break;
-			case "KeyL":
-				if (altKey) {
+					break;
+				case "KeyL":
 					this.exit();
-				}
-				break;
-			case "Enter":
-				if (this == undefined) return;
-				if (altKey) {
+					break;
+				case "Enter":
+					if (this == undefined) return;
 					const focusedWindow = this.env.windows.getFocus();
 
 					if (focusedWindow == undefined) return;
@@ -164,8 +165,14 @@ export default class dockAndDesktop extends Application {
 							this.dock.dockHeight
 					);
 					focusedWindow.move(0, this.menubar.barHeight);
-				}
-				break;
+					break;
+				case "KeyD":
+					if (altKey) {
+						this.dockFocus = true;
+						console.log("focus");
+					}
+					break;
+			}
 		}
 	}
 

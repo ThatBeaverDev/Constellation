@@ -1,5 +1,4 @@
 import { Renderer } from "../../../lib/uiKit/uiKit";
-import { ApplicationAuthorisationAPI } from "../../../security/env";
 import { WindowAlias } from "../../../security/definitions";
 import dockAndDesktop from "../tcpsys/app";
 // @ts-expect-error
@@ -18,7 +17,7 @@ interface Program {
 export default class dock {
 	readonly parent: dockAndDesktop;
 	readonly renderer: Renderer;
-	readonly env: ApplicationAuthorisationAPI;
+	readonly env: dockAndDesktop["env"];
 	winAPI?: typeof import("../../../windows/windows");
 
 	dockHeight: number = 50;

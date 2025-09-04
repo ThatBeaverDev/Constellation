@@ -1,11 +1,10 @@
 import { Renderer } from "../../../lib/uiKit/uiKit";
-import { ApplicationAuthorisationAPI } from "../../../security/env";
 import dockAndDesktop from "../tcpsys/app";
 
 export default class menubar {
 	parent: dockAndDesktop;
 	renderer: Renderer;
-	env: ApplicationAuthorisationAPI;
+	env: dockAndDesktop["env"];
 
 	barHeight: number = 35;
 

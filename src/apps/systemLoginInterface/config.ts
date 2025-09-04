@@ -5,7 +5,8 @@ const manifest = {
 	author: "ThatBeaverDev",
 	version: 1,
 	icon: "users-round",
-	userspace: false
+	userspace: false,
+	allowMultipleInstances: false
 };
 
 export default manifest;

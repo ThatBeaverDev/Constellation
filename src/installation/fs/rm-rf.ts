@@ -71,7 +71,7 @@ import { installationTimestamp } from "../index.js";
 //	installationTimestamp("Wipe Filesystem", start, "secondary");
 //}
 
-// or, you know, we COULD just delete the filesystem. 🤦
+// or, you know, we COULD just delete the filesystem properly. 🤦
 
 export async function rm_rf() {
 	const databases: IDBDatabaseInfo[] = await window.indexedDB.databases();

@@ -16,7 +16,10 @@ export const folders: string[] = [
 	"/System/CoreLibraries/mimeFiles"
 ];
 
-export const files: any = {
+export const files: Record<
+	string,
+	string | { type: "jsonFilesIndex" | "binary"; directory: string }
+> = {
 	// finder app
 	"/build/apps/com.constellation.finder.idx": {
 		type: "jsonFilesIndex",
@@ -119,7 +122,7 @@ if (isAppdev) {
 /**
  * Options for the user
  */
-export interface options {
+export interface PostInstallOptions {
 	user: {
 		username: string;
 		displayName: string;
@@ -130,7 +133,7 @@ export interface options {
 	};
 }
 
-export const developmentOptions: options = {
+export const developmentOptions: PostInstallOptions = {
 	user: {
 		username: "dev",
 		displayName: "Developer",

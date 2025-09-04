@@ -141,8 +141,6 @@ export default class systemLoginInterface extends Application {
 		if (change.ok) {
 			const result = { username: user, password: password };
 
-			console.log(result);
-
 			this.exit(result);
 			return;
 		} else {

@@ -1,9 +1,9 @@
 import { userDirectories } from "../constellation.config.js";
-import fs from "../io/fs.js";
+import { FilesystemAPI } from "../io/fs.js";
+import { resolveDirectory } from "../io/fspath.js";
 import { sha512 } from "../lib/crypto.js";
 import { debug, log } from "../lib/logging.js";
 import { securityTimestamp } from "./definitions.js";
-import { DirectoryPermissionStats } from "./permissions.js";
 
 const start = performance.now();
 const name = "/System/users.js";
@@ -22,123 +22,132 @@ export type User = {
 	allowGraphicalLogin: string; // boolean
 };
 
-export const users: Record<User["name"], User> = {};
 export const defaultUser = "guest";
 
-/**
- * Initialises the user system, such as loading users from the user file and creating guest and sys if needed
- */
-export async function init() {
-	debug(name, "Users initialising.");
+const usersParentFolder = "/Users";
 
-	// check if there's already a permissions file
-	const permissionsFileExists = (await fs.stat(usersDirectory)) !== undefined;
-	// if the permissions file exists, use it, else use {}
-	const fileData = permissionsFileExists
-		? JSON.parse((await fs.readFile(usersDirectory)) || "{}")
-		: {};
+export default class Users {
+	usersStorage: Record<User["name"], User> = {};
 
-	// put data into the permissions storage variable
-	Object.assign(users, fileData);
+	constructor(public fs: FilesystemAPI) {}
 
-	debug(name, "Users initialised.");
-}
+	/**
+	 * Initialises the user system, such as loading users from the user file and creating guest and sys if needed
+	 */
+	async init() {
+		debug(name, "Users initialising.");
 
-/**
- * Updates the user file
- */
-async function onUsersUpdate() {
-	await fs.writeFile(usersDirectory, JSON.stringify(users));
-}
+		// check if there's already a permissions file
+		const permissionsFileExists =
+			(await this.fs.stat(usersDirectory)) !== undefined;
+		// if the permissions file exists, use it, else use {}
+		const fileData = permissionsFileExists
+			? JSON.parse((await this.fs.readFile(usersDirectory)) || "{}")
+			: {};
 
-/**
- * Returns a new user. Doesn't place it in the user list.
- * @param {string} username - the user's name
- * @param {string} password - the user's password
- * @returns A new user
- */
-async function createUser(username: string, password: string): Promise<User> {
-	return {
-		name: username,
-		fullName: username,
-		directory: "/Users/" + username,
-		password: await sha512(password),
-		profilePicture: "circle-user-round",
-		id: Number(Date.now()) + "-" + crypto.randomUUID(),
-		lastLogin: String(Date.now()),
-		operator: "false",
-		allowGraphicalLogin: "false"
-	};
-}
+		// put data into the permissions storage variable
+		Object.assign(this.usersStorage, fileData);
 
-export function getUser(username: string): User {
-	if (users[username] == undefined) {
-		throw new Error("User by name " + username + " does not exist.");
-	}
-	return users[username];
-}
-
-export function setUserKey(username: string, key: keyof User, value: string) {
-	const usr = users[username];
-
-	if (usr == undefined) {
-		throw new Error(`User ${username} does not exist.`);
+		debug(name, "Users initialised.");
 	}
 
-	usr[key] = value;
-	void onUsersUpdate();
-}
+	/**
+	 * Updates the user file
+	 */
+	async onUsersUpdate() {
+		await this.fs.writeFile(usersDirectory, JSON.stringify(this.usersStorage));
+	}
 
-export async function newUser(
-	username: string,
-	password: string,
-	extraOptions?: Partial<Record<keyof User, string>>
-) {
-	log(name, `Creating user by name ${username}.`);
-	const user = await createUser(username, password);
+	async validatePassword(username: string, password: string) {
+		const targetUser = this.usersStorage[username];
 
-	if (extraOptions !== undefined) {
-		for (const i in extraOptions) {
-			const key = i as keyof User;
+		if (targetUser == undefined) {
+			throw new Error("User by name " + username + " does not exist.");
+		}
 
-			if (extraOptions[key] !== undefined) user[key] = extraOptions[key];
+		const targetPassword = targetUser.password;
+		const passhash = await sha512(password);
+
+		if (targetPassword == passhash) {
+			// all good!
+			return true;
+		} else {
+			// WRONG.
+			throw new Error("Failure to change user: password is incorrect.");
 		}
 	}
 
-	users[username] = user;
-
-	// make the user's home folder
-	await fs.mkdir(user.directory);
-
-	for (const i in userDirectories) {
-		// get absolute path
-		const directory = fs.resolve(user.directory, userDirectories[i]);
-
-		// create directory
-		await fs.mkdir(directory);
-
-		console.log(`Created directory ${directory} for user ${username}`);
+	/**
+	 * Returns a new user. Doesn't place it in the user list.
+	 * @param {string} username - the user's name
+	 * @param {string} password - the user's password
+	 * @returns A new user
+	 */
+	async createUser(username: string, password: string): Promise<User> {
+		return {
+			name: username,
+			fullName: username,
+			directory: resolveDirectory(usersParentFolder, username),
+			password: await sha512(password),
+			profilePicture: "circle-user-round",
+			id: Number(Date.now()) + "-" + crypto.randomUUID(),
+			lastLogin: String(Date.now()),
+			operator: "false",
+			allowGraphicalLogin: "false"
+		};
 	}
 
-	void (await onUsersUpdate());
-}
-
-export async function validatePassword(username: string, password: string) {
-	const targetUser = users[username];
-
-	if (targetUser == undefined) {
-		throw new Error("User by name " + username + " does not exist.");
+	getUser(username: string): User {
+		if (this.usersStorage[username] == undefined) {
+			throw new Error("User by name " + username + " does not exist.");
+		}
+		return this.usersStorage[username];
 	}
 
-	const targetPassword = targetUser.password;
-	const passhash = await sha512(password);
+	setUserKey(username: string, key: keyof User, value: string) {
+		const usr = this.usersStorage[username];
 
-	if (targetPassword == passhash) {
-		// all good!
-		return true;
-	} else {
-		// WRONG.
-		throw new Error("Failure to change user: password is incorrect.");
+		if (usr == undefined) {
+			throw new Error(`User ${username} does not exist.`);
+		}
+
+		usr[key] = value;
+		void this.onUsersUpdate();
+	}
+
+	async newUser(
+		username: string,
+		password: string,
+		extraOptions?: Partial<Record<keyof User, string>>
+	) {
+		log(name, `Creating user by name ${username}.`);
+		const user = await this.createUser(username, password);
+
+		if (extraOptions !== undefined) {
+			for (const i in extraOptions) {
+				const key = i as keyof User;
+
+				if (extraOptions[key] !== undefined)
+					user[key] = extraOptions[key];
+			}
+		}
+
+		this.usersStorage[username] = user;
+
+		// make the user's home folder
+		await this.fs.mkdir(user.directory);
+
+		for (const i in userDirectories) {
+			// get absolute path
+			const directory = this.fs.resolve(user.directory, userDirectories[i]);
+
+			// create directory
+			await this.fs.mkdir(directory);
+
+			console.log(`Created directory ${directory} for user ${username}`);
+		}
+
+		void (await this.onUsersUpdate());
 	}
 }
 

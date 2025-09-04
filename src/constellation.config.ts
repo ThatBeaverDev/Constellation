@@ -5,8 +5,10 @@ const baseWallpaperURL = isLocalhost
 	? "/wallpapers/Originals/"
 	: "/wallpapers/";
 
+const path = "/System/constellation.config.js";
+
 if (isLocalhost) {
-	log("localhost detected - using 4K wallpapers.");
+	log(path, "localhost detected - using 4K wallpapers.");
 }
 
 export const name = "Constellation";
@@ -44,9 +46,9 @@ export function setStatus(
 	state: "working" | "error" = "working"
 ) {
 	if (state == "error") {
-		error(name, text);
+		error(path, text);
 	} else {
-		log(name, text);
+		log(path, text);
 	}
 
 	status = String(text);
