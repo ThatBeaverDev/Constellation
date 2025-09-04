@@ -1,6 +1,6 @@
 import * as conf from "../constellation.config.js";
-import realFS from "../io/fs.js";
-import { appName, execute, showPrompt } from "../runtime/runtime.js";
+import realFS, { FilesystemAPI } from "../io/fs.js";
+import { appName } from "../runtime/runtime.js";
 import { PermissionsError } from "../errors.js";
 import {
 	allWindows,
@@ -8,15 +8,6 @@ import {
 	getWindowOfId,
 	GraphicalWindow
 } from "../windows/windows.js";
-import {
-	DirectoryPermissionStats,
-	getDirectoryPermissions,
-	getFilesDomainOfDirectory,
-	Permission,
-	setDirectoryPermission,
-	permissionsMetadata,
-	checkDirectoryPermission
-} from "../security/permissions.js";
 import { Framework, Process } from "../runtime/executables.js";
 import Shell from "../lib/shell.js";
 import { include } from "../runtime/importRewrites.js";
@@ -27,17 +18,56 @@ import {
 	UserAlias,
 	WindowAlias
 } from "./definitions.js";
-import { User, users, validatePassword } from "./users.js";
+import Users, { User } from "./users.js";
 import { debug, error, log, warn } from "../lib/logging.js";
 import { FS, Stats } from "../io/browserfs.js";
+import {
+	DirectoryPermissionStats,
+	Permission,
+	Permissions
+} from "./permissions.js";
+import ConstellationKernel from "../main.js";
 
 const start = performance.now();
 const name = "/System/security/env.js";
 
-export const associations: any = {};
+const globalPermissionsHost = "/System/globalPermissionsHost.js";
+
+securityTimestamp("Startup /src/security/env.ts", start);
+
+export class EnvironmentCreator {
+	associations: any = {};
+
+	constructor(
+		public filesystem: FilesystemAPI,
+		public users: Users,
+		public permissions: Permissions,
+		public ConstellationKernel: ConstellationKernel
+	) {}
+
+	newEnv(
+		directory: string,
+		user: string,
+		password: string,
+		process?: Framework,
+		isGlobal: boolean = false
+	) {
+		return new ApplicationAuthorisationAPI(
+			this,
+			directory,
+			user,
+			password,
+			process,
+			isGlobal
+		);
+	}
+}
 
 export class ApplicationAuthorisationAPI {
+	#environmentCreator: EnvironmentCreator;
+
 	constructor(
+		environmentCreator: EnvironmentCreator,
 		directory: string,
 		user: string,
 		password: string,
@@ -46,10 +76,17 @@ export class ApplicationAuthorisationAPI {
 	) {
 		const start = performance.now();
 
+		this.#environmentCreator = environmentCreator;
 		this.#isGlobal = isGlobal;
 
-		this.#permissions = getDirectoryPermissions(directory);
-		this.userID = users[this.#permissions.user]?.id;
+		this.#permissions =
+			this.#environmentCreator.permissions.getDirectoryPermissions(
+				directory
+			);
+		this.userID =
+			this.#environmentCreator.users.usersStorage[
+				this.#permissions.user
+			]?.id;
 
 		if (this.userID == undefined) {
 			throw new Error(
@@ -84,7 +121,10 @@ export class ApplicationAuthorisationAPI {
 	readonly #isGlobal: boolean;
 
 	#checkPermission(permission: Permission) {
-		checkDirectoryPermission(this.directory, permission);
+		this.#environmentCreator.permissions.checkDirectoryPermission(
+			this.directory,
+			permission
+		);
 	}
 
 	// shell
@@ -93,7 +133,7 @@ export class ApplicationAuthorisationAPI {
 	// logging
 	debug(...content: any): undefined {
 		const initiator = this.directory;
-		if (initiator == "/System/globalPermissionsHost.js") {
+		if (initiator == globalPermissionsHost) {
 			throw new Error(
 				`globalEnv cannot be used to log. (${this.directory})`
 			);
@@ -103,7 +143,7 @@ export class ApplicationAuthorisationAPI {
 	}
 	log(...content: any): undefined {
 		const initiator = this.directory;
-		if (initiator == "/System/globalPermissionsHost.js") {
+		if (initiator == globalPermissionsHost) {
 			throw new Error(
 				`globalEnv cannot be used to log. (${this.directory})`
 			);
@@ -113,7 +153,7 @@ export class ApplicationAuthorisationAPI {
 	}
 	warn(...content: any): undefined {
 		const initiator = this.directory;
-		if (initiator == "/System/globalPermissionsHost.js") {
+		if (initiator == globalPermissionsHost) {
 			throw new Error(
 				`globalEnv cannot be used to log. (${this.directory})`
 			);
@@ -123,7 +163,7 @@ export class ApplicationAuthorisationAPI {
 	}
 	error(...content: any): undefined {
 		const initiator = this.directory;
-		if (initiator == "/System/globalPermissionsHost.js") {
+		if (initiator == globalPermissionsHost) {
 			throw new Error(
 				`globalEnv cannot be used to log. (${this.directory})`
 			);
@@ -138,11 +178,19 @@ export class ApplicationAuthorisationAPI {
 	 * @param reason - the description of this statement
 	 */
 	prompt(text: string, reason = "") {
-		showPrompt("log", text, reason);
+		this.#environmentCreator.ConstellationKernel.runtime.showPrompt(
+			"log",
+			text,
+			reason
+		);
 	}
 
 	#directoryActionCheck(directory: string, isWriteOperation: boolean) {
-		const domainType = getFilesDomainOfDirectory(directory, this.#user);
+		const domainType =
+			this.#environmentCreator.permissions.getFilesDomainOfDirectory(
+				directory,
+				this.#user
+			);
 		switch (domainType) {
 			case "global":
 				// all good
@@ -364,12 +412,11 @@ export class ApplicationAuthorisationAPI {
 
 			return "none"; // no idea to be honest
 		},
-		resolve: (base: string, child: string): string => {
-			return realFS.resolve(base, child);
-		},
-		relative: (from: string, to: string): string => {
-			return realFS.relative(from, to);
-		}
+		/**
+		 *
+		 */
+		resolve: realFS.resolve,
+		relative: realFS.relative
 	};
 
 	expectFileType = async (
@@ -390,24 +437,24 @@ export class ApplicationAuthorisationAPI {
 		}
 	};
 
-	async include(location: string): Promise<any> {
-		let url = location;
+	async include(directory: string): Promise<any> {
+		let url = directory;
 
-		this.#directoryActionCheck(location, false);
+		this.#directoryActionCheck(directory, false);
 
-		let type = location.includes("://") ? "URL" : "directory";
+		let type = directory.includes("://") ? "URL" : "directory";
 		// @ts-expect-error
-		if (conf.importOverrides[location] !== undefined) {
+		if (conf.importOverrides[directory] !== undefined) {
 			type = "URL";
 			// @ts-expect-error
-			url = conf.importOverrides[location];
+			url = conf.importOverrides[directory];
 		}
 
 		switch (type) {
 			case "directory":
-				return await include(location);
+				return await include(directory);
 			case "URL":
-				const exports = await import(url);
+				const exports = await import(url.toString());
 
 				return exports;
 		}
@@ -425,12 +472,18 @@ export class ApplicationAuthorisationAPI {
 			);
 
 		if (this.#process instanceof Process)
-			return execute(directory, args, user, password, this.#process);
+			return this.#environmentCreator.ConstellationKernel.runtime.execute(
+				directory,
+				args,
+				user,
+				password,
+				this.#process
+			);
 
 		throw new Error("Framework may not execute processes.");
 	};
 	getPIDOfName(name: string): number | undefined {
-		return associations[name];
+		return this.#environmentCreator.associations[name];
 	}
 
 	/**
@@ -444,15 +497,25 @@ export class ApplicationAuthorisationAPI {
 		permission: Permission,
 		value: boolean
 	) {
-		checkDirectoryPermission(this.directory, "managePermissions");
+		this.#environmentCreator.permissions.checkDirectoryPermission(
+			this.directory,
+			"managePermissions"
+		);
 
-		await setDirectoryPermission(directory, permission, value);
+		await this.#environmentCreator.permissions.setDirectoryPermission(
+			directory,
+			permission,
+			value
+		);
 	}
 
 	async hasPermission(permission: Permission) {
 		try {
 			// this will error if we don't have the permission
-			checkDirectoryPermission(this.directory, permission);
+			this.#environmentCreator.permissions.checkDirectoryPermission(
+				this.directory,
+				permission
+			);
 
 			return true;
 		} catch {}
@@ -468,7 +531,10 @@ export class ApplicationAuthorisationAPI {
 	async requestUserPermission(permission: Permission) {
 		const start = performance.now();
 
-		if (permissionsMetadata[permission].requestable == false) {
+		if (
+			this.#environmentCreator.permissions.permissionsMetadata[permission]
+				.requestable == false
+		) {
 			this.error(
 				name,
 				"Permission by name " +
@@ -490,16 +556,23 @@ export class ApplicationAuthorisationAPI {
 		}
 
 		this.log("Permission by name " + permission + " requested.");
-		const ok = await showPrompt(
-			"log",
-			appname + " is requesting permission for " + permission,
-			permissionsMetadata[permission].description,
-			["Allow", "Deny"]
-		);
+		const ok =
+			await this.#environmentCreator.ConstellationKernel.runtime.showPrompt(
+				"log",
+				appname + " is requesting permission for " + permission,
+				this.#environmentCreator.permissions.permissionsMetadata[
+					permission
+				].description,
+				["Allow", "Deny"]
+			);
 
 		switch (ok) {
 			case "Allow":
-				await setDirectoryPermission(this.directory, permission, true);
+				await this.#environmentCreator.permissions.setDirectoryPermission(
+					this.directory,
+					permission,
+					true
+				);
 				this.#permissions[permission] = true;
 				return true;
 			case "Deny":
@@ -579,7 +652,10 @@ export class ApplicationAuthorisationAPI {
 		all: (): WindowAlias[] => {
 			const start = performance.now();
 
-			checkDirectoryPermission(this.directory, "windows");
+			this.#environmentCreator.permissions.checkDirectoryPermission(
+				this.directory,
+				"windows"
+			);
 
 			const obj: WindowAlias[] = [];
 
@@ -599,7 +675,10 @@ export class ApplicationAuthorisationAPI {
 		getFocus: (): WindowAlias | undefined => {
 			const start = performance.now();
 
-			checkDirectoryPermission(this.directory, "windows");
+			this.#environmentCreator.permissions.checkDirectoryPermission(
+				this.directory,
+				"windows"
+			);
 
 			const target = getWindowOfId(focusedWindow);
 
@@ -623,10 +702,14 @@ export class ApplicationAuthorisationAPI {
 		all: () => {
 			const start = performance.now();
 
-			checkDirectoryPermission(this.directory, "users");
+			this.#environmentCreator.permissions.checkDirectoryPermission(
+				this.directory,
+				"users"
+			);
 
 			const obj: Record<UserAlias["name"], UserAlias> = {};
 
+			const users = this.#environmentCreator.users.usersStorage;
 			for (const user in users) {
 				const userData = users[user];
 
@@ -641,7 +724,7 @@ export class ApplicationAuthorisationAPI {
 		userInfo: (name: UserAlias["name"] = this.user) => {
 			const start = performance.now();
 
-			const userData = users[name];
+			const userData = this.#environmentCreator.users.usersStorage[name];
 			if (userData == undefined) return;
 
 			const obj = this.#userToAlias(userData);
@@ -655,7 +738,10 @@ export class ApplicationAuthorisationAPI {
 
 			let ok;
 			try {
-				ok = await validatePassword(user, password);
+				ok = await this.#environmentCreator.users.validatePassword(
+					user,
+					password
+				);
 			} catch (e) {
 				securityTimestamp(
 					`Env ${this.directory} switch user.`,
@@ -681,9 +767,3 @@ export class ApplicationAuthorisationAPI {
 		}
 	};
 }
-
-export function processCanKeylog(process: Process): boolean {
-	return true;
-}
-
-securityTimestamp("Startup /src/security/env.ts", start);

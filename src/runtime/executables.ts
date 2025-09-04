@@ -1,11 +1,12 @@
 import { registerKeyboardShortcut } from "../io/keyboardShortcuts.js";
 import { Renderer } from "../lib/uiKit/uiKit.js";
-import { ApplicationAuthorisationAPI, associations } from "../security/env.js";
+import { ApplicationAuthorisationAPI } from "../security/env.js";
 import { terminate } from "./runtime.js";
 import { IPCMessage, replyCallback, sendMessage } from "./messages.js";
-import { defaultUser, validatePassword } from "../security/users.js";
+import ConstellationKernel from "../main.js";
 
 export let nextPID = 0;
+let popupNo = 25000;
 
 /**
  * The Manifest to inform other programs of basic info about an app, like the name or icon.
@@ -49,7 +50,9 @@ export interface ProgramManifest {
 	 * Whether this application should be exposed to the user and displayed in search etc.
 	 */
 	userspace?: boolean;
+	allowMultipleInstances?: boolean
 }
+
 /**
  * Fundemental entity which can access directory-based system APIs.
  */
@@ -62,6 +65,7 @@ export class Framework {
 	 * @param password - the password for the executable's user
 	 */
 	constructor(
+		ConstellationKernel: ConstellationKernel,
 		directory: string,
 		args: any[],
 		user: string,
@@ -69,6 +73,7 @@ export class Framework {
 	) {
 		this.directory = directory;
 		this.env = new ApplicationAuthorisationAPI(
+			ConstellationKernel.security.env,
 			directory,
 			user,
 			password,
@@ -83,11 +88,19 @@ export class Framework {
 
 	/**
 	 * Function called to validate user credentials. Throws an error if incorrect.
+	 * @param ConstellationKernel - Kernel to validate with.
 	 * @param user - Username to validate on.
 	 * @param password - Password to validate with.
 	 */
-	async validateCredentials(user: string, password: string) {
-		await validatePassword(user, password);
+	async validateCredentials(
+		ConstellationKernel: ConstellationKernel,
+		user: string,
+		password: string
+	) {
+		await ConstellationKernel.security.users.validatePassword(
+			user,
+			password
+		);
 	}
 
 	readonly directory: string;
@@ -148,12 +161,25 @@ export class Framework {
  */
 export class Process extends Framework {
 	constructor(
+		ConstellationKernel: ConstellationKernel,
 		directory: string,
 		args: any[],
 		user: string,
 		password: string
 	) {
-		super(directory, args, user, password);
+		super(ConstellationKernel, directory, args, user, password);
+
+		this.shout = function shout(name: string) {
+			if (ConstellationKernel.runtime.associations[name] == undefined) {
+				ConstellationKernel.runtime.associations[name] = this.id;
+			} else {
+				throw new Error(
+					"Association by name '" +
+						name +
+						"' is already taken. is another instance of your app already using it?"
+				);
+			}
+		};
 	}
 
 	/**
@@ -186,15 +212,7 @@ export class Process extends Framework {
 	 * @param name - Name to register the program to.
 	 */
 	shout(name: string) {
-		if (associations[name] == undefined) {
-			associations[name] = this.id;
-		} else {
-			throw new Error(
-				"Association by name '" +
-					name +
-					"' is already taken. is another instance of your app already using it?"
-			);
-		}
+		// Code for this is found in constructor since I don't want programs getting their hands on the kernel.
 	}
 
 	// events
@@ -279,6 +297,7 @@ export class Process extends Framework {
 	}
 }
 
+export class BackgroundProcess extends Process {}
 export class Module extends Framework {}
 
 /**
@@ -286,12 +305,13 @@ export class Module extends Framework {}
  */
 export class Application extends Process {
 	constructor(
+		ConstellationKernel: ConstellationKernel,
 		directory: string,
 		args: any[],
 		user: string,
 		password: string
 	) {
-		super(directory, args, user, password);
+		super(ConstellationKernel, directory, args, user, password);
 		this.renderer = new Renderer(this);
 	}
 
@@ -304,20 +324,18 @@ export class Application extends Process {
 	}
 }
 
-export class BackgroundProcess extends Process {}
-
-let popupNo = 25000;
 /**
  * An application made for acting on a higher level of the layering. Not to be used in normal applications.
  */
 export class Popup extends Application {
 	constructor(
+		ConstellationKernel: ConstellationKernel,
 		directory: string,
 		args: any[],
 		user: string,
 		password: string
 	) {
-		super(directory, args, user, password);
+		super(ConstellationKernel, directory, args, user, password);
 
 		const no = popupNo++;
 

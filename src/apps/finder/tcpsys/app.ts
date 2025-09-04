@@ -1,5 +1,4 @@
 import { onClickOptions } from "../../../lib/uiKit/definitions";
-import { IPCMessage } from "../../../runtime/messages";
 import { directoryPointType } from "../../../security/definitions";
 
 const clamp = (n: number, min: number, max: number) => {
@@ -118,7 +117,7 @@ export default class finder extends Application {
 			case "KeyG":
 				// TODO: GRAPHICAL PROMPT
 				// eslint-disable-next-line
-				this.cd(prompt("Select a directory") || "");
+				this.cd(prompt("Select a directory") || ".");
 				break;
 		}
 	}
@@ -182,8 +181,8 @@ export default class finder extends Application {
 			const month = latestDate.getMonth() + 1;
 			const year = latestDate.getFullYear();
 
-			const hour = latestDate.getHours();
-			const minute = latestDate.getMinutes();
+			const hour = String(latestDate.getHours()).padStart(2, "0");
+			const minute = String(latestDate.getMinutes()).padStart(2, "0");
 
 			const lastModified = `${monthDay}/${month}/${year} at ${hour}:${minute}`;
 
@@ -208,7 +207,7 @@ export default class finder extends Application {
 								if (!stat.ok) throw stat.data;
 
 								Math.round(stat.data.size / 102.4) / 10;
-							})} KiB, Last Modified ${lastModified}`
+							})()} KiB, Last Modified ${lastModified}`
 			};
 
 			return obj;

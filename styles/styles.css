@@ -72,13 +72,9 @@
 
 		--main-text-color: rgb(0, 0, 0);
 
-		--main-accent-primary-val: calc(215 + (var(--main-accent-contrast) * 1));
-		--main-accent-secondary-val: calc(215 + (var(--main-accent-contrast) * 2));
-		--main-accent-tertiary-val: calc(215 + (var(--main-accent-contrast) * 3));
-
-		--main-accent-primary: rgb(var(--main-accent-primary-val), 0, var(--main-accent-primary-val));
-		--main-accent-secondary: rgb(var(--main-accent-secondary-val), 0, var(--main-accent-secondary-val));
-		--main-accent-tertiary: rgb(var(--main-accent-tertiary-val), 0, var(--main-accent-tertiary-val));
+		--main-accent-primary:  #e2b7f9ff;
+		--main-accent-secondary:#dba2fa;
+		--main-accent-tertiary: #cc7cf7ff;
 	}
 }
 

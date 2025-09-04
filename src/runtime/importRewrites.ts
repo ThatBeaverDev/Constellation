@@ -1,4 +1,8 @@
-import { default as fs, readFile, resolve } from "../io/fs.js";
+import { default as fs, readFile } from "../io/fs.js";
+import {
+	getParentDirectory,
+	resolveDirectory as resolve
+} from "../io/fspath.js";
 import { AppsTimeStamp } from "./runtime.js";
 
 /**
@@ -49,7 +53,7 @@ export async function rewriteImportsAsync(
 			const [full, bindings, specifier] = match;
 			// resolve the path
 			const resolved = resolve(
-				currentPath.textBeforeLast("/"),
+				getParentDirectory(currentPath),
 				specifier
 			);
 			// blobify it

@@ -1,6 +1,12 @@
 import { setStatus } from "../constellation.config.js";
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
 import { ApiError, BrowserFS } from "./browserfs.js";
+import {
+	getParentDirectory,
+	normaliseDirectory,
+	resolveDirectory
+} from "./fspath.js";
+import { relative } from "./nodepath.js";
 
 export function filesystemTimestamp(
 	label: string,
@@ -91,7 +97,10 @@ await new Promise((resolve: Function) => {
 const fs = BrowserFS.BFSRequire("fs");
 
 function isRoot(directory: string) {
-	const segments = directory.split("/").filter((section) => section !== "");
+	const segments = directory
+		.toString()
+		.split("/")
+		.filter((section) => section !== "");
 
 	if (segments.length == 0 || segments.length == 1) {
 		return true;
@@ -104,7 +113,7 @@ const writeFile = async (directory: string, content: string) => {
 	const start = performance.now();
 	let written = false;
 
-	await fs.writeFile(directory, content, () => {
+	await fs.writeFile(directory.toString(), content, () => {
 		written = true;
 	});
 
@@ -127,7 +136,7 @@ export const readFile = async (
 	const start = performance.now();
 
 	return new Promise((resolve: Function) =>
-		fs.readFile(directory, "utf8", (e: any, rv?: string) => {
+		fs.readFile(directory.toString(), "utf8", (e: any, rv?: string) => {
 			filesystemTimestamp(`readFile ${directory}`, start);
 			resolve(rv);
 		})
@@ -138,7 +147,7 @@ const renameFile = async (oldPath: string, newPath: string): Promise<void> => {
 	const start = performance.now();
 
 	return new Promise((resolve, reject) => {
-		fs.rename(oldPath, newPath, (err: any) => {
+		fs.rename(oldPath.toString(), newPath.toString(), (err: any) => {
 			filesystemTimestamp(`renameFile ${oldPath} → ${newPath}`, start);
 			if (err) {
 				console.warn(`renameFile failed: ${oldPath} → ${newPath}`, err);
@@ -164,14 +173,17 @@ const rename = async (oldPath: string, newPath: string): Promise<void> => {
 		const entries = await readdir(oldPath);
 
 		for (const entry of entries) {
-			const from = resolve(oldPath, entry);
-			const to = resolve(newPath, entry);
+			const from = resolveDirectory(oldPath, entry);
+			const to = resolveDirectory(newPath, entry);
 			await rename(from, to);
 		}
 
 		await new Promise<void>((resolve, reject) => {
-			fs.rmdir(oldPath, (err: any) => {
-				filesystemTimestamp(`rmdir ${oldPath}`, performance.now());
+			fs.rmdir(oldPath.toString(), (err: any) => {
+				filesystemTimestamp(
+					`rmdir ${oldPath.toString()}`,
+					performance.now()
+				);
 				if (err) reject(err);
 				else resolve();
 			});
@@ -185,7 +197,7 @@ const readdir = async (directory: string): Promise<string[]> => {
 	const start = performance.now();
 
 	return new Promise((resolve: Function) =>
-		fs.readdir(directory, (e: any, rv?: string[]) => {
+		fs.readdir(directory.toString(), (e: any, rv?: string[]) => {
 			filesystemTimestamp(`readdir ${directory}`, start);
 			resolve(rv);
 		})
@@ -203,7 +215,7 @@ const mkdir = async (directory: string): Promise<undefined> => {
 		throw new Error("Directories cannot be created under root.");
 	}
 
-	const parentDirectory = directory.textBeforeLast("/");
+	const parentDirectory = getParentDirectory(directory);
 	const parent = await stat(parentDirectory);
 	if (parent == undefined)
 		throw new Error(
@@ -215,7 +227,7 @@ const mkdir = async (directory: string): Promise<undefined> => {
 		);
 
 	return new Promise((resolve: Function) => {
-		fs.mkdir(directory, (e: any) => {
+		fs.mkdir(directory.toString(), (e: any) => {
 			filesystemTimestamp(`mkdir ${directory}`, start);
 			resolve();
 		});
@@ -227,7 +239,7 @@ const stat = async (directory: string): Promise<any> => {
 	let stats: any;
 	let ok = false;
 
-	fs.stat(directory, (_: any, data: any) => {
+	fs.stat(directory.toString(), (_: any, data: any) => {
 		stats = data;
 		ok = true;
 	});
@@ -247,7 +259,7 @@ const rmdir = async (directory: string): Promise<any> => {
 	const start = performance.now();
 
 	return new Promise((resolve: Function) =>
-		fs.rmdir(directory, () => {
+		fs.rmdir(directory.toString(), () => {
 			filesystemTimestamp(`rmdir ${directory}`, start);
 			resolve();
 		})
@@ -257,67 +269,12 @@ const unlink = async (directory: string): Promise<any> => {
 	const start = performance.now();
 
 	return new Promise((resolve: Function) => {
-		fs.unlink(directory, () => {
+		fs.unlink(directory.toString(), () => {
 			filesystemTimestamp(`unlink ${directory}`, start);
 			resolve();
 		});
 	});
 };
-export const resolve = (base = "/", target: string) => {
-	if (target.startsWith("/")) return target;
-
-	const baseParts = base.split("/").filter(Boolean);
-	const targetParts = target.split("/");
-
-	for (const part of targetParts) {
-		if (part === "." || part === "") continue;
-		if (part === "..") {
-			if (baseParts.length > 0) baseParts.pop();
-		} else {
-			baseParts.push(part);
-		}
-	}
-
-	return "/" + baseParts.join("/");
-};
-const normalize = (path: string) =>
-	path.replace(/\/+/g, "/").replace(/\/$/, "") || "/";
-export function relative(from: string, to: string) {
-	from = normalize(from);
-	to = normalize(to);
-
-	if (from === to) return "";
-
-	const fromParts = from.split("/").filter(Boolean);
-	const toParts = to.split("/").filter(Boolean);
-
-	// find the point where both paths are the same
-	let commonLength = 0;
-	while (
-		commonLength < fromParts.length &&
-		commonLength < toParts.length &&
-		fromParts[commonLength] === toParts[commonLength]
-	) {
-		commonLength++;
-	}
-
-	// steps to ascend from common ancestor
-	const upSteps = fromParts.length - commonLength;
-	const up = Array(upSteps).fill("..");
-
-	// steps to descend to the target
-	const down = toParts.slice(commonLength);
-
-	// merge steps to get one set of steps
-	const result = [...up, ...down].join("/");
-	return result || ".";
-}
-
-/*
-
-tcpkg /System /sys.idx
-
-*/
 
 const main = {
 	...fs,
@@ -325,9 +282,9 @@ const main = {
 	writeFile,
 	readFile,
 	readdir,
-	resolve,
+	resolve: resolveDirectory,
 	relative,
-	normalize,
+	normalize: normaliseDirectory,
 	stat,
 	rename,
 	mkdir,
@@ -336,6 +293,58 @@ const main = {
 };
 
 export default main;
+
+export class FilesystemAPI {
+	constructor(public rootPoint: string) {}
+	async init() {}
+
+	async writeFile(directory: string, content: string) {
+		const realpath = this.rootPoint + directory;
+		return await writeFile(realpath, content);
+	}
+
+	async readFile(directory: string) {
+		const realpath = this.rootPoint + directory;
+		return await readFile(realpath);
+	}
+
+	async readdir(directory: string) {
+		const realpath = this.rootPoint + directory;
+		return await readdir(realpath);
+	}
+
+	resolve(base: string, ...targets: string[]) {
+		return resolveDirectory(base, ...targets);
+	}
+
+	relative(from: string, to: string) {
+		return relative(from, to);
+	}
+
+	normalize(path: string) {
+		return normaliseDirectory(path);
+	}
+
+	async stat(directory: string) {
+		const realpath = this.rootPoint + directory;
+		return await stat(realpath);
+	}
+
+	async mkdir(directory: string) {
+		const realpath = this.rootPoint + directory;
+		return await mkdir(realpath);
+	}
+
+	async rmdir(directory: string) {
+		const realpath = this.rootPoint + directory;
+		return await rmdir(realpath);
+	}
+
+	async unlink(directory: string) {
+		const realpath = this.rootPoint + directory;
+		return await unlink(realpath);
+	}
+}
 
 export async function fsLoaded() {
 	await new Promise((resolve: Function) => {
