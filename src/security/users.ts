@@ -55,7 +55,10 @@ export default class Users {
 	 * Updates the user file
 	 */
 	async onUsersUpdate() {
-		await this.fs.writeFile(usersDirectory, JSON.stringify(this.usersStorage));
+		await this.fs.writeFile(
+			usersDirectory,
+			JSON.stringify(this.usersStorage)
+		);
 	}
 
 	async validatePassword(username: string, password: string) {
@@ -139,7 +142,10 @@ export default class Users {
 
 		for (const i in userDirectories) {
 			// get absolute path
-			const directory = this.fs.resolve(user.directory, userDirectories[i]);
+			const directory = this.fs.resolve(
+				user.directory,
+				userDirectories[i]
+			);
 
 			// create directory
 			await this.fs.mkdir(directory);

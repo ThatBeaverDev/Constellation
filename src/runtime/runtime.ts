@@ -84,8 +84,6 @@ export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
 	const start = performance.now();
 	const procDir = String(proc.directory);
 
-	console.log(proc)
-
 	const idx = processes.indexOf(proc);
 
 	if (!isDueToCrash) {
@@ -116,7 +114,6 @@ export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
 
 	AppsTimeStamp(`Terminate process ${procDir}`, start);
 }
-(window as any).terminate = terminate
 
 const activeIterators = new WeakMap<
 	Process,
@@ -290,7 +287,9 @@ export class ProgramRuntime {
 		if (config.allowMultipleInstances == false) {
 			for (const process of processes) {
 				if (process.directory == directory) {
-					throw new Error("This application may not run more than once.")
+					throw new Error(
+						"This application may not run more than once."
+					);
 				}
 			}
 		}
@@ -362,7 +361,11 @@ export class ProgramRuntime {
 			password
 		);
 		try {
-			await live.validateCredentials(this.ConstellationKernel, user, password);
+			await live.validateCredentials(
+				this.ConstellationKernel,
+				user,
+				password
+			);
 		} catch (e: any) {
 			const error = new AppInitialisationError("error");
 			error.message = e.message;
