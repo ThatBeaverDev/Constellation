@@ -42,7 +42,7 @@ export async function install(ConstellationKernel: ConstellationKernel) {
 		// TODO: download n execute the installer
 	}
 
-	// mark this boot as postinstall, allows launchd / CoreExecutable to start the graphical part of installation.
+	// mark this boot as postinstall, allows CoreExecutable to start the graphical part of installation.
 	const params = new URL(window.location.href).searchParams;
 	params.set("postinstall", "true");
 	window.history.pushState({}, "", "?" + params.toString());

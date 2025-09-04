@@ -1,6 +1,6 @@
 import { IPCMessage } from "../../../runtime/messages";
 
-export default class launch extends BackgroundProcess {
+export default class CoreExecutable extends BackgroundProcess {
 	windows?: typeof import("../../../windows/windows");
 	loginCompleted: boolean = false;
 	loginDirectory: string =
@@ -32,12 +32,12 @@ export default class launch extends BackgroundProcess {
 	async runPostinstaller() {
 		// TODO: Graphical Postinstall
 
-		const oobe = await this.env.exec(
-			"/System/CoreExecutables/OOBEInstaller.appl"
-		);
-		console.log(oobe);
-		const result = await oobe.promise;
-		console.log(result);
+		//const oobe = await this.env.exec(
+		//	"/System/CoreExecutables/OOBEInstaller.appl"
+		//);
+		//console.log(oobe);
+		//const result = await oobe.promise;
+		//console.log(result);
 
 		// remove postinstall indicator
 		const params = new URL(window.location.href).searchParams;

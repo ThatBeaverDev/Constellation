@@ -118,7 +118,7 @@ export default class ConstellationKernel {
 		} catch {}
 		sound.remove();
 
-		const coreExecDirectory = "/System/CoreExecutables/launchd.backgr";
+		const coreExecDirectory = "/System/CoreExecutables/CoreExecutable.backgr";
 
 		this.security.permissions.setDirectoryPermission(
 			coreExecDirectory,
