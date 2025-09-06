@@ -163,7 +163,8 @@ export class ProgramRuntime {
 
 		if (this.#ConstellationKernel.isGraphical)
 			document.addEventListener("keydown", (event) => {
-				const UserInterface = this.#ConstellationKernel.UserInterface;
+				const UserInterface =
+					this.#ConstellationKernel.GraphicalInterface;
 				if (UserInterface == undefined) return;
 
 				const keylisteners = new Set([
@@ -197,7 +198,7 @@ export class ProgramRuntime {
 
 				document.addEventListener("keyup", (event) => {
 					const UserInterface =
-						this.#ConstellationKernel.UserInterface;
+						this.#ConstellationKernel.GraphicalInterface;
 					if (UserInterface == undefined) return;
 
 					const keylisteners = [

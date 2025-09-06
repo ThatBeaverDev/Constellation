@@ -15,8 +15,8 @@ export async function preinstall(ConstellationKernel: ConstellationKernel) {
 		await installer.folders();
 		await installer.files();
 
-		if (ConstellationKernel.UserInterface)
-			ConstellationKernel.UserInterface.windows.reapplyStyles();
+		if (ConstellationKernel.GraphicalInterface)
+			ConstellationKernel.GraphicalInterface.windows.reapplyStyles();
 	} catch (e: any) {
 		ConstellationKernel.config.setStatus(e, "error");
 		throw e; // escalate again to make sure main knows something went wrong

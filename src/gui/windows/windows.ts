@@ -259,10 +259,10 @@ class GraphicalWindowClass {
 		Application: Application
 	) {
 		this.#ConstellationKernel = ConstellationKernel;
-		if (ConstellationKernel.UserInterface == undefined)
+		if (ConstellationKernel.GraphicalInterface == undefined)
 			throw new Error("Windows cannot exist on a non-graphical system.");
 
-		const WindowSystem = ConstellationKernel.UserInterface.windows;
+		const WindowSystem = ConstellationKernel.GraphicalInterface.windows;
 		this.#WindowSystem = WindowSystem;
 		this.name = name;
 		this.winID = WindowSystem.winID++;
@@ -310,8 +310,8 @@ class GraphicalWindowClass {
 
 			const kernel = this.#ConstellationKernel;
 			let icon: HTMLImageElement;
-			if (kernel.UserInterface) {
-				icon = kernel.UserInterface.getIcon(iconpath);
+			if (kernel.GraphicalInterface) {
+				icon = kernel.GraphicalInterface.getIcon(iconpath);
 			} else {
 				// just so typescript doesn't freak out. this will never happen.
 				icon = document.createElement("img");
@@ -601,8 +601,8 @@ class GraphicalWindowClass {
 		this.iconName = loc;
 
 		const kernel = this.#ConstellationKernel;
-		if (kernel.UserInterface) {
-			const icon = kernel.UserInterface.getIcon(loc);
+		if (kernel.GraphicalInterface) {
+			const icon = kernel.GraphicalInterface.getIcon(loc);
 
 			this.#setIcon(icon);
 		}
@@ -630,7 +630,7 @@ class GraphicalWindowClass {
 				}
 			],
 			{
-				duration: 500,
+				duration: 150,
 				easing: "ease-in"
 			}
 		);
@@ -655,7 +655,7 @@ class GraphicalWindowClass {
 			);
 		}
 
-		setTimeout(del, 150);
+		setTimeout(del, 125);
 	}
 
 	close() {

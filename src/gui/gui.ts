@@ -4,7 +4,7 @@ import ConstellationKernel from "../kernel.js";
 import WindowSystem from "./windows/windows.js";
 import UiKitInstanceCreator from "./uiKit/uiKit.js";
 
-export class UserInterface {
+export class GraphicalInterface {
 	icons: Icons;
 	getIcon: Icons["getIcon"];
 	windows: WindowSystem;
