@@ -13,11 +13,11 @@ export default class body {
 	initialised: boolean = false;
 
 	async init() {
-		const dir = parent.env.fs.resolve(
+		const dir = this.parent.env.fs.resolve(
 			this.parent.directory,
 			"resources/pages/index.js"
 		);
-		const include = await parent.env.include(dir);
+		const include = await this.parent.env.include(dir);
 		this.pages = await include.default(this.parent);
 
 		this.location = "home";
