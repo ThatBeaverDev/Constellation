@@ -1,27 +1,18 @@
 import { Process } from "./executables.js";
 import * as executables from "./executables.js";
 
-import fs from "../io/fs.js";
-import * as uikit from "../lib/uiKit/uiKit.js";
-import {
-	focusedWindow,
-	getWindowOfId,
-	GraphicalWindow
-} from "../windows/windows.js";
-
-import { blobify, translateAllBlobURIsToDirectories } from "../lib/blobify.js";
-import { AppInitialisationError, ImportError } from "../errors.js";
+import { AppInitialisationError } from "../errors.js";
 import ProcessWaitingObject from "./appWaitingObject.js";
 import {
 	ApplicationAuthorisationAPI,
 	EnvironmentCreator
 } from "../security/env.js";
-import { rewriteImportsAsync } from "./importRewrites.js";
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
-import { debug } from "../lib/logging.js";
-import ConstellationKernel from "../main.js";
+import ConstellationKernel from "../kernel.js";
+import { GraphicalWindow } from "../gui/windows/windows.js";
+import { importRewriter } from "./codeProcessor.js";
 
-const name = "/System/apps.js";
+const path = "/System/runtime.js";
 
 export function AppsTimeStamp(
 	label: string,
@@ -51,17 +42,11 @@ window.processes = processes;
 
 window.renderID = 0;
 
-await uikit.init();
-
 // allow processes to access this
 window.Application = executables.Application;
 window.BackgroundProcess = executables.BackgroundProcess;
 window.Popup = executables.Popup;
 window.Module = executables.Module;
-
-// @ts-expect-error
-window.env = {};
-(window as any).env = window.env;
 
 export function getProcessFromID(id: number) {
 	for (const proc of processes) {
@@ -135,79 +120,38 @@ export function appName(proc: executables.Framework) {
 	return constructorName;
 }
 
-document.addEventListener("keydown", (event) => {
-	//event.preventDefault()
+declare global {
+	interface Window {
+		envs: Map<ProgramRuntime["id"], ApplicationAuthorisationAPI>;
+	}
+}
+window.envs = new Map();
 
-	const keylisteners = new Set([
-		getWindowOfId(focusedWindow)?.Application,
-		...processes.filter((proc) => proc.env.hasPermission("keylogger"))
-	]);
-
-	const procKeydown = (proc?: Process) => {
-		if (proc == undefined) return;
-
-		const fnc = proc.keydown;
-
-		if (typeof fnc == "function") {
-			fnc.call(
-				proc,
-				event.code,
-				event.metaKey,
-				event.altKey,
-				event.ctrlKey,
-				event.shiftKey,
-				event.repeat
-			);
-		}
-	};
-
-	keylisteners.forEach((item) => procKeydown(item));
-});
-document.addEventListener("keyup", (event) => {
-	//event.preventDefault()
-
-	const keylisteners = [
-		getWindowOfId(focusedWindow)?.Application,
-		...processes.filter((proc) => proc.env.hasPermission("keylogger"))
-	];
-
-	const procKeyup = (proc?: Process) => {
-		if (proc == undefined) return;
-
-		const fnc = proc.keyup;
-
-		if (typeof fnc == "function") {
-			fnc.call(
-				proc,
-				event.code,
-				event.metaKey,
-				event.altKey,
-				event.ctrlKey,
-				event.shiftKey,
-				event.repeat
-			);
-		}
-	};
-
-	keylisteners.forEach((item) => procKeyup(item));
-});
-
+let nextProgramRuntimeId = 0;
 export class ProgramRuntime {
 	EnvironmentCreator: EnvironmentCreator;
 	associations: Record<string, Process["id"]> = {};
+	id: number = nextProgramRuntimeId++;
+	#ConstellationKernel: ConstellationKernel;
 
 	constructor(
-		public ConstellationKernel: ConstellationKernel,
+		ConstellationKernel: ConstellationKernel,
 		public isGraphical = false
 	) {
-		this.EnvironmentCreator = this.ConstellationKernel.security.env;
+		this.#ConstellationKernel = ConstellationKernel;
+		this.EnvironmentCreator = this.#ConstellationKernel.security.env;
+		this.importsRewriter = new importRewriter(
+			this.#ConstellationKernel.fs,
+			this
+		);
 	}
 
 	async init() {
 		const startEnvInit = performance.now();
-		debug(name, "Apps initialising.");
+		this.#ConstellationKernel.lib.logging.debug(path, "Apps initialising.");
 
-		window.env = new ApplicationAuthorisationAPI(
+		const env = new ApplicationAuthorisationAPI(
+			this.#ConstellationKernel,
 			this.EnvironmentCreator,
 			"/System/globalPermissionsHost.js",
 			"guest",
@@ -215,9 +159,79 @@ export class ProgramRuntime {
 			undefined,
 			true
 		);
-		(window as any).env = window.env;
+		window.envs.set(this.id, env);
 
-		debug(name, "Apps initialised.");
+		if (this.#ConstellationKernel.isGraphical)
+			document.addEventListener("keydown", (event) => {
+				const UserInterface = this.#ConstellationKernel.UserInterface;
+				if (UserInterface == undefined) return;
+
+				const keylisteners = new Set([
+					UserInterface.windows.getWindowOfId(
+						UserInterface.windows.focusedWindow
+					)?.Application,
+					...processes.filter((proc) =>
+						proc.env.hasPermission("keylogger")
+					)
+				]);
+
+				const procKeydown = (proc?: Process) => {
+					if (proc == undefined) return;
+
+					const fnc = proc.keydown;
+
+					if (typeof fnc == "function") {
+						fnc.call(
+							proc,
+							event.code,
+							event.metaKey,
+							event.altKey,
+							event.ctrlKey,
+							event.shiftKey,
+							event.repeat
+						);
+					}
+				};
+
+				keylisteners.forEach((item) => procKeydown(item));
+
+				document.addEventListener("keyup", (event) => {
+					const UserInterface =
+						this.#ConstellationKernel.UserInterface;
+					if (UserInterface == undefined) return;
+
+					const keylisteners = [
+						UserInterface.windows.getWindowOfId(
+							UserInterface.windows.focusedWindow
+						)?.Application,
+						...processes.filter((proc) =>
+							proc.env.hasPermission("keylogger")
+						)
+					];
+
+					const procKeyup = (proc?: Process) => {
+						if (proc == undefined) return;
+
+						const fnc = proc.keyup;
+
+						if (typeof fnc == "function") {
+							fnc.call(
+								proc,
+								event.code,
+								event.metaKey,
+								event.altKey,
+								event.ctrlKey,
+								event.shiftKey,
+								event.repeat
+							);
+						}
+					};
+
+					keylisteners.forEach((item) => procKeyup(item));
+				});
+			});
+
+		this.#ConstellationKernel.lib.logging.debug(path, "Apps initialised.");
 		AppsTimeStamp("Creation of global env", startEnvInit);
 	}
 
@@ -252,7 +266,10 @@ export class ProgramRuntime {
 	}> {
 		const start = performance.now();
 
-		console.debug("Executing program from " + directory);
+		this.#ConstellationKernel.lib.logging.debug(
+			path,
+			"Executing program from " + directory
+		);
 
 		/**
 		 * Reads a file from an application package
@@ -264,9 +281,9 @@ export class ProgramRuntime {
 			dir: string,
 			throwIfEmpty: Boolean = true
 		): Promise<string> => {
-			const rel = fs.resolve(directory, dir);
+			const rel = this.#ConstellationKernel.fs.resolve(directory, dir);
 
-			const content = await fs.readFile(rel);
+			const content = await this.#ConstellationKernel.fs.readFile(rel);
 
 			if (content == undefined) {
 				if (throwIfEmpty) {
@@ -281,7 +298,11 @@ export class ProgramRuntime {
 
 		// get the app config
 		const configSrc = await get("config.js");
-		const configBlob = await blobify(configSrc, "text/javascript");
+		const configBlob =
+			await this.#ConstellationKernel.lib.blobifier.blobify(
+				configSrc,
+				"text/javascript"
+			);
 		const config = (await import(configBlob)).default;
 
 		if (config.allowMultipleInstances == false) {
@@ -298,12 +319,14 @@ export class ProgramRuntime {
 
 		let executableDirectory: string | undefined;
 		let type: executionFiletype | undefined;
-		const tcpsys = await fs.readdir(fs.resolve(directory, "tcpsys"));
+		const tcpsys = await this.#ConstellationKernel.fs.readdir(
+			this.#ConstellationKernel.fs.resolve(directory, "tcpsys")
+		);
 
 		// get the script
 		for (const ext of allowedExtensions) {
 			if (tcpsys.includes("app." + ext)) {
-				executableDirectory = fs.resolve(
+				executableDirectory = this.#ConstellationKernel.fs.resolve(
 					directory,
 					"tcpsys/app." + ext
 				);
@@ -320,19 +343,25 @@ export class ProgramRuntime {
 		switch (type) {
 			case "js":
 				{
-					const content = await fs.readFile(executableDirectory);
+					const content =
+						await this.#ConstellationKernel.fs.readFile(
+							executableDirectory
+						);
 
 					if (content == undefined) {
 						throw new AppInitialisationError(
-							fs.resolve(directory, "tcpsys/app.[js / sjs]") +
-								" is empty and cannot be executed"
+							this.#ConstellationKernel.fs.resolve(
+								directory,
+								"tcpsys/app.js"
+							) + " is empty and cannot be executed"
 						);
 					}
 
-					const importsResolved = await rewriteImportsAsync(
-						content,
-						executableDirectory
-					);
+					const importsResolved =
+						await this.importsRewriter.processCode(
+							content,
+							executableDirectory
+						);
 
 					data = importsResolved;
 				}
@@ -344,7 +373,10 @@ export class ProgramRuntime {
 		}
 
 		// create a blob of the content
-		const blob = blobify(data, "text/javascript");
+		const blob = this.#ConstellationKernel.lib.blobifier.blobify(
+			data,
+			"text/javascript"
+		);
 
 		// import from the script BLOB
 		const exports = await import(blob);
@@ -354,7 +386,7 @@ export class ProgramRuntime {
 
 		// create the process
 		const live = new Executable(
-			this.ConstellationKernel,
+			this.#ConstellationKernel,
 			directory,
 			args,
 			user,
@@ -362,7 +394,7 @@ export class ProgramRuntime {
 		);
 		try {
 			await live.validateCredentials(
-				this.ConstellationKernel,
+				this.#ConstellationKernel,
 				user,
 				password
 			);
@@ -392,13 +424,17 @@ export class ProgramRuntime {
 		};
 	}
 
+	importsRewriter: importRewriter;
+
 	async showPrompt(
 		type: "error" | "warning" | "log",
 		title: string,
 		description?: any,
 		buttons?: String[]
 	) {
-		const popup = await fs.readFile(popupDirectory + "/config.js");
+		const popup = await this.#ConstellationKernel.fs.readFile(
+			popupDirectory + "/config.js"
+		);
 
 		if (popup == undefined) {
 			throw new Error(
@@ -478,7 +514,7 @@ export class ProgramRuntime {
 			process.executing = false;
 		} catch (e: any) {
 			process.executing = false;
-			console.warn(e);
+			this.#ConstellationKernel.lib.logging.warn(path, e);
 
 			if (!catchError) return;
 
@@ -486,16 +522,22 @@ export class ProgramRuntime {
 
 			await terminate(process);
 
-			const choice = await this.ConstellationKernel.runtime.showPrompt(
+			const choice = await this.#ConstellationKernel.runtime.showPrompt(
 				"warning",
 				`${name} quit unexpectedly.`,
-				translateAllBlobURIsToDirectories(e.stack),
+				this.#ConstellationKernel.lib.blobifier.translateAllBlobURIsToDirectories(
+					e.stack
+				),
 				["Ignore", "Report..."]
 			);
 
 			switch (choice) {
 				case "Report...":
-					console.log("we need to report thissss....");
+					// TODO: report the error???
+					this.#ConstellationKernel.lib.logging.log(
+						path,
+						"we need to report thissss...."
+					);
 					break;
 			}
 		}

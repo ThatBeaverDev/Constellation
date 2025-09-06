@@ -77,7 +77,7 @@ export default class remapper extends Application {
 				}
 				break;
 			default:
-				console.warn("Unknown message sender: " + origin);
+				this.env.warn("Unknown message sender: " + origin);
 		}
 	}
 

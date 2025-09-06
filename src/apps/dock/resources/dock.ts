@@ -1,4 +1,4 @@
-import { Renderer } from "../../../lib/uiKit/uiKit";
+import { UiKitRenderer } from "../../../gui/uiKit/uiKit";
 import { WindowAlias } from "../../../security/definitions";
 import dockAndDesktop from "../tcpsys/app";
 // @ts-expect-error
@@ -16,9 +16,8 @@ interface Program {
 
 export default class dock {
 	readonly parent: dockAndDesktop;
-	readonly renderer: Renderer;
+	readonly renderer: UiKitRenderer;
 	readonly env: dockAndDesktop["env"];
-	winAPI?: typeof import("../../../windows/windows");
 
 	dockHeight: number = 50;
 	dockPadding: number = 10;
@@ -50,8 +49,6 @@ export default class dock {
 		} catch {}
 
 		if (getPerms !== true) return;
-
-		this.winAPI = await this.parent.env.include("/System/windows.js");
 
 		await this.refresh();
 
@@ -125,7 +122,6 @@ export default class dock {
 		}
 
 		if (this.ok !== true) return;
-		if (this.winAPI == undefined) return;
 
 		const iconWidth = this.dockHeight - this.dockPadding * 2;
 		const iconScale = iconWidth / 24;
@@ -200,8 +196,6 @@ export default class dock {
 			this.renderer.onClick(
 				iconID,
 				(left: number, top: number) => {
-					if (this.winAPI == undefined) return;
-
 					if (win == undefined) {
 						// check whether the app is even running at all
 						if (program.windows.length == 0) {
@@ -217,15 +211,13 @@ export default class dock {
 								contextMenuItems[
 									`${win.iconName}-:-${win.name};${i}`
 								] = () => {
-									if (this.winAPI == undefined) return;
-
 									if (win.minimised) {
 										win.unminimise();
 									} else {
 										win.minimise();
 									}
 
-									this.winAPI.focusWindow(win.winID);
+									this.env.windows.focusWindow(win.winID);
 								};
 							}
 
@@ -244,7 +236,7 @@ export default class dock {
 							win.minimise();
 						}
 
-						this.winAPI.focusWindow(win.winID);
+						this.env.windows.focusWindow(win.winID);
 					}
 
 					this.refresh();
@@ -254,7 +246,7 @@ export default class dock {
 					let contextMenuItems: Record<string, Function> = {
 						"folder-open-:-Show in Finder": () =>
 							this.env.exec("/Applications/Finder.appl", [
-								env.fs.resolve(directory, "..")
+								this.env.fs.resolve(directory, "..")
 							])
 					};
 

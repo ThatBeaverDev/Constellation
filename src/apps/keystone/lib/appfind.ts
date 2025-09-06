@@ -1,6 +1,7 @@
 import TerminalAlias from "../../../lib/terminalAlias";
-
-const pathinf = await env.include("/System/CoreLibraries/pathinf.js");
+// @ts-expect-error
+// prettier-ignore
+import { pathName, pathIcon, pathVisible } from "/System/CoreLibraries/pathinf.js";
 
 export type fileInfo = {
 	directory: string;
@@ -35,9 +36,9 @@ export default async function find(
 		for (const dir of localNames) {
 			const obj: fileInfo = {
 				directory: dir,
-				name: await pathinf.pathName(dir),
-				icon: await pathinf.pathIcon(dir),
-				visible: await pathinf.pathVisible(dir)
+				name: await pathName(dir),
+				icon: await pathIcon(dir),
+				visible: await pathVisible(dir)
 			};
 
 			if (

@@ -23,12 +23,20 @@
 			"ES5",
 			"ES6"
 		],
+		"paths": {
+			"pathinf": ["./src/syslib/pathinf.ts"],
+			"blob": ["./src/syslib/blob.ts"],
+			"mime": ["./src/syslib/mime.ts"],
+			"keyboardUtils": ["./src/syslib/keyboardUtils.ts"]
+		},
+		"noUnusedLocals": true,
 
 		// types
-		"sourceMap": false,
+		"sourceMap": true,
 		"declaration": true,
 		"declarationDir": "types",
 		"emitDeclarationOnly": false,
+		"types": [],
 
 		// incremental
 		"incremental": true,
@@ -44,7 +52,7 @@
 		"./build",
 		"./src/apps/app-template",
 		"./src/apps/types",
-		"./src/lib/external/browserfs.*"
+		"./node_modules"
 	],
 	"watchOptions": {
 		"watchFile": "useFsEvents",

@@ -1,4 +1,4 @@
-import * as conf from "../constellation.config.js";
+// @ts-nocheck
 import { processes } from "../runtime/runtime.js";
 
 // Global error handler
@@ -76,7 +76,7 @@ export default async function panic(error: any, source?: string) {
 	await new Promise((resolve) => setTimeout(resolve, 500));
 
 	// Stop all intervals and timeouts
-	const highestTimerId = setTimeout(() => {}, 0);
+	const highestTimerId = Number(setTimeout(() => {}, 0));
 	for (let i = 0; i <= highestTimerId; i++) {
 		clearInterval(i);
 		clearTimeout(i);

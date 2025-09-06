@@ -11,7 +11,6 @@ function SystemInitialiserTimestamp(
 
 	const end = performance.now();
 
-	// @ts-expect-error
 	console.timeStamp(
 		label,
 		start,
@@ -82,7 +81,7 @@ async function check() {
 	} else {
 		const main = document.createElement("script");
 		main.type = "module";
-		main.src = "/build/main.js";
+		main.src = "/build/entrypoint.js";
 		main.defer = "true";
 
 		document.body.appendChild(main);

@@ -1,12 +1,11 @@
-import { userDirectories } from "../constellation.config.js";
-import { FilesystemAPI } from "../io/fs.js";
-import { resolveDirectory } from "../io/fspath.js";
+import { FilesystemAPI } from "../fs/fs.js";
+import { resolveDirectory } from "../fs/fspath.js";
+import ConstellationKernel from "../kernel.js";
 import { sha512 } from "../lib/crypto.js";
-import { debug, log } from "../lib/logging.js";
 import { securityTimestamp } from "./definitions.js";
 
 const start = performance.now();
-const name = "/System/users.js";
+const path = "/System/users.js";
 
 export const usersDirectory = "/System/users.json";
 
@@ -28,14 +27,22 @@ const usersParentFolder = "/Users";
 
 export default class Users {
 	usersStorage: Record<User["name"], User> = {};
+	fs: FilesystemAPI;
 
-	constructor(public fs: FilesystemAPI) {}
+	#ConstellationKernel: ConstellationKernel;
+	constructor(ConstellationKernel: ConstellationKernel) {
+		this.fs = ConstellationKernel.fs;
+		this.#ConstellationKernel = ConstellationKernel;
+	}
 
 	/**
 	 * Initialises the user system, such as loading users from the user file and creating guest and sys if needed
 	 */
 	async init() {
-		debug(name, "Users initialising.");
+		this.#ConstellationKernel.lib.logging.debug(
+			path,
+			"Users initialising."
+		);
 
 		// check if there's already a permissions file
 		const permissionsFileExists =
@@ -48,7 +55,7 @@ export default class Users {
 		// put data into the permissions storage variable
 		Object.assign(this.usersStorage, fileData);
 
-		debug(name, "Users initialised.");
+		this.#ConstellationKernel.lib.logging.debug(path, "Users initialised.");
 	}
 
 	/**
@@ -123,7 +130,10 @@ export default class Users {
 		password: string,
 		extraOptions?: Partial<Record<keyof User, string>>
 	) {
-		log(name, `Creating user by name ${username}.`);
+		this.#ConstellationKernel.lib.logging.log(
+			path,
+			`Creating user by name ${username}.`
+		);
 		const user = await this.createUser(username, password);
 
 		if (extraOptions !== undefined) {
@@ -140,17 +150,20 @@ export default class Users {
 		// make the user's home folder
 		await this.fs.mkdir(user.directory);
 
-		for (const i in userDirectories) {
+		for (const i in this.#ConstellationKernel.config.userDirectories) {
 			// get absolute path
 			const directory = this.fs.resolve(
 				user.directory,
-				userDirectories[i]
+				this.#ConstellationKernel.config.userDirectories[i]
 			);
 
 			// create directory
 			await this.fs.mkdir(directory);
 
-			console.log(`Created directory ${directory} for user ${username}`);
+			this.#ConstellationKernel.lib.logging.log(
+				path,
+				`Created directory ${directory} for user ${username}`
+			);
 		}
 
 		void (await this.onUsersUpdate());

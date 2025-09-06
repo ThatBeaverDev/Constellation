@@ -1,5 +1,4 @@
-import { FilesystemAPI } from "../io/fs.js";
-import ConstellationKernel from "../main.js";
+import ConstellationKernel from "../kernel.js";
 import { EnvironmentCreator } from "./env.js";
 import { Permissions } from "./permissions.js";
 import Users from "./users.js";
@@ -9,16 +8,16 @@ export default class Security {
 	permissions: Permissions;
 	users: Users;
 
-	constructor(public ConstellationKernel: ConstellationKernel) {
+	constructor(ConstellationKernel: ConstellationKernel) {
 		const filesystem = ConstellationKernel.fs;
 
-		this.users = new Users(filesystem);
+		this.users = new Users(ConstellationKernel);
 		this.permissions = new Permissions(filesystem);
 		this.env = new EnvironmentCreator(
 			filesystem,
 			this.users,
 			this.permissions,
-			this.ConstellationKernel
+			ConstellationKernel
 		);
 	}
 

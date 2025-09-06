@@ -1,85 +1,52 @@
-import { error, log } from "./lib/logging.js";
-
-const isLocalhost = window.location.hostname == "localhost";
-const baseWallpaperURL = isLocalhost
-	? "/wallpapers/Originals/"
-	: "/wallpapers/";
+import ConstellationKernel from "./kernel.js";
 
 const path = "/System/constellation.config.js";
 
-if (isLocalhost) {
-	log(path, "localhost detected - using 4K wallpapers.");
-}
+export default class ConstellationConfiguration {
+	name: string = "Constellation";
+	version: string = "25.7.1a";
+	keyword: string = "Sahara";
+	wallpaper: string;
+	wallpaperPosition: string = "center";
+	userfile: string = "/System/users.json";
+	userDirectories: string[] = [
+		"Desktop",
+		"Documents",
+		"Applications",
+		"Media",
+		"Notes",
+		"Media/Music",
+		"Media/Pictures",
+		"Media/Videos"
+	];
+	isDevmode: boolean =
+		new URL(window.location.href).searchParams.get("dev") !== null;
+	systemPassword = "TODO:systemPasswordThatNeedsToBeChanged";
 
-export const name = "Constellation";
-export const version = "25.7.1a";
-export const keyword = "Sahara";
-export const wallpaper = baseWallpaperURL + "Walid Ahmad - Desert Night.jpg";
-export const wallpaperPosition = "center";
-export const importOverrides = {
-	"/System/apps.js": "/build/apps/apps.js",
-	"/System/windows.js": "/build/windows/windows.js",
-	"/System/uiKit.js": "/build/lib/uiKit/uiKit.js",
-	"/System/executables.js": "/build/apps/executables.js",
-	"/System/keybindings.js": "/build/io/keyboardShortcuts.js",
-	"/System/CoreLibraries/fs.js": "/build/fs.js",
-	"/System/CoreLibraries/srcFS.js": "/build/lib/external/browserfs.js",
-	"/System/constellation.config.js": "/build/constellation.config.js"
-};
-export const userfile = "/System/users.json";
-export const userDirectories = [
-	"Desktop",
-	"Documents",
-	"Applications",
-	"Media",
-	"Notes",
-	"Media/Music",
-	"Media/Pictures",
-	"Media/Videos"
-];
-export const isDevmode =
-	new URL(window.location.href).searchParams.get("dev") !== null;
+	status: string = "";
+	#ConstellationKernel: ConstellationKernel;
 
-export let status = "";
-export function setStatus(
-	text: string | Error,
-	state: "working" | "error" = "working"
-) {
-	if (state == "error") {
-		error(path, text);
-	} else {
-		log(path, text);
+	constructor(ConstellationKernel: ConstellationKernel) {
+		const isLocalhost = window.location.hostname == "localhost";
+		const baseWallpaperURL = isLocalhost
+			? "/wallpapers/Originals/"
+			: "/wallpapers/";
+
+		this.wallpaper = baseWallpaperURL + "Walid Ahmad - Desert Night.jpg";
+		this.#ConstellationKernel = ConstellationKernel;
 	}
 
-	status = String(text);
-
-	if (text instanceof Error) {
-		const style = document.createElement("style");
-		style.textContent = `
-		img.bootImage {
-			filter: hue-rotate(80deg) saturate(1000%) !important;
+	setStatus(text: string | Error, state: "working" | "error" = "working") {
+		if (state == "error") {
+			this.#ConstellationKernel.lib.logging.error(path, text);
+		} else {
+			this.#ConstellationKernel.lib.logging.log(path, text);
 		}
 
-		p.bootText {
-			color: red !important;
-		}
+		this.status = String(text);
 
-		span.loader {
-			border-color: red !important;
+		if (this.#ConstellationKernel.UserInterface !== undefined) {
+			this.#ConstellationKernel.UserInterface.setStatus(text, state);
 		}
-
-		span.loader::after {
-			background-color: red !important;
-			animation: none !important;
-			width: 100%;
-		}
-		`;
-		document.body.appendChild(style);
-
-		setTimeout(() => {
-			throw text;
-		}, 5000);
 	}
 }
-
-export const systemPassword = "systemPasswordThatNeedsToBeChanged";

@@ -8,7 +8,7 @@ export default class KeystoneSearch extends Popup {
 	results: object[] = [];
 	files: string[] = [];
 	fileInfo: fileInfo[] = [];
-	searchInterval: number = 0;
+	searchInterval?: ReturnType<typeof setInterval>;
 	ok: boolean = true;
 	entries: any;
 	rendering: any[] = [];
@@ -120,7 +120,7 @@ export default class KeystoneSearch extends Popup {
 				}
 				break;
 			default:
-				console.warn("Unknown message sender: " + origin);
+				this.env.warn("Unknown message sender: " + origin);
 		}
 	}
 

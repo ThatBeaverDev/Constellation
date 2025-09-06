@@ -1,3 +1,5 @@
+import calc from "../tcpsys/app";
+
 type characterType = "operator" | "bracket" | "number" | "variable" | "";
 
 type binaryOperator = "+" | "-" | "*" | "/" | "%" | "^" | "√";
@@ -313,7 +315,7 @@ export function getVariable(letter: string): number {
 	return value;
 }
 
-export function evaluate(calculation: string) {
+export function evaluate(calculation: string, env: calc["env"]) {
 	const ast = astWithVariables(calculation);
 
 	function calculateBit(bit: ASTStaticNode): number {
@@ -341,7 +343,7 @@ export function evaluate(calculation: string) {
 							1 / calculateBit(bit.right)
 						);
 					default:
-						console.warn("[!] zeroing for ", bit);
+						env.warn("[!] zeroing for ", bit);
 						return 0;
 				}
 			}
@@ -358,7 +360,7 @@ export function evaluate(calculation: string) {
 					case "√":
 						return Math.sqrt(calculateBit(bit.value));
 					default:
-						console.warn("[!] zeroing for ", bit);
+						env.warn("[!] zeroing for ", bit);
 						return 0;
 				}
 		}

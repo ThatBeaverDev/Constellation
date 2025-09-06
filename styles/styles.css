@@ -127,7 +127,7 @@
 	}
 
 	.bootImage {
-		filter: invert(100%) brightness(10000%) drop-shadow(0px 4px 4px black);
+		filter: invert(100%) brightness(10000%)
 	}
 }
 
@@ -169,11 +169,6 @@ body {
 	font-optical-sizing: auto;
 	white-space: pre;
 	line-height: 1.2;
-}
-
-img,
-p {
-	filter: drop-shadow(0px 4px 4px black);
 }
 
 .hidden {
@@ -329,9 +324,23 @@ p {
 	animation-duration: 0.15s;
 	animation-fill-mode: forwards;
 }
+.unfullscreeningWindow {
+	animation-name: unfullscreenWindow;
+	animation-duration: 0.15s;
+	animation-fill-mode: forwards;
+}
 
 @keyframes fullscreenWindow {
 	to {
+		top: 0px;
+		left: 0px;
+		width: 100vw;
+		height: 100vh;
+	}
+}
+
+@keyframes unfullscreenWindow {
+	from {
 		top: 0px;
 		left: 0px;
 		width: 100vw;

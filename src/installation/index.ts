@@ -1,21 +1,16 @@
-import {
-	isDevmode,
-	setStatus,
-	systemPassword
-} from "../constellation.config.js";
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
 import { preinstall } from "./fs.js";
 import devinstall from "./devinstall.js";
-import ConstellationKernel from "../main.js";
+import ConstellationKernel from "../kernel.js";
 
 export async function install(ConstellationKernel: ConstellationKernel) {
 	const start = performance.now();
-	setStatus(`Installation: Initialising`);
+	ConstellationKernel.config.setStatus(`Installation: Initialising`);
 
 	try {
-		await preinstall();
+		await preinstall(ConstellationKernel);
 	} catch (e: any) {
-		setStatus(e, "error");
+		ConstellationKernel.config.setStatus(e, "error");
 		throw e; // escalate again to make sure main knows something went wrong
 	}
 
@@ -30,13 +25,17 @@ export async function install(ConstellationKernel: ConstellationKernel) {
 		fullName: "Admin",
 		allowGraphicalLogin: "true"
 	});
-	await ConstellationKernel.security.users.newUser("system", systemPassword, {
-		profilePicture: "/System/CoreAssets/Logos/Constellation-lucide.svg",
-		directory: "/System/user",
-		operator: "true"
-	});
+	await ConstellationKernel.security.users.newUser(
+		"system",
+		ConstellationKernel.config.systemPassword,
+		{
+			profilePicture: "/System/CoreAssets/Logos/Constellation-lucide.svg",
+			directory: "/System/user",
+			operator: "true"
+		}
+	);
 
-	if (isDevmode) {
+	if (ConstellationKernel.config.isDevmode) {
 		await devinstall(ConstellationKernel);
 	} else {
 		// TODO: download n execute the installer
@@ -45,11 +44,12 @@ export async function install(ConstellationKernel: ConstellationKernel) {
 	// mark this boot as postinstall, allows CoreExecutable to start the graphical part of installation.
 	const params = new URL(window.location.href).searchParams;
 	params.set("postinstall", "true");
-	window.history.pushState({}, "", "?" + params.toString());
+	if (window.history)
+		window.history.pushState({}, "", "?" + params.toString());
 
 	installationTimestamp("Initialise System", initialisationStart, "primary");
 
-	setStatus("Installation: Complete");
+	ConstellationKernel.config.setStatus("Installation: Complete");
 
 	installationTimestamp("Install System", start, "primary");
 }

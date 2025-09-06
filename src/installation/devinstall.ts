@@ -1,4 +1,4 @@
-import ConstellationKernel from "../main.js";
+import ConstellationKernel from "../kernel.js";
 import { developmentOptions } from "./installation.config.js";
 
 export default async function devinstall(
