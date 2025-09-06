@@ -51,7 +51,7 @@ if (isCommandLine) {
 
 	(window as any).location = {
 		hash: "",
-		host: "localost:5174",
+		host: "localhost:5174",
 		hostname: "localhost",
 		href: "https://localhost:5174",
 		origin: "https://localhost:5174",
