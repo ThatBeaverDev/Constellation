@@ -4,6 +4,7 @@
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
+	"bin": "./build/entrypoint.js",
 	"scripts": {
 		"dev": "python3 -m http.server 5173",
 		"dev-https": "npx http-server . -S -C certs/cert.pem -K certs/key.pem -p 5174",
