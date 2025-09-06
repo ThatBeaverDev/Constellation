@@ -1,6 +1,5 @@
 import dock, { dockConfig } from "../resources/dock.js";
 import menubar from "../resources/menubar.js";
-
 interface menubarConfig {}
 
 export default class dockAndDesktop extends Application {
@@ -62,14 +61,14 @@ export default class dockAndDesktop extends Application {
 	}
 
 	async loadConfig() {
-		const dir = env.fs.resolve(this.directory, "./data");
+		const dir = this.env.fs.resolve(this.directory, "./data");
 		const list = await this.env.fs.listDirectory(dir);
 		if (!list.ok) throw list.data;
 		let configs = list.data;
 
 		if (configs == undefined) {
 			// the directory doesn't exist.
-			const mkdir = await env.fs.createDirectory(dir);
+			const mkdir = await this.env.fs.createDirectory(dir);
 
 			if (!mkdir.ok) throw mkdir.data;
 
@@ -81,7 +80,7 @@ export default class dockAndDesktop extends Application {
 		if (configs.includes(this.env.userID + ".json")) {
 			// we have the config, let's load it.
 			const read = await this.env.fs.readFile(
-				env.fs.resolve(
+				this.env.fs.resolve(
 					this.directory,
 					"./data/" + this.env.userID + ".json"
 				)
@@ -98,11 +97,11 @@ export default class dockAndDesktop extends Application {
 	async commitConfig() {
 		const configString = JSON.stringify(this.config);
 
-		const configDirectory = env.fs.resolve(
+		const configDirectory = this.env.fs.resolve(
 			this.directory,
 			"./data/" + this.env.userID + ".json"
 		);
-		await env.fs.writeFile(configDirectory, configString);
+		await this.env.fs.writeFile(configDirectory, configString);
 	}
 
 	frame() {
@@ -169,7 +168,7 @@ export default class dockAndDesktop extends Application {
 				case "KeyD":
 					if (altKey) {
 						this.dockFocus = true;
-						console.log("focus");
+						this.env.log("focus");
 					}
 					break;
 			}

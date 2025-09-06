@@ -8,14 +8,14 @@ export default async function tcupkg(
 	const targetRel = parent.env.fs.resolve(parent.path, target);
 	const directory = parent.env.fs.resolve(parent.path, output);
 
-	let read = await env.fs.readFile(targetRel);
+	let read = await parent.env.fs.readFile(targetRel);
 	if (!read.ok) throw read.data;
 
 	const content = read.data;
 
 	let json;
 
-	await env.fs.createDirectory(directory);
+	await parent.env.fs.createDirectory(directory);
 
 	try {
 		json = JSON.parse(content);
@@ -24,24 +24,24 @@ export default async function tcupkg(
 	}
 
 	for (const path of json.directories) {
-		const relative = env.fs.resolve(directory, path);
+		const relative = parent.env.fs.resolve(directory, path);
 
-		await env.fs.createDirectory(relative);
+		await parent.env.fs.createDirectory(relative);
 	}
 
 	const awaitFiles = [];
 	for (const path in json.files) {
 		const data = json.files[path];
-		const relative = env.fs.resolve(directory, path);
+		const relative = parent.env.fs.resolve(directory, path);
 
 		const type = data.type == undefined ? "string" : data.type;
 
 		switch (type) {
 			case "string":
-				awaitFiles.push(env.fs.writeFile(relative, data));
+				awaitFiles.push(parent.env.fs.writeFile(relative, data));
 				break;
 			case "binary":
-				awaitFiles.push(env.fs.writeFile(relative, data.data));
+				awaitFiles.push(parent.env.fs.writeFile(relative, data.data));
 				break;
 			default:
 				throw new Error(

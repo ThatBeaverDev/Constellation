@@ -1,6 +1,4 @@
 import TerminalAlias from "./terminalAlias.js";
-import { Application } from "../runtime/executables.js";
-import fs from "../io/fs.js";
 import { ApplicationAuthorisationAPI } from "../security/env.js";
 
 type shellResult = {
@@ -17,6 +15,7 @@ export default class Shell {
 
 	constructor(directory: string, env: ApplicationAuthorisationAPI) {
 		this.#directory = directory;
+		this.#directory;
 		this.#env = env;
 		this.setRef();
 		this.index();
@@ -89,7 +88,7 @@ export default class Shell {
 
 				if (typeof fnc !== "function")
 					throw new Error(
-						"Default export of library file is not a function and is therefore invalid."
+						"The default export of the library file is not a function and is therefore invalid."
 					);
 
 				return fnc;

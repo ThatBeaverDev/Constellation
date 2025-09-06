@@ -6,6 +6,7 @@ const params = url.searchParams;
 const isAppdev = params.get("appdev") !== null;
 
 export const folders: string[] = [
+	"/System",
 	"/System/CoreExecutables",
 	"/System/CoreComponents",
 	"/System/CoreLibraries",
@@ -13,7 +14,10 @@ export const folders: string[] = [
 	"/System/CoreAssets/Logos",
 	"/System/windows",
 
-	"/System/CoreLibraries/mimeFiles"
+	"/System/CoreLibraries/mimeFiles",
+
+	"/Users",
+	"/Applications"
 ];
 
 export const files: Record<
@@ -86,8 +90,8 @@ export const files: Record<
 	},
 
 	// windowing files
-	"/src/windows/flick.css": "/System/windows/flick.css",
-	"/src/windows/scale.css": "/System/windows/scale.css",
+	"/src/gui/windows/flick.css": "/System/windows/flick.css",
+	"/src/gui/windows/scale.css": "/System/windows/scale.css",
 
 	// sounds
 	"/build/assets/sounds.idx": {
@@ -109,6 +113,11 @@ export const files: Record<
 	"/build/apps/com.constellation.calculator.idx": {
 		type: "jsonFilesIndex",
 		directory: "/Applications/calculator.appl"
+	},
+	// Out of box experience
+	"/build/installation/com.constellation.oobe.idx": {
+		type: "jsonFilesIndex",
+		directory: "/System/CoreExecutables/OOBEInstaller.appl"
 	}
 };
 

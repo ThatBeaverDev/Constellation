@@ -1,21 +1,23 @@
+import systemSettings from "../../tcpsys/app";
+
 export default class body {
-	constructor(parent: any) {
+	constructor(parent: systemSettings) {
 		this.parent = parent;
 
 		this.init();
 	}
 
-	parent: any;
+	parent: systemSettings;
 	pages: any;
 	location: string = "home";
 	initialised: boolean = false;
 
 	async init() {
-		const dir = env.fs.resolve(
+		const dir = parent.env.fs.resolve(
 			this.parent.directory,
 			"resources/pages/index.js"
 		);
-		const include = await env.include(dir);
+		const include = await parent.env.include(dir);
 		this.pages = await include.default(this.parent);
 
 		this.location = "home";
@@ -23,8 +25,22 @@ export default class body {
 		this.initialised = true;
 	}
 
-	async renderStructure(struct: any) {
-		const title = struct.title;
+	async renderStructure(struct: {
+		title: string;
+		items: (
+			| { type: "link"; text: string; href: string }
+			| { type: "titleCard"; text: string }
+			| {
+					type: "optionsList";
+					text: string;
+					options: string[];
+					default: any;
+					getValue: Function;
+					setValue: Function;
+					value?: any;
+			  }
+		)[];
+	}) {
 		const items = struct.items;
 
 		const r = this.parent.renderer;
@@ -76,11 +92,6 @@ export default class body {
 					}
 
 					break;
-
-				default:
-					throw new Error(
-						"Unknown jsonRenderStructure type: '" + item.type + "'"
-					);
 			}
 
 			y += 15;

@@ -1,5 +1,5 @@
 import { MessageError } from "../errors.js";
-import { getProcessFromID, processes } from "./runtime.js";
+import { getProcessFromID } from "./runtime.js";
 import { Process } from "./executables.js";
 export type replyCallback = (data: any) => void | undefined;
 

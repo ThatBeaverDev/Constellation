@@ -1,7 +1,6 @@
 import { IPCMessage } from "../../../runtime/messages";
 
 export default class CoreExecutable extends BackgroundProcess {
-	windows?: typeof import("../../../windows/windows");
 	loginCompleted: boolean = false;
 	loginDirectory: string =
 		"/System/CoreExecutables/systemLoginInterface.appl";
@@ -15,8 +14,6 @@ export default class CoreExecutable extends BackgroundProcess {
 		this.env.setDirectoryPermission(dockDirectory, "windows", true);
 		this.env.setDirectoryPermission(dockDirectory, "keylogger", true);
 		this.env.setDirectoryPermission(loginInterfaceDirectory, "users", true);
-
-		this.windows = await this.env.include("/System/windows.js");
 
 		// this.windows
 		this.registerKeyboardShortcut("Close Window", "KeyW", ["AltLeft"]);
@@ -110,7 +107,6 @@ export default class CoreExecutable extends BackgroundProcess {
 		const origin = msg.originDirectory;
 		const keyboardAPI = "/System/io/keyboard.js";
 
-		if (this.windows == undefined) return;
 		if (this.loginCompleted == false) return;
 
 		switch (origin) {
@@ -120,13 +116,10 @@ export default class CoreExecutable extends BackgroundProcess {
 					case "keyboardShortcutTrigger-Close Window": {
 						// Close Window!
 
-						const win = this.windows.getWindowOfId(
-							this.windows.focusedWindow
-						);
-
+						const win = this.env.windows.getFocus();
 						if (win == undefined) return;
 
-						win.remove();
+						win.close();
 						break;
 					}
 
@@ -137,7 +130,7 @@ export default class CoreExecutable extends BackgroundProcess {
 				}
 				break;
 			default:
-				console.warn("Unknown message sender: " + origin);
+				this.env.warn("Unknown message sender: " + origin);
 		}
 	}
 }

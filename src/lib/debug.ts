@@ -8,8 +8,14 @@ export function performanceLog(
 
 	const end = performance.now();
 
-	// @ts-expect-error
-	console.timeStamp(label, start, end, subset, "ConstellationCore", colour);
+	(console as any).timeStamp(
+		label,
+		start,
+		end,
+		subset,
+		"ConstellationCore",
+		colour
+	);
 }
 
 export type DevToolsColor =

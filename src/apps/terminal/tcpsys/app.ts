@@ -1,5 +1,4 @@
-import { uikitTextboxConfig } from "../../../lib/uiKit/definitions";
-import { IPCMessage } from "../../../runtime/messages";
+import { uikitTextboxConfig } from "../../../gui/uiKit/definitions";
 
 // convert anything to a string, NICELY (no [object Object] here)
 function stringify(content: object, fancy: boolean = false) {
@@ -163,10 +162,7 @@ export default class terminalUI extends Application {
 		this.renderer.clear();
 
 		let y = 15;
-		const visibleLogs = this.logs.slice(
-			-50 - this.scroll,
-			-this.scroll || undefined
-		);
+		this.logs.slice(-50 - this.scroll, -this.scroll || undefined);
 
 		for (const i of this.logs) {
 			this.renderer.text(0, y, i);

@@ -1,6 +1,5 @@
-import { onClickOptions } from "../../../lib/uiKit/definitions";
+import { onClickOptions } from "../../../gui/uiKit/definitions";
 import { directoryPointType } from "../../../security/definitions";
-
 const clamp = (n: number, min: number, max: number) => {
 	if (n < min) {
 		return min;
@@ -56,7 +55,7 @@ export default class finder extends Application {
 
 		this.renderer.setIcon("folder");
 		this.renderer.setIcon(
-			env.fs.resolve(this.directory, "./resources/icon.svg")
+			this.env.fs.resolve(this.directory, "./resources/icon.svg")
 		);
 
 		setInterval(() => {
@@ -165,7 +164,7 @@ export default class finder extends Application {
 
 			const type = await this.env.fs.typeOfFile(path);
 
-			const stat = await env.fs.stat(path);
+			const stat = await this.env.fs.stat(path);
 			if (!stat.ok) {
 				throw stat.data;
 			}
@@ -202,7 +201,7 @@ export default class finder extends Application {
 								return list.data.length;
 							})()} Items, Last Modified ${lastModified}`
 						: `${await (async () => {
-								const stat = await env.fs.stat(path);
+								const stat = await this.env.fs.stat(path);
 
 								if (!stat.ok) throw stat.data;
 
@@ -242,6 +241,8 @@ export default class finder extends Application {
 			if (this.pipes.recieve !== undefined) {
 				// loop through messages
 				for (const i in this.pipes.recieve) {
+					i;
+
 					const item = this.pipes.recieve[0];
 					if (typeof item !== "object") continue;
 
@@ -276,7 +277,7 @@ export default class finder extends Application {
 			return;
 		}
 
-		const iconScale = 2;
+		const iconScale = 0.5;
 		const padding = 5;
 
 		this.renderer.box(0, 0, 100, this.renderer.windowHeight + 100, {
@@ -290,14 +291,14 @@ export default class finder extends Application {
 
 		const homedir = usrinf.directory;
 		const important: Record<string, string> = {
-			Documents: env.fs.resolve(homedir, "./Documents"),
-			Desktop: env.fs.resolve(homedir, "./Desktop"),
-			Notes: env.fs.resolve(homedir, "./Notes"),
+			Documents: this.env.fs.resolve(homedir, "./Documents"),
+			Desktop: this.env.fs.resolve(homedir, "./Desktop"),
+			Notes: this.env.fs.resolve(homedir, "./Notes"),
 			Home: homedir
 		};
 		let y = 10 + 10 * 1.2;
 		for (const name in important) {
-			const icon = this.renderer.icon(10, y, "folder", 0.5);
+			const icon = this.renderer.icon(10, y, "folder", iconScale);
 			const text = this.renderer.text(25, y, name, 12);
 
 			const onclick = () => {

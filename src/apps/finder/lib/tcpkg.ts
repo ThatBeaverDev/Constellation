@@ -11,27 +11,27 @@ export default async function tcpkg(
 	outputDirectory: string,
 	...data: string[]
 ) {
-	const mimeLib = await env.include("/System/CoreLibraries/mime.js");
+	const mimeLib = await parent.env.include("/System/CoreLibraries/mime.js");
 
 	let logs = [];
 
 	// get params from args
 	const params: Record<string, string> = {};
-	const args = data
-		.map((item) => {
-			if (item[0] == "-") {
-				// it's a parameter
-				const name = item.substring(1, Infinity).split("=")[0];
-				const value = item.substring(item.indexOf("=") + 1, Infinity);
-
-				params[name] = value;
-
-				return undefined;
-			}
-
-			return item;
-		})
-		.filter((item) => item !== undefined);
+	//const args = data
+	//	.map((item) => {
+	//		if (item[0] == "-") {
+	//			// it's a parameter
+	//			const name = item.substring(1, Infinity).split("=")[0];
+	//			const value = item.substring(item.indexOf("=") + 1, Infinity);
+	//
+	//			params[name] = value;
+	//
+	//			return undefined;
+	//		}
+	//
+	//		return item;
+	//	})
+	//	.filter((item) => item !== undefined);
 
 	let verbose = params.v == "-v" || String(params["-verbose"]) == "true";
 
@@ -39,13 +39,16 @@ export default async function tcpkg(
 		throw new Error("You need to provide a directory to package!");
 	}
 
-	const input = env.fs.resolve(parent.path, packageDirectory);
-	const output = env.fs.resolve(parent.path, outputDirectory || "./app.idx");
+	const input = parent.env.fs.resolve(parent.path, packageDirectory);
+	const output = parent.env.fs.resolve(
+		parent.path,
+		outputDirectory || "./app.idx"
+	);
 
 	async function checkOutput() {
 		let content;
 		try {
-			const read = await env.fs.readFile(output);
+			const read = await parent.env.fs.readFile(output);
 			if (!read.ok) throw read.data;
 			content = read.data;
 		} catch (e) {}
@@ -71,21 +74,21 @@ export default async function tcpkg(
 	// walk the folder
 	async function walk(directory: string) {
 		if (verbose) logs.push(`Walking ${directory}...`);
-		const listDir = await env.fs.listDirectory(directory);
+		const listDir = await parent.env.fs.listDirectory(directory);
 		if (!listDir.ok) throw listDir.data;
 
 		const ls = listDir.data;
 
 		for (const item of ls) {
-			const dir = env.fs.resolve(directory, item);
+			const dir = parent.env.fs.resolve(directory, item);
 
-			const stt = await env.fs.stat(dir);
+			const stt = await parent.env.fs.stat(dir);
 			if (!stt.ok) throw stt.data;
 			const stat = stt.data;
 
 			const isDir = stat.isDirectory();
 
-			const relative: string = env.fs.relative(input, dir);
+			const relative: string = parent.env.fs.relative(input, dir);
 
 			if (isDir) {
 				// folder
@@ -110,7 +113,7 @@ export default async function tcpkg(
 						type.startsWith("text/") || type == "image/svg+xml";
 
 					if (isText) {
-						const read = await env.fs.readFile(dir);
+						const read = await parent.env.fs.readFile(dir);
 						if (!read.ok) throw read.data;
 
 						const content = read.data;
@@ -118,7 +121,7 @@ export default async function tcpkg(
 						pkg.files[relative] = content;
 					} else {
 						// encode to dataURI
-						const read = await env.fs.readFile(dir);
+						const read = await parent.env.fs.readFile(dir);
 						if (!read.ok) throw read.data;
 						const content = read.data;
 
@@ -152,7 +155,7 @@ export default async function tcpkg(
 	// stringify it
 	const result = JSON.stringify(pkg, null, 8);
 
-	const write = await env.fs.writeFile(output, result);
+	const write = await parent.env.fs.writeFile(output, result);
 	if (!write.ok) throw write.data;
 
 	logs.push("App packaged to '" + output + "' successfully!");

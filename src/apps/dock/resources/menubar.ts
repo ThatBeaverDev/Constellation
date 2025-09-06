@@ -1,9 +1,9 @@
-import { Renderer } from "../../../lib/uiKit/uiKit";
+import { UiKitRenderer } from "../../../gui/uiKit/uiKit";
 import dockAndDesktop from "../tcpsys/app";
 
 export default class menubar {
 	parent: dockAndDesktop;
-	renderer: Renderer;
+	renderer: UiKitRenderer;
 	env: dockAndDesktop["env"];
 
 	barHeight: number = 35;

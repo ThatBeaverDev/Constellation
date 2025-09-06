@@ -5,16 +5,16 @@ import * as executables from "./runtime/executables.js";
 export {}; // mark as module to allow global augment
 
 declare global {
-	interface Window {
-		env: ApplicationAuthorisationAPI;
-	}
-
 	interface String {
 		textAfter(after: string): string;
 		textAfterAll(after: string): string;
 		textBefore(before: string): string;
 		textBeforeLast(before: string): string;
 		map(mappings: any): string;
+	}
+
+	interface Window {
+		runtime: "nodejs" | "browser" | "deno";
 	}
 
 	const env: ApplicationAuthorisationAPI;
@@ -30,4 +30,6 @@ declare global {
 	const Module: new (directory: string, args: any[]) => executables.Module;
 
 	type ApplicationManifest = executables.ProgramManifest;
+
+	const runtime: "node" | "browser";
 }

@@ -1,9 +1,8 @@
-import { registerKeyboardShortcut } from "../io/keyboardShortcuts.js";
-import { Renderer } from "../lib/uiKit/uiKit.js";
+import { UiKitRenderer } from "../gui/uiKit/uiKit.js";
 import { ApplicationAuthorisationAPI } from "../security/env.js";
 import { terminate } from "./runtime.js";
 import { IPCMessage, replyCallback, sendMessage } from "./messages.js";
-import ConstellationKernel from "../main.js";
+import ConstellationKernel from "../kernel.js";
 
 export let nextPID = 0;
 let popupNo = 25000;
@@ -72,13 +71,13 @@ export class Framework {
 		password: string
 	) {
 		this.directory = directory;
-		this.env = new ApplicationAuthorisationAPI(
-			ConstellationKernel.security.env,
+		this.env = ConstellationKernel.security.env.newEnv(
 			directory,
 			user,
 			password,
 			this
 		);
+
 		this.id = nextPID++;
 		this.identifier = this.directory + ":" + this.id;
 		this.args = args;
@@ -180,6 +179,21 @@ export class Process extends Framework {
 				);
 			}
 		};
+
+		this.registerKeyboardShortcut = function (
+			name: string,
+			key: string,
+			modifiers: string[]
+		): undefined {
+			if (ConstellationKernel.UserInterface == undefined) return;
+
+			ConstellationKernel.UserInterface.keyboardShortcuts.registerKeyboardShortcut(
+				this,
+				name,
+				key,
+				modifiers
+			);
+		};
 	}
 
 	/**
@@ -276,9 +290,7 @@ export class Process extends Framework {
 		name: string,
 		key: string,
 		modifiers: string[]
-	) => {
-		registerKeyboardShortcut(this, name, key, modifiers);
-	};
+	): undefined => {};
 
 	/**
 	 * Function to exit the process, and pass a value out through the executor's AppWaitingObject.
@@ -312,10 +324,17 @@ export class Application extends Process {
 		password: string
 	) {
 		super(ConstellationKernel, directory, args, user, password);
-		this.renderer = new Renderer(this);
+		const UserInterface = ConstellationKernel.UserInterface;
+		if (UserInterface == undefined) {
+			throw new Error(
+				"Graphical applications cannot run in non-graphical environments."
+			);
+		}
+
+		this.renderer = UserInterface.uiKit.newRenderer(this);
 	}
 
-	renderer: Renderer;
+	renderer: UiKitRenderer;
 
 	exit(value?: any) {
 		this.renderer.terminate();
@@ -346,7 +365,7 @@ export class Popup extends Application {
 		}, 500);
 	}
 
-	#windowPositioningInterval: number;
+	#windowPositioningInterval: ReturnType<typeof setInterval>;
 
 	exit(value?: Exclude<any, null>) {
 		clearInterval(this.#windowPositioningInterval);

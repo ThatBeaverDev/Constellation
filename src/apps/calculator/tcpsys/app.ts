@@ -1,5 +1,5 @@
 import { IPCMessage } from "../../../runtime/messages.js";
-import { evaluate, tokenise } from "../resources/logic.js";
+import { evaluate } from "../resources/logic.js";
 
 export default class calc extends Application {
 	text: string = "";
@@ -13,7 +13,7 @@ export default class calc extends Application {
 	onmessage(msg: IPCMessage) {
 		switch (msg.originDirectory) {
 			case "/System/io/keyboard.js":
-				console.log(msg);
+				this.env.log(msg);
 				break;
 		}
 	}
@@ -68,7 +68,7 @@ export default class calc extends Application {
 					"=": () => {
 						this.mode = "answer";
 						try {
-							this.result = evaluate(this.text);
+							this.result = evaluate(this.text, this.env);
 						} catch (e: any) {
 							this.text = String(e);
 							this.result = NaN;
@@ -148,7 +148,7 @@ export default class calc extends Application {
 					"=": () => {
 						this.mode = "answer";
 						try {
-							this.result = evaluate(this.text);
+							this.result = evaluate(this.text, this.env);
 						} catch (e: any) {
 							this.text = String(e);
 							this.result = NaN;

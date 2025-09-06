@@ -1,16 +1,8 @@
-import * as conf from "../constellation.config.js";
-import realFS, { FilesystemAPI } from "../io/fs.js";
+import { FilesystemAPI } from "../fs/fs.js";
 import { appName } from "../runtime/runtime.js";
 import { PermissionsError } from "../errors.js";
-import {
-	allWindows,
-	focusedWindow,
-	getWindowOfId,
-	GraphicalWindow
-} from "../windows/windows.js";
 import { Framework, Process } from "../runtime/executables.js";
 import Shell from "../lib/shell.js";
-import { include } from "../runtime/importRewrites.js";
 import {
 	directoryPointType as directoryPoint,
 	fsResponse,
@@ -19,14 +11,14 @@ import {
 	WindowAlias
 } from "./definitions.js";
 import Users, { User } from "./users.js";
-import { debug, error, log, warn } from "../lib/logging.js";
-import { FS, Stats } from "../io/browserfs.js";
+import { Stats } from "../fs/BrowserFsTypes.js";
 import {
 	DirectoryPermissionStats,
 	Permission,
 	Permissions
 } from "./permissions.js";
-import ConstellationKernel from "../main.js";
+import ConstellationKernel from "../kernel.js";
+import { GraphicalWindow } from "../gui/windows/windows.js";
 
 const start = performance.now();
 const name = "/System/security/env.js";
@@ -37,13 +29,21 @@ securityTimestamp("Startup /src/security/env.ts", start);
 
 export class EnvironmentCreator {
 	associations: any = {};
-
+	filesystem: FilesystemAPI;
+	users: Users;
+	permissions: Permissions;
+	#ConstellationKernel: ConstellationKernel;
 	constructor(
-		public filesystem: FilesystemAPI,
-		public users: Users,
-		public permissions: Permissions,
-		public ConstellationKernel: ConstellationKernel
-	) {}
+		filesystem: FilesystemAPI,
+		users: Users,
+		permissions: Permissions,
+		ConstellationKernel: ConstellationKernel
+	) {
+		this.filesystem = filesystem;
+		this.users = users;
+		this.permissions = permissions;
+		this.#ConstellationKernel = ConstellationKernel;
+	}
 
 	newEnv(
 		directory: string,
@@ -53,6 +53,7 @@ export class EnvironmentCreator {
 		isGlobal: boolean = false
 	) {
 		return new ApplicationAuthorisationAPI(
+			this.#ConstellationKernel,
 			this,
 			directory,
 			user,
@@ -65,8 +66,10 @@ export class EnvironmentCreator {
 
 export class ApplicationAuthorisationAPI {
 	#environmentCreator: EnvironmentCreator;
+	#ConstellationKernel: ConstellationKernel;
 
 	constructor(
+		ConstellationKernel: ConstellationKernel,
 		environmentCreator: EnvironmentCreator,
 		directory: string,
 		user: string,
@@ -77,7 +80,11 @@ export class ApplicationAuthorisationAPI {
 		const start = performance.now();
 
 		this.#environmentCreator = environmentCreator;
+		this.#ConstellationKernel = ConstellationKernel;
 		this.#isGlobal = isGlobal;
+
+		this.fs.resolve = this.#ConstellationKernel.fs.resolve;
+		this.fs.relative = this.#ConstellationKernel.fs.relative;
 
 		this.#permissions =
 			this.#environmentCreator.permissions.getDirectoryPermissions(
@@ -102,7 +109,7 @@ export class ApplicationAuthorisationAPI {
 		this.#password = password;
 		this.#process = process;
 
-		debug(
+		this.#ConstellationKernel.lib.logging.debug(
 			name,
 			`ApplicationAuthorisationAPI created as ${user} for ${directory}`
 		);
@@ -139,7 +146,11 @@ export class ApplicationAuthorisationAPI {
 			);
 		}
 
-		debug(initiator, ...content);
+		this.#ConstellationKernel.lib.logging.debug(
+			initiator,
+			content[0],
+			...content.splice(1, Infinity)
+		);
 	}
 	log(...content: any): undefined {
 		const initiator = this.directory;
@@ -149,7 +160,11 @@ export class ApplicationAuthorisationAPI {
 			);
 		}
 
-		log(initiator, ...content);
+		this.#ConstellationKernel.lib.logging.log(
+			initiator,
+			content[0],
+			...content.splice(1, Infinity)
+		);
 	}
 	warn(...content: any): undefined {
 		const initiator = this.directory;
@@ -159,7 +174,11 @@ export class ApplicationAuthorisationAPI {
 			);
 		}
 
-		warn(initiator, ...content);
+		this.#ConstellationKernel.lib.logging.warn(
+			initiator,
+			content[0],
+			...content.splice(1, Infinity)
+		);
 	}
 	error(...content: any): undefined {
 		const initiator = this.directory;
@@ -169,7 +188,11 @@ export class ApplicationAuthorisationAPI {
 			);
 		}
 
-		error(initiator, ...content);
+		this.#ConstellationKernel.lib.logging.error(
+			initiator,
+			content[0],
+			...content.splice(1, Infinity)
+		);
 	}
 
 	/**
@@ -178,11 +201,7 @@ export class ApplicationAuthorisationAPI {
 	 * @param reason - the description of this statement
 	 */
 	prompt(text: string, reason = "") {
-		this.#environmentCreator.ConstellationKernel.runtime.showPrompt(
-			"log",
-			text,
-			reason
-		);
+		this.#ConstellationKernel.runtime.showPrompt("log", text, reason);
 	}
 
 	#directoryActionCheck(directory: string, isWriteOperation: boolean) {
@@ -222,7 +241,7 @@ export class ApplicationAuthorisationAPI {
 			try {
 				this.#directoryActionCheck(directory, true);
 
-				await realFS.mkdir(directory);
+				await this.#ConstellationKernel.fs.mkdir(directory);
 				return { data: true, ok: true };
 			} catch (error: any) {
 				return {
@@ -237,7 +256,8 @@ export class ApplicationAuthorisationAPI {
 			try {
 				this.#directoryActionCheck(directory, false);
 
-				const list = await realFS.readdir(directory);
+				const list =
+					await this.#ConstellationKernel.fs.readdir(directory);
 				return { data: list, ok: true };
 			} catch (error: any) {
 				return {
@@ -253,7 +273,7 @@ export class ApplicationAuthorisationAPI {
 				this.#directoryActionCheck(directory, true);
 
 				let err: Error | undefined;
-				await realFS.rmdir(directory);
+				await this.#ConstellationKernel.fs.rmdir(directory);
 
 				if (err !== undefined && err !== null) {
 					// @ts-expect-error
@@ -284,7 +304,10 @@ export class ApplicationAuthorisationAPI {
 			try {
 				this.#directoryActionCheck(directory, true);
 
-				await realFS.writeFile(directory, contents);
+				await this.#ConstellationKernel.fs.writeFile(
+					directory,
+					contents
+				);
 				return {
 					data: true,
 					ok: true
@@ -300,7 +323,7 @@ export class ApplicationAuthorisationAPI {
 			try {
 				this.#directoryActionCheck(directory, true);
 
-				await realFS.unlink(directory);
+				await this.#ConstellationKernel.fs.unlink(directory);
 				return {
 					data: true,
 					ok: true
@@ -314,7 +337,8 @@ export class ApplicationAuthorisationAPI {
 		},
 		readFile: async (directory: string): Promise<fsResponse<string>> => {
 			try {
-				const content = await realFS.readFile(directory);
+				const content =
+					await this.#ConstellationKernel.fs.readFile(directory);
 
 				if (content == undefined) {
 					throw new Error(`File at ${directory} does not exist!`);
@@ -331,32 +355,36 @@ export class ApplicationAuthorisationAPI {
 				};
 			}
 		},
-		move: async (
-			oldDirectory: string,
-			newDirectory: string
-		): Promise<fsResponse<void>> => {
-			try {
-				return {
-					data: await realFS.rename(oldDirectory, newDirectory),
-					ok: true
-				};
-			} catch (error: any) {
-				return {
-					data: error,
-					ok: false
-				};
-			}
-		},
+		//move: async (
+		//	oldDirectory: string,
+		//	newDirectory: string
+		//): Promise<fsResponse<void>> => {
+		//	try {
+		//		return {
+		//			data: await this.#environmentCreator.ConstellationKernel.fs.rename(
+		//				oldDirectory,
+		//				newDirectory
+		//			),
+		//			ok: true
+		//		};
+		//	} catch (error: any) {
+		//		return {
+		//			data: error,
+		//			ok: false
+		//		};
+		//	}
+		//},
 
 		stat: async (directory: string): Promise<fsResponse<Stats>> => {
 			try {
 				this.#directoryActionCheck(directory, false);
 
-				const stat = await realFS.stat(directory);
+				const stat = await this.#ConstellationKernel.fs.stat(directory);
 
 				if (stat == undefined) {
 					throw new Error(
-						directory + " has no file and cannot be 'statted'"
+						directory +
+							" does not exist and therefore cannot be 'statted'"
 					);
 				}
 
@@ -415,8 +443,8 @@ export class ApplicationAuthorisationAPI {
 		/**
 		 *
 		 */
-		resolve: realFS.resolve,
-		relative: realFS.relative
+		resolve: (base: string, ...targets: string[]): string => "/",
+		relative: (from: string, to: string): string => "/"
 	};
 
 	expectFileType = async (
@@ -443,16 +471,12 @@ export class ApplicationAuthorisationAPI {
 		this.#directoryActionCheck(directory, false);
 
 		let type = directory.includes("://") ? "URL" : "directory";
-		// @ts-expect-error
-		if (conf.importOverrides[directory] !== undefined) {
-			type = "URL";
-			// @ts-expect-error
-			url = conf.importOverrides[directory];
-		}
 
 		switch (type) {
 			case "directory":
-				return await include(directory);
+				return await this.#ConstellationKernel.runtime.importsRewriter.include(
+					directory
+				);
 			case "URL":
 				const exports = await import(url.toString());
 
@@ -472,7 +496,7 @@ export class ApplicationAuthorisationAPI {
 			);
 
 		if (this.#process instanceof Process)
-			return this.#environmentCreator.ConstellationKernel.runtime.execute(
+			return this.#ConstellationKernel.runtime.execute(
 				directory,
 				args,
 				user,
@@ -497,10 +521,7 @@ export class ApplicationAuthorisationAPI {
 		permission: Permission,
 		value: boolean
 	) {
-		this.#environmentCreator.permissions.checkDirectoryPermission(
-			this.directory,
-			"managePermissions"
-		);
+		this.#checkPermission("managePermissions");
 
 		await this.#environmentCreator.permissions.setDirectoryPermission(
 			directory,
@@ -512,10 +533,7 @@ export class ApplicationAuthorisationAPI {
 	async hasPermission(permission: Permission) {
 		try {
 			// this will error if we don't have the permission
-			this.#environmentCreator.permissions.checkDirectoryPermission(
-				this.directory,
-				permission
-			);
+			this.#checkPermission(permission);
 
 			return true;
 		} catch {}
@@ -556,15 +574,13 @@ export class ApplicationAuthorisationAPI {
 		}
 
 		this.log("Permission by name " + permission + " requested.");
-		const ok =
-			await this.#environmentCreator.ConstellationKernel.runtime.showPrompt(
-				"log",
-				appname + " is requesting permission for " + permission,
-				this.#environmentCreator.permissions.permissionsMetadata[
-					permission
-				].description,
-				["Allow", "Deny"]
-			);
+		const ok = await this.#ConstellationKernel.runtime.showPrompt(
+			"log",
+			appname + " is requesting permission for " + permission,
+			this.#environmentCreator.permissions.permissionsMetadata[permission]
+				.description,
+			["Allow", "Deny"]
+		);
 
 		switch (ok) {
 			case "Allow":
@@ -652,14 +668,13 @@ export class ApplicationAuthorisationAPI {
 		all: (): WindowAlias[] => {
 			const start = performance.now();
 
-			this.#environmentCreator.permissions.checkDirectoryPermission(
-				this.directory,
-				"windows"
-			);
+			this.#checkPermission("windows");
+			const UserInterface = this.#ConstellationKernel.UserInterface;
+			if (UserInterface == undefined) return [];
 
 			const obj: WindowAlias[] = [];
 
-			for (const win of allWindows()) {
+			for (const win of UserInterface.windows.allWindows()) {
 				const wn = this.#windowToAlias(win);
 
 				obj.push(wn);
@@ -675,12 +690,13 @@ export class ApplicationAuthorisationAPI {
 		getFocus: (): WindowAlias | undefined => {
 			const start = performance.now();
 
-			this.#environmentCreator.permissions.checkDirectoryPermission(
-				this.directory,
-				"windows"
-			);
+			this.#checkPermission("windows");
+			const UserInterface = this.#ConstellationKernel.UserInterface;
+			if (UserInterface == undefined) return undefined;
 
-			const target = getWindowOfId(focusedWindow);
+			const target = UserInterface.windows.getWindowOfId(
+				UserInterface.windows.focusedWindow
+			);
 
 			if (target == undefined) return undefined; // no window is focused
 
@@ -689,6 +705,17 @@ export class ApplicationAuthorisationAPI {
 			securityTimestamp(`Env ${this.directory} get window focus`, start);
 
 			return obj;
+		},
+		/**
+		 * Focuses the window by the given ID.
+		 * @param id - the Window's ID.
+		 */
+		focusWindow: (id: number) => {
+			this.#checkPermission("windows");
+			const UserInterface = this.#ConstellationKernel.UserInterface;
+			if (UserInterface == undefined) return undefined;
+
+			UserInterface.windows.focusWindow(id);
 		}
 	};
 
@@ -702,10 +729,7 @@ export class ApplicationAuthorisationAPI {
 		all: () => {
 			const start = performance.now();
 
-			this.#environmentCreator.permissions.checkDirectoryPermission(
-				this.directory,
-				"users"
-			);
+			this.#checkPermission("users");
 
 			const obj: Record<UserAlias["name"], UserAlias> = {};
 

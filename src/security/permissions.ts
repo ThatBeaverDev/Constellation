@@ -1,5 +1,5 @@
 import { PermissionsError } from "../errors.js";
-import fs, { FilesystemAPI } from "../io/fs.js";
+import { FilesystemAPI } from "../fs/fs.js";
 import { securityTimestamp } from "./definitions.js";
 import { defaultUser } from "./users.js";
 
@@ -35,14 +35,14 @@ export type DirectoryPermissionStats = Record<Permission, boolean> & {
 export class Permissions {
 	permissionsData: PermissionsStore = {};
 
-	constructor(public filesystem: FilesystemAPI) {}
+	constructor(public fs: FilesystemAPI) {}
 	async init() {
 		// check if there's already a permissions file
 		const permissionsFileExists =
-			(await fs.stat(permissionsDirectory)) !== undefined;
+			(await this.fs.stat(permissionsDirectory)) !== undefined;
 		// if the permissions file exists, use it, else use {}
 		const fileData = permissionsFileExists
-			? JSON.parse((await fs.readFile(permissionsDirectory)) || "{}")
+			? JSON.parse((await this.fs.readFile(permissionsDirectory)) || "{}")
 			: {};
 
 		// put data into the permissions storage variable
@@ -85,7 +85,7 @@ export class Permissions {
 	}
 
 	async onPermissionsUpdate() {
-		await fs.writeFile(
+		await this.fs.writeFile(
 			permissionsDirectory,
 			JSON.stringify(this.permissionsData)
 		);
