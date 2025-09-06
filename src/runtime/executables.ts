@@ -185,9 +185,9 @@ export class Process extends Framework {
 			key: string,
 			modifiers: string[]
 		): undefined {
-			if (ConstellationKernel.UserInterface == undefined) return;
+			if (ConstellationKernel.GraphicalInterface == undefined) return;
 
-			ConstellationKernel.UserInterface.keyboardShortcuts.registerKeyboardShortcut(
+			ConstellationKernel.GraphicalInterface.keyboardShortcuts.registerKeyboardShortcut(
 				this,
 				name,
 				key,
@@ -324,7 +324,7 @@ export class Application extends Process {
 		password: string
 	) {
 		super(ConstellationKernel, directory, args, user, password);
-		const UserInterface = ConstellationKernel.UserInterface;
+		const UserInterface = ConstellationKernel.GraphicalInterface;
 		if (UserInterface == undefined) {
 			throw new Error(
 				"Graphical applications cannot run in non-graphical environments."

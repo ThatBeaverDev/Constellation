@@ -118,10 +118,13 @@ export class ContextMenu {
 			if (afterIcon !== "") {
 				txt = " ".repeat(Math.ceil(24 / widthOfSpace)) + afterIcon;
 
-				if (ConstellationKernel.UserInterface == undefined) {
+				if (ConstellationKernel.GraphicalInterface == undefined) {
 					icon = document.createElement("img");
 				} else {
-					icon = ConstellationKernel.UserInterface.getIcon(iconName);
+					icon =
+						ConstellationKernel.GraphicalInterface.getIcon(
+							iconName
+						);
 				}
 
 				icon.style.top = `${yPos}px`;

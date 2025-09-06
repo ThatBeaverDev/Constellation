@@ -669,7 +669,7 @@ export class ApplicationAuthorisationAPI {
 			const start = performance.now();
 
 			this.#checkPermission("windows");
-			const UserInterface = this.#ConstellationKernel.UserInterface;
+			const UserInterface = this.#ConstellationKernel.GraphicalInterface;
 			if (UserInterface == undefined) return [];
 
 			const obj: WindowAlias[] = [];
@@ -691,7 +691,7 @@ export class ApplicationAuthorisationAPI {
 			const start = performance.now();
 
 			this.#checkPermission("windows");
-			const UserInterface = this.#ConstellationKernel.UserInterface;
+			const UserInterface = this.#ConstellationKernel.GraphicalInterface;
 			if (UserInterface == undefined) return undefined;
 
 			const target = UserInterface.windows.getWindowOfId(
@@ -712,7 +712,7 @@ export class ApplicationAuthorisationAPI {
 		 */
 		focusWindow: (id: number) => {
 			this.#checkPermission("windows");
-			const UserInterface = this.#ConstellationKernel.UserInterface;
+			const UserInterface = this.#ConstellationKernel.GraphicalInterface;
 			if (UserInterface == undefined) return undefined;
 
 			UserInterface.windows.focusWindow(id);

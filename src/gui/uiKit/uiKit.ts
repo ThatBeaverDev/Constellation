@@ -138,7 +138,7 @@ class UiKitRendererClass {
 		this.#ConstellationKernel = ConstellationKernel;
 		this.#process = process;
 
-		const UserInterface = ConstellationKernel.UserInterface;
+		const UserInterface = ConstellationKernel.GraphicalInterface;
 		if (UserInterface == undefined)
 			throw new Error(
 				"UIkit requires a graphical environment to function."
@@ -482,7 +482,7 @@ class UiKitRendererClass {
 	}
 
 	#focusTextbox() {
-		const UserInterface = this.#ConstellationKernel.UserInterface;
+		const UserInterface = this.#ConstellationKernel.GraphicalInterface;
 		if (UserInterface == undefined) return;
 
 		const windowFocus = UserInterface.windows.getWindowOfId(
@@ -499,7 +499,7 @@ class UiKitRendererClass {
 	 * Commits all UI elements since the last `renderer.clear()` call.
 	 */
 	readonly commit = () => {
-		const UserInterface = this.#ConstellationKernel.UserInterface;
+		const UserInterface = this.#ConstellationKernel.GraphicalInterface;
 		if (UserInterface == undefined) return;
 
 		const start = performance.now();

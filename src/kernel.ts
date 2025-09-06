@@ -6,14 +6,29 @@ import * as apps from "./runtime/runtime.js";
 import panic from "./lib/panic.js";
 import ConstellationConfiguration from "./constellation.config.js";
 import Security from "./security/index.js";
-import { UserInterface } from "./gui/gui.js";
+import { GraphicalInterface } from "./gui/gui.js";
 import blobifier from "./lib/blobify.js";
 import LoggingAPI from "./lib/logging.js";
+import { TextInterface } from "./tui/tui.js";
 
 (window as any).kernels = [];
 const path = "/System/kernel.js";
 
-export default class ConstellationKernel {
+type GraphicalKernel = {
+	isGraphical: true;
+	GraphicalInterface: GraphicalInterface;
+	TextInterface?: never;
+};
+
+type CommandLineKernel = {
+	isGraphical: false;
+	GraphicalInterface?: never;
+	TextInterface?: TextInterface;
+};
+
+type Kernel = GraphicalKernel | CommandLineKernel;
+
+export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 	verboseBootUIInterval?: ReturnType<typeof setInterval>;
 
 	// subsystems
@@ -23,26 +38,32 @@ export default class ConstellationKernel {
 	config: ConstellationConfiguration;
 	lib: { blobifier: blobifier; logging: LoggingAPI };
 
-	UserInterface?: UserInterface;
+	// property types
+	GraphicalInterface?: KernelType extends { isGraphical: true }
+		? GraphicalInterface
+		: undefined;
+	TextInterface?: KernelType extends { isGraphical: false }
+		? TextInterface
+		: undefined;
 
 	constructor(
 		rootPoint: string,
-		public isGraphical: boolean = false,
+		public isGraphical: boolean,
 		logs: any[] = []
 	) {
 		(window as any).kernels.push(this);
-
-		const url = new URL(window.location.href);
-		const params = url.searchParams;
-		const bootScreenTest = params.get("bootscreenTest") == "true";
 
 		// subsystems
 		this.fs = new FilesystemAPI(rootPoint);
 		this.security = new Security(this);
 		this.runtime = new apps.ProgramRuntime(this);
 		this.config = new ConstellationConfiguration(this);
+
+		// assign based on runtime flag
 		if (isGraphical) {
-			this.UserInterface = new UserInterface(this);
+			this.GraphicalInterface = new GraphicalInterface(this) as any;
+		} else {
+			this.TextInterface = new TextInterface(this) as any;
 		}
 
 		if (isGraphical) {
@@ -63,12 +84,10 @@ export default class ConstellationKernel {
 			logging: new LoggingAPI()
 		};
 
-		if (!bootScreenTest) {
-			try {
-				this.init();
-			} catch (e) {
-				panic(e, "systemMain");
-			}
+		try {
+			this.init();
+		} catch (e) {
+			panic(e, "systemInit");
 		}
 	}
 
@@ -79,8 +98,8 @@ export default class ConstellationKernel {
 
 		await this.security.init();
 
-		if (this.UserInterface) {
-			await this.UserInterface.init();
+		if (this.GraphicalInterface) {
+			await this.GraphicalInterface.init();
 		}
 		await this.runtime.init();
 

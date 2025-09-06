@@ -45,8 +45,8 @@ export default class ConstellationConfiguration {
 
 		this.status = String(text);
 
-		if (this.#ConstellationKernel.UserInterface !== undefined) {
-			this.#ConstellationKernel.UserInterface.setStatus(text, state);
+		if (this.#ConstellationKernel.GraphicalInterface !== undefined) {
+			this.#ConstellationKernel.GraphicalInterface.setStatus(text, state);
 		}
 	}
 }
