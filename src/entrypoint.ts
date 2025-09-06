@@ -75,17 +75,55 @@ if (isCommandLine) {
 
 	// @ts-expect-error
 	process.chdir(projectRoot);
-} else {
 }
 
-const ConstellationKernel = (await import("./kernel.js")).default;
-(window as any).ConstellationKernel = ConstellationKernel;
+async function startupKernel() {
+	if (!isCommandLine) {
+		document.removeEventListener("keydown", detectKeyPresses);
+	}
 
-const logs: string[] = [];
-const kernel = new ConstellationKernel(
-	"/",
-	typeof window.document !==
-		"undefined" /* Only boot graphical if in a browser, else use console mode */,
-	logs
-);
-kernel.lib.logging.log("external", kernel);
+	const ConstellationKernel = (await import("./kernel.js")).default;
+	(window as any).ConstellationKernel = ConstellationKernel;
+
+	let isGraphical = true;
+	if (typeof window.document == "undefined" || appliedBootKey == "tuiMode") {
+		/* Only boot graphical if in a browser or user requested it, else use console mode */
+		isGraphical = false;
+	}
+
+	const logs: string[] = [];
+	const kernel = new ConstellationKernel("/", isGraphical, logs);
+	kernel.lib.logging.log("external", kernel);
+}
+
+const bootKeys = {
+	tuiMode:
+		"Boots the system into TUI mode, which is the default for command line programs.",
+	safeMode:
+		"Boots the sytem into safe mode, wherein only authorised programs can run."
+};
+type bootkey = keyof typeof bootKeys;
+
+let appliedBootKey: bootkey | undefined = undefined;
+
+function detectKeyPresses(event: KeyboardEvent) {
+	if (appliedBootKey !== undefined) return;
+
+	const key = event.code;
+
+	switch (key) {
+		case "KeyS":
+			// TODO: implement safe mode
+			appliedBootKey = "safeMode";
+			break;
+		case "KeyT":
+			appliedBootKey = "tuiMode";
+			break;
+	}
+}
+
+if (!isCommandLine) {
+	document.addEventListener("keydown", detectKeyPresses);
+}
+
+setTimeout(startupKernel, 1000);
