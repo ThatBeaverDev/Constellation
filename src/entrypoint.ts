@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 import { isCommandLine } from "./getPlatform.js";
 
 // allow `declare global`.
@@ -63,6 +65,17 @@ if (isCommandLine) {
 			return "https://localhost:5174";
 		}
 	};
+
+	// we now need to insure we're in the right directory, else system installaton will fail.
+	// @ts-expect-error
+	const entrypoint = process.argv[1];
+
+	const entrypointParent = entrypoint.textBeforeLast("/");
+	const projectRoot = entrypointParent.textBeforeLast("/");
+
+	// @ts-expect-error
+	process.chdir(projectRoot);
+} else {
 }
 
 const ConstellationKernel = (await import("./kernel.js")).default;
