@@ -137,7 +137,6 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 		);
 
 		try {
-			this.lib.logging.warn(path, coreExecDirectory);
 			const exec = await this.runtime.execute(
 				coreExecDirectory,
 				[],

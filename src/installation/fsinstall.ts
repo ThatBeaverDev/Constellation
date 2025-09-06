@@ -102,7 +102,13 @@ export class FilesystemInstaller {
 					return fs.readFile(path, { encoding: "utf8" });
 				}
 			: async (location: string): Promise<string> => {
-					return await (await fetch(location)).text();
+					const req = await fetch(location);
+					if (!req.ok) {
+						throw new Error(
+							`Failed to fetch file from location ${location}`
+						);
+					}
+					return await req.text();
 				};
 
 		this.#ConstellationKernel.config.setStatus(
@@ -186,7 +192,6 @@ export class FilesystemInstaller {
 
 					const startDirectories = performance.now();
 
-					this.#ConstellationKernel.lib.logging.warn(path, directory);
 					await this.fs.mkdir(directory);
 
 					try {
