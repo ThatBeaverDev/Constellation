@@ -66,6 +66,11 @@ class UiKitRendererClass {
 	// window stuff
 	windowWidth: number = 0;
 	windowHeight: number = 0;
+	/**
+	 * Resizes the application window
+	 * @param width - width of the window in pixels
+	 * @param height - height of the window in pixels
+	 */
 	resizeWindow(width: number, height: number) {
 		this.#window.resize(width, height);
 	}
