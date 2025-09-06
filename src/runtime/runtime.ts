@@ -57,6 +57,9 @@ export function getProcessFromID(id: number) {
 }
 
 type executionFiletype = "js";
+export type executionResult = {
+	promise: Promise<any>;
+};
 
 let popupDirectory = "/System/CoreExecutables/Popup.appl";
 
@@ -262,9 +265,7 @@ export class ProgramRuntime {
 		password: string,
 		parent?: Process,
 		waitForInit: boolean = true
-	): Promise<{
-		promise: Promise<any>;
-	}> {
+	): Promise<executionResult> {
 		const start = performance.now();
 
 		this.#ConstellationKernel.lib.logging.debug(

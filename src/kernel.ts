@@ -13,6 +13,7 @@ import { TextInterface } from "./tui/tui.js";
 
 (window as any).kernels = [];
 const path = "/System/kernel.js";
+path;
 
 type GraphicalKernel = {
 	isGraphical: true;
@@ -30,6 +31,7 @@ type Kernel = GraphicalKernel | CommandLineKernel;
 
 export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 	verboseBootUIInterval?: ReturnType<typeof setInterval>;
+	executionInterval?: ReturnType<typeof setInterval>;
 
 	// subsystems
 	fs: FilesystemAPI;
@@ -136,8 +138,10 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 			true
 		);
 
+		let exec: apps.executionResult;
+
 		try {
-			const exec = await this.runtime.execute(
+			exec = await this.runtime.execute(
 				coreExecDirectory,
 				[],
 				"system",
@@ -145,13 +149,13 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 				undefined,
 				false
 			);
-			this.lib.logging.warn(path, exec);
 		} catch (e) {
 			panic(e, "executeCoreExecutableDuringStartup");
+			return;
 		}
 
 		let ok = true;
-		setInterval(async () => {
+		this.executionInterval = setInterval(async () => {
 			if (ok == false) return;
 			ok = false;
 
