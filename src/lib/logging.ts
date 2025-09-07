@@ -71,7 +71,7 @@ function coreLogging(type: logLevel, origin: string, ...content: any[]) {
 
 export default class LoggingAPI {
 	post(mainLog: any, ...content: any[]) {
-		coreLogging("post", "", ...content);
+		coreLogging("post", "", mainLog, ...content);
 	}
 	debug(initiator: string, mainLog: any, ...content: any[]): undefined {
 		coreLogging("debug", initiator, mainLog, ...content);
