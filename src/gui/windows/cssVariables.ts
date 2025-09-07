@@ -4,16 +4,16 @@ import { windowsTimestamp } from "./windows.js";
 export default class cssVariables {
 	live: HTMLElement;
 	vars: Record<string, string> = {};
-	ConstellationKernel: ConstellationKernel;
+	#ConstellationKernel: ConstellationKernel;
 
 	constructor(ConstellationKernel: ConstellationKernel) {
-		this.ConstellationKernel = ConstellationKernel;
+		this.#ConstellationKernel = ConstellationKernel;
 
 		// default variables
 		this.vars = {
-			"wallpaper-url": `url("${this.ConstellationKernel.config.wallpaper}")`,
+			"wallpaper-url": `url("${this.#ConstellationKernel.config.wallpaper}")`,
 			"wallpaper-position":
-				this.ConstellationKernel.config.wallpaperPosition
+				this.#ConstellationKernel.config.wallpaperPosition
 		};
 
 		// construct style element
