@@ -383,8 +383,67 @@ export class ProgramRuntime {
 		// import from the script BLOB
 		const exports = await import(blob);
 
-		// get the class constructor
-		const Executable: typeof Process = exports.default;
+		const { gui, tui, backgr } = exports;
+
+		// get the class executable
+		let Executable: typeof Process;
+		if (
+			this.#ConstellationKernel.GraphicalInterface !== undefined &&
+			typeof gui == "function"
+		) {
+			// Graphical executable
+			// log it
+			this.#ConstellationKernel.lib.logging.debug(
+				path,
+				`Executable at ${directory} in initialisation is using Graphical entrypoint.`
+			);
+
+			// assign it
+			Executable = gui;
+		} else if (
+			this.#ConstellationKernel.TextInterface !== undefined &&
+			typeof tui == "function"
+		) {
+			// Text based executable
+			// log it
+			this.#ConstellationKernel.lib.logging.debug(
+				path,
+				`Executable at ${directory} in initialisation is using Text-based entrypoint.`
+			);
+
+			// assign it
+			Executable = tui;
+		} else if (typeof backgr == "function") {
+			// Background executable
+			// log it
+			this.#ConstellationKernel.lib.logging.debug(
+				path,
+				`Executable at ${directory} in initialisation is using Text-based entrypoint.`
+			);
+
+			// assign it
+			Executable = backgr;
+		} else if (typeof exports.default == "function") {
+			// any old executable
+			// log it
+			this.#ConstellationKernel.lib.logging.debug(
+				path,
+				`Executable at ${directory} in initialisation is using Text-based entrypoint.`
+			);
+
+			// assign it
+			Executable = exports.default;
+		} else {
+			// nothing found.
+
+			this.#ConstellationKernel.lib.logging.error(
+				path,
+				`Executable at ${directory} in initialisation has no supported entrypont.`
+			);
+			throw new Error(
+				`Executable at ${directory} in initialisation has no supported entrypont.`
+			);
+		}
 
 		// create the process
 		const live = new Executable(
