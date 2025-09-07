@@ -1,6 +1,8 @@
 import { FilesystemAPI } from "../fs/fs.js";
 import ConstellationKernel from "../kernel.js";
 
+const path = "/System/gui/icons.js"
+
 export class Icons {
 	cache: Record<string, HTMLImageElement> = {};
 	div: HTMLDivElement;
@@ -77,7 +79,7 @@ export class Icons {
 		const content = await this.fs.readFile(directory);
 		if (content == undefined) {
 			this.#ConstellationKernel.lib.logging.warn(
-				`Failed to load icon from ${directory}:`,
+				path,`Failed to load icon from ${directory}:`,
 				content
 			);
 			icon.alt = "[!]";
