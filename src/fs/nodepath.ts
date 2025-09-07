@@ -223,7 +223,6 @@ posix.basename = function (path: string, ext: string) {
 
 	if (f == undefined) return;
 
-	// TODO: make this comparison case-insensitive on windows?
 	if (ext && f.substring(-1 * ext.length) === ext) {
 		f = f.substring(0, f.length - ext.length);
 	}

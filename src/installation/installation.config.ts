@@ -14,7 +14,7 @@ export const folders: string[] = [
 	"/System/CoreAssets/Logos",
 	"/System/windows",
 
-	"/System/CoreLibraries/mimeFiles",
+	"/System/CoreLibraries/mimes",
 
 	"/Users",
 	"/Applications"
@@ -36,7 +36,7 @@ export const files: Record<
 	"/build/lib/external/fzf.js": "/System/CoreLibraries/fzf.js",
 
 	// mime library
-	"/build/syslib/mime/mimes.js": "/System/CoreLibraries/mimeFiles/mimes.js",
+	"/build/syslib/mime/mimes.js": "/System/CoreLibraries/mimes/mimes.js",
 	"/build/syslib/mime.js": "/System/CoreLibraries/mime.js",
 
 	// logos
