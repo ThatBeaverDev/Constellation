@@ -1,4 +1,4 @@
-export default {
+const mimes: Record<string, string[]> = {
 	"application/andrew-inset": ["ez"],
 	"application/appinstaller": ["appinstaller"],
 	"application/applixware": ["aw"],
@@ -1078,3 +1078,5 @@ export default {
 	"video/x-smv": ["smv"],
 	"x-conference/x-cooltalk": ["ice"]
 };
+
+export default mimes;
