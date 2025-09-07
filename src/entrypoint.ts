@@ -67,35 +67,47 @@ if (isCommandLine) {
 	};
 
 	// we now need to insure we're in the right directory, else system installaton will fail.
-	// @ts-expect-error
 	const entrypoint = process.argv[1];
 
 	const entrypointParent = entrypoint.textBeforeLast("/");
 	const projectRoot = entrypointParent.textBeforeLast("/");
 
-	// @ts-expect-error
 	process.chdir(projectRoot);
 }
 
+/**
+ * Starts the base kernel
+ */
 async function startupKernel() {
+	// wait for the installation index if it's a promise
+	if (installationIndex instanceof Promise) {
+		installationIndex = await installationIndex;
+	}
+
 	if (!isCommandLine) {
 		document.removeEventListener("keydown", detectKeyPresses);
 	}
 
+	// get the contructor
 	const ConstellationKernel = (await import("./kernel.js")).default;
+	// TEMP: add constructor to window
 	(window as any).ConstellationKernel = ConstellationKernel;
 
+	// check if the environment is graphical or not
 	let isGraphical = true;
 	if (typeof window.document == "undefined" || appliedBootKey == "tuiMode") {
 		/* Only boot graphical if in a browser or user requested it, else use console mode */
 		isGraphical = false;
 	}
 
+	// create the kernel
 	const logs: string[] = [];
-	const kernel = new ConstellationKernel("/", isGraphical, logs);
-	kernel.lib.logging.log("external", kernel);
+	new ConstellationKernel("/", isGraphical, logs, {
+		installationIdx: installationIndex
+	});
 }
 
+// Listen for keys in the 1s of kernel time to know whether to boot into either safe mode (TODO) or TUI mode.
 const bootKeys = {
 	tuiMode:
 		"Boots the system into TUI mode, which is the default for command line programs.",
@@ -105,7 +117,11 @@ const bootKeys = {
 type bootkey = keyof typeof bootKeys;
 
 let appliedBootKey: bootkey | undefined = undefined;
+let installationIndex: any = undefined;
 
+if (!isCommandLine) {
+	document.addEventListener("keydown", detectKeyPresses);
+}
 function detectKeyPresses(event: KeyboardEvent) {
 	if (appliedBootKey !== undefined) return;
 
@@ -119,11 +135,29 @@ function detectKeyPresses(event: KeyboardEvent) {
 		case "KeyT":
 			appliedBootKey = "tuiMode";
 			break;
-	}
-}
+		case "KeyF":
+			installationIndex = new Promise((resolve: Function) => {
+				const input = document.createElement("input");
+				input.type = "file";
+				input.accept = ".idx";
 
-if (!isCommandLine) {
-	document.addEventListener("keydown", detectKeyPresses);
+				input.addEventListener("change", async () => {
+					if (input.files == null) return;
+
+					if (input.files.length === 1) {
+						const file = input.files[0];
+						const contents = await file.text();
+						const object = JSON.parse(contents);
+
+						resolve(object);
+					}
+				});
+
+				input.click();
+			});
+
+			break;
+	}
 }
 
 setTimeout(startupKernel, 1000);
