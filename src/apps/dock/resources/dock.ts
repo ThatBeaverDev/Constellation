@@ -7,6 +7,7 @@ import { getAppConfig, pathIcon } from "/System/CoreLibraries/pathinf.js";
 export interface dockConfig {
 	pins: string[];
 }
+
 interface Program {
 	windows: WindowAlias[];
 	isPinned: boolean;
@@ -14,7 +15,7 @@ interface Program {
 	icon: string;
 }
 
-export default class dock {
+export default class Dock {
 	readonly parent: dockAndDesktop;
 	readonly renderer: UiKitRenderer;
 	readonly env: dockAndDesktop["env"];
