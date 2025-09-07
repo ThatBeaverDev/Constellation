@@ -17,7 +17,9 @@ export const folders: string[] = [
 	"/System/CoreLibraries/mimes",
 
 	"/Users",
-	"/Applications"
+	"/Applications",
+
+	"/.Cores"
 ];
 
 export const files: Record<
