@@ -11,6 +11,7 @@ import blobifier from "./lib/blobify.js";
 import LoggingAPI from "./lib/logging.js";
 import { TextInterface } from "./tui/tui.js";
 import { tcupkg } from "./lib/packaging/tcupkg.js";
+import { ConstellationFileIndex } from "./lib/packaging/definitions.js";
 import { tcpkg } from "./lib/packaging/tcpkg.js";
 
 (window as any).kernels = [];
@@ -30,6 +31,10 @@ type CommandLineKernel = {
 };
 
 type Kernel = GraphicalKernel | CommandLineKernel;
+
+interface ConstellationKernelConfiguration {
+	installationIdx: ConstellationFileIndex;
+}
 
 export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 	verboseBootUIInterval?: ReturnType<typeof setInterval>;
@@ -53,6 +58,7 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 			) => Promise<void>;
 		};
 	};
+	install: (ConstellationKernel: ConstellationKernel) => Promise<void>;
 
 	// property types
 	GraphicalInterface?: KernelType extends { isGraphical: true }
@@ -66,8 +72,16 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 		rootPoint: string,
 		public isGraphical: boolean,
 		logs: any[] = [],
+		configuration?: ConstellationKernelConfiguration
 	) {
 		(window as any).kernels.push(this);
+
+		this.install =
+			configuration?.installationIdx == undefined
+				? installer.install
+				: async () => {
+						await tcupkg(this, configuration.installationIdx, "/");
+					};
 
 		// subsystems
 		this.fs = new FilesystemAPI(rootPoint);
@@ -115,7 +129,7 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 	async init() {
 		await this.fs.init();
 
-		await installer.install(this);
+		await this.install(this);
 
 		await this.security.init();
 
@@ -182,5 +196,15 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 
 			ok = true;
 		}, 50);
+
+		await exec.promise;
+		// now this means that the core process has terminated and the system can power off.
+
+		await this.#terminate();
+	}
+
+	async #terminate() {
+		clearInterval(this.executionInterval);
+		clearInterval(this.verboseBootUIInterval);
 	}
 }
