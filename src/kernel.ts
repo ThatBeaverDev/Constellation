@@ -138,7 +138,7 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 		}
 		await this.runtime.init();
 
-		if (this.isGraphical) {
+		if (this.GraphicalInterface !== undefined) {
 			const bootBackground = document.querySelector("div.bootCover")!;
 			bootBackground.classList.add("fadeOut");
 
@@ -155,6 +155,8 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 				sound.play();
 			} catch {}
 			sound.remove();
+		} else if (this.TextInterface !== undefined) {
+			this.TextInterface.init()
 		}
 
 		const coreExecDirectory =
