@@ -72,8 +72,8 @@
 
 		--main-text-color: rgb(0, 0, 0);
 
-		--main-accent-primary:  #e2b7f9ff;
-		--main-accent-secondary:#dba2fa;
+		--main-accent-primary: #e2b7f9ff;
+		--main-accent-secondary: #dba2fa;
 		--main-accent-tertiary: #cc7cf7ff;
 	}
 }
@@ -127,7 +127,7 @@
 	}
 
 	.bootImage {
-		filter: invert(100%) brightness(10000%)
+		filter: invert(100%) brightness(10000%) !important;
 	}
 }
 
@@ -148,6 +148,10 @@
 	/* block double tab zoom */
 	-webkit-tap-highlight-color: transparent;
 	/* remove highlight for selection */
+}
+
+p, h1, h2, h3 {
+	user-select: auto;
 }
 
 body {
@@ -324,6 +328,7 @@ body {
 	animation-duration: 0.15s;
 	animation-fill-mode: forwards;
 }
+
 .unfullscreeningWindow {
 	animation-name: unfullscreenWindow;
 	animation-duration: 0.15s;
