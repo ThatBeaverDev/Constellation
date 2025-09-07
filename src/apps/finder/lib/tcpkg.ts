@@ -36,7 +36,8 @@ export default async function tcpkg(
 	let verbose = params.v == "-v" || String(params["-verbose"]) == "true";
 
 	if (["", undefined, null].includes(packageDirectory)) {
-		throw new Error("You need to provide a directory to package!");
+		throw new Error(`Usage:
+tcpkg \${inputDirectory} \${outputFile}`);
 	}
 
 	const input = parent.env.fs.resolve(parent.path, packageDirectory);
