@@ -1,5 +1,4 @@
-const mimeData = await env.include("/System/CoreLibraries/mimeFiles/mimes.js");
-const mimes = mimeData.default;
+import mimes from "./mime/mimes.js";
 
 if (mimes == undefined) {
 	throw new Error(
