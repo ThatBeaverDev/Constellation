@@ -1,4 +1,6 @@
 import TerminalAlias from "../../../lib/terminalAlias";
+// @ts-expect-error
+import { getType } from "/System/CoreLibraries/mime.js";
 
 interface TCPackage {
 	files: Record<string, string | { type: "binary" | "text"; data: string }>;
@@ -11,8 +13,6 @@ export default async function tcpkg(
 	outputDirectory: string,
 	...data: string[]
 ) {
-	const mimeLib = await parent.env.include("/System/CoreLibraries/mime.js");
-
 	let logs = [];
 
 	// get params from args
@@ -99,7 +99,7 @@ tcpkg \${inputDirectory} \${outputFile}`);
 				// file
 
 				try {
-					const type = mimeLib.getType(dir.textAfterAll("."));
+					const type = getType(dir.textAfterAll("."));
 
 					if (verbose)
 						logs.push(`Packaging ${dir} with mime ${type}...`);
@@ -111,7 +111,11 @@ tcpkg \${inputDirectory} \${outputFile}`);
 					}
 
 					const isText =
-						type.startsWith("text/") || type == "image/svg+xml";
+						type.startsWith("text/") ||
+						type.includes("xml") ||
+						type.includes("javascript") ||
+						type.includes("typescript") ||
+						type.includes("json");
 
 					if (isText) {
 						const read = await parent.env.fs.readFile(dir);
