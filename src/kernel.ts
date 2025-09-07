@@ -2,7 +2,7 @@ import * as installer from "./installation/index.js";
 
 import { FilesystemAPI } from "./fs/fs.js";
 
-import * as apps from "./runtime/runtime.js";
+import { executionResult, ProgramRuntime } from "./runtime/runtime.js";
 import panic from "./lib/panic.js";
 import ConstellationConfiguration from "./constellation.config.js";
 import Security from "./security/index.js";
@@ -10,6 +10,8 @@ import { GraphicalInterface } from "./gui/gui.js";
 import blobifier from "./lib/blobify.js";
 import LoggingAPI from "./lib/logging.js";
 import { TextInterface } from "./tui/tui.js";
+import { tcupkg } from "./lib/packaging/tcupkg.js";
+import { tcpkg } from "./lib/packaging/tcpkg.js";
 
 (window as any).kernels = [];
 const path = "/System/kernel.js";
@@ -36,9 +38,21 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 	// subsystems
 	fs: FilesystemAPI;
 	security: Security;
-	runtime: apps.ProgramRuntime;
+	runtime: ProgramRuntime;
 	config: ConstellationConfiguration;
-	lib: { blobifier: blobifier; logging: LoggingAPI };
+	lib: {
+		blobifier: blobifier;
+		logging: LoggingAPI;
+		packaging: {
+			tcpkg: (
+				packageDirectory: string
+			) => Promise<ConstellationFileIndex>;
+			tcupkg: (
+				idxFile: ConstellationFileIndex,
+				directory: string
+			) => Promise<void>;
+		};
+	};
 
 	// property types
 	GraphicalInterface?: KernelType extends { isGraphical: true }
@@ -51,14 +65,14 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 	constructor(
 		rootPoint: string,
 		public isGraphical: boolean,
-		logs: any[] = []
+		logs: any[] = [],
 	) {
 		(window as any).kernels.push(this);
 
 		// subsystems
 		this.fs = new FilesystemAPI(rootPoint);
 		this.security = new Security(this);
-		this.runtime = new apps.ProgramRuntime(this);
+		this.runtime = new ProgramRuntime(this);
 		this.config = new ConstellationConfiguration(this);
 
 		// assign based on runtime flag
@@ -83,7 +97,12 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 
 		this.lib = {
 			blobifier: new blobifier(this.fs),
-			logging: new LoggingAPI()
+			logging: new LoggingAPI(),
+			packaging: {
+				// preinsert the `ConstellationKernel` arguement.
+				tcpkg: tcpkg.bind(undefined, this),
+				tcupkg: tcupkg.bind(undefined, this)
+			}
 		};
 
 		try {
@@ -138,7 +157,7 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 			true
 		);
 
-		let exec: apps.executionResult;
+		let exec: executionResult;
 
 		try {
 			exec = await this.runtime.execute(

@@ -4,6 +4,7 @@ import { files, folders } from "./installation.config.js";
 import ConstellationKernel from "../kernel.js";
 import { FilesystemAPI } from "../fs/fs.js";
 import { isCommandLine } from "../getPlatform.js";
+import { tcupkg } from "../lib/packaging/tcupkg.js";
 
 const path = "/System/installer/fsinstall.js";
 
@@ -93,7 +94,6 @@ export class FilesystemInstaller {
 
 		const source = isCommandLine
 			? async (location: string): Promise<string> => {
-					// @ts-expect-error
 					const fs = await import("node:fs/promises");
 
 					// make it relative if using absolute path
@@ -160,7 +160,6 @@ export class FilesystemInstaller {
 			}
 
 			let content;
-			let json;
 			switch (type) {
 				case "text": {
 					const start = performance.now();
@@ -190,12 +189,8 @@ export class FilesystemInstaller {
 
 					content = downloadedContents[location];
 
-					const startDirectories = performance.now();
-
-					await this.fs.mkdir(directory);
-
 					try {
-						json = JSON.parse(content);
+						content = JSON.parse(content);
 					} catch {
 						this.#ConstellationKernel.lib.logging.error(
 							path,
@@ -203,50 +198,9 @@ export class FilesystemInstaller {
 						);
 					}
 
-					for (const path of json.directories) {
-						const relative = this.fs.resolve(directory, path);
-
-						await this.fs.mkdir(relative);
-					}
-
-					installationTimestamp(
-						"Create directories",
-						startDirectories,
-						"secondary-dark"
-					);
-					const startFiles = performance.now();
-
-					for (const path in json.files) {
-						const data = json.files[path];
-						const relative = this.fs.resolve(directory, path);
-
-						const type =
-							data.type == undefined ? "string" : data.type;
-
-						switch (type) {
-							case "string":
-								writingWaitlist.push(
-									this.fs.writeFile(relative, data)
-								);
-								break;
-							case "binary":
-								writingWaitlist.push(
-									this.fs.writeFile(relative, data.data)
-								);
-								break;
-							default:
-								throw new Error(
-									"Unknown key type within files object: '" +
-										type +
-										"'"
-								);
-						}
-					}
-
-					installationTimestamp(
-						"Write Files",
-						startFiles,
-						"secondary-dark"
+					// unpackage it using the kernel unpackager
+					writingWaitlist.push(
+						tcupkg(this.#ConstellationKernel, content, directory)
 					);
 
 					installationTimestamp(
