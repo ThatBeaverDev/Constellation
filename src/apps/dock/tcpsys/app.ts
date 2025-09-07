@@ -1,17 +1,18 @@
-import dock, { dockConfig } from "../resources/dock.js";
-import menubar from "../resources/menubar.js";
-interface menubarConfig {}
+import Dock, { dockConfig } from "../resources/dock.js";
+import menubar, { menubarConfig } from "../resources/menubar.js";
+
+interface config {
+	dock: dockConfig;
+	menubar: menubarConfig;
+	name: string;
+	icon: string;
+}
 
 export default class dockAndDesktop extends Application {
-	dock?: dock;
+	dock?: Dock;
 	menubar?: menubar;
 	showApps: boolean = false;
-	config: {
-		dock: dockConfig;
-		menubar: menubarConfig;
-		name: string;
-		icon: string;
-	} = {
+	config: config = {
 		dock: {
 			pins: [
 				"/Applications/Finder.appl",
@@ -52,7 +53,7 @@ export default class dockAndDesktop extends Application {
 
 		await this.loadConfig();
 
-		this.dock = new dock(this);
+		this.dock = new Dock(this);
 		this.menubar = new menubar(this);
 
 		this.renderer.minimiseWindow = () => {

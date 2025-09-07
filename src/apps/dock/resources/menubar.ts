@@ -1,6 +1,8 @@
 import { UiKitRenderer } from "../../../gui/uiKit/uiKit";
 import dockAndDesktop from "../tcpsys/app";
 
+export interface menubarConfig {}
+
 export default class menubar {
 	parent: dockAndDesktop;
 	renderer: UiKitRenderer;
