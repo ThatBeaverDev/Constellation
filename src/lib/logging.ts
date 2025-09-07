@@ -1,56 +1,78 @@
-type logLevel = "debug" | "log" | "warn" | "error";
+import { isCommandLine } from "../getPlatform.js";
 
-function rgbToAnsi256(rgbColour: RGBColour) {
-	const [r, g, b] = rgbColour;
-
-	if (r === g && g === b) {
-		if (r < 8) return 16;
-		if (r > 248) return 231;
-		return Math.round(((r - 8) / 247) * 24) + 232;
-	}
-	return (
-		16 +
-		36 * Math.round((r / 255) * 5) +
-		6 * Math.round((g / 255) * 5) +
-		Math.round((b / 255) * 5)
-	);
-}
-
-type RGBColour = [number, number, number];
-
-const debug: RGBColour = [50, 168, 83];
-const log: RGBColour = [255, 255, 255];
-const warning: RGBColour = [253, 243, 170];
-const error: RGBColour = [253, 170, 170];
-
-const debugAnsii = `\x1b[38;5;${rgbToAnsi256(debug)}m`;
-const logAnsii = `\x1b[38;5;${rgbToAnsi256(log)}m`;
-const warningAnsii = `\x1b[38;5;${rgbToAnsi256(warning)}m`;
-const errorAnsii = `\x1b[38;5;${rgbToAnsi256(error)}m`;
+type logLevel = "post" | "debug" | "log" | "warn" | "error";
 
 function coreLogging(type: logLevel, origin: string, ...content: any[]) {
-	const logger = console[type];
-
-	let escape = "";
-	switch (type) {
-		case "debug":
-			escape = debugAnsii;
-			break;
-		case "log":
-			escape = logAnsii;
-			break;
-		case "warn":
-			escape = warningAnsii;
-			break;
-		case "error":
-			escape = errorAnsii;
-			break;
+	if (isCommandLine) {
+		// ANSI colors for Node/CLI
+		switch (type) {
+			case "post":
+				console.log(...content);
+				break;
+			case "debug":
+				console.debug(
+					`\x1b[38;5;72m{${origin}}`,
+					"-",
+					...content,
+					"\x1b[0m"
+				);
+				break;
+			case "log":
+				console.log(
+					`\x1b[38;5;231m{${origin}}`,
+					"-",
+					...content,
+					"\x1b[0m"
+				);
+				break;
+			case "warn":
+				console.warn(
+					`\x1b[38;5;229m{${origin}}`,
+					"-",
+					...content,
+					"\x1b[0m"
+				);
+				break;
+			case "error":
+				console.error(
+					`\x1b[38;5;217m{${origin}}`,
+					"-",
+					...content,
+					"\x1b[0m"
+				);
+				break;
+		}
+	} else {
+		// CSS styles for Browser
+		let style = "";
+		switch (type) {
+			case "post":
+				console.log(...content);
+				break;
+			case "debug":
+				style = "color: #48bb78;"; // greenish
+				console.debug(`%c{${origin}}%c -`, style, "", ...content);
+				break;
+			case "log":
+				style = "color: #ffffff;"; // white
+				console.log(`%c{${origin}}%c -`, style, "", ...content);
+				break;
+			case "warn":
+				style = "color: #f6e05e;"; // yellow
+				console.warn(`%c{${origin}}%c -`, style, "", ...content);
+				break;
+			case "error":
+				style = "color: #f56565;"; // red
+				console.error(`%c{${origin}}%c -`, style, "", ...content);
+				break;
+		}
 	}
-
-	logger(`${escape}{${origin}}\x1b[0m`, "-", ...content);
 }
 
 export default class LoggingAPI {
+	post(mainLog: any, ...content: any[]) {
+		coreLogging("post", "", ...content);
+	}
 	debug(initiator: string, mainLog: any, ...content: any[]): undefined {
 		coreLogging("debug", initiator, mainLog, ...content);
 	}
