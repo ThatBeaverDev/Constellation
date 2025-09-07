@@ -1,4 +1,5 @@
 import ConstellationKernel from "./kernel.js";
+import { getFlagValue } from "./lib/flags.js";
 
 const path = "/System/constellation.config.js";
 
@@ -19,8 +20,7 @@ export default class ConstellationConfiguration {
 		"Media/Pictures",
 		"Media/Videos"
 	];
-	isDevmode: boolean =
-		new URL(window.location.href).searchParams.get("dev") !== null;
+	isDevmode: boolean = getFlagValue("dev") == "true";
 	systemPassword = "TODO:systemPasswordThatNeedsToBeChanged";
 
 	status: string = "";
