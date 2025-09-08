@@ -7,8 +7,13 @@ export function getFlagValue(name: string): string {
 		const url = new URL(globalThis.location.href);
 		const value = url.searchParams.get(name);
 
-		if (value !== null) {
-			return value;
+		switch (value) {
+			case "":
+				return "true";
+			case null:
+				break;
+			default:
+				return value;
 		}
 	} else if (process) {
 		// use execution parameters (eg: tcp --dev)
