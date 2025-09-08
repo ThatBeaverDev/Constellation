@@ -1,4 +1,4 @@
-import { step } from "./definitions";
+import { step } from "./definitions.js";
 
 export default class uiKitTransitioners {
 	textboxElem: HTMLInputElement | HTMLTextAreaElement | undefined;
