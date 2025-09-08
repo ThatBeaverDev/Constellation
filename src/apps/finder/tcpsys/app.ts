@@ -280,6 +280,7 @@ export default class finder extends Application {
 		const iconScale = 0.5;
 		const padding = 5;
 
+		const sidebarWidth = 100;
 		this.renderer.box(0, 0, 100, this.renderer.windowHeight + 100, {
 			background: "var(--main-theme-secondary)"
 		});
@@ -311,6 +312,8 @@ export default class finder extends Application {
 			y += 10 + 12 * 1.2;
 		}
 
+		// padding
+		let contentPadding = 10;
 		const displayItem = (
 			x: number = 110,
 			y: number = 10,
@@ -322,13 +325,9 @@ export default class finder extends Application {
 			rightClick: Function = () => {}
 		) => {
 			const iconScale = 1.4166666666;
+			//const width = 39 + Math.max( this.renderer.getTextWidth(name), this.renderer.getTextWidth(subtext) ) + padding * 2;
 			const width =
-				39 +
-				Math.max(
-					this.renderer.getTextWidth(name),
-					this.renderer.getTextWidth(subtext)
-				) +
-				padding * 2;
+				this.renderer.windowWidth - sidebarWidth - contentPadding * 2;
 			const height = 34 + padding * 2;
 
 			if (selected == true) {
@@ -392,14 +391,12 @@ export default class finder extends Application {
 			this.location.subtext
 		);
 
-		const baseY = dims.height + 20 + 10;
+		const baseY = dims.height + 20 + contentPadding;
 
 		// draw the folder contents
-		let x = 110;
+		let x = sidebarWidth + contentPadding;
 		y = baseY;
 
-		let maxWidth = 0;
-		let height = 0;
 		for (const i in this.listing) {
 			const obj = this.listing[i];
 
@@ -491,7 +488,7 @@ export default class finder extends Application {
 				this.renderer.setContextMenu(x, y, obj.name, context);
 			};
 
-			const dims = displayItem(
+			displayItem(
 				x,
 				y,
 				obj.icon,
@@ -502,18 +499,8 @@ export default class finder extends Application {
 				rightClick
 			);
 
-			if (dims.width > maxWidth) {
-				maxWidth = dims.width;
-			}
-			height = dims.height;
-
+			// move down
 			y += 45;
-			if (y + height > this.renderer.windowHeight) {
-				// next row!
-				y = baseY;
-				x += maxWidth;
-				maxWidth = 0;
-			}
 		}
 
 		if (this.type == "picker") {
