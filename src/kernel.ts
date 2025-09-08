@@ -156,7 +156,7 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 			} catch {}
 			sound.remove();
 		} else if (this.TextInterface !== undefined) {
-			this.TextInterface.init()
+			this.TextInterface.init();
 		}
 
 		const coreExecDirectory =
@@ -189,20 +189,25 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 			return;
 		}
 
-		let ok = true;
-		this.executionInterval = setInterval(async () => {
-			if (ok == false) return;
-			ok = false;
-
-			this.runtime.frame();
-
-			ok = true;
-		}, 50);
+		this.executionLoop();
 
 		await exec.promise;
 		// now this means that the core process has terminated and the system can power off.
 
 		await this.#terminate();
+	}
+
+	async executionLoop() {
+		const frame = async () => {
+			return new Promise((resolve: Function) => {
+				this.runtime.frame();
+				setTimeout(resolve, 5);
+			});
+		};
+
+		while (true) {
+			await frame();
+		}
 	}
 
 	async #terminate() {
