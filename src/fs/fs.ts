@@ -91,54 +91,20 @@ const readFile = async (directory: string): Promise<string | undefined> => {
 	);
 };
 
-const renameFile = async (oldPath: string, newPath: string): Promise<void> => {
+const rename = async (oldPath: string, newPath: string): Promise<void> => {
 	const start = performance.now();
 
 	return new Promise((resolve, reject) => {
-		fs.rename(oldPath.toString(), newPath.toString(), (err: any) => {
-			filesystemTimestamp(`renameFile ${oldPath} → ${newPath}`, start);
+		fs.rename(oldPath, newPath, (err: any) => {
+			filesystemTimestamp(`rename ${oldPath} → ${newPath}`, start);
 			if (err) {
-				console.warn(`renameFile failed: ${oldPath} → ${newPath}`, err);
+				console.warn(`rename failed: ${oldPath} → ${newPath}`, err);
 				reject(err);
 			} else {
 				resolve();
 			}
 		});
 	});
-};
-
-const rename = async (oldPath: string, newPath: string): Promise<void> => {
-	const type = await stat(oldPath);
-	if (!type) return;
-
-	const isDir = type.isDirectory();
-
-	if (isDir) {
-		await mkdir(newPath).catch((e: Error) => {
-			throw e;
-		});
-
-		const entries = await readdir(oldPath);
-
-		for (const entry of entries) {
-			const from = resolveDirectory(oldPath, entry);
-			const to = resolveDirectory(newPath, entry);
-			await rename(from, to);
-		}
-
-		await new Promise<void>((resolve, reject) => {
-			fs.rmdir(oldPath.toString(), (err: any) => {
-				filesystemTimestamp(
-					`rmdir ${oldPath.toString()}`,
-					performance.now()
-				);
-				if (err) reject(err);
-				else resolve();
-			});
-		});
-	} else {
-		await renameFile(oldPath, newPath);
-	}
 };
 
 const readdir = async (directory: string): Promise<string[]> => {
@@ -248,6 +214,13 @@ export class FilesystemAPI {
 	async readdir(directory: string) {
 		const realpath = this.#realDir(directory);
 		return await readdir(realpath);
+	}
+
+	async rename(oldPath: string, newPath: string) {
+		const resolvedOldPath = this.#realDir(oldPath);
+		const resolvedNewPath = this.#realDir(newPath);
+
+		return await rename(resolvedOldPath, resolvedNewPath);
 	}
 
 	resolve(base: string, ...targets: string[]) {
