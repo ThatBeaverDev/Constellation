@@ -1,5 +1,7 @@
-import { onClickOptions } from "../../../gui/uiKit/definitions";
+import { pathIcon } from "pathinf";
 import { directoryPointType } from "../../../security/definitions";
+import finderBody from "../resources/body.js";
+
 const clamp = (n: number, min: number, max: number) => {
 	if (n < min) {
 		return min;
@@ -11,7 +13,7 @@ const clamp = (n: number, min: number, max: number) => {
 	return n;
 };
 
-type listing = {
+export type listing = {
 	name: string;
 	path: string;
 	icon: directoryPointType;
@@ -20,8 +22,6 @@ type listing = {
 };
 
 export default class finder extends Application {
-	pathinf?: typeof import("../../../syslib/pathinf");
-
 	name: string = "Finder";
 	type: "picker" | "app" = "app";
 	pipes!: {
@@ -34,6 +34,10 @@ export default class finder extends Application {
 	location?: listing;
 	icon: string = "folder";
 	ok: boolean = false;
+	sidebarWidth: number = 100;
+
+	// submodules
+	body?: finderBody;
 
 	async init() {
 		const [
@@ -43,9 +47,8 @@ export default class finder extends Application {
 			sendingPipe
 		] = this.args;
 
-		this.pathinf = await this.env.include(
-			"/System/CoreLibraries/pathinf.js"
-		);
+		this.body = new finderBody(this);
+
 		await this.cd(initialDirectory);
 		this.type = mode;
 		this.pipes = {
@@ -122,7 +125,6 @@ export default class finder extends Application {
 	}
 
 	async cd(directory: string) {
-		if (this.pathinf == undefined) return;
 		this.ok = false;
 
 		const oldDir = String(this.path);
@@ -158,8 +160,6 @@ export default class finder extends Application {
 		const generateListing = async (
 			directory: string
 		): Promise<listing | undefined> => {
-			if (this.pathinf == undefined) return;
-
 			const path = this.env.fs.resolve(this.path, directory);
 
 			const type = await this.env.fs.typeOfFile(path);
@@ -188,7 +188,7 @@ export default class finder extends Application {
 			const obj: listing = {
 				name: directory,
 				path,
-				icon: await this.pathinf.pathIcon(path),
+				icon: await pathIcon(path),
 				type,
 				subtext:
 					type == "directory"
@@ -225,7 +225,7 @@ export default class finder extends Application {
 
 		this.listing = listings;
 
-		const newIcon = await this.pathinf.pathIcon(this.path);
+		const newIcon = await pathIcon(this.path);
 		if (newIcon !== this.icon) {
 			this.icon = newIcon;
 			this.renderer.setIcon(this.icon);
@@ -277,248 +277,9 @@ export default class finder extends Application {
 			return;
 		}
 
-		const iconScale = 0.5;
-		const padding = 5;
+		if (this.body == undefined) return;
 
-		const sidebarWidth = 100;
-		this.renderer.box(0, 0, 100, this.renderer.windowHeight + 100, {
-			background: "var(--main-theme-secondary)"
-		});
-
-		// draw the folder name and icon at the top for the current location
-		this.renderer.text(10, 10, "Important", 10);
-		const usrinf = this.env.users.userInfo();
-		if (usrinf == undefined) return;
-
-		const homedir = usrinf.directory;
-		const important: Record<string, string> = {
-			Documents: this.env.fs.resolve(homedir, "./Documents"),
-			Desktop: this.env.fs.resolve(homedir, "./Desktop"),
-			Notes: this.env.fs.resolve(homedir, "./Notes"),
-			Home: homedir
-		};
-		let y = 10 + 10 * 1.2;
-		for (const name in important) {
-			const icon = this.renderer.icon(10, y, "folder", iconScale);
-			const text = this.renderer.text(25, y, name, 12);
-
-			const onclick = () => {
-				this.cd(important[name]);
-			};
-
-			this.renderer.onClick(icon, onclick);
-			this.renderer.onClick(text, onclick);
-
-			y += 10 + 12 * 1.2;
-		}
-
-		// padding
-		let contentPadding = 10;
-		const displayItem = (
-			x: number = 110,
-			y: number = 10,
-			icon: string = "/System/CoreAssets/Vectors/files/file.svg",
-			name: string = "File",
-			subtext: string = "Unknown",
-			selected: boolean = false,
-			leftClick: Function = () => {},
-			rightClick: Function = () => {}
-		) => {
-			const iconScale = 1.4166666666;
-			//const width = 39 + Math.max( this.renderer.getTextWidth(name), this.renderer.getTextWidth(subtext) ) + padding * 2;
-			const width =
-				this.renderer.windowWidth - sidebarWidth - contentPadding * 2;
-			const height = 34 + padding * 2;
-
-			if (selected == true) {
-				this.renderer.box(x, y, width, height, {
-					background: "var(--main-accent-secondary)",
-					borderRadius: 4
-				});
-			}
-
-			const iconElem = this.renderer.icon(
-				x + padding,
-				y + padding,
-				icon,
-				iconScale
-			);
-
-			const titleElem = this.renderer.text(
-				x + 39 + padding,
-				y + 3 + padding,
-				name
-			);
-			const subtextElem = this.renderer.text(
-				x + 39 + padding,
-				y + 20 + padding,
-				subtext,
-				10
-			);
-
-			const onClickConfig: onClickOptions = {
-				scale: 1.1,
-				origin: "left"
-			};
-
-			this.renderer.onClick(
-				iconElem,
-				leftClick,
-				rightClick,
-				onClickConfig
-			);
-			this.renderer.onClick(
-				titleElem,
-				leftClick,
-				rightClick,
-				onClickConfig
-			);
-			this.renderer.onClick(
-				subtextElem,
-				leftClick,
-				rightClick,
-				onClickConfig
-			);
-
-			return { width, height };
-		};
-
-		const dims = displayItem(
-			undefined,
-			undefined,
-			this.location.icon,
-			this.location.path + " - Current Location",
-			this.location.subtext
-		);
-
-		const baseY = dims.height + 20 + contentPadding;
-
-		// draw the folder contents
-		let x = sidebarWidth + contentPadding;
-		y = baseY;
-
-		for (const i in this.listing) {
-			const obj = this.listing[i];
-
-			const openFile = () => {
-				if (this.type == "picker") {
-					// select and submit the file
-					this.pickerSubmit();
-				} else {
-					/* TODO: OPEN THE FILE! */
-					this.env.prompt(
-						"Functionality not implemented: opening files",
-						"no current API for opening files in applications."
-					);
-				}
-			};
-			const openDirectory = async () => {
-				await this.cd(obj.path);
-			};
-
-			const leftClick = async () => {
-				// left click
-				if (this.selector == Number(i)) {
-					switch (obj.type) {
-						case "directory":
-							if (obj.path.endsWith(".appl")) {
-								this.env.exec(obj.path);
-								return;
-							} else {
-								await openDirectory();
-							}
-							break;
-						case "file":
-							openFile();
-
-							break;
-						default:
-							throw new Error(
-								"Unknown filetype cannot be handled for action: " +
-									obj.type
-							);
-					}
-				} else {
-					this.selector = Number(i);
-				}
-			};
-
-			const rightClick = async (x: number, y: number) => {
-				// right click
-
-				const context: Record<string, Function> = {};
-
-				switch (obj.type) {
-					case "file":
-						context["Open File"] = openFile.bind(this);
-						break;
-					case "directory":
-						if (obj.path.endsWith(".appl")) {
-							context["Show Contents"] = openDirectory.bind(this);
-						} else {
-							context["Open Directory"] =
-								openDirectory.bind(this);
-						}
-						break;
-				}
-
-				context["Rename"] = () => {
-					/* TODO: RENAME THE FILE! */
-					this.env.prompt(
-						"Functionality not implemented: renaming files"
-					);
-					/* TODO: RENAME THE FILE! */
-					this.env.prompt(
-						"Functionality not implemented: renaming files"
-					);
-				};
-				context["Move to Bin"] = () => {
-					/* TODO: MOVE THE FILE! */
-					this.env.prompt(
-						"Functionality not implemented: trashing files"
-					);
-				};
-				context["Copy"] = () => {
-					/* TODO: COPY THE FILE! */
-					this.env.prompt(
-						"Functionality not implemented: copying files"
-					);
-				};
-
-				this.renderer.setContextMenu(x, y, obj.name, context);
-			};
-
-			displayItem(
-				x,
-				y,
-				obj.icon,
-				obj.name,
-				obj.subtext,
-				this.selector == Number(i),
-				leftClick,
-				rightClick
-			);
-
-			// move down
-			y += 45;
-		}
-
-		if (this.type == "picker") {
-			// get the name
-			const itemName = this.listing[this.selector].name;
-			// get the path
-			const path =
-				itemName == ".."
-					? this.path
-					: this.env.fs.resolve(this.path, itemName);
-
-			this.renderer.button(
-				5,
-				this.renderer.windowHeight - 50,
-				"Select location (" + path + ")",
-				this.pickerSubmit
-			);
-		}
+		this.body.render();
 
 		this.renderer.commit();
 	}
