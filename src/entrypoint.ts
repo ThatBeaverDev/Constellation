@@ -81,6 +81,9 @@ if (isCommandLine) {
 async function startupKernel() {
 	// wait for the installation index if it's a promise
 	if (installationIndex instanceof Promise) {
+		console.log(
+			"Waiting for the user to complete installation file selection."
+		);
 		installationIndex = await installationIndex;
 	}
 
