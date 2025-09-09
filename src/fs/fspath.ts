@@ -4,8 +4,9 @@ import { resolve as noderesolve, normalize } from "./nodepath.js";
  * @returns Parent directory of the current directory.
  */
 export function getParentDirectory(path: string): string {
-	const parent = path.replace(/\/[^\/]+\/?$/, "") || "/";
-	return parent;
+	if (path == "/") return "/";
+
+	return path.textBeforeLast("/") || "/";
 }
 
 export function isAbsoluteDirectory(path: string) {
