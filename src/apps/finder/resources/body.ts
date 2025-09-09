@@ -113,7 +113,7 @@ export default class finderBody {
 		this.renderer.onClick(
 			contentArea,
 			undefined,
-			this.interactions.showBodyContextMenu
+			this.interactions.showBodyContextMenu()
 		);
 
 		// draw the folder name and icon at the top for the current location

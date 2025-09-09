@@ -13,7 +13,7 @@ const clamp = (n: number, min: number, max: number) => {
 	return n;
 };
 
-export type listing = {
+export interface listing {
 	name: string;
 	path: string;
 	icon: directoryPointType;
