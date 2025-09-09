@@ -26,7 +26,8 @@ export class importRewriter {
 	 */
 	async blobifyModule(
 		path: string,
-		allowCache: boolean = true
+		allowCache: boolean = true,
+		importerPath?: string
 	): Promise<string> {
 		if (allowCache) {
 			if (this.blobCache.has(path)) return this.blobCache.get(path)!;
@@ -35,7 +36,9 @@ export class importRewriter {
 		let code = await this.fs.readFile(path);
 
 		if (code == undefined) {
-			throw new Error(`File at ${path} doesn't exist.`);
+			throw new Error(
+				`File at ${path}, imported by ${importerPath || "unknown"} doesn't exist.`
+			);
 		}
 
 		// Rewrite imports to blob URLs AND include references to env.
@@ -93,7 +96,11 @@ export class importRewriter {
 				}
 
 				// blobify it
-				const blobUrl = await this.blobifyModule(resolved);
+				const blobUrl = await this.blobifyModule(
+					resolved,
+					undefined,
+					currentPath
+				);
 				return {
 					full,
 					replacement: `import ${bindings} from "${blobUrl}"`
