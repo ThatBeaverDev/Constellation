@@ -11,19 +11,31 @@ export default class finderInteractions {
 		this.renderer = parent.renderer;
 	}
 
-	showBodyContextMenu(clickX: number, clickY: number) {
-		const context: Record<string, Function> = {};
+	async reloadInterface() {
+		await this.parent.cd(this.parent.path);
+	}
 
-		context["New Folder"] = async () => {
-			let name = "New Folder";
-			let path = this.env.fs.resolve(this.parent.path, name);
+	showBodyContextMenu() {
+		const parentPath = this.parent.path;
+		return (clickX: number, clickY: number) => {
+			const context: Record<string, Function> = {};
 
-			await this.env.fs.createDirectory(path);
+			context["New Folder"] = async () => {
+				let name = "New Folder";
+				let path = this.env.fs.resolve(parentPath, name);
 
-			this.parent.cd(this.parent.path);
+				await this.env.fs.createDirectory(path);
+
+				this.reloadInterface();
+			};
+
+			this.renderer.setContextMenu(
+				clickX,
+				clickY,
+				"Folder Actions",
+				context
+			);
 		};
-
-		this.renderer.setContextMenu(clickX, clickY, "Folder Actions", context);
 	}
 
 	openFile(directory: string) {
@@ -102,11 +114,37 @@ export default class finderInteractions {
 					"Functionality not implemented: renaming files"
 				);
 			};
-			context["Move to Bin"] = () => {
-				/* TODO: MOVE THE FILE! */
-				this.env.prompt(
-					"Functionality not implemented: trashing files"
+			context["Move to Bin"] = async () => {
+				const userInfo = this.env.users.userInfo(this.env.user);
+
+				if (userInfo == undefined)
+					throw new Error(
+						"User that finder is running as supposedly doesn't exist."
+					);
+
+				const filename = btoa(
+					JSON.stringify({
+						originalPath: obj.path,
+						deletionTime: Date(),
+						deletionTimestamp: Date.now()
+					})
 				);
+
+				const binpath = env.fs.resolve(
+					userInfo.directory,
+					"./recentlyDeleted"
+				);
+				const fileTargetPath = env.fs.resolve(binpath, filename);
+
+				const moveResult = await this.env.fs.move(
+					obj.path,
+					fileTargetPath
+				);
+				if (!moveResult.ok) {
+					throw moveResult.data;
+				}
+
+				this.reloadInterface();
 			};
 			context["Copy"] = () => {
 				/* TODO: COPY THE FILE! */
