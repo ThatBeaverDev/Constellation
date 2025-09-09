@@ -19,6 +19,7 @@ import {
 } from "./permissions.js";
 import ConstellationKernel from "../kernel.js";
 import { GraphicalWindow } from "../gui/windows/windows.js";
+import { getParentDirectory } from "../fs/fspath.js";
 
 const start = performance.now();
 const name = "/System/security/env.js";
@@ -419,7 +420,8 @@ export class ApplicationAuthorisationAPI {
 		typeOfFile: async (
 			directory: string
 		): Promise<directoryPoint | never> => {
-			this.#directoryActionCheck(directory, false);
+			const parentDirectory = getParentDirectory(directory);
+			this.#directoryActionCheck(parentDirectory, false);
 
 			const stat = await this.fs.stat(directory);
 
