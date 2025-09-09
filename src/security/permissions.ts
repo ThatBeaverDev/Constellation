@@ -133,11 +133,25 @@ export class Permissions {
 		}
 	}
 
-	getFilesDomainOfDirectory(
+	static getFilesDomainOfDirectory(
 		directory: string,
-		user: string
+		user: string,
+		applicationDirectory: string
 	): DirectoryDomain {
-		const rootPrefix = directory.split("/")[0];
+		let applicationDirectoryWithTrailingSlash =
+			applicationDirectory[applicationDirectory.length - 1] == "/"
+				? applicationDirectory
+				: applicationDirectory + "/";
+
+		if (
+			(directory + "/").startsWith(applicationDirectoryWithTrailingSlash)
+		) {
+			return "local";
+		}
+
+		const rootPrefix = directory
+			.split("/")
+			.filter((item) => item !== "")[0];
 
 		switch (rootPrefix) {
 			case "Temporary":
@@ -146,12 +160,14 @@ export class Permissions {
 			case "System":
 				return "system";
 			case "Users": {
-				const username = directory.split("/")[1];
+				const username = directory
+					.split("/")
+					.filter((item) => item !== "")[1];
 
 				if (username === user) {
 					return "user";
 				} else {
-					return "system";
+					return "private";
 				}
 			}
 			default:
@@ -224,6 +240,6 @@ export class Permissions {
 
 type PermissionsStore = Record<string, DirectoryPermissionStats>;
 
-type DirectoryDomain = "system" | "user" | "global";
+type DirectoryDomain = "system" | "user" | "global" | "local" | "private";
 
 securityTimestamp("Startup /src/security/permissions.ts", start);
