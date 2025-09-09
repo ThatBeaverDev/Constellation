@@ -11,6 +11,7 @@ export default class ConstellationConfiguration {
 	wallpaperPosition: string = "center";
 	userfile: string = "/System/users.json";
 	userDirectories: string[] = [
+		"recentlyDeleted",
 		"Desktop",
 		"Documents",
 		"Applications",
