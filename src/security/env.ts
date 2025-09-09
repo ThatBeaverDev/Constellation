@@ -208,11 +208,12 @@ export class ApplicationAuthorisationAPI {
 		directory: string,
 		isWriteOperation: boolean
 	): undefined | never {
-		const domainType = Permissions.getFilesDomainOfDirectory(
-			directory,
-			this.#user,
-			this.directory
-		);
+		const domainType =
+			this.#environmentCreator.permissions.getFilesDomainOfDirectory(
+				directory,
+				this.#user,
+				this.directory
+			);
 
 		switch (domainType) {
 			case "local":

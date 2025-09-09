@@ -133,7 +133,7 @@ export class Permissions {
 		}
 	}
 
-	static getFilesDomainOfDirectory(
+	getFilesDomainOfDirectory(
 		directory: string,
 		user: string,
 		applicationDirectory: string
@@ -163,6 +163,8 @@ export class Permissions {
 				const username = directory
 					.split("/")
 					.filter((item) => item !== "")[1];
+
+				if (username == undefined) return "global";
 
 				if (username === user) {
 					return "user";
