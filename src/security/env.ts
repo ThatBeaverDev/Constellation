@@ -204,13 +204,18 @@ export class ApplicationAuthorisationAPI {
 		this.#ConstellationKernel.runtime.showPrompt("log", text, reason);
 	}
 
-	#directoryActionCheck(directory: string, isWriteOperation: boolean) {
-		const domainType =
-			this.#environmentCreator.permissions.getFilesDomainOfDirectory(
-				directory,
-				this.#user
-			);
+	#directoryActionCheck(
+		directory: string,
+		isWriteOperation: boolean
+	): undefined | never {
+		const domainType = Permissions.getFilesDomainOfDirectory(
+			directory,
+			this.#user,
+			this.directory
+		);
+
 		switch (domainType) {
+			case "local":
 			case "global":
 				// all good
 				break;
@@ -231,6 +236,12 @@ export class ApplicationAuthorisationAPI {
 					);
 				}
 				break;
+			case "private":
+				throw new PermissionsError(
+					`Permission denied in action upon ${directory} - domain ${domainType}, isWriteOperation: ${isWriteOperation}`
+				);
+			default:
+				throw new Error("Unknown domain: " + domainType);
 		}
 	}
 
@@ -337,6 +348,8 @@ export class ApplicationAuthorisationAPI {
 		},
 		readFile: async (directory: string): Promise<fsResponse<string>> => {
 			try {
+				this.#directoryActionCheck(directory, false);
+
 				const content =
 					await this.#ConstellationKernel.fs.readFile(directory);
 
@@ -355,25 +368,28 @@ export class ApplicationAuthorisationAPI {
 				};
 			}
 		},
-		//move: async (
-		//	oldDirectory: string,
-		//	newDirectory: string
-		//): Promise<fsResponse<void>> => {
-		//	try {
-		//		return {
-		//			data: await this.#environmentCreator.ConstellationKernel.fs.rename(
-		//				oldDirectory,
-		//				newDirectory
-		//			),
-		//			ok: true
-		//		};
-		//	} catch (error: any) {
-		//		return {
-		//			data: error,
-		//			ok: false
-		//		};
-		//	}
-		//},
+		move: async (
+			oldDirectory: string,
+			newDirectory: string
+		): Promise<fsResponse<void>> => {
+			try {
+				this.#directoryActionCheck(oldDirectory, true);
+				this.#directoryActionCheck(newDirectory, true);
+
+				return {
+					data: await this.#ConstellationKernel.fs.rename(
+						oldDirectory,
+						newDirectory
+					),
+					ok: true
+				};
+			} catch (error: any) {
+				return {
+					data: error,
+					ok: false
+				};
+			}
+		},
 
 		stat: async (directory: string): Promise<fsResponse<Stats>> => {
 			try {
@@ -399,7 +415,11 @@ export class ApplicationAuthorisationAPI {
 				};
 			}
 		},
-		typeOfFile: async (directory: string): Promise<directoryPoint> => {
+		typeOfFile: async (
+			directory: string
+		): Promise<directoryPoint | never> => {
+			this.#directoryActionCheck(directory, false);
+
 			const stat = await this.fs.stat(directory);
 
 			if (!stat.ok) {
@@ -451,6 +471,8 @@ export class ApplicationAuthorisationAPI {
 		directory: string,
 		expectedType: directoryPoint
 	) => {
+		this.#directoryActionCheck(directory, false);
+
 		const fileType = await this.fs.typeOfFile(directory);
 
 		if (fileType !== expectedType) {
