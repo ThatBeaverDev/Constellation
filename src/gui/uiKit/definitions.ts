@@ -56,7 +56,7 @@ export type uikitTextareaConfig = {
 export type uikitBoxConfig = {
 	borderRadius?: number | string;
 	blur?: number;
-	background?: string;
+	background?: string | "sidebar";
 };
 export type uikitCanvasOptions = {
 	colour: string;

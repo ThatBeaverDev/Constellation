@@ -264,7 +264,20 @@ export default class uiKitCreators {
 		config?: uikitBoxConfig
 	) => {
 		const box = document.createElement("div");
-		box.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px; background: ${config?.background || "var(--main-theme-tertiary)"}; border-radius: ${config?.borderRadius}px; background-filter: blur(${config?.blur}px)`;
+
+		box.style.left = `${x}px`;
+		box.style.top = `${y}px`;
+		box.style.width = `${width}px`;
+		box.style.height = `${height}px`;
+
+		if (config?.background == "sidebar") {
+			box.style.background = `var(--headerColour)`;
+		} else {
+			box.style.background = `${config?.background || "var(--main-theme-tertiary)"}`;
+		}
+		box.style.borderRadius = `${config?.borderRadius}px`;
+		box.style.backdropFilter = `${config?.blur || 0}px`;
+
 		box.id = String(window.renderID++);
 		box.className = "uikitBox";
 
