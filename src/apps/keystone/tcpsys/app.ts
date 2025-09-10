@@ -2,7 +2,6 @@ import { IPCMessage } from "../../../runtime/messages";
 import { fileInfo } from "../lib/appfind";
 
 export default class KeystoneSearch extends Popup {
-	pathinf?: typeof import("../../../syslib/pathinf");
 	fzfLib?: typeof import("../../../lib/external/fzf");
 
 	results: object[] = [];
@@ -23,9 +22,6 @@ export default class KeystoneSearch extends Popup {
 		this.registerKeyboardShortcut("Open", "Enter", []);
 
 		this.fzfLib = await this.env.include("/System/CoreLibraries/fzf.js");
-		this.pathinf = await this.env.include(
-			"/System/CoreLibraries/pathinf.js"
-		);
 
 		await this.env.shell.index();
 
