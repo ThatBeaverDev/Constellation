@@ -222,6 +222,7 @@ export class ApplicationAuthorisationAPI {
 				// all good
 				break;
 			case "user":
+				// all ok IF we're only reading or have permission to write
 				if (isWriteOperation && this.#permissions.userFiles == false) {
 					throw new PermissionsError(
 						`Permission denied in action upon ${directory} - domain ${domainType}, isWriteOperation: ${isWriteOperation}`
@@ -395,7 +396,8 @@ export class ApplicationAuthorisationAPI {
 
 		stat: async (directory: string): Promise<fsResponse<Stats>> => {
 			try {
-				this.#directoryActionCheck(directory, false);
+				const parentDirectory = getParentDirectory(directory);
+				this.#directoryActionCheck(parentDirectory, false);
 
 				const stat = await this.#ConstellationKernel.fs.stat(directory);
 
