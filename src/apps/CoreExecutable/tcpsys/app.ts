@@ -10,10 +10,13 @@ export default class CoreExecutable extends BackgroundProcess {
 		const dockDirectory = "/System/CoreExecutables/Dock.appl";
 		const loginInterfaceDirectory =
 			"/System/CoreExecutables/systemLoginInterface.appl";
+		const finderDirectory = "/Applications/Finder.appl";
 
 		this.env.setDirectoryPermission(dockDirectory, "windows", true);
 		this.env.setDirectoryPermission(dockDirectory, "keylogger", true);
 		this.env.setDirectoryPermission(loginInterfaceDirectory, "users", true);
+
+		this.env.setDirectoryPermission(finderDirectory, "userFiles", true);
 
 		// this.windows
 		this.registerKeyboardShortcut("Close Window", "KeyW", ["AltLeft"]);
