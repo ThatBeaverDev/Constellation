@@ -1,8 +1,7 @@
 import { UiKitRenderer } from "../../../gui/uiKit/uiKit";
 import { WindowAlias } from "../../../security/definitions";
 import dockAndDesktop from "../tcpsys/app";
-// @ts-expect-error
-import { getAppConfig, pathIcon } from "/System/CoreLibraries/pathinf.js";
+import { getAppConfig, pathIcon } from "pathinf";
 
 export interface dockConfig {
 	pins: string[];
@@ -66,7 +65,7 @@ export default class Dock {
 
 			this.pinsInfo[i] = {
 				directory: pin,
-				manifest: await getAppConfig(pin)
+				manifest: await getAppConfig(this.env, pin)
 			};
 		}
 
@@ -75,8 +74,8 @@ export default class Dock {
 		programs[this.parent.directory] = {
 			windows: [],
 			isPinned: true,
-			manifest: await getAppConfig(this.parent.directory),
-			icon: await pathIcon(this.parent.directory)
+			manifest: await getAppConfig(this.env, this.parent.directory),
+			icon: await pathIcon(this.env, this.parent.directory)
 		};
 
 		if (this.pinsInfo !== undefined) {
@@ -87,8 +86,8 @@ export default class Dock {
 					programs[progDir] = {
 						windows: [],
 						isPinned: true,
-						manifest: await getAppConfig(progDir),
-						icon: await pathIcon(progDir)
+						manifest: await getAppConfig(this.env, progDir),
+						icon: await pathIcon(this.env, progDir)
 					};
 				}
 			}
@@ -102,8 +101,8 @@ export default class Dock {
 				programs[winDir] = {
 					windows: [],
 					isPinned: this.config.pins.includes(winDir),
-					manifest: await getAppConfig(winDir),
-					icon: await pathIcon(winDir)
+					manifest: await getAppConfig(this.env, winDir),
+					icon: await pathIcon(this.env, winDir)
 				};
 			}
 
@@ -246,9 +245,10 @@ export default class Dock {
 					// menu items
 					let contextMenuItems: Record<string, Function> = {
 						"folder-open-:-Show in Finder": () =>
-							this.env.exec("/Applications/Finder.appl", [
-								this.env.fs.resolve(directory, "..")
-							])
+							this.env.exec(
+								"/System/CoreExecutables/Finder.appl",
+								[this.env.fs.resolve(directory, "..")]
+							)
 					};
 
 					if (win !== undefined) {

@@ -1,6 +1,5 @@
 import TerminalAlias from "../../../lib/terminalAlias";
-// @ts-expect-error
-import { getType } from "/System/CoreLibraries/mime.js";
+import { getType } from "mime";
 
 interface TCPackage {
 	files: Record<string, string | { type: "binary" | "text"; data: string }>;

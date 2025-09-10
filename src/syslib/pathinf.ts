@@ -1,12 +1,20 @@
+import { ApplicationAuthorisationAPI } from "../security/env";
+
 const applicationExtensions = ["appl", "backgr"];
 
-export async function getAppConfig(directory: string) {
+export async function getAppConfig(
+	env: ApplicationAuthorisationAPI,
+	directory: string
+) {
 	const appConf = await env.include(env.fs.resolve(directory, "config.js"));
 	// get the real data
 	return appConf?.default;
 }
 
-export async function pathIcon(directory: string) {
+export async function pathIcon(
+	env: ApplicationAuthorisationAPI,
+	directory: string
+) {
 	const stats = await env.fs.stat(directory);
 
 	if (!stats.ok) {
@@ -27,7 +35,7 @@ export async function pathIcon(directory: string) {
 					// let's try and extract the app's own icon
 
 					try {
-						const config = await getAppConfig(directory);
+						const config = await getAppConfig(env, directory);
 						// get the icon
 						const icon = config?.icon;
 
@@ -657,12 +665,15 @@ export async function pathIcon(directory: string) {
 	}
 }
 
-export async function pathName(directory: string) {
+export async function pathName(
+	env: ApplicationAuthorisationAPI,
+	directory: string
+) {
 	const ext = directory.textAfterAll(".");
 
 	if (applicationExtensions.includes(ext)) {
 		// app
-		const config = await getAppConfig(directory);
+		const config = await getAppConfig(env, directory);
 		const name = config?.name;
 
 		if (name !== undefined) {
@@ -673,12 +684,15 @@ export async function pathName(directory: string) {
 	return directory.textBeforeLast(".");
 }
 
-export async function pathVisible(directory: string): Promise<boolean> {
+export async function pathVisible(
+	env: ApplicationAuthorisationAPI,
+	directory: string
+): Promise<boolean> {
 	const ext = directory.textAfterAll(".");
 
 	if (applicationExtensions.includes(ext)) {
 		// app
-		const config = await getAppConfig(directory);
+		const config = await getAppConfig(env, directory);
 		const show = config?.userspace;
 
 		if (show == false) return false;
@@ -687,7 +701,10 @@ export async function pathVisible(directory: string): Promise<boolean> {
 	return !directory.textAfterAll("/").startsWith(".");
 }
 
-export async function pathMime(directory: string) {
+export async function pathMime(
+	env: ApplicationAuthorisationAPI,
+	directory: string
+) {
 	const stats = await env.fs.stat(directory);
 
 	if (!stats.ok) {
@@ -725,7 +742,10 @@ export async function pathMime(directory: string) {
 	return "text/plain";
 }
 
-export async function pathSize(directory: string) {
+export async function pathSize(
+	env: ApplicationAuthorisationAPI,
+	directory: string
+) {
 	const stat = await env.fs.stat(directory);
 	if (!stat.ok) throw stat.data;
 
