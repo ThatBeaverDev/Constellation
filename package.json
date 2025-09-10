@@ -16,6 +16,7 @@
 		"showUnused": "npx ts-prune -p tsconfig.json --ignore src/apps | grep -v 'used in module'"
 	},
 	"devDependencies": {
+		"@types/node": "^24.3.1",
 		"@typescript/native-preview": "7.0.0-dev.20250624.1",
 		"prettier": "3.5.3",
 		"rollup": "4.45.1",
@@ -27,8 +28,6 @@
 		"linux"
 	],
 	"dependencies": {
-		"@zenfs/core": "^2.4.0",
-		"@zenfs/dom": "^1.2.4",
 		"bun": "^1.2.21",
 		"mime": "4.0.7",
 		"remove-empty-directories": "^0.0.1",
