@@ -47,3 +47,18 @@ export default class cssVariables {
 		windowsTimestamp("Refresh Variable CSS", start);
 	}
 }
+
+export async function applyWindowsCSS() {
+	const files = [
+		"/styles/windowHeader.css",
+		"/styles/windowBody.css"
+	];
+
+	for (const i in files) {
+		const elem = document.createElement("style");
+		elem.id = files[i];
+		elem.textContent = await (await fetch(files[i])).text();
+
+		document.body.appendChild(elem);
+	}
+}

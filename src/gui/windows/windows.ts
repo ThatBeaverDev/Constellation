@@ -2,7 +2,7 @@ import { Application } from "../../runtime/executables.js";
 import { terminate } from "../../runtime/runtime.js";
 import { DevToolsColor, performanceLog } from "../../lib/debug.js";
 import ConstellationKernel from "../../kernel.js";
-import cssVariables from "./cssVariables.js";
+import cssVariables, { applyWindowsCSS } from "./css.js";
 
 const start = performance.now();
 const name = "/System/windows.js";
@@ -29,6 +29,7 @@ function clamp(n: number | undefined, min: number, max: number) {
 	return n;
 }
 
+applyWindowsCSS();
 export default class WindowSystem {
 	// constants
 	readonly EDGE_THRESHOLD = 8;
