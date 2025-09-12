@@ -1,0 +1,56 @@
+.windowSnappingIndicator {
+    position: absolute;
+
+    background-color: var(--main-theme-secondary);
+    backdrop-filter: blur(10px);
+    fill-opacity: 0.5;
+
+    border: #ffffff solid 1px;
+    border-radius: var(--window-border-radius);
+
+    animation-timing-function: ease-in-out;
+    animation-duration: var(--window-transition-duration);
+    animation-fill-mode: forwards;
+}
+
+.windowSnappingIndicator.snapLeft {
+    animation-name: snapLeft;
+}
+
+.windowSnappingIndicator.snapRight {
+    animation-name: snapRight;
+}
+
+@keyframes snapLeft {
+    from {
+        left: 0px;
+        top: 50vh;
+
+        width: 0px;
+        height: 0px;
+    }
+    to {
+        left: 0px;
+        top: 0px;
+
+        width: 50vw;
+        height: 100vh;
+    }
+}
+
+@keyframes snapRight {
+    from {
+        left: 100vw;
+        top: 50vh;
+
+        width: 0px;
+        height: 0px;
+    }
+    to {
+        left: 50vw;
+        top: 0px;
+
+        width: 50vw;
+        height: 100vh;
+    }
+}
