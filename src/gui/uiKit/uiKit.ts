@@ -53,7 +53,7 @@ class UiKitRendererClass {
 			colour: "rgb(155, 155, 155)"
 		}
 	};
-	#process: Process;
+	#process?: Process;
 	#window: GraphicalWindow;
 	readonly #steps: step[] = [];
 	#displayedSteps: step[] = [];
@@ -138,7 +138,8 @@ class UiKitRendererClass {
 
 	constructor(
 		ConstellationKernel: ConstellationKernel,
-		process: Application
+		process?: Application,
+		window?: GraphicalWindow
 	) {
 		this.#ConstellationKernel = ConstellationKernel;
 		this.#process = process;
@@ -149,10 +150,19 @@ class UiKitRendererClass {
 				"UIkit requires a graphical environment to function."
 			);
 
-		this.#window = UserInterface.windows.newWindow(
-			this.#process.directory,
-			process
-		).data;
+		if (window == undefined) {
+			let windowName = "Window";
+			if (process !== undefined) {
+				windowName = process.directory;
+			}
+
+			this.#window = UserInterface.windows.newWindow(
+				windowName,
+				process
+			).data;
+		} else {
+			this.#window = window;
+		}
 
 		this.#creators = new uiKitCreators(
 			ConstellationKernel,
@@ -852,8 +862,12 @@ export default class UiKitInstanceCreator {
 
 		document.body.appendChild(style);
 	}
-	newRenderer(process: Application) {
-		return new UiKitRendererClass(this.#ConstellationKernel, process);
+	newRenderer(process?: Application, window?: GraphicalWindow) {
+		return new UiKitRendererClass(
+			this.#ConstellationKernel,
+			process,
+			window
+		);
 	}
 }
 
