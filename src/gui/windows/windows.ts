@@ -189,7 +189,7 @@ export default class WindowSystem {
 		windowsTimestamp("Update Windows", start);
 	}
 
-	newWindow(title: string, ApplicationObject: Application) {
+	newWindow(title: string, ApplicationObject?: Application) {
 		const start = performance.now();
 
 		const win = new GraphicalWindowClass(
@@ -257,7 +257,7 @@ class GraphicalWindowClass {
 	constructor(
 		ConstellationKernel: ConstellationKernel,
 		name: string,
-		Application: Application
+		Application?: Application
 	) {
 		this.#ConstellationKernel = ConstellationKernel;
 		if (ConstellationKernel.GraphicalInterface == undefined)
@@ -449,7 +449,7 @@ class GraphicalWindowClass {
 	title: HTMLElement;
 	iconDiv: HTMLElement;
 	readonly winID: number;
-	Application: Application;
+	Application?: Application;
 	resizeObserver: ResizeObserver;
 	iconName: string = "app-window-mac";
 
@@ -660,6 +660,8 @@ class GraphicalWindowClass {
 	}
 
 	close() {
-		terminate(this.Application);
+		if (this.Application) {
+			terminate(this.Application);
+		}
 	}
 }
