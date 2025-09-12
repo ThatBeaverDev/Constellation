@@ -48,7 +48,7 @@ export type WindowAlias = {
 	shortName?: string;
 	iconName: string;
 	winID: number;
-	applicationDirectory: string;
+	applicationDirectory?: string;
 
 	position: {
 		left: number;

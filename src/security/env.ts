@@ -658,7 +658,7 @@ export class ApplicationAuthorisationAPI {
 			name: win.name,
 			shortName: win.shortname,
 			iconName: win.iconName,
-			applicationDirectory: win.Application.directory,
+			applicationDirectory: win.Application?.directory,
 
 			position: win.position,
 			dimensions: win.dimensions,
