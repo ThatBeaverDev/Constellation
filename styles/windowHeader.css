@@ -52,3 +52,7 @@
     left: 0px;
     top: 0px;
 }
+
+.windowContainer.square > .windowHeader {
+    display: none;
+}

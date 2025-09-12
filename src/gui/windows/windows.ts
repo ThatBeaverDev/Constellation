@@ -524,10 +524,10 @@ class GraphicalWindowClass {
 	}
 
 	showHeader() {
-		this.header.style.height = "";
+		this.container.classList.remove("square");
 	}
 	hideHeader() {
-		this.header.style.height = "0px";
+		this.container.classList.add("square");
 	}
 
 	square() {
