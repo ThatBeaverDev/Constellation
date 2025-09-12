@@ -5,3 +5,4 @@
 /// <reference path="../security/env.ts" />
 /// <reference path="../runtime/executables.ts" />
 /// <reference types="../global.d.ts" />
+/// <reference path="../fs/fs.ts" />
