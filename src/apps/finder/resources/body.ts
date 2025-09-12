@@ -33,8 +33,8 @@ export default class finderBody {
 	}
 
 	displayItem(
-		x: number = 110,
-		y: number = 10,
+		x: number = 100 + this.contentPadding,
+		y: number = this.contentPadding,
 		icon: string = "/System/CoreAssets/Vectors/files/file.svg",
 		name: string = "File",
 		subtext: string = "Unknown",
@@ -52,7 +52,7 @@ export default class finderBody {
 
 		if (selected == true) {
 			this.renderer.box(x, y, width, height, {
-				background: "var(--main-accent-secondary)",
+				background: "var(--main-accent-tertiary)",
 				borderRadius: 4
 			});
 		}
@@ -99,7 +99,7 @@ export default class finderBody {
 		const iconScale = 0.5;
 
 		this.renderer.box(0, 0, 100, this.renderer.windowHeight + 100, {
-			background: "var(--main-theme-secondary)"
+			background: "sidebar"
 		});
 
 		const contentArea = this.renderer.box(
@@ -150,6 +150,29 @@ export default class finderBody {
 			this.parent.location.path + " - Current Location",
 			this.parent.location.subtext
 		);
+
+		if (this.parent.textDisplay !== undefined) {
+			const text = this.parent.textDisplay;
+			const textWidth = this.renderer.getTextWidth(text);
+			const textHeight = 15 * 1.2;
+
+			const leftPadding =
+				this.parent.sidebarWidth +
+				this.contentPadding +
+				this.contentPadding;
+			const topPadding =
+				dims.height + this.contentPadding + this.contentPadding;
+
+			const areaWidth = this.renderer.windowWidth - leftPadding;
+			const areaHeight = this.renderer.windowHeight - topPadding;
+
+			const left = leftPadding + (areaWidth - textWidth) / 2;
+			const top = topPadding + (areaHeight - textHeight) / 2;
+
+			this.renderer.text(left, top, this.parent.textDisplay);
+
+			return;
+		}
 
 		const baseY = dims.height + 20 + this.contentPadding;
 
