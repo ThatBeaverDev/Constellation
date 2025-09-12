@@ -151,7 +151,31 @@ export default class finderBody {
 			this.parent.location.subtext
 		);
 
+		const baseY = dims.height + 20 + this.contentPadding;
+
+		// draw the folder contents
+		let x = this.parent.sidebarWidth + this.contentPadding;
+		y = baseY;
+
 		if (this.parent.textDisplay !== undefined) {
+			const fakeListing: listing = {
+				name: "..",
+				path: this.parent.path.textBeforeLast("/"),
+				icon: "/System/CoreAssets/Vectors/files/folder.svg",
+				type: "directory",
+				subtext: "Exit this folder"
+			};
+
+			this.displayItem(
+				x,
+				y,
+				"/System/CoreAssets/Vectors/files/folder.svg",
+				"..",
+				"Exit this folder",
+				this.parent.selector == 0,
+				this.interactions.displayItemLeftClick(fakeListing, "0")
+			);
+
 			const text = this.parent.textDisplay;
 			const textWidth = this.renderer.getTextWidth(text);
 			const textHeight = 15 * 1.2;
@@ -173,12 +197,6 @@ export default class finderBody {
 
 			return;
 		}
-
-		const baseY = dims.height + 20 + this.contentPadding;
-
-		// draw the folder contents
-		let x = this.parent.sidebarWidth + this.contentPadding;
-		y = baseY;
 
 		for (const index in this.parent.listing) {
 			const obj: listing = this.parent.listing[index];
