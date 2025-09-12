@@ -3,6 +3,7 @@ import { terminate } from "../../runtime/runtime.js";
 import { DevToolsColor, performanceLog } from "../../lib/debug.js";
 import ConstellationKernel from "../../kernel.js";
 import cssVariables, { applyWindowsCSS } from "./css.js";
+import { showUserPrompt } from "../prompt.js";
 
 const start = performance.now();
 const name = "/System/windows.js";
@@ -244,6 +245,24 @@ export default class WindowSystem {
 		this.styleElem.textContent = css;
 
 		windowsTimestamp("Update CSS Styling", start);
+	}
+
+	/**
+	 * Displays a prompt to the user, providing a title, description and two options for buttons.
+	 * @param icon - Icon to display at the top of the popup
+	 * @param config - Configuration object to define properties of the popup
+	 * @returns "primary" or "secondary", depending on whether the first or second button is pressed.
+	 */
+	async showUserPrompt(
+		icon: string,
+		config: {
+			primary: string;
+			secondary?: string;
+			title: string;
+			description: string;
+		}
+	): Promise<"primary" | "secondary" | never> {
+		return await showUserPrompt(this.#ConstellationKernel, icon, config);
 	}
 }
 windowsTimestamp("Startup of src/windows/windows.ts", start, "primary");
