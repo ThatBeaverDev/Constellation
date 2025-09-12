@@ -14,7 +14,6 @@
 
     position: absolute;
 
-    min-width: 300px;
     min-height: var(--window-header-height);
 
     border-radius: var(--window-border-radius);
