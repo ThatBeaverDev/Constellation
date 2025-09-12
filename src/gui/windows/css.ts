@@ -50,6 +50,7 @@ export default class cssVariables {
 
 export async function applyWindowsCSS() {
 	const files = [
+		"/styles/windowSnapping.css",
 		"/styles/windowHeader.css",
 		"/styles/windowBody.css"
 	];

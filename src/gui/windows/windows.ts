@@ -31,6 +31,12 @@ function clamp(n: number | undefined, min: number, max: number) {
 }
 
 applyWindowsCSS();
+
+interface snappingWindowInfo {
+	window: GraphicalWindowClass;
+	side: "left" | "right" | "fullscreen";
+}
+
 export default class WindowSystem {
 	// constants
 	readonly EDGE_THRESHOLD = 8;
@@ -49,7 +55,19 @@ export default class WindowSystem {
 	 * ID of the currently focused window
 	 */
 	focusedWindow: number | undefined;
-	target: GraphicalWindowClass | undefined = undefined;
+	target:
+		| {
+				window: GraphicalWindowClass;
+
+				originX: number;
+				originY: number;
+
+				windowX: number;
+				windowY: number;
+
+				hasMoved: boolean;
+		  }
+		| undefined = undefined;
 	startMouseX = 0;
 	startMouseY = 0;
 	offsetX = 0;
@@ -59,6 +77,71 @@ export default class WindowSystem {
 	windowTilingNumber = 0;
 	#ConstellationKernel: ConstellationKernel;
 	cssVariables: cssVariables;
+
+	_snappingWindow: snappingWindowInfo | undefined;
+	_snappingWindowDisplay: HTMLDivElement = (() => {
+		const elem = document.createElement("div");
+		elem.id = String(window.renderID++);
+		elem.className = "windowSnappingIndicator";
+
+		document.body.appendChild(elem);
+
+		return elem;
+	})();
+	set snappingWindow(info: snappingWindowInfo | undefined) {
+		// make it snap
+
+		if (info == undefined) {
+			// no more snapping
+			this._snappingWindowDisplay.style.width = "0px";
+			this._snappingWindowDisplay.style.height = "0px";
+			this._snappingWindowDisplay.style.top = "0px";
+			this._snappingWindowDisplay.style.left = "0px";
+
+			this._snappingWindowDisplay.classList.remove("snapRight");
+			this._snappingWindowDisplay.classList.remove("snapLeft");
+
+			this._snappingWindow = undefined;
+
+			return;
+		}
+
+		if (
+			this._snappingWindow?.window === info.window &&
+			this._snappingWindow.side == info.side
+		) {
+			return;
+		}
+
+		switch (info.side) {
+			case "left":
+				this._snappingWindowDisplay.style.width = `${window.innerWidth / 2}px`;
+				this._snappingWindowDisplay.style.height = `${window.innerHeight}px`;
+				this._snappingWindowDisplay.style.top = "0px";
+				this._snappingWindowDisplay.style.left = "0px";
+
+				this._snappingWindowDisplay.classList.remove("snapRight");
+				this._snappingWindowDisplay.classList.add("snapLeft");
+
+				break;
+			case "right":
+				this._snappingWindowDisplay.style.width = `${window.innerWidth / 2}px`;
+				this._snappingWindowDisplay.style.height = `${window.innerHeight}px`;
+				this._snappingWindowDisplay.style.top = "0px";
+				this._snappingWindowDisplay.style.left = `${window.innerWidth / 2}px`;
+
+				this._snappingWindowDisplay.classList.remove("snapLeft");
+				this._snappingWindowDisplay.classList.add("snapRight");
+
+				break;
+		}
+
+		this._snappingWindow = info;
+	}
+
+	get snappingWindow(): snappingWindowInfo | undefined {
+		return this._snappingWindow;
+	}
 
 	constructor(ConstellationKernel: ConstellationKernel) {
 		this.#ConstellationKernel = ConstellationKernel;
@@ -73,6 +156,8 @@ export default class WindowSystem {
 
 		const windowPointerDown = (e: PointerEvent) => {
 			// clear target if clicking outside windows
+			// target is assigned within the window's constructor.
+
 			if (!this.target) return;
 			e.preventDefault();
 		};
@@ -84,13 +169,84 @@ export default class WindowSystem {
 			const x = e.clientX - this.offsetX;
 			const y = e.clientY - this.offsetY;
 
-			this.target.move(x, y);
-			this.target.unfullscreen();
+			this.target.windowX = x;
+			this.target.windowY = y;
+
+			const win = this.target.window;
+
+			if (this.target.hasMoved) {
+				//setTimeout(() => {
+				const snappingInfo = win.move(x, y);
+				win.unfullscreen();
+
+				let side: "left" | "right" | "fullscreen" | undefined =
+					undefined;
+
+				if (snappingInfo.snapLeft) {
+					side = "left";
+				} else if (snappingInfo.snapRight) {
+					side = "right";
+				}
+
+				// no snapping needed
+				if (side == undefined) {
+					if (this.snappingWindow?.window == win) {
+						this.snappingWindow = undefined;
+					}
+					return;
+				}
+
+				this.snappingWindow = {
+					window: win,
+					side
+				};
+				//}, 10);
+			} else {
+				const distanceX = Math.abs(
+					this.target.windowX - this.target.originX
+				);
+				const distanceY = Math.abs(
+					this.target.windowY - this.target.originY
+				);
+				const distancePythagoras = Math.sqrt(
+					distanceX ** 2 + distanceY ** 2
+				);
+
+				if (distancePythagoras > 10) {
+					this.target.hasMoved = true;
+				}
+			}
 		};
 		window.addEventListener("pointermove", windowPointerMove);
 
 		// stop the dragging
 		const windowPointerUp = (e: PointerEvent) => {
+			if (this.snappingWindow !== undefined) {
+				// we need to actually snap the window
+
+				const win = this.snappingWindow.window;
+				switch (this.snappingWindow.side) {
+					case "left":
+						win.move(0, 0);
+						win.resize(
+							window.innerWidth / 2,
+							window.innerHeight,
+							true
+						);
+						break;
+					case "right":
+						win.move(window.innerWidth / 2, 0);
+						win.resize(
+							window.innerWidth / 2,
+							window.innerHeight,
+							true
+						);
+						break;
+				}
+
+				this.snappingWindow = undefined;
+			}
+
 			this.target = undefined;
 		};
 		window.addEventListener("pointerup", windowPointerUp);
@@ -404,7 +560,17 @@ class GraphicalWindowClass {
 		this.minimiseButton = document.getElementById(this.minimiseButton.id)!;
 
 		const headerPointerDown = (e: PointerEvent) => {
-			this.#WindowSystem.target = this;
+			this.#WindowSystem.target = {
+				window: this,
+
+				originX: this.position.left,
+				originY: this.position.top,
+
+				windowX: this.position.left,
+				windowY: this.position.top,
+
+				hasMoved: false
+			};
 
 			const rect = this.container.getBoundingClientRect();
 			this.#WindowSystem.offsetX = e.clientX - rect.left;
@@ -451,7 +617,7 @@ class GraphicalWindowClass {
 			const height = Number(heightPx.substring(0, heightPx.length - 2));
 
 			this.resize(width, height);
-			this.move(this.position.left, this.position.top);
+			this.move(this.position.left, this.position.top, undefined, false);
 		});
 
 		this.resizeObserver.observe(this.container);
@@ -505,7 +671,24 @@ class GraphicalWindowClass {
 		windowsTimestamp(`Reposition window ${this.winID}`, start);
 	}
 
-	move(x?: number, y?: number, z?: number) {
+	/**
+	 * Moves the window, whilst preventing it from moving offscreen.
+	 * @param x - the X position of the window.
+	 * @param y - the Y position of the window.
+	 * @param z - the Z position of the window.
+	 * @returns - Snapping information
+	 */
+	move(x?: number, y?: number, z?: number, unsnap: boolean = true) {
+		if (this.lastResizeWasSnapping == true && unsnap == true) {
+			// undo snapping size
+			this.resize(this.unsnappedWidth, this.unsnappedHeight);
+
+			this.lastResizeWasSnapping = false;
+
+			this.unsnappedWidth = undefined;
+			this.unsnappedHeight = undefined;
+		}
+
 		const clamped = {
 			x: clamp(x, 0, window.innerWidth - this.dimensions.width),
 			y: clamp(y, 0, window.innerHeight - this.dimensions.height)
@@ -520,13 +703,31 @@ class GraphicalWindowClass {
 		if (z !== undefined) this.position.zIndex = z;
 
 		this.reposition();
+
+		return {
+			snapLeft: clamped.x !== x && Number(x) < this.dimensions.width / 2,
+			snapRight: clamped.x !== x && Number(x) > this.dimensions.width / 2
+		};
 	}
 
-	resize(width = 100, height = 100) {
-		this.container.dataset.width = String(width);
+	lastResizeWasSnapping: boolean = false;
+	unsnappedWidth?: number;
+	unsnappedHeight?: number;
+	resize(width = 100, height = 100, isSnapping?: boolean) {
+		const clampedWidth = clamp(width, this.minimumWidth, Infinity);
+
+		this.container.style.minWidth = `${clampedWidth}px`;
+
+		this.container.dataset.width = String(clampedWidth);
 		this.container.dataset.height = String(height);
 
-		this.dimensions.width = width;
+		if (isSnapping) {
+			this.lastResizeWasSnapping = true;
+			this.unsnappedWidth = Number(this.dimensions.width);
+			this.unsnappedHeight = Number(this.dimensions.height);
+		}
+
+		this.dimensions.width = clampedWidth;
 		this.dimensions.height = height;
 
 		this.reposition();
@@ -609,6 +810,8 @@ class GraphicalWindowClass {
 		top: 0,
 		zIndex: 0
 	};
+
+	minimumWidth = 300;
 
 	rename(name: string) {
 		this.name = name;
