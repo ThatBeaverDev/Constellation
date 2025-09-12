@@ -9,7 +9,6 @@ import {
 } from "../security/env.js";
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
 import ConstellationKernel from "../kernel.js";
-import { GraphicalWindow } from "../gui/windows/windows.js";
 import { importRewriter } from "./codeProcessor.js";
 
 const path = "/System/runtime.js";
@@ -31,14 +30,27 @@ declare global {
 		BackgroundProcess: typeof executables.BackgroundProcess;
 		Popup: typeof executables.Popup;
 		Module: typeof executables.Module;
-		processes: executables.Process[];
 		env: ApplicationAuthorisationAPI;
-		windows: GraphicalWindow[];
 	}
 }
 
-export const processes: executables.Process[] = [];
-window.processes = processes;
+interface ProcessInformation {
+	// attachment info
+	id: number;
+	counter: number;
+	kernel: ConstellationKernel;
+
+	// origination
+	directory: string;
+	startTime: number;
+
+	// state
+	program: Process;
+	children: Process[];
+}
+
+export const processes: ProcessInformation[] = [];
+(window as any).processes = processes;
 
 window.renderID = 0;
 
@@ -48,10 +60,10 @@ window.BackgroundProcess = executables.BackgroundProcess;
 window.Popup = executables.Popup;
 window.Module = executables.Module;
 
-export function getProcessFromID(id: number) {
+export function getProcessFromID(id: number): Process | undefined {
 	for (const proc of processes) {
 		if (proc.id == id) {
-			return proc;
+			return proc.program;
 		}
 	}
 }
@@ -72,7 +84,7 @@ export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
 	const start = performance.now();
 	const procDir = String(proc.directory);
 
-	const idx = processes.indexOf(proc);
+	const idx = processes.map((item) => item.program).indexOf(proc);
 
 	if (!isDueToCrash) {
 		try {
@@ -175,7 +187,7 @@ export class ProgramRuntime {
 						UserInterface.windows.focusedWindow
 					)?.Application,
 					...processes.filter((proc) =>
-						proc.env.hasPermission("keylogger")
+						proc.program.env.hasPermission("keylogger")
 					)
 				]);
 
@@ -197,7 +209,13 @@ export class ProgramRuntime {
 					}
 				};
 
-				keylisteners.forEach((item) => procKeydown(item));
+				keylisteners.forEach((item) => {
+					if (item instanceof Process) {
+						procKeydown(item);
+					} else {
+						procKeydown(item?.program);
+					}
+				});
 
 				document.addEventListener("keyup", (event) => {
 					const UserInterface =
@@ -209,7 +227,7 @@ export class ProgramRuntime {
 							UserInterface.windows.focusedWindow
 						)?.Application,
 						...processes.filter((proc) =>
-							proc.env.hasPermission("keylogger")
+							proc.program.env.hasPermission("keylogger")
 						)
 					];
 
@@ -231,7 +249,13 @@ export class ProgramRuntime {
 						}
 					};
 
-					keylisteners.forEach((item) => procKeyup(item));
+					keylisteners.forEach((item) => {
+						if (item instanceof Process) {
+							procKeyup(item);
+						} else {
+							procKeyup(item?.program);
+						}
+					});
 				});
 			});
 
@@ -468,14 +492,24 @@ export class ProgramRuntime {
 
 		if (parent?.children !== undefined) parent.children.push(live);
 
+		const info: ProcessInformation = {
+			id: Number(executables.nextPID),
+			counter: 0,
+			kernel: this.#ConstellationKernel,
+			directory,
+			startTime: Date.now(),
+			program: live,
+			children: []
+		};
+
 		// add to the processes list
-		processes.push(live);
+		processes.push(info);
 
 		if (waitForInit) {
-			await this.procExec(live, "init");
+			await this.procExec(info, "init");
 		} else {
 			// not waiting for anybody.
-			this.procExec(live, "init");
+			this.procExec(info, "init");
 		}
 
 		AppsTimeStamp(`Open program from ${directory}`, start);
@@ -538,11 +572,20 @@ export class ProgramRuntime {
 	}
 
 	async procExec(
-		process: Process,
+		info: ProcessInformation,
 		subset: "init" | "frame" | "terminate" = "frame",
 		catchError: boolean = true
 	) {
+		const process = info.program;
+
+		// insure readonly properties are still the same
+		(process as any).id = Number(info.id);
+		(process as any).directory = String(info.directory);
+		(process as any).startTime = Number(info.startTime);
+
 		if (process.executing) return;
+
+		info.counter++;
 
 		try {
 			process.executing = true;
