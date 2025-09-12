@@ -16,10 +16,17 @@ const clamp = (n: number, min: number, max: number) => {
 export interface listing {
 	name: string;
 	path: string;
-	icon: directoryPointType;
-	type: string;
+	icon: string;
+	type: directoryPointType;
 	subtext: string;
-};
+	hasAccess?: boolean;
+
+	trashMetadata?: {
+		originalPath: string;
+		deletionTime: string;
+		deletionTimestamp: number;
+	};
+}
 
 export default class finder extends Application {
 	name: string = "Finder";
@@ -31,6 +38,7 @@ export default class finder extends Application {
 	path: string = "/";
 	selector: number = 0;
 	listing: listing[] = [];
+	textDisplay?: string;
 	location?: listing;
 	icon: string = "folder";
 	ok: boolean = false;
@@ -126,6 +134,8 @@ export default class finder extends Application {
 
 	async cd(directory: string) {
 		this.ok = false;
+		delete this.textDisplay;
+		this.listing = [];
 
 		const oldDir = String(this.path);
 		if (oldDir !== directory) {
@@ -137,13 +147,24 @@ export default class finder extends Application {
 
 		const directoryContents = await this.env.fs.listDirectory(dir);
 		if (!directoryContents.ok) {
-			this.env.prompt(`Directory at ${this.path} doesn't exist.`);
+			if (directoryContents.data.constructor.name == "PermissionsError") {
+				// this is just a no permissions case
+				this.textDisplay = `You don't have permission to view '${this.path}'`;
+				this.ok = true;
+				return;
+			}
+			this.env.prompt(
+				`Directory at ${this.path} doesn't exist.`,
+				String(directoryContents.data)
+			);
 			this.path = oldDir;
+			this.ok = true;
 			return;
 		}
 		if (directoryContents.data == undefined) {
 			this.env.prompt(`Directory at ${this.path} doesn't exist.`);
 			this.path = oldDir;
+			this.ok = true;
 			return;
 		}
 
@@ -162,52 +183,87 @@ export default class finder extends Application {
 		): Promise<listing | undefined> => {
 			const path = this.env.fs.resolve(this.path, directory);
 
-			const type = await this.env.fs.typeOfFile(path);
-
-			const stat = await this.env.fs.stat(path);
-			if (!stat.ok) {
-				throw stat.data;
+			// get the type
+			let type: directoryPointType;
+			try {
+				type = await this.env.fs.typeOfFile(path);
+			} catch (e: unknown) {
+				if (e?.constructor?.name == "PermissionsError") {
+					// deal with it?
+					type = "none";
+				} else {
+					throw e;
+				}
 			}
 
-			const lastModifiedDate: Date = stat.data.mtime;
-			const creationDate: Date = stat.data.atime;
+			let stat: any = await this.env.fs.stat(path);
 
-			const dates = [lastModifiedDate, creationDate];
-			dates.sort();
-			const latestDate = dates[1];
+			if (!stat.ok) {
+				stat = {
+					ok: true,
+					data: { mtime: undefined, atime: undefined }
+				};
+			}
 
-			const monthDay = latestDate.getDate();
-			const month = latestDate.getMonth() + 1;
-			const year = latestDate.getFullYear();
+			const lastModifiedDate: Date | undefined = stat.data.mtime;
+			const creationDate: Date | undefined = stat.data.atime;
 
-			const hour = String(latestDate.getHours()).padStart(2, "0");
-			const minute = String(latestDate.getMinutes()).padStart(2, "0");
+			let lastModified;
+			if (lastModifiedDate == undefined || creationDate == undefined) {
+				// one of them is bad, just leave it
+				lastModified = "Insufficient Permissions";
+			} else {
+				const dates = [lastModifiedDate, creationDate];
+				dates.sort();
+				const latestDate = dates[1];
 
-			const lastModified = `${monthDay}/${month}/${year} at ${hour}:${minute}`;
+				const monthDay = latestDate.getDate();
+				const month = latestDate.getMonth() + 1;
+				const year = latestDate.getFullYear();
+
+				const hour = String(latestDate.getHours()).padStart(2, "0");
+				const minute = String(latestDate.getMinutes()).padStart(2, "0");
+
+				lastModified = `${monthDay}/${month}/${year} at ${hour}:${minute}`;
+			}
+
+			const lastModifiedText =
+				lastModified == "Insufficient Permissions"
+					? ""
+					: `, Last Modified ${lastModified}`;
+
+			const getDirectorySubtext = async () => {
+				const list = await this.env.fs.listDirectory(path);
+
+				if (!list.ok) return "Insufficient Permissions.";
+
+				return String(list.data.length) + " Items" + lastModifiedText;
+			};
+
+			const getFileSubtext = async () => {
+				const stat = await this.env.fs.stat(path);
+
+				if (!stat.ok) return "Insufficient Permissions.";
+
+				const size = Math.round(stat.data.size / 102.4) / 10;
+
+				return String(size) + " KiB" + lastModifiedText;
+			};
 
 			const obj: listing = {
 				name: directory,
 				path,
-				icon: await pathIcon(path),
+				icon: await pathIcon(this.env, path),
 				type,
 				subtext:
 					type == "directory"
-						? `${await (async () => {
-								const list =
-									await this.env.fs.listDirectory(path);
-
-								if (!list.ok) throw list.data;
-
-								return list.data.length;
-							})()} Items, Last Modified ${lastModified}`
-						: `${await (async () => {
-								const stat = await this.env.fs.stat(path);
-
-								if (!stat.ok) throw stat.data;
-
-								Math.round(stat.data.size / 102.4) / 10;
-							})()} KiB, Last Modified ${lastModified}`
+						? await getDirectorySubtext()
+						: await getFileSubtext()
 			};
+
+			if (type == "directory") {
+				obj.hasAccess = obj.subtext == "Insufficient Permissions.";
+			}
 
 			return obj;
 		};
@@ -225,7 +281,7 @@ export default class finder extends Application {
 
 		this.listing = listings;
 
-		const newIcon = await pathIcon(this.path);
+		const newIcon = await pathIcon(this.env, this.path);
 		if (newIcon !== this.icon) {
 			this.icon = newIcon;
 			this.renderer.setIcon(this.icon);
