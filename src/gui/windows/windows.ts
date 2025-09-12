@@ -316,7 +316,8 @@ export default class WindowSystem {
 		target.move(
 			target.position.left,
 			target.position.top,
-			this.windowTilingNumber++
+			this.windowTilingNumber++,
+			false
 		);
 
 		windowsTimestamp(`Focus window ${id}`, start);
