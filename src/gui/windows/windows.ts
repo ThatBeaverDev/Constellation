@@ -665,3 +665,26 @@ class GraphicalWindowClass {
 		}
 	}
 }
+
+export class UserPrompt extends GraphicalWindowClass {
+	constructor(ConstellationKernel: ConstellationKernel, name: string) {
+		super(ConstellationKernel, name);
+		this.minimumWidth = 200;
+
+		this.container.style.background =
+			"rgb(from var(--backgroundColour) r g b / 50%)";
+		this.container.style.backdropFilter = "blur(10px)";
+
+		this.hideHeader();
+
+		// position windows where requested or at the default location
+		const width: number = 200;
+		const height: number = 200;
+
+		const left = (window.innerWidth - width) / 2;
+		const top = (window.innerHeight - height) / 2;
+
+		this.resize(width, height);
+		this.move(left, top);
+	}
+}
