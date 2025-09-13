@@ -108,9 +108,28 @@ export default class finderInteractions {
 					break;
 			}
 
-			context["Rename"] = () => {
-				/* TODO: RENAME THE FILE! */
+			context["Rename"] = async () => {
+				const newName = await this.renderer.askUserQuestion(
+					"What should this file be called?",
+					"This file's current name is " + obj.name,
+					obj.icon
 				);
+
+				const oldPath = obj.path;
+				const newPath = obj.path.textBeforeLast("/") + "/" + newName;
+
+				const rename = await this.env.fs.move(oldPath, newPath);
+				if (!rename.ok) {
+					if (rename.data.name == "PermissionsError") {
+						this.renderer.showUserPrompt(
+							"Access Denied",
+							"You cannot rename this file because you do not have permission to modify files in this directory.",
+							"OK",
+							undefined,
+							obj.icon
+						);
+					}
+				}
 			};
 			context["Move to Bin"] = async () => {
 				const userInfo = this.env.users.userInfo(this.env.user);
