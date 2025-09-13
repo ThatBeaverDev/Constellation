@@ -10,6 +10,7 @@ import {
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
 import ConstellationKernel from "../kernel.js";
 import { importRewriter } from "./codeProcessor.js";
+import { dump } from "./crashed.js";
 
 const path = "/System/runtime.js";
 
@@ -34,7 +35,7 @@ declare global {
 	}
 }
 
-interface ProcessInformation {
+export interface ProcessInformation {
 	// attachment info
 	id: number;
 	counter: number;
@@ -621,6 +622,8 @@ export class ProgramRuntime {
 			this.#ConstellationKernel.lib.logging.warn(path, e);
 
 			if (!catchError) return;
+
+			await dump(this.#ConstellationKernel, info);
 
 			const name = appName(process);
 

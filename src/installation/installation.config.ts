@@ -13,6 +13,7 @@ export const folders: string[] = [
 	"/System/CoreAssets",
 	"/System/CoreAssets/Logos",
 	"/System/windows",
+	"/System/dumps",
 
 	"/System/CoreLibraries/mimes",
 
