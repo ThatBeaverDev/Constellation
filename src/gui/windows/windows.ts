@@ -413,13 +413,30 @@ export default class WindowSystem {
 	async showUserPrompt(
 		icon: string,
 		config: {
+			title: string;
+			subtext: string;
 			primary: string;
 			secondary?: string;
-			title: string;
-			description: string;
 		}
 	): Promise<"primary" | "secondary" | never> {
-		return await showUserPrompt(this.#ConstellationKernel, icon, config);
+		return await showUserPrompt(
+			this.#ConstellationKernel,
+			icon,
+			"statement",
+			config
+		);
+	}
+
+	async askUserQuestion(
+		icon: string,
+		config: { title: string; subtext: string; defaultAnswer?: string }
+	) {
+		return await showUserPrompt(
+			this.#ConstellationKernel,
+			icon,
+			"question",
+			config
+		);
 	}
 }
 windowsTimestamp("Startup of src/windows/windows.ts", start, "primary");
