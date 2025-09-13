@@ -239,6 +239,7 @@ interface FS {
 		encoding: string,
 		cb?: BFSCallback<string>
 	): void;
+	readFile(filename: string, cb?: BFSCallback<string>): void;
 	readdir(path: string, cb?: BFSCallback<string[]>): void;
 	readlink(path: string, cb?: BFSCallback<string>): void;
 	realpath(path: string, cb?: BFSCallback<string>): void;
