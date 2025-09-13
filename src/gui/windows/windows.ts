@@ -916,7 +916,11 @@ class GraphicalWindowClass {
 }
 
 export class UserPrompt extends GraphicalWindowClass {
-	constructor(ConstellationKernel: ConstellationKernel, name: string) {
+	constructor(
+		ConstellationKernel: ConstellationKernel,
+		name: string,
+		width: number = 200
+	) {
 		super(ConstellationKernel, name);
 		this.minimumWidth = 200;
 
@@ -929,7 +933,6 @@ export class UserPrompt extends GraphicalWindowClass {
 		this.hideHeader();
 
 		// position windows where requested or at the default location
-		const width: number = 200;
 		const height: number = 200;
 
 		const left = (window.innerWidth - width) / 2;
