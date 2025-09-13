@@ -11,6 +11,10 @@
     animation-timing-function: ease-in-out;
     animation-duration: var(--window-transition-duration);
     animation-fill-mode: forwards;
+
+    top: -100px;
+    width: 0px;
+    height: 0px;
 }
 
 .windowSnappingIndicator.snapLeft {
@@ -19,6 +23,10 @@
 
 .windowSnappingIndicator.snapRight {
     animation-name: snapRight;
+}
+
+.windowSnappingIndicator.snapFullscreen {
+    animation-name: snapFullscreen;
 }
 
 @keyframes snapLeft {
@@ -51,6 +59,23 @@
         top: 0px;
 
         width: 50vw;
+        height: 100vh;
+    }
+}
+
+@keyframes snapFullscreen {
+    from {
+        left: 50vw;
+        top: 0px;
+
+        width: 0px;
+        height: 0px;
+    }
+    to {
+        left: 0px;
+        top: 0px;
+
+        width: 100vw;
         height: 100vh;
     }
 }

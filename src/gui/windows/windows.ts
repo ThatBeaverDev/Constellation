@@ -93,13 +93,10 @@ export default class WindowSystem {
 
 		if (info == undefined) {
 			// no more snapping
-			this._snappingWindowDisplay.style.width = "0px";
-			this._snappingWindowDisplay.style.height = "0px";
-			this._snappingWindowDisplay.style.top = "0px";
-			this._snappingWindowDisplay.style.left = "0px";
 
 			this._snappingWindowDisplay.classList.remove("snapRight");
 			this._snappingWindowDisplay.classList.remove("snapLeft");
+			this._snappingWindowDisplay.classList.remove("snapFullscreen");
 
 			this._snappingWindow = undefined;
 
@@ -115,24 +112,21 @@ export default class WindowSystem {
 
 		switch (info.side) {
 			case "left":
-				this._snappingWindowDisplay.style.width = `${window.innerWidth / 2}px`;
-				this._snappingWindowDisplay.style.height = `${window.innerHeight}px`;
-				this._snappingWindowDisplay.style.top = "0px";
-				this._snappingWindowDisplay.style.left = "0px";
-
 				this._snappingWindowDisplay.classList.remove("snapRight");
+				this._snappingWindowDisplay.classList.remove("snapFullscreen");
 				this._snappingWindowDisplay.classList.add("snapLeft");
 
 				break;
 			case "right":
-				this._snappingWindowDisplay.style.width = `${window.innerWidth / 2}px`;
-				this._snappingWindowDisplay.style.height = `${window.innerHeight}px`;
-				this._snappingWindowDisplay.style.top = "0px";
-				this._snappingWindowDisplay.style.left = `${window.innerWidth / 2}px`;
-
 				this._snappingWindowDisplay.classList.remove("snapLeft");
+				this._snappingWindowDisplay.classList.remove("snapFullscreen");
 				this._snappingWindowDisplay.classList.add("snapRight");
 
+				break;
+			case "fullscreen":
+				this._snappingWindowDisplay.classList.remove("snapLeft");
+				this._snappingWindowDisplay.classList.remove("snapRight");
+				this._snappingWindowDisplay.classList.add("snapFullscreen");
 				break;
 		}
 
@@ -186,6 +180,8 @@ export default class WindowSystem {
 					side = "left";
 				} else if (snappingInfo.snapRight) {
 					side = "right";
+				} else if (snappingInfo.snapFullscreen) {
+					side = "fullscreen";
 				}
 
 				// no snapping needed
@@ -242,6 +238,9 @@ export default class WindowSystem {
 							true
 						);
 						break;
+					case "fullscreen":
+						win.move(0, 0);
+						win.resize(window.innerWidth, window.innerHeight, true);
 				}
 
 				this.snappingWindow = undefined;
@@ -631,8 +630,9 @@ class GraphicalWindowClass {
 			const widthPx = this.container.style.width;
 			const heightPx = this.container.style.height;
 
-			const width = Number(widthPx.substring(0, widthPx.length - 2));
-			const height = Number(heightPx.substring(0, heightPx.length - 2));
+			const width = Number(widthPx.substring(0, widthPx.length - 2)) + 4;
+			const height =
+				Number(heightPx.substring(0, heightPx.length - 2)) + 4;
 
 			this.resize(width, height);
 			this.move(this.position.left, this.position.top, undefined, false);
@@ -661,8 +661,8 @@ class GraphicalWindowClass {
 		const start = performance.now();
 		const c = this.container;
 
-		const width = c.dataset.width + "px";
-		const height = c.dataset.height + "px";
+		const width = Number(c.dataset.width) - 4 + "px";
+		const height = Number(c.dataset.height) - 4 + "px";
 
 		const left = c.dataset.left + "px";
 		const top = c.dataset.top + "px";
@@ -732,7 +732,8 @@ class GraphicalWindowClass {
 
 		return {
 			snapLeft: clamped.x !== x && Number(x) < this.dimensions.width / 2,
-			snapRight: clamped.x !== x && Number(x) > this.dimensions.width / 2
+			snapRight: clamped.x !== x && Number(x) > this.dimensions.width / 2,
+			snapFullscreen: clamped.y !== y && Number(y) < 0
 		};
 	}
 
