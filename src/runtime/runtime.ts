@@ -184,9 +184,12 @@ export class ProgramRuntime {
 				if (UserInterface == undefined) return;
 
 				const keylisteners = new Set([
+					// focused window
 					UserInterface.windows.getWindowOfId(
 						UserInterface.windows.focusedWindow
 					)?.Application,
+
+					// key listeners
 					...processes.filter((proc) =>
 						proc.program.env.hasPermission("keylogger")
 					)

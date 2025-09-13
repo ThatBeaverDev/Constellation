@@ -1,4 +1,4 @@
-const manifest = {
+const manifest: ApplicationManifest = {
 	name: "Calculator",
 	description: "A Calculator",
 	category: "Productivity",
