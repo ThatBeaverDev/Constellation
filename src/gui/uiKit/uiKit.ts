@@ -1,5 +1,5 @@
 import { GraphicalWindow } from "../windows/windows.js";
-import { getTextWidth } from "./calcWidth.js";
+import { getTextHeight, getTextWidth, insertNewlines } from "./textUtils.js";
 import { Application, Process } from "../../runtime/executables.js";
 import { UIError } from "../../errors.js";
 import { ContextMenu } from "./contexts.js";
@@ -403,6 +403,8 @@ class UiKitRendererClass {
 	}
 
 	readonly getTextWidth = getTextWidth;
+	readonly getTextHeight = getTextHeight;
+	readonly insertNewlines = insertNewlines;
 
 	readonly setTextboxContent = (content: string) => {
 		// insure there is actually a textbox
@@ -433,7 +435,6 @@ class UiKitRendererClass {
 	readonly #creators: uiKitCreators;
 	readonly #eventCreators: uikitEventCreators;
 	readonly #transitioners: uiKitTransitioners;
-	useTransitioners: boolean = true;
 
 	/**
 	 * Sets the displayed context menu of the window. use .removeContextMenu() to remove it.
