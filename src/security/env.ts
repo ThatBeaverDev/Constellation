@@ -196,15 +196,6 @@ export class ApplicationAuthorisationAPI {
 		);
 	}
 
-	/**
-	 * Shows a graphical prompt onscreen
-	 * @param text - the main statement
-	 * @param reason - the description of this statement
-	 */
-	prompt(text: string, reason = "") {
-		this.#ConstellationKernel.runtime.showPrompt("log", text, reason);
-	}
-
 	#directoryActionCheck(
 		directory: string,
 		isWriteOperation: boolean

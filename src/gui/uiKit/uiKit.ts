@@ -467,6 +467,62 @@ class UiKitRendererClass {
 		this.#context = undefined;
 	};
 
+	/**
+	 * Shows a graphical prompt onscreen
+	 * @param title - the main statement
+	 * @param subtext - the description of this statement
+	 */
+	prompt(title: string, subtext = "", icon = this.#window.iconName) {
+		const gui = this.#ConstellationKernel.GraphicalInterface?.windows;
+		if (gui == undefined)
+			throw new Error(
+				"UiKit may not be used in a non-graphical environment"
+			);
+
+		gui.showUserPrompt(icon, {
+			title,
+			subtext,
+			primary: "Cancel"
+		});
+	}
+
+	async showUserPrompt(
+		title: string,
+		subtext: string,
+		primary: string,
+		secondary?: string,
+		icon: string = this.#window.iconName
+	) {
+		const gui = this.#ConstellationKernel.GraphicalInterface?.windows;
+		if (gui == undefined)
+			throw new Error(
+				"UiKit may not be used in a non-graphical environment"
+			);
+
+		return await gui.showUserPrompt(icon, {
+			title,
+			subtext,
+			primary,
+			secondary
+		});
+	}
+	async askUserQuestion(
+		title: string,
+		subtext: string,
+		icon: string = this.#window.iconName
+	) {
+		const gui = this.#ConstellationKernel.GraphicalInterface?.windows;
+		if (gui == undefined)
+			throw new Error(
+				"UiKit may not be used in a non-graphical environment"
+			);
+
+		return await gui.askUserQuestion(icon, {
+			title,
+			subtext
+		});
+	}
+
 	redraw = () => {
 		this.#mustRedraw = true;
 	};

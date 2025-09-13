@@ -153,7 +153,7 @@ export default class finder extends Application {
 				this.ok = true;
 				return;
 			}
-			this.env.prompt(
+			this.renderer.prompt(
 				`Directory at ${this.path} doesn't exist.`,
 				String(directoryContents.data)
 			);
@@ -162,7 +162,7 @@ export default class finder extends Application {
 			return;
 		}
 		if (directoryContents.data == undefined) {
-			this.env.prompt(`Directory at ${this.path} doesn't exist.`);
+			this.renderer.prompt(`Directory at ${this.path} doesn't exist.`);
 			this.path = oldDir;
 			this.ok = true;
 			return;
