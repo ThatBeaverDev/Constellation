@@ -905,6 +905,8 @@ export class UserPrompt extends GraphicalWindowClass {
 		this.container.style.background =
 			"rgb(from var(--backgroundColour) r g b / 50%)";
 		this.container.style.backdropFilter = "blur(10px)";
+		this.container.style.zIndex = "10000";
+		this.forcedZIndex = 100000;
 
 		this.hideHeader();
 
