@@ -187,6 +187,52 @@ const unlink = async (directory: string): Promise<any> => {
 		});
 	});
 };
+/**
+ * Recursively copies a file or directory to another location
+ * @param oldPath - Path to input
+ * @param newPath - Path to destinationo
+ */
+function copyRecursively(oldPath: string, newPath: string): Promise<void> {
+	return new Promise((resolve, reject) => {
+		fs.stat(oldPath, (error, stats) => {
+			if (error) return reject(error);
+			if (stats == undefined) return reject();
+
+			if (stats.isDirectory()) {
+				// destination exists
+				fs.mkdir(newPath, { recursive: true } as any, (error) => {
+					if (error && error.code !== "EEXIST") return reject(error);
+
+					fs.readdir(oldPath, (error, files) => {
+						if (error) return reject(error);
+						if (files == undefined) return reject();
+
+						Promise.all(
+							files.map((file) =>
+								copyRecursively(
+									oldPath + "/" + file,
+									newPath + "/" + file
+								)
+							)
+						)
+							.then(() => resolve())
+							.catch(reject);
+					});
+				});
+			} else {
+				// file
+				fs.readFile(oldPath, (err4, data) => {
+					if (err4) return reject(err4);
+
+					fs.writeFile(newPath, data, (err5) => {
+						if (err5) return reject(err5);
+						resolve();
+					});
+				});
+			}
+		});
+	});
+}
 
 export class FilesystemAPI {
 	rootPoint: string;
@@ -221,6 +267,13 @@ export class FilesystemAPI {
 		const resolvedNewPath = this.#realDir(newPath);
 
 		return await rename(resolvedOldPath, resolvedNewPath);
+	}
+
+	async cp(oldPath: string, newPath: string) {
+		const resolvedOldPath = this.#realDir(oldPath);
+		const resolvedNewPath = this.#realDir(newPath);
+
+		return await copyRecursively(resolvedOldPath, resolvedNewPath);
 	}
 
 	resolve(base: string, ...targets: string[]) {
