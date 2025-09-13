@@ -557,7 +557,7 @@ export class ApplicationAuthorisationAPI {
 		);
 	}
 
-	async hasPermission(permission: Permission) {
+	hasPermission(permission: Permission) {
 		try {
 			// this will error if we don't have the permission
 			this.#checkPermission(permission);
