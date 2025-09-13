@@ -1,4 +1,9 @@
 import ConstellationKernel from "../kernel.js";
+import {
+	getTextHeight,
+	getTextWidth,
+	insertNewlines
+} from "./uiKit/textUtils.js";
 import { UserPrompt } from "./windows/windows.js";
 
 interface StatementConfig {
@@ -47,7 +52,14 @@ export async function showUserPrompt(
 	if (kernel.GraphicalInterface == undefined)
 		throw new Error("User Prompts require the GraphicalInterface");
 
-	const popup = new UserPrompt(ConstellationKernel, "Popup");
+	// make the popup wider if needed
+	const titleWidth = getTextWidth(config.title);
+	let windowWidth = 200;
+	if (titleWidth > 150) {
+		windowWidth = 300;
+		// window needs to be bigger
+	}
+	const popup = new UserPrompt(ConstellationKernel, "Popup", windowWidth);
 
 	const ui = kernel.GraphicalInterface.uiKit.newRenderer(undefined, popup);
 
@@ -62,34 +74,38 @@ export async function showUserPrompt(
 	// define icon size
 	const iconSize = 50;
 	const iconScale = iconSize / 24;
+	const iconLeft = (width - iconSize) / 2;
 
 	// draw icon
 	let y = outerPadding;
-	ui.icon(75, y, icon, iconScale);
+	ui.icon(iconLeft, y, icon, iconScale);
 	y += iconSize + innerPadding;
 
 	// title
-	const titleWidth = ui.getTextWidth(config.title);
-	const titleHeight = 15 * 1.2;
+	const titleHeight = getTextHeight(config.title);
 	const titleLeft = (width - titleWidth) / 2;
 
 	ui.text(titleLeft, y, config.title);
 	y += titleHeight + innerPadding;
 
 	// description
-	const descWidth = ui.getTextWidth(config.subtext, 11);
-	const descHeight = 11 * 1.2;
+	const desc = insertNewlines(
+		config.subtext,
+		width - outerPadding - outerPadding
+	);
+	const descWidth = getTextWidth(desc, 11);
+	const descHeight = getTextHeight(desc, 11);
 	const descLeft = (width - descWidth) / 2;
 
-	ui.text(descLeft, y, config.subtext, 11);
+	ui.text(descLeft, y, desc, 11);
 	y += descHeight + innerPadding;
 
 	if (type == "statement") {
 		return new Promise(
 			(resolve: (result: "primary" | "secondary") => void) => {
 				// primary button
-				const primaryWidth = ui.getTextWidth(config.primary);
-				const primaryHeight = 15 * 1.2;
+				const primaryWidth = getTextWidth(config.primary);
+				const primaryHeight = getTextHeight(config.primary);
 				const primaryLeft = (width - primaryWidth) / 2;
 
 				const primary = ui.button(primaryLeft, y, config.primary);
@@ -101,8 +117,8 @@ export async function showUserPrompt(
 
 				// secondary button
 				if (config.secondary) {
-					const secondaryWidth = ui.getTextWidth(config.primary);
-					const secondaryHeight = 15 * 1.2;
+					const secondaryWidth = getTextWidth(config.secondary);
+					const secondaryHeight = getTextWidth(config.secondary);
 					const secondaryLeft = (width - secondaryWidth) / 2;
 
 					const secondary = ui.button(
@@ -124,9 +140,16 @@ export async function showUserPrompt(
 	} else if (type == "question") {
 		return new Promise((resolve: (result: string) => void) => {
 			// textbox
-			ui.textbox(0, y, width, 25, "Prompt", {
-				enter: () => {}
-			});
+			ui.textbox(
+				outerPadding,
+				y,
+				width - outerPadding - outerPadding,
+				25,
+				"Prompt",
+				{
+					enter: () => {}
+				}
+			);
 			y += 25 + innerPadding;
 
 			// done button
