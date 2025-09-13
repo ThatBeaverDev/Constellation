@@ -25,11 +25,12 @@ export const folders: string[] = [
 
 export const files: Record<
 	string,
-	string | { type: "jsonFilesIndex" | "binary"; directory: string }
+	| string
+	| { type: "jsonFilesIndex" | "binary" | "application"; directory: string }
 > = {
 	// finder app
 	"/build/apps/com.constellation.finder.idx": {
-		type: "jsonFilesIndex",
+		type: "application",
 		directory: "/Applications/Finder.appl"
 	},
 
@@ -49,45 +50,45 @@ export const files: Record<
 
 	// init system
 	"/build/apps/com.constellation.CoreExecutable.idx": {
-		type: "jsonFilesIndex",
+		type: "application",
 		directory: "/System/CoreExecutables/CoreExecutable.backgr"
 	},
 
 	// terminal
 	"/build/apps/com.constellation.terminal.idx": {
-		type: "jsonFilesIndex",
+		type: "application",
 		directory: "/Applications/Terminal.appl"
 	},
 
 	// remapper
 	"/build/apps/com.constellation.remapper.idx": {
-		type: "jsonFilesIndex",
+		type: "application",
 		directory: "/Applications/Remapper.appl"
 	},
 
 	// Popup
 	"/build/apps/com.constellation.popup.idx": {
-		type: "jsonFilesIndex",
+		type: "application",
 		directory: "/System/CoreExecutables/Popup.appl"
 	},
 	// Settings
 	"/build/apps/com.constellation.settings.idx": {
-		type: "jsonFilesIndex",
+		type: "application",
 		directory: "/Applications/Settings.appl"
 	},
 	// Search
 	"/build/apps/com.constellation.search.idx": {
-		type: "jsonFilesIndex",
+		type: "application",
 		directory: "/Applications/Search.appl"
 	},
 	// Dock & Desktop
 	"/build/apps/com.constellation.dock.idx": {
-		type: "jsonFilesIndex",
+		type: "application",
 		directory: "/System/CoreExecutables/Dock.appl"
 	},
 	// Library
 	"/build/apps/com.constellation.library.idx": {
-		type: "jsonFilesIndex",
+		type: "application",
 		directory: "/System/CoreExecutables/Library.appl"
 	},
 
@@ -108,17 +109,17 @@ export const files: Record<
 
 	// LoginUI
 	"/build/apps/com.constellation.systemLoginInterface.idx": {
-		type: "jsonFilesIndex",
+		type: "application",
 		directory: "/System/CoreExecutables/systemLoginInterface.appl"
 	},
 	// Calculator
 	"/build/apps/com.constellation.calculator.idx": {
-		type: "jsonFilesIndex",
+		type: "application",
 		directory: "/Applications/calculator.appl"
 	},
 	// Out of box experience
 	"/build/installation/com.constellation.oobe.idx": {
-		type: "jsonFilesIndex",
+		type: "application",
 		directory: "/System/CoreExecutables/OOBEInstaller.appl"
 	}
 };
