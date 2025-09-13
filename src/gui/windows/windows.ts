@@ -638,6 +638,7 @@ class GraphicalWindowClass {
 	Application?: Application;
 	resizeObserver: ResizeObserver;
 	iconName: string = "app-window-mac";
+	forcedZIndex?: number;
 
 	reposition() {
 		const start = performance.now();
@@ -665,8 +666,15 @@ class GraphicalWindowClass {
 		if (c.style.top !== top) {
 			c.style.top = top;
 		}
-		if (c.style.zIndex !== zIndex) {
-			c.style.zIndex = zIndex;
+
+		if (this.forcedZIndex == undefined) {
+			if (c.style.zIndex !== zIndex) {
+				c.style.zIndex = zIndex;
+			}
+		} else {
+			if (c.style.zIndex !== String(this.forcedZIndex)) {
+				c.style.zIndex = String(this.forcedZIndex);
+			}
 		}
 
 		windowsTimestamp(`Reposition window ${this.winID}`, start);
