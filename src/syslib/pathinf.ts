@@ -8,17 +8,17 @@ export async function getAppConfig(
 ) {
 	const appConf = await env.include(env.fs.resolve(directory, "config.js"));
 	// get the real data
-	return appConf?.default;
+	return appConf?.default as ApplicationManifest;
 }
 
 export async function pathIcon(
 	env: ApplicationAuthorisationAPI,
 	directory: string
-) {
+): Promise<string | never> {
 	const stats = await env.fs.stat(directory);
 
 	if (!stats.ok) {
-		return;
+		throw stats.data;
 	}
 
 	const extension = directory.textAfterAll(".");
