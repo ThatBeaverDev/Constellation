@@ -180,6 +180,14 @@ export class FilesystemInstaller {
 
 					break;
 				}
+				case "application": {
+					if (directory.startsWith("/System/"))
+						await this.#ConstellationKernel.security.permissions.setDirectoryPermission(
+							directory,
+							"systemFiles",
+							true
+						);
+				}
 				case "jsonFilesIndex": {
 					const start = performance.now();
 
