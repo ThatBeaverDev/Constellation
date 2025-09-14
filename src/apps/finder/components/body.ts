@@ -1,6 +1,6 @@
 import { onClickOptions } from "../../../gui/uiKit/definitions.js";
 import finder, { listing } from "../tcpsys/app.js";
-import finderInteractions from "../resources/interactions.js";
+import finderInteractions from "./interactions.js";
 
 export default class finderBody {
 	renderer: finder["renderer"];

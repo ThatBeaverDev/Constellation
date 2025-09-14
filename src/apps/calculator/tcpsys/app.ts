@@ -1,5 +1,5 @@
 import { IPCMessage } from "../../../runtime/messages.js";
-import { evaluate } from "../resources/logic.js";
+import { evaluate } from "../components/logic.js";
 
 export default class calc extends Application {
 	text: string = "";
