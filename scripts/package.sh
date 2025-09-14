@@ -18,9 +18,6 @@ compile() {
     cp assets/apps/terminal.svg build/apps/terminal/resources/icon.svg
     ./scripts/tcpkg build/apps/terminal build/apps/com.constellation.terminal.idx -override=true
 
-    # Build Remapper
-    ./scripts/tcpkg build/apps/remapper build/apps/com.constellation.remapper.idx -override=true
-
     # Build Popup
     ./scripts/tcpkg build/apps/popup build/apps/com.constellation.popup.idx -override=true
 
