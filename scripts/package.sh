@@ -58,6 +58,9 @@ compile() {
 
     # Build the Out of Box Experience
     ./scripts/tcpkg build/installation/oobe build/installation/com.constellation.oobe.idx -override=true
+
+    # Build FiletypeDatabaseManager
+    ./scripts/tcpkg build/apps/background/filetypeDatabaseManager build/apps/background/com.constellation.fTypeDbMgr.idx -override=true
 }
 
 # first param is directory, second param is name

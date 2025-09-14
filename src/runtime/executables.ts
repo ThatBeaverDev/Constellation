@@ -49,7 +49,10 @@ export interface ProgramManifest {
 	 * Whether this application should be exposed to the user and displayed in search etc.
 	 */
 	userspace?: boolean;
-	allowMultipleInstances?: boolean;
+	/**
+	 * Which filetypes this application is able to open.
+	 */
+	filetypes?: string[];
 }
 
 /**

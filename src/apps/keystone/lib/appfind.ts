@@ -1,11 +1,12 @@
 import TerminalAlias from "../../../lib/terminalAlias";
-import { pathName, pathIcon, pathVisible } from "pathinf";
+import { pathName, pathIcon, pathVisible, getAppConfig } from "pathinf";
 
 export type fileInfo = {
 	directory: string;
 	name: string;
 	icon: string;
 	visible: boolean;
+	filetypes: string[];
 };
 
 export type appFindResult = { files: fileInfo[]; names: string[] };
@@ -32,11 +33,14 @@ export default async function find(
 		// build file objects
 		const localFiles: fileInfo[] = [];
 		for (const dir of localNames) {
+			const config = await getAppConfig(parent.env, dir);
+
 			const obj: fileInfo = {
 				directory: dir,
 				name: await pathName(parent.env, dir),
 				icon: await pathIcon(parent.env, dir),
-				visible: await pathVisible(parent.env, dir)
+				visible: await pathVisible(parent.env, dir),
+				filetypes: config.filetypes || []
 			};
 
 			if (
