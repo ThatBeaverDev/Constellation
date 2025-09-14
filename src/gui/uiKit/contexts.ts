@@ -3,45 +3,6 @@ import { getTextWidth } from "./textUtils.js";
 
 const padding = 10;
 
-export default class ContextMenuCreator {
-	newContext(
-		x: number = 0,
-		y: number = 0,
-		headerText: string = "",
-		items: string[] = []
-	) {
-		const container = document.createElement("div");
-		container.id = String(window.renderID++);
-		container.className = "uikitContextContainer";
-
-		container.style.left = `${x}px`;
-		container.style.top = `${y}px`;
-
-		const header = document.createElement("p");
-		header.className = "uikitText";
-		header.id = String(window.renderID++);
-		header.innerText = headerText;
-
-		function newTextButton(container: HTMLDivElement, id: number) {
-			const elem = document.createElement("button");
-			elem.className = "uiKitButton";
-			elem.id = String(window.renderID++);
-
-			elem.innerText = items[id];
-
-			elem.style.left = `${padding}px`;
-			elem.style.top = `${padding + id * 5}`;
-
-			container.appendChild(elem);
-		}
-
-		newTextButton(container, 0);
-
-		document.body.appendChild(container);
-		return container;
-	}
-}
-
 export class ContextMenu {
 	#start = Date.now();
 

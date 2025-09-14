@@ -168,6 +168,8 @@ export default class Users {
 
 		void (await this.onUsersUpdate());
 	}
+
+	async terminate() {}
 }
 
 securityTimestamp("Startup /src/security/users.ts", start);

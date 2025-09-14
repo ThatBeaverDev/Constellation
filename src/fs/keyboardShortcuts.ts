@@ -47,72 +47,75 @@ export class keyboardShortcutsAPI {
 	constructor(ConstellationKernel: ConstellationKernel) {
 		this.#ConstellationKernel = ConstellationKernel;
 
-		document.addEventListener("keydown", (e) => {
-			const keyCode = e.code;
+		document.addEventListener("keydown", this.keydown.bind(this));
+	}
 
-			const meta = e.metaKey;
-			const option = e.altKey;
-			const shift = e.shiftKey;
-			const ctrl = e.ctrlKey;
+	keydown(e: KeyboardEvent) {
+		const keyCode = e.code;
 
-			for (const [
-				shortcutName,
-				cut
-			] of this.keyboardShortcuts.entries()) {
-				shortcutName;
+		const meta = e.metaKey;
+		const option = e.altKey;
+		const shift = e.shiftKey;
+		const ctrl = e.ctrlKey;
 
-				// insure the right main key is pressed
-				if (keyCode == cut.key) {
-					// loop through all the necessary modifiers to insure they are all pressed
-					let ok = true;
-					for (const i in cut.modifiers) {
-						const mod = cut.modifiers[i];
-						switch (mod) {
-							case "AltLeft":
-							case "AltRight":
-								if (!option) {
-									ok = false;
-								}
-								break;
-							case "ShiftLeft":
-							case "ShiftRight":
-								if (!shift) {
-									ok = false;
-								}
-								break;
-							case "MetaLeft":
-							case "MetaRight":
-								if (!meta) {
-									ok = false;
-								}
-								break;
-							case "ControlLeft":
-							case "ControlRight":
-								if (!ctrl) {
-									ok = false;
-								}
-								break;
-							default:
-								this.#ConstellationKernel.lib.logging.warn(
-									path,
-									"Unknown Modfier key: '" + mod + "'"
-								);
-						}
-					}
+		for (const [shortcutName, cut] of this.keyboardShortcuts.entries()) {
+			shortcutName;
 
-					if (ok) {
-						// trigger the shortcut
-						sendMessage(
-							"/System/keyboardShortcuts.js",
-							0,
-							cut.process,
-							"keyboardShortcutTrigger-" + cut.name
-						);
-
-						e.preventDefault();
+			// insure the right main key is pressed
+			if (keyCode == cut.key) {
+				// loop through all the necessary modifiers to insure they are all pressed
+				let ok = true;
+				for (const i in cut.modifiers) {
+					const mod = cut.modifiers[i];
+					switch (mod) {
+						case "AltLeft":
+						case "AltRight":
+							if (!option) {
+								ok = false;
+							}
+							break;
+						case "ShiftLeft":
+						case "ShiftRight":
+							if (!shift) {
+								ok = false;
+							}
+							break;
+						case "MetaLeft":
+						case "MetaRight":
+							if (!meta) {
+								ok = false;
+							}
+							break;
+						case "ControlLeft":
+						case "ControlRight":
+							if (!ctrl) {
+								ok = false;
+							}
+							break;
+						default:
+							this.#ConstellationKernel.lib.logging.warn(
+								path,
+								"Unknown Modfier key: '" + mod + "'"
+							);
 					}
 				}
+
+				if (ok) {
+					// trigger the shortcut
+					sendMessage(
+						"/System/keyboardShortcuts.js",
+						0,
+						cut.process,
+						"keyboardShortcutTrigger-" + cut.name
+					);
+
+					e.preventDefault();
+				}
 			}
-		});
+		}
+	}
+
+	async terminate() {
+		document.removeEventListener("keydown", this.keydown);
 	}
 }

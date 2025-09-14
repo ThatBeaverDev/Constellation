@@ -8,7 +8,7 @@ import {
 	EnvironmentCreator
 } from "../security/env.js";
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
-import ConstellationKernel from "../kernel.js";
+import ConstellationKernel, { Terminatable } from "../kernel.js";
 import { importRewriter } from "./codeProcessor.js";
 import { dump } from "./crashed.js";
 
@@ -146,10 +146,11 @@ window.envs = new Map();
 
 let nextProgramRuntimeId = 0;
 export class ProgramRuntime {
-	EnvironmentCreator: EnvironmentCreator;
+	EnvironmentCreator: EnvironmentCreator & Terminatable;
 	associations: Record<string, Process["id"]> = {};
 	id: number = nextProgramRuntimeId++;
 	#ConstellationKernel: ConstellationKernel;
+	isTerminating: boolean = false;
 
 	constructor(
 		ConstellationKernel: ConstellationKernel,
@@ -161,6 +162,89 @@ export class ProgramRuntime {
 			this.#ConstellationKernel.fs,
 			this
 		);
+	}
+
+	documentKeyDown(event: KeyboardEvent) {
+		const UserInterface = this.#ConstellationKernel.GraphicalInterface;
+		if (UserInterface == undefined) return;
+
+		const keylisteners = new Set([
+			// focused window
+			UserInterface.windows.getWindowOfId(
+				UserInterface.windows.focusedWindow
+			)?.Application,
+
+			// key listeners
+			...processes.filter((proc) =>
+				proc.program.env.hasPermission("keylogger")
+			)
+		]);
+
+		const procKeydown = (proc?: Process) => {
+			if (proc == undefined) return;
+
+			const fnc = proc.keydown;
+
+			if (typeof fnc == "function") {
+				fnc.call(
+					proc,
+					event.code,
+					event.metaKey,
+					event.altKey,
+					event.ctrlKey,
+					event.shiftKey,
+					event.repeat
+				);
+			}
+		};
+
+		keylisteners.forEach((item) => {
+			if (item instanceof Process) {
+				procKeydown(item);
+			} else {
+				procKeydown(item?.program);
+			}
+		});
+	}
+
+	documentKeyUp(event: KeyboardEvent) {
+		const UserInterface = this.#ConstellationKernel.GraphicalInterface;
+		if (UserInterface == undefined) return;
+
+		const keylisteners = [
+			UserInterface.windows.getWindowOfId(
+				UserInterface.windows.focusedWindow
+			)?.Application,
+			...processes.filter((proc) =>
+				proc.program.env.hasPermission("keylogger")
+			)
+		];
+
+		const procKeyup = (proc?: Process) => {
+			if (proc == undefined) return;
+
+			const fnc = proc.keyup;
+
+			if (typeof fnc == "function") {
+				fnc.call(
+					proc,
+					event.code,
+					event.metaKey,
+					event.altKey,
+					event.ctrlKey,
+					event.shiftKey,
+					event.repeat
+				);
+			}
+		};
+
+		keylisteners.forEach((item) => {
+			if (item instanceof Process) {
+				procKeyup(item);
+			} else {
+				procKeyup(item?.program);
+			}
+		});
 	}
 
 	async init() {
@@ -178,91 +262,13 @@ export class ProgramRuntime {
 		);
 		window.envs.set(this.id, env);
 
-		if (this.#ConstellationKernel.isGraphical)
-			document.addEventListener("keydown", (event) => {
-				const UserInterface =
-					this.#ConstellationKernel.GraphicalInterface;
-				if (UserInterface == undefined) return;
-
-				const keylisteners = new Set([
-					// focused window
-					UserInterface.windows.getWindowOfId(
-						UserInterface.windows.focusedWindow
-					)?.Application,
-
-					// key listeners
-					...processes.filter((proc) =>
-						proc.program.env.hasPermission("keylogger")
-					)
-				]);
-
-				const procKeydown = (proc?: Process) => {
-					if (proc == undefined) return;
-
-					const fnc = proc.keydown;
-
-					if (typeof fnc == "function") {
-						fnc.call(
-							proc,
-							event.code,
-							event.metaKey,
-							event.altKey,
-							event.ctrlKey,
-							event.shiftKey,
-							event.repeat
-						);
-					}
-				};
-
-				keylisteners.forEach((item) => {
-					if (item instanceof Process) {
-						procKeydown(item);
-					} else {
-						procKeydown(item?.program);
-					}
-				});
-
-				document.addEventListener("keyup", (event) => {
-					const UserInterface =
-						this.#ConstellationKernel.GraphicalInterface;
-					if (UserInterface == undefined) return;
-
-					const keylisteners = [
-						UserInterface.windows.getWindowOfId(
-							UserInterface.windows.focusedWindow
-						)?.Application,
-						...processes.filter((proc) =>
-							proc.program.env.hasPermission("keylogger")
-						)
-					];
-
-					const procKeyup = (proc?: Process) => {
-						if (proc == undefined) return;
-
-						const fnc = proc.keyup;
-
-						if (typeof fnc == "function") {
-							fnc.call(
-								proc,
-								event.code,
-								event.metaKey,
-								event.altKey,
-								event.ctrlKey,
-								event.shiftKey,
-								event.repeat
-							);
-						}
-					};
-
-					keylisteners.forEach((item) => {
-						if (item instanceof Process) {
-							procKeyup(item);
-						} else {
-							procKeyup(item?.program);
-						}
-					});
-				});
-			});
+		if (this.#ConstellationKernel.isGraphical) {
+			document.addEventListener(
+				"keydown",
+				this.documentKeyDown.bind(this)
+			);
+			document.addEventListener("keyup", this.documentKeyUp.bind(this));
+		}
 
 		this.#ConstellationKernel.lib.logging.debug(path, "Apps initialised.");
 		AppsTimeStamp("Creation of global env", startEnvInit);
@@ -298,6 +304,9 @@ export class ProgramRuntime {
 		parent?: Process,
 		waitForInit: boolean = true
 	): Promise<executionResult> {
+		if (this.isTerminating)
+			throw new Error("Execution blocked: this kernel is terminating.");
+
 		const start = performance.now();
 
 		this.#ConstellationKernel.lib.logging.debug(
@@ -654,6 +663,23 @@ export class ProgramRuntime {
 					);
 					break;
 			}
+		}
+	}
+
+	async terminate() {
+		// EnvironmentCreator is terminated by security, which creates it.
+
+		this.isTerminating = true;
+
+		processes.forEach((processInfo) => {
+			if (processInfo.kernel === this.#ConstellationKernel) {
+				terminate(processInfo.program);
+			}
+		});
+
+		if (this.#ConstellationKernel.isGraphical) {
+			document.removeEventListener("keydown", this.documentKeyDown);
+			document.removeEventListener("keyup", this.documentKeyUp);
 		}
 	}
 }

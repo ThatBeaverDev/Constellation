@@ -902,22 +902,24 @@ class UiKitRendererClass {
 		this.#deleteElements();
 
 		this.#window.remove();
+
+		if (this.#context) this.#context.remove();
 	}
 }
 
 export default class UiKitInstanceCreator {
 	#ConstellationKernel: ConstellationKernel;
+	style: HTMLStyleElement;
 	constructor(ConstellationKernel: ConstellationKernel) {
 		this.#ConstellationKernel = ConstellationKernel;
+
+		this.style = document.createElement("style");
+		document.body.appendChild(this.style);
 	}
 
 	async init() {
 		const styles = await (await fetch("/src/gui/uiKit/styles.css")).text();
-
-		const style = document.createElement("style");
-		style.textContent = styles;
-
-		document.body.appendChild(style);
+		this.style.textContent = styles;
 	}
 	newRenderer(process?: Application, window?: GraphicalWindow) {
 		return new UiKitRendererClass(
@@ -925,6 +927,10 @@ export default class UiKitInstanceCreator {
 			process,
 			window
 		);
+	}
+
+	async terminate() {
+		this.style.remove();
 	}
 }
 

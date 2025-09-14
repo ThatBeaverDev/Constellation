@@ -1,9 +1,10 @@
 import { Application } from "../../runtime/executables.js";
 import { terminate } from "../../runtime/runtime.js";
 import { DevToolsColor, performanceLog } from "../../lib/debug.js";
-import ConstellationKernel from "../../kernel.js";
-import cssVariables, { applyWindowsCSS } from "./css.js";
+import ConstellationKernel, { Terminatable } from "../../kernel.js";
+import cssVariables from "./css.js";
 import { showUserPrompt } from "../prompt.js";
+import WindowSystemInteractions from "./interactions.js";
 
 const start = performance.now();
 const name = "/System/windows.js";
@@ -29,8 +30,6 @@ function clamp(n: number | undefined, min: number, max: number) {
 	}
 	return n;
 }
-
-applyWindowsCSS();
 
 interface snappingWindowInfo {
 	window: GraphicalWindowClass;
@@ -76,7 +75,8 @@ export default class WindowSystem {
 	winID = 0;
 	windowTilingNumber = 0;
 	#ConstellationKernel: ConstellationKernel;
-	cssVariables: cssVariables;
+	cssVariables: cssVariables & Terminatable;
+	interactions: WindowSystemInteractions & Terminatable;
 
 	_snappingWindow: snappingWindowInfo | undefined;
 	_snappingWindowDisplay: HTMLDivElement = (() => {
@@ -137,128 +137,46 @@ export default class WindowSystem {
 		return this._snappingWindow;
 	}
 
+	update: ReturnType<typeof setInterval>;
+
 	constructor(ConstellationKernel: ConstellationKernel) {
 		this.#ConstellationKernel = ConstellationKernel;
 
 		// init css styles
 		this.cssVariables = new cssVariables(ConstellationKernel);
+		this.cssVariables.applyWindowCSS();
 		this.setCSSVariable = this.cssVariables.setCSSVariable.bind(
 			this.cssVariables
 		);
 
+		// init interactions
+		this.interactions = new WindowSystemInteractions(this);
+
 		// event listeners
+		window.addEventListener(
+			"pointerdown",
+			this.interactions.windowPointerDown.bind(this.interactions)
+		);
 
-		const windowPointerDown = (e: PointerEvent) => {
-			// clear target if clicking outside windows
-			// target is assigned within the window's constructor.
-
-			if (!this.target) return;
-			e.preventDefault();
-		};
-		window.addEventListener("pointerdown", windowPointerDown);
-
-		const windowPointerMove = (e: PointerEvent) => {
-			if (!this.target) return;
-
-			const x = e.clientX - this.offsetX;
-			const y = e.clientY - this.offsetY;
-
-			this.target.windowX = x;
-			this.target.windowY = y;
-
-			const win = this.target.window;
-
-			if (this.target.hasMoved) {
-				//setTimeout(() => {
-				const snappingInfo = win.move(x, y);
-				win.unfullscreen();
-
-				let side: "left" | "right" | "fullscreen" | undefined =
-					undefined;
-
-				if (snappingInfo.snapLeft) {
-					side = "left";
-				} else if (snappingInfo.snapRight) {
-					side = "right";
-				} else if (snappingInfo.snapFullscreen) {
-					side = "fullscreen";
-				}
-
-				// no snapping needed
-				if (side == undefined) {
-					if (this.snappingWindow?.window == win) {
-						this.snappingWindow = undefined;
-					}
-					return;
-				}
-
-				this.snappingWindow = {
-					window: win,
-					side
-				};
-				//}, 10);
-			} else {
-				const distanceX = Math.abs(
-					this.target.windowX - this.target.originX
-				);
-				const distanceY = Math.abs(
-					this.target.windowY - this.target.originY
-				);
-				const distancePythagoras = Math.sqrt(
-					distanceX ** 2 + distanceY ** 2
-				);
-
-				if (distancePythagoras > 10) {
-					this.target.hasMoved = true;
-				}
-			}
-		};
-		window.addEventListener("pointermove", windowPointerMove);
+		window.addEventListener(
+			"pointermove",
+			this.interactions.windowPointerMove.bind(this.interactions)
+		);
 
 		// stop the dragging
-		const windowPointerUp = (e: PointerEvent) => {
-			if (this.snappingWindow !== undefined) {
-				// we need to actually snap the window
+		window.addEventListener(
+			"pointerup",
+			this.interactions.windowPointerUp.bind(this.interactions)
+		);
 
-				const win = this.snappingWindow.window;
-				switch (this.snappingWindow.side) {
-					case "left":
-						win.move(0, 0);
-						win.resize(
-							window.innerWidth / 2,
-							window.innerHeight,
-							true
-						);
-						break;
-					case "right":
-						win.move(window.innerWidth / 2, 0);
-						win.resize(
-							window.innerWidth / 2,
-							window.innerHeight,
-							true
-						);
-						break;
-					case "fullscreen":
-						win.move(0, 0);
-						win.resize(window.innerWidth, window.innerHeight, true);
-				}
-
-				this.snappingWindow = undefined;
-			}
-
-			this.target = undefined;
-		};
-		window.addEventListener("pointerup", windowPointerUp);
-
-		window.addEventListener("resize", () => {
-			this.updateWindows();
-		});
+		window.addEventListener(
+			"resize",
+			this.interactions.windowResize.bind(this.interactions)
+		);
 
 		document.addEventListener(
 			"touchmove",
-			function preventBehavior(e: TouchEvent) {
-				e.preventDefault();
-			},
+			this.interactions.documentTouchMove.bind(this.interactions),
 			{ passive: false }
 		);
 
@@ -268,12 +186,45 @@ export default class WindowSystem {
 
 		document.body.appendChild(this.styleElem);
 
-		setInterval(() => {
+		this.update = setInterval(() => {
 			if (this.minimiseAnimation !== this.oldMinimiseAnimation) {
 				this.oldMinimiseAnimation = String(this.minimiseAnimation);
 				this.updateLiveStyling();
 			}
 		});
+	}
+
+	async terminate() {
+		this._snappingWindowDisplay.remove();
+
+		// submodules
+		await this.cssVariables.terminate();
+		await this.interactions.terminate();
+
+		// event listeners
+		window.removeEventListener(
+			"pointerdown",
+			this.interactions.windowPointerDown
+		);
+		window.removeEventListener(
+			"pointermove",
+			this.interactions.windowPointerMove
+		);
+		window.removeEventListener(
+			"pointerup",
+			this.interactions.windowPointerUp
+		);
+		window.removeEventListener("resize", this.interactions.windowResize);
+		document.removeEventListener(
+			"touchmove",
+			this.interactions.documentTouchMove
+		);
+
+		// close windows
+		this.windows.forEach((window) => window.remove());
+
+		this.styleElem.remove();
+		clearInterval(this.update);
 	}
 
 	setCSSVariable: typeof this.cssVariables.setCSSVariable;

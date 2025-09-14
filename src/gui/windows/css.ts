@@ -46,20 +46,28 @@ export default class cssVariables {
 
 		windowsTimestamp("Refresh Variable CSS", start);
 	}
-}
 
-export async function applyWindowsCSS() {
-	const files = [
-		"/styles/windowSnapping.css",
-		"/styles/windowHeader.css",
-		"/styles/windowBody.css"
-	];
+	#elements: HTMLStyleElement[] = [];
+	async applyWindowCSS() {
+		const files = [
+			"/styles/windowSnapping.css",
+			"/styles/windowHeader.css",
+			"/styles/windowBody.css"
+		];
 
-	for (const i in files) {
-		const elem = document.createElement("style");
-		elem.id = files[i];
-		elem.textContent = await (await fetch(files[i])).text();
+		for (const i in files) {
+			const elem = document.createElement("style");
+			elem.id = files[i];
+			elem.textContent = await (await fetch(files[i])).text();
 
-		document.body.appendChild(elem);
+			document.body.appendChild(elem);
+			this.#elements.push(elem);
+		}
+	}
+
+	async terminate() {
+		this.#elements.forEach((elem) => elem.remove());
+
+		this.live.remove();
 	}
 }

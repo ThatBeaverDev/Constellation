@@ -43,6 +43,9 @@ export default class finder extends Application {
 	icon: string = "folder";
 	ok: boolean = false;
 	sidebarWidth: number = 100;
+	cdInterval: ReturnType<typeof setInterval> = setInterval(() => {
+		this.cd(this.path);
+	}, 500);
 
 	// submodules
 	body?: finderBody;
@@ -68,10 +71,6 @@ export default class finder extends Application {
 		this.renderer.setIcon(
 			this.env.fs.resolve(this.directory, "./resources/icon.svg")
 		);
-
-		setInterval(() => {
-			this.cd(this.path);
-		}, 500);
 
 		this.ok = true;
 	}
@@ -355,5 +354,9 @@ export default class finder extends Application {
 		// send it to the caller and exit
 		this.pipes.send.push({ intent: "selectionComplete", data: path });
 		this.exit();
+	}
+
+	async terminate(): Promise<void> {
+		clearInterval(this.cdInterval);
 	}
 }

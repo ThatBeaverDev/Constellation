@@ -63,6 +63,8 @@ export class EnvironmentCreator {
 			isGlobal
 		);
 	}
+
+	async terminate() {}
 }
 
 export class ApplicationAuthorisationAPI {

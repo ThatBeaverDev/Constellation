@@ -1,15 +1,15 @@
 import { keyboardShortcutsAPI } from "../fs/keyboardShortcuts.js";
 import { Icons } from "./icons.js";
-import ConstellationKernel from "../kernel.js";
+import ConstellationKernel, { Terminatable } from "../kernel.js";
 import WindowSystem from "./windows/windows.js";
 import UiKitInstanceCreator from "./uiKit/uiKit.js";
 
-export class GraphicalInterface {
-	icons: Icons;
+export class GraphicalInterface implements Terminatable {
+	icons: Icons & Terminatable;
 	getIcon: Icons["getIcon"];
-	windows: WindowSystem;
-	keyboardShortcuts: keyboardShortcutsAPI;
-	uiKit: UiKitInstanceCreator;
+	windows: WindowSystem & Terminatable;
+	keyboardShortcuts: keyboardShortcutsAPI & Terminatable;
+	uiKit: UiKitInstanceCreator & Terminatable;
 
 	constructor(ConstellationKernel: ConstellationKernel) {
 		this.icons = new Icons(ConstellationKernel);
@@ -52,5 +52,11 @@ export class GraphicalInterface {
 				throw text;
 			}, 5000);
 		}
+	}
+
+	async terminate() {
+		await this.windows.terminate();
+		await this.keyboardShortcuts.terminate();
+		await this.uiKit.terminate();
 	}
 }

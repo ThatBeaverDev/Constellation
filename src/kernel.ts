@@ -18,17 +18,17 @@ import { tcpkg } from "./lib/packaging/tcpkg.js";
 const path = "/System/kernel.js";
 path;
 
-type GraphicalKernel = {
+interface GraphicalKernel extends Terminatable {
 	isGraphical: true;
 	GraphicalInterface: GraphicalInterface;
 	TextInterface?: never;
-};
+}
 
-type CommandLineKernel = {
+interface CommandLineKernel extends Terminatable {
 	isGraphical: false;
 	GraphicalInterface?: never;
 	TextInterface?: TextInterface;
-};
+}
 
 type Kernel = GraphicalKernel | CommandLineKernel;
 
@@ -36,14 +36,19 @@ interface ConstellationKernelConfiguration {
 	installationIdx: ConstellationFileIndex;
 }
 
-export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
+export interface Terminatable {
+	terminate(): Promise<void>;
+}
+
+export default class ConstellationKernel<KernelType extends Kernel = Kernel>
+	implements Terminatable
+{
 	verboseBootUIInterval?: ReturnType<typeof setInterval>;
-	executionInterval?: ReturnType<typeof setInterval>;
 
 	// subsystems
-	fs: FilesystemAPI;
-	security: Security;
-	runtime: ProgramRuntime;
+	fs: FilesystemAPI & Terminatable;
+	security: Security & Terminatable;
+	runtime: ProgramRuntime & Terminatable;
 	config: ConstellationConfiguration;
 	lib: {
 		blobifier: blobifier;
@@ -58,14 +63,16 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 			) => Promise<void>;
 		};
 	};
+	logs: any[] = [];
+	isTerminated: boolean = false;
 	install: (ConstellationKernel: ConstellationKernel) => Promise<void>;
 
 	// property types
 	GraphicalInterface?: KernelType extends { isGraphical: true }
-		? GraphicalInterface
+		? GraphicalInterface & Terminatable
 		: undefined;
 	TextInterface?: KernelType extends { isGraphical: false }
-		? TextInterface
+		? TextInterface & Terminatable
 		: undefined;
 
 	constructor(
@@ -111,7 +118,7 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 
 		this.lib = {
 			blobifier: new blobifier(this.fs),
-			logging: new LoggingAPI(),
+			logging: new LoggingAPI(this),
 			packaging: {
 				// preinsert the `ConstellationKernel` arguement.
 				tcpkg: tcpkg.bind(undefined, this),
@@ -194,7 +201,7 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 		await exec.promise;
 		// now this means that the core process has terminated and the system can power off.
 
-		await this.#terminate();
+		await this.terminate();
 	}
 
 	async executionLoop() {
@@ -206,12 +213,26 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel> {
 		};
 
 		while (true) {
+			if (this.isTerminated) {
+				console.warn("`executionLoop` ran on terminated kernel.");
+				return;
+			}
+
 			await frame();
 		}
 	}
 
-	async #terminate() {
-		clearInterval(this.executionInterval);
+	async terminate() {
+		this.isTerminated = true;
+
 		clearInterval(this.verboseBootUIInterval);
+
+		await this.runtime.terminate();
+		await this.security.terminate();
+
+		if (this.GraphicalInterface) await this.GraphicalInterface.terminate();
+		if (this.TextInterface) await this.TextInterface.terminate();
+
+		await this.fs.terminate();
 	}
 }
