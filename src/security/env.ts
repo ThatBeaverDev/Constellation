@@ -502,6 +502,14 @@ export class ApplicationAuthorisationAPI {
 		}
 	}
 
+	/**
+	 * Starts a program from a given directory to a `.appl` or `.backgr` package
+	 * @param directory - Directory of the root of the application to execute from
+	 * @param args - Arguements to be passed to the process
+	 * @param user - Username to start this process with. Defaults to the parent process' user
+	 * @param password - Password of the selected user. Defaults to the parent process' user's password
+	 * @returns an Object containing a promise with the Process Waiting object - this promise will resolve when the process exits, and return the value the process exited with.
+	 */
 	exec = async (
 		directory: string,
 		args: any[] = [],
