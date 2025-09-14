@@ -1,10 +1,12 @@
-import { IPCMessage } from "../../../runtime/messages";
+import { IPCMessage } from "../../../../runtime/messages.js";
+import ServiceManager from "../components/serviceManager.js";
 
 export default class CoreExecutable extends BackgroundProcess {
 	loginCompleted: boolean = false;
 	loginDirectory: string =
 		"/System/CoreExecutables/systemLoginInterface.appl";
 	onLogin = [];
+	serviceManager?: ServiceManager;
 
 	async init() {
 		const dockDirectory = "/System/CoreExecutables/Dock.appl";
@@ -20,6 +22,10 @@ export default class CoreExecutable extends BackgroundProcess {
 
 		// this.windows
 		this.registerKeyboardShortcut("Close Window", "KeyW", ["AltLeft"]);
+
+		// start services
+		this.serviceManager = new ServiceManager(this);
+		await this.serviceManager.init();
 
 		const params = new URL(window.location.href).searchParams;
 		if (params.get("postinstall") == "true") {
@@ -135,5 +141,9 @@ export default class CoreExecutable extends BackgroundProcess {
 			default:
 				this.env.warn("Unknown message sender: " + origin);
 		}
+	}
+
+	frame() {
+		if (this.serviceManager) this.serviceManager.frame();
 	}
 }
