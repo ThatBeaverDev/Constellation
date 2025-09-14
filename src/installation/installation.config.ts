@@ -61,12 +61,6 @@ export const files: Record<
 		directory: "/Applications/Terminal.appl"
 	},
 
-	// remapper
-	"/build/apps/com.constellation.remapper.idx": {
-		type: "application",
-		directory: "/Applications/Remapper.appl"
-	},
-
 	// Popup
 	"/build/apps/com.constellation.popup.idx": {
 		type: "application",
