@@ -1,5 +1,5 @@
-import Dock, { dockConfig } from "../resources/dock.js";
-import menubar, { menubarConfig } from "../resources/menubar.js";
+import Dock, { dockConfig } from "../components/dock.js";
+import menubar, { menubarConfig } from "../components/menubar.js";
 
 interface config {
 	dock: dockConfig;

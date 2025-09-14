@@ -1,6 +1,6 @@
 import { pathIcon } from "pathinf";
 import { directoryPointType } from "../../../security/definitions";
-import finderBody from "../resources/body.js";
+import finderBody from "../components/body.js";
 
 const clamp = (n: number, min: number, max: number) => {
 	if (n < min) {
