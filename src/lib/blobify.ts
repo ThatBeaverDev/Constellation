@@ -1,15 +1,29 @@
 import { FilesystemAPI } from "../fs/fs";
 
+const blobifyCache: Record<string, string> = {};
+
 export default class blobifier {
 	index: any = {};
 
 	constructor(public fs: FilesystemAPI) {}
 
-	blobify(text: string, mime = "text/plain") {
-		const blob = new Blob([text], {
+	blobify(
+		value: string | Uint8Array<ArrayBuffer>,
+		mime = "text/plain"
+	): string {
+		const keyname = JSON.stringify({ content: value, mimeType: mime });
+
+		// return from cache if we have it
+		if (blobifyCache[keyname] !== undefined) {
+			return blobifyCache[keyname];
+		}
+
+		const blob = new Blob([value], {
 			type: mime
 		});
 		const location = URL.createObjectURL(blob);
+
+		blobifyCache[keyname] = location;
 
 		return location;
 	}
@@ -19,10 +33,7 @@ export default class blobifier {
 		if (text == undefined)
 			throw new Error(`${location} is empty and cannot be 'blobified'`);
 
-		const blob = new Blob([text], {
-			type: mime
-		});
-		const URI = URL.createObjectURL(blob);
+		const URI = this.blobify(text, mime);
 
 		this.index[URI] = location;
 
@@ -43,18 +54,6 @@ export default class blobifier {
 		return str;
 	}
 
-	async readAndBlobify(directory: string, mime = "text/plain") {
-		const text = await this.fs.readFile(directory);
-		if (text == undefined) throw new Error("File doesn't exist!");
-
-		const blob = new Blob([text], {
-			type: mime
-		});
-		const location = URL.createObjectURL(blob);
-
-		return location;
-	}
-
 	dataUriToBlobUrl(dataUri: string): string {
 		const [meta, base64] = dataUri.split(",");
 		const mime =
@@ -64,7 +63,6 @@ export default class blobifier {
 
 		for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
 
-		const blob = new Blob([array], { type: mime });
-		return URL.createObjectURL(blob);
+		return this.blobify(array, mime);
 	}
 }
