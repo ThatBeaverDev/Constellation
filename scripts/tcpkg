@@ -87,6 +87,11 @@ async function walk(directory) {
 		} else {
 			// file
 
+			// don't package .map.js files, they are unnecessary
+			if (dir.endsWith(".js.map")) {
+				continue;
+			}
+
 			try {
 				const type = mime.getType(dir);
 
