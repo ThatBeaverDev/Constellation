@@ -72,6 +72,7 @@ export function getProcessFromID(id: number): Process | undefined {
 type executionFiletype = "js";
 export type executionResult = {
 	promise: Promise<any>;
+	hasExited: boolean;
 };
 
 let popupDirectory = "/System/CoreExecutables/Popup.appl";
@@ -280,10 +281,13 @@ export class ProgramRuntime {
 	}
 
 	/**
-	 *
+	 * Starts a program from a given directory to a `.appl` or `.backgr` package
 	 * @param directory - Directory of the root of the application to execute from
 	 * @param args - Arguements to be passed to the process
-	 * @param isPackage - Whether this file is in a 'package'.
+	 * @param user - Username to start this process with
+	 * @param password - Password of the selected user
+	 * @param parent? - Parent process
+	 * @param waitForInit - Whether function should wait for the `init` function of the program to finish
 	 * @returns an Object containing a promise with the Process Waiting object - this promise will resolve when the process exits, and return the value the process exited with.
 	 */
 	async execute(
@@ -518,9 +522,9 @@ export class ProgramRuntime {
 
 		AppsTimeStamp(`Open program from ${directory}`, start);
 
-		return {
-			promise: ProcessWaitingObject(live) as Promise<Exclude<any, null>>
-		};
+		const result = ProcessWaitingObject(live);
+
+		return result;
 	}
 
 	importsRewriter: importRewriter;
