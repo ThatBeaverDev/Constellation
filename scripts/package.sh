@@ -11,7 +11,7 @@ compile() {
     ./scripts/tcpkg build/apps/finder build/apps/com.constellation.finder.idx -override=true
 
     # Build the CoreExecutable
-    ./scripts/tcpkg build/apps/CoreExecutable build/apps/com.constellation.CoreExecutable.idx -override=true
+    ./scripts/tcpkg build/apps/background/CoreExecutable build/apps/com.constellation.CoreExecutable.idx -override=true
 
     # Build Terminal
     mkdir -p build/apps/terminal/resources

@@ -14,6 +14,7 @@ export const folders: string[] = [
 	"/System/CoreAssets/Logos",
 	"/System/windows",
 	"/System/dumps",
+	"/System/CoreServices",
 
 	"/System/CoreLibraries/mimes",
 
@@ -126,12 +127,16 @@ export const files: Record<
 		type: "application",
 		directory: "/System/CoreExecutables/filetypeDatabaseManager.backgr"
 	},
+
+	"/build/services.idx": {
+		type: "jsonFilesIndex",
+		directory: "/System/CoreServices"
 	}
 };
 
 if (isAppdev) {
 	files["http://localhost:5172/app.idx"] = {
-		type: "jsonFilesIndex",
+		type: "application",
 		directory: "/Applications/developerApplication.appl"
 	};
 }
