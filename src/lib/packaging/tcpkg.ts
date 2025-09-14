@@ -30,6 +30,11 @@ export async function tcpkg(
 
 			// determine if the path is a directory or not
 			const stat = await fs.stat(dir);
+			if (stat == undefined)
+				throw new Error(
+					"Stat is undefined for a file that *should* exist?"
+				);
+
 			const isDir = stat.isDirectory();
 
 			// get the *relative* path

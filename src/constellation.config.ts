@@ -38,16 +38,16 @@ export default class ConstellationConfiguration {
 	}
 
 	setStatus(text: string | Error, state: "working" | "error" = "working") {
-		if (state == "error") {
-			this.#ConstellationKernel.lib.logging.error(path, text);
-		} else {
-			this.#ConstellationKernel.lib.logging.log(path, text);
-		}
-
 		this.status = String(text);
 
 		if (this.#ConstellationKernel.GraphicalInterface !== undefined) {
 			this.#ConstellationKernel.GraphicalInterface.setStatus(text, state);
+		}
+
+		if (state == "error") {
+			this.#ConstellationKernel.lib.logging.error(path, text);
+		} else {
+			this.#ConstellationKernel.lib.logging.log(path, text);
 		}
 	}
 }

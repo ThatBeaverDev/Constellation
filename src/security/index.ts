@@ -1,12 +1,12 @@
-import ConstellationKernel from "../kernel.js";
+import ConstellationKernel, { Terminatable } from "../kernel.js";
 import { EnvironmentCreator } from "./env.js";
 import { Permissions } from "./permissions.js";
 import Users from "./users.js";
 
 export default class Security {
-	env: EnvironmentCreator;
-	permissions: Permissions;
-	users: Users;
+	env: EnvironmentCreator & Terminatable;
+	permissions: Permissions & Terminatable;
+	users: Users & Terminatable;
 
 	constructor(ConstellationKernel: ConstellationKernel) {
 		const filesystem = ConstellationKernel.fs;
@@ -23,5 +23,11 @@ export default class Security {
 
 	async init() {
 		this.users.init();
+	}
+
+	async terminate() {
+		await this.env.terminate();
+		await this.permissions.terminate();
+		await this.users.terminate();
 	}
 }

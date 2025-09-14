@@ -1,6 +1,6 @@
 import { isCommandLine } from "../getPlatform.js";
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
-import { ApiError, BrowserFS } from "./BrowserFsTypes.js";
+import { ApiError, BrowserFS, Stats } from "./BrowserFsTypes.js";
 import {
 	getParentDirectory,
 	normaliseDirectory,
@@ -157,11 +157,11 @@ const mkdir = async (directory: string): Promise<undefined> => {
 	});
 };
 
-const stat = async (directory: string): Promise<any> => {
+const stat = async (directory: string): Promise<Stats | undefined> => {
 	const start = performance.now();
 
 	return new Promise((resolve) => {
-		fs.stat(directory, (_: any, data: any) => {
+		fs.stat(directory, (_: any, data?: Stats) => {
 			filesystemTimestamp(`stat ${directory}`, start);
 			resolve(data);
 		});
@@ -291,7 +291,7 @@ export class FilesystemAPI {
 		return this.rootPoint + path;
 	}
 
-	async stat(directory: string) {
+	async stat(directory: string): ReturnType<typeof stat> {
 		const realpath = this.#realDir(directory);
 		return await stat(realpath);
 	}
@@ -310,6 +310,8 @@ export class FilesystemAPI {
 		const realpath = this.#realDir(directory);
 		return await unlink(realpath);
 	}
+
+	async terminate() {}
 }
 
 export async function fsLoaded() {

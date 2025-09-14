@@ -238,6 +238,8 @@ export class Permissions {
 			requestable: false
 		}
 	};
+
+	async terminate() {}
 }
 
 type PermissionsStore = Record<string, DirectoryPermissionStats>;

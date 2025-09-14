@@ -67,7 +67,7 @@ export class FilesystemInstaller {
 		try {
 			const response = await fetch(URL);
 			if (!response.ok) {
-				throw new Error("Failed to download the file.");
+				throw new InstallationError("Failed to download the file.");
 			}
 			const blob = await response.blob();
 			const dataURL = await new Promise((resolve, reject) => {
@@ -104,7 +104,7 @@ export class FilesystemInstaller {
 			: async (location: string): Promise<string> => {
 					const req = await fetch(location);
 					if (!req.ok) {
-						throw new Error(
+						throw new InstallationError(
 							`Failed to fetch file from location ${location}`
 						);
 					}
@@ -128,11 +128,6 @@ export class FilesystemInstaller {
 			const start = performance.now();
 
 			const response = await downloadingContents[location];
-
-			//if (!response.ok) {
-			//	installationTimestamp("Download File [failed]", start, "error");
-			//	throw new Error(`File failed to download: ${location}`);
-			//}
 
 			downloadedContents[location] = response;
 
