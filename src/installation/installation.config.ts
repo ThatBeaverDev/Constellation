@@ -121,6 +121,11 @@ export const files: Record<
 	"/build/installation/com.constellation.oobe.idx": {
 		type: "application",
 		directory: "/System/CoreExecutables/OOBEInstaller.appl"
+	// Filetype database manager
+	"/build/apps/background/com.constellation.fTypeDbMgr.idx": {
+		type: "application",
+		directory: "/System/CoreExecutables/filetypeDatabaseManager.backgr"
+	},
 	}
 };
 
