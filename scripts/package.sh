@@ -61,6 +61,9 @@ compile() {
 
     # Build FiletypeDatabaseManager
     ./scripts/tcpkg build/apps/background/filetypeDatabaseManager build/apps/background/com.constellation.fTypeDbMgr.idx -override=true
+
+    # Package CoreServices directory
+    ./scripts/tcpkg build/services build/services.idx -override=true
 }
 
 # first param is directory, second param is name
