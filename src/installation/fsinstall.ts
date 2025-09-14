@@ -18,32 +18,28 @@ export class FilesystemInstaller {
 	}
 
 	async rm_rf() {
-		if (typeof window.indexedDB == "undefined") return; // smart feature detection
+		const fs = this.#ConstellationKernel.fs;
 
-		const databases: IDBDatabaseInfo[] = await window.indexedDB.databases();
+		async function walk(directory: string) {
+			const list = await fs.readdir(directory);
 
-		for (const i in databases) {
-			const database = databases[i];
-			if (database.name == undefined) return;
+			for (const item of list) {
+				const resolved = fs.resolve(directory, item);
 
-			const DBDeleteRequest = window.indexedDB.deleteDatabase(
-				database.name
-			);
+				const stat = await fs.stat(resolved);
+				if (stat == undefined) return;
 
-			DBDeleteRequest.onerror = (event) => {
-				this.#ConstellationKernel.lib.logging.error(
-					path,
-					`Error deleting database ${database.name}.`
-				);
-			};
+				if (stat.isDirectory()) {
+					await walk(resolved);
+				} else {
+					await fs.unlink(resolved);
+				}
+			}
 
-			DBDeleteRequest.onsuccess = (event) => {
-				this.#ConstellationKernel.lib.logging.log(
-					path,
-					`Database ${database.name} deleted successfully`
-				);
-			};
+			await fs.rmdir(directory);
 		}
+
+		await walk("/");
 	}
 
 	async folders() {
