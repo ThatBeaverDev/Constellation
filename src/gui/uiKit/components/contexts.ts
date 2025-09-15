@@ -1,4 +1,4 @@
-import ConstellationKernel from "../../kernel.js";
+import ConstellationKernel from "../../../kernel.js";
 import { getTextWidth } from "./textUtils.js";
 
 const padding = 10;

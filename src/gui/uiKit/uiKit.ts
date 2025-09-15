@@ -1,9 +1,13 @@
 import { GraphicalWindow } from "../windows/windows.js";
-import { getTextHeight, getTextWidth, insertNewlines } from "./textUtils.js";
+import {
+	getTextHeight,
+	getTextWidth,
+	insertNewlines
+} from "./components/textUtils.js";
 import { Application, Process } from "../../runtime/executables.js";
 import { UIError } from "../../errors.js";
-import { ContextMenu } from "./contexts.js";
-import uiKitCreators from "./creators.js";
+import { ContextMenu } from "./components/contexts.js";
+import uiKitCreators from "./components/creators.js";
 import {
 	onClickOptions,
 	step,
@@ -15,9 +19,9 @@ import {
 	uikitTextareaConfig,
 	uikitTextboxConfig
 } from "./definitions.js";
-import canvasKit from "./canvasKit.js";
-import uikitEventCreators from "./eventCreators.js";
-import uiKitTransitioners from "./transitioners.js";
+import canvasKit from "./components/canvasKit.js";
+import uikitEventCreators from "./components/eventCreators.js";
+import uiKitTransitioners from "./components/transitioners.js";
 import ConstellationKernel from "../../kernel.js";
 
 const uiKitStart = performance.now();
@@ -918,7 +922,9 @@ export default class UiKitInstanceCreator {
 	}
 
 	async init() {
-		const styles = await (await fetch("/src/gui/uiKit/styles.css")).text();
+		const styles = await (
+			await fetch("/src/gui/uiKit/styles/styles.css")
+		).text();
 		this.style.textContent = styles;
 	}
 	newRenderer(process?: Application, window?: GraphicalWindow) {

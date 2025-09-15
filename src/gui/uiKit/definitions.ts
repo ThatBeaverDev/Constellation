@@ -1,5 +1,5 @@
 import { DevToolsColor, performanceLog } from "../../lib/debug.js";
-import uiKitCreators from "./creators";
+import uiKitCreators from "./components/creators.js";
 
 export class uiKitInitialisationError extends Error {
 	constructor(message: string) {

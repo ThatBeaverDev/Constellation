@@ -1,11 +1,5 @@
 /* uiKit styling */
 
-@media (prefers-color-scheme: dark) {
-	img[src$=".svg"] {
-		filter: invert(100%) brightness(10000%) drop-shadow(0px 4px 4px black);
-	}
-}
-
 :root {
 	--uikitClickableExpandDuration: 0.15s;
 }

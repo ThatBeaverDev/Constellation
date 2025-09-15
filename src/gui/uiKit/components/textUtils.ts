@@ -1,4 +1,4 @@
-import { font, uiKitInitialisationError } from "./definitions.js";
+import { font, uiKitInitialisationError } from "../definitions.js";
 
 let canvas: HTMLCanvasElement | null = null;
 let ctx: CanvasRenderingContext2D | null = null;
