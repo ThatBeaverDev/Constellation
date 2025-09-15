@@ -8,13 +8,15 @@ import ConstellationConfiguration from "./constellation.config.js";
 import Security from "./security/index.js";
 import { GraphicalInterface } from "./gui/gui.js";
 import blobifier from "./lib/blobify.js";
-import LoggingAPI from "./lib/logging.js";
+import LoggingAPI, { CapitalisedLogLevel } from "./lib/logging.js";
 import { TextInterface } from "./tui/tui.js";
 import { tcupkg } from "./lib/packaging/tcupkg.js";
 import { ConstellationFileIndex } from "./lib/packaging/definitions.js";
 import { tcpkg } from "./lib/packaging/tcpkg.js";
 
-(window as any).kernels = [];
+if (ConstellationConfiguration.isDevmode) {
+	(window as any).kernels = [];
+}
 const path = "/System/kernel.js";
 path;
 
@@ -63,7 +65,7 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 			) => Promise<void>;
 		};
 	};
-	logs: any[] = [];
+	logs: [CapitalisedLogLevel, string, ...any[]][];
 	isTerminated: boolean = false;
 	install: (ConstellationKernel: ConstellationKernel) => Promise<void>;
 
@@ -81,7 +83,11 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 		logs: any[] = [],
 		configuration?: ConstellationKernelConfiguration
 	) {
-		(window as any).kernels.push(this);
+		if (ConstellationConfiguration.isDevmode) {
+			(window as any).kernels.push(this);
+		}
+
+		this.logs = logs;
 
 		this.install =
 			configuration?.installationIdx == undefined

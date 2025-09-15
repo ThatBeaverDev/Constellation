@@ -104,7 +104,7 @@ async function startupKernel() {
 	}
 
 	// create the kernel
-	const logs: string[] = [];
+	const logs: any[] = [];
 	new ConstellationKernel("/", isGraphical, logs, {
 		installationIdx: installationIndex
 	});

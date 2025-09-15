@@ -22,6 +22,7 @@ export default class ConstellationConfiguration {
 		"Media/Videos"
 	];
 	isDevmode: boolean = getFlagValue("dev") == "true";
+	static isDevmode: boolean = getFlagValue("dev") == "true";
 	systemPassword = "TODO:systemPasswordThatNeedsToBeChanged";
 
 	status: string = "";
