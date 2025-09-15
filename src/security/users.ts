@@ -160,7 +160,7 @@ export default class Users {
 			// create directory
 			await this.fs.mkdir(directory);
 
-			this.#ConstellationKernel.lib.logging.log(
+			this.#ConstellationKernel.lib.logging.debug(
 				path,
 				`Created directory ${directory} for user ${username}`
 			);

@@ -1,6 +1,12 @@
+import ConstellationConfiguration from "../constellation.config.js";
 import { isCommandLine } from "../getPlatform.js";
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
-import { ApiError, BrowserFS, Stats } from "./BrowserFsTypes.js";
+import {
+	ApiError,
+	BrowserFS,
+	FileSystemConfiguration,
+	Stats
+} from "./BrowserFsTypes.js";
 import {
 	getParentDirectory,
 	normaliseDirectory,
@@ -27,37 +33,23 @@ filesystemTimestamp("Download and initalise BrowserFS", startDownloadBrowserFS);
 
 const configureBrowserFS = performance.now();
 await new Promise((resolve: Function) => {
-	if (isCommandLine) {
-		BrowserFS.configure(
-			{
-				fs: "InMemory",
-				options: {}
-			},
-			(e?: ApiError | null) => {
-				if (e) {
-					console.error("PREBOOT:LOADFS", e);
-				}
-				console.log("Initialised Browser Filesystem.");
-				filesystemTimestamp("Configure BrowserFS", configureBrowserFS);
-				resolve();
-			}
-		);
-	} else {
-		BrowserFS.configure(
-			{ fs: "IndexedDB", options: {} },
-			(e?: ApiError | null) => {
-				if (e) {
-					console.error("PREBOOT:LOADFS", e);
-				}
-				console.log("Initialised Browser Filesystem.");
-				filesystemTimestamp("Configure BrowserFS", configureBrowserFS);
-				resolve();
-			}
-		);
-	}
+	let fs: FileSystemConfiguration["fs"] = "IndexedDB";
+	if (isCommandLine) fs = "InMemory";
+
+	BrowserFS.configure({ fs, options: {} }, (e?: ApiError | null) => {
+		if (e) {
+			console.error("PREBOOT:LOADFS", e);
+		}
+		console.log("Initialised Browser Filesystem.");
+		filesystemTimestamp("Configure BrowserFS", configureBrowserFS);
+		resolve();
+	});
 });
 
 const fs = BrowserFS.BFSRequire("fs");
+if (ConstellationConfiguration.isDevmode) {
+	(window as any).BFS = fs;
+}
 
 const writeFile = async (directory: string, content: string) => {
 	const start = performance.now();

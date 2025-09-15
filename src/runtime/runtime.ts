@@ -11,6 +11,7 @@ import { DevToolsColor, performanceLog } from "../lib/debug.js";
 import ConstellationKernel, { Terminatable } from "../kernel.js";
 import { importRewriter } from "./codeProcessor.js";
 import { dump } from "./crashed.js";
+import ConstellationConfiguration from "../constellation.config.js";
 
 const path = "/System/runtime.js";
 
@@ -51,7 +52,9 @@ export interface ProcessInformation {
 }
 
 export const processes: ProcessInformation[] = [];
-(window as any).processes = processes;
+if (ConstellationConfiguration.isDevmode) {
+	(window as any).processes = processes;
+}
 
 window.renderID = 0;
 

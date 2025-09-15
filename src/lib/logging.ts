@@ -1,7 +1,8 @@
 import { isCommandLine } from "../getPlatform.js";
 import ConstellationKernel from "../kernel.js";
 
-type logLevel = "post" | "debug" | "log" | "warn" | "error";
+export type LogLevel = "post" | "debug" | "log" | "warn" | "error";
+export type CapitalisedLogLevel = "POST" | "DEBUG" | "LOG" | "WARN" | "ERROR";
 
 export default class LoggingAPI {
 	#ConstellationKernel: ConstellationKernel;
@@ -25,9 +26,9 @@ export default class LoggingAPI {
 		this.coreLogging("error", initiator, mainLog, ...content);
 	}
 
-	coreLogging(type: logLevel, origin: string, ...content: any[]) {
+	coreLogging(type: LogLevel, origin: string, ...content: any[]) {
 		this.#ConstellationKernel.logs.push([
-			type.toUpperCase(),
+			type.toUpperCase() as CapitalisedLogLevel,
 			origin,
 			...content
 		]);
