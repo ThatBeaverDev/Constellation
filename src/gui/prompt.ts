@@ -3,7 +3,7 @@ import {
 	getTextHeight,
 	getTextWidth,
 	insertNewlines
-} from "./uiKit/textUtils.js";
+} from "./uiKit/components/textUtils.js";
 import { UserPrompt } from "./windows/windows.js";
 
 interface StatementConfig {

@@ -1,6 +1,6 @@
-import { UIError } from "../../errors.js";
-import ConstellationKernel from "../../kernel.js";
-import { type GraphicalWindow } from "../windows/windows.js";
+import { UIError } from "../../../errors.js";
+import ConstellationKernel from "../../../kernel.js";
+import { type GraphicalWindow } from "../../windows/windows.js";
 import {
 	canvasPosition,
 	canvasRenderingStep,
@@ -8,8 +8,8 @@ import {
 	uikitBoxConfig,
 	uikitCanvasOptions,
 	uikitIconOptions
-} from "./definitions.js";
-import { UiKitRenderer } from "./uiKit.js";
+} from "../definitions.js";
+import { UiKitRenderer } from "../uiKit.js";
 
 export default class uiKitCreators {
 	#parent: UiKitRenderer;

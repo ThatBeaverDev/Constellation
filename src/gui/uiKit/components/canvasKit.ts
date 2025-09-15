@@ -1,4 +1,4 @@
-import { canvasPosition, canvasRenderingStep, step } from "./definitions";
+import { canvasPosition, canvasRenderingStep, step } from "../definitions.js";
 
 type canvasImageArgs =
 	| [dx: number, dy: number, imageURL: string]
