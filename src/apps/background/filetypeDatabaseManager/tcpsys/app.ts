@@ -1,4 +1,4 @@
-import { appFindResult, fileInfo } from "../../../keystone/lib/appfind.js";
+import { appFindResult, fileInfo } from "../../../gui/keystone/lib/appfind.js";
 import { requiredAllocations } from "../lib/allocateFileTypeToApplication.js";
 
 export interface filetypeDatabase {
