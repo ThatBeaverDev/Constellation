@@ -99,9 +99,9 @@ class UiKitRendererClass {
 		this.#window.shortname = name;
 	}
 
-	readonly setIcon = (name: string) => {
+	setIcon(name: string) {
 		this.#window.setIcon(name);
-	};
+	}
 	makeWindowInvisible() {
 		this.#window.hide();
 	}
@@ -197,50 +197,50 @@ class UiKitRendererClass {
 		// other window properties
 	};
 
-	readonly icon = (
+	icon(
 		x: number = 0,
 		y: number = 0,
 		iconName: string = "circle-help",
 		iconScale: number = 1,
 		colour: string = "",
 		options: uikitIconOptions = {}
-	) => {
+	) {
 		const obj: step = {
 			type: "uikitIcon",
 			args: [x, y, iconName, iconScale, colour, options]
 		};
 
 		return this.#steps.push(obj);
-	};
+	}
 
-	readonly text = (
+	text(
 		x: number,
 		y: number,
 		string: string,
 		fontSize: number = 15,
 		colour: string = ""
-	) => {
+	) {
 		const obj: step = {
 			type: "uikitText",
 			args: [x, y, string, fontSize, colour]
 		};
 		return this.#steps.push(obj);
-	};
-	readonly button = (
+	}
+	button(
 		x: number,
 		y: number,
 		string: string,
 		leftClickCallback: Function = () => {},
 		rightClickCallback: Function = () => {},
 		size: number = 15
-	) => {
+	) {
 		const obj: step = {
 			type: "uikitButton",
 			args: [x, y, string, leftClickCallback, rightClickCallback, size]
 		};
 		return this.#steps.push(obj);
-	};
-	readonly textbox = (
+	}
+	textbox(
 		x: number,
 		y: number,
 		width: number = 200,
@@ -248,7 +248,7 @@ class UiKitRendererClass {
 		backtext: string,
 		callbacks: textboxCallbackObject,
 		options: uikitTextboxConfig = this.defaultConfig.uikitTextbox
-	) => {
+	) {
 		if (this.#creators.hasTextbox == true) {
 			throw new UIError("UI cannot have more than one textbox.");
 		}
@@ -268,46 +268,46 @@ class UiKitRendererClass {
 			args: [x, y, width, height, backtext, callbacks, opts]
 		};
 		return this.#steps.push(obj);
-	};
+	}
 
-	readonly verticalLine = (x: number, y: number, height: number) => {
+	verticalLine(x: number, y: number, height: number) {
 		const obj: step = {
 			type: "uikitVerticalLine",
 			args: [x, y, height]
 		};
 		return this.#steps.push(obj);
-	};
+	}
 
-	readonly horizontalLine = (x: number, y: number, width: number) => {
+	horizontalLine(x: number, y: number, width: number) {
 		const obj: step = {
 			type: "uikitHorizontalLine",
 			args: [x, y, width]
 		};
 		return this.#steps.push(obj);
-	};
+	}
 
-	readonly progressBar = (
+	progressBar(
 		x: number,
 		y: number,
 		width: number,
 		height: number,
 		progress: number | "throb"
-	) => {
+	) {
 		const obj: step = {
 			type: "uikitProgressBar",
 			args: [x, y, width, height, progress]
 		};
 		return this.#steps.push(obj);
-	};
+	}
 
-	readonly textarea = (
+	textarea(
 		x: number,
 		y: number,
 		width: number,
 		height: number,
 		callbacks: textboxCallbackObject,
 		options: uikitTextareaConfig = this.defaultConfig.uikitTextarea
-	) => {
+	) {
 		if (this.#creators.hasTextbox == true) {
 			throw new UIError("UI cannot have more than one textbox.");
 		}
@@ -319,35 +319,30 @@ class UiKitRendererClass {
 			args: [x, y, width, height, callbacks, options]
 		};
 		return this.#steps.push(obj);
-	};
+	}
 
-	readonly box = (
+	box(
 		x: number,
 		y: number,
 		width: number,
 		height: number,
 		config?: uikitBoxConfig
-	) => {
+	) {
 		const obj: step = {
 			type: "uikitBox",
 			args: [x, y, width, height, config]
 		};
 
 		return this.#steps.push(obj);
-	};
+	}
 
-	readonly canvas2D = (
-		x: number,
-		y: number,
-		width: number,
-		height: number
-	) => {
+	canvas2D(x: number, y: number, width: number, height: number) {
 		const obj: step = {
 			type: "uikitCanvas2D",
 			args: [x, y, width, height, []] // last arguement (the []) is the list of drawing commands
 		};
 		return this.#steps.push(obj);
-	};
+	}
 
 	onClick(
 		elemID: number,
@@ -410,15 +405,15 @@ class UiKitRendererClass {
 	readonly getTextHeight = getTextHeight;
 	readonly insertNewlines = insertNewlines;
 
-	readonly setTextboxContent = (content: string) => {
+	setTextboxContent(content: string) {
 		// insure there is actually a textbox
 		if (this.#creators.textboxElem !== undefined) {
 			// set the value
 			this.#creators.textboxElem.value = content;
 		}
-	};
+	}
 
-	readonly getTextboxContent = () => {
+	getTextboxContent() {
 		// insure there is actually a textbox
 		if (this.#creators.textboxElem !== undefined) {
 			// return the value
@@ -427,7 +422,7 @@ class UiKitRendererClass {
 
 		// return null otherwise
 		return null;
-	};
+	}
 
 	get darkmode() {
 		return (
@@ -463,13 +458,13 @@ class UiKitRendererClass {
 			buttons
 		);
 	}
-	readonly removeContextMenu = () => {
+	removeContextMenu() {
 		if (this.#context !== undefined) {
 			this.#context.remove();
 		}
 
 		this.#context = undefined;
-	};
+	}
 
 	/**
 	 * Shows a graphical prompt onscreen
@@ -574,7 +569,7 @@ class UiKitRendererClass {
 	/**
 	 * Commits all UI elements since the last `renderer.clear()` call.
 	 */
-	readonly commit = () => {
+	commit() {
 		const UserInterface = this.#ConstellationKernel.GraphicalInterface;
 		if (UserInterface == undefined) return;
 
@@ -900,7 +895,7 @@ class UiKitRendererClass {
 		this.#focusTextbox();
 
 		uiKitTimestamp("Commit to Window", start);
-	};
+	}
 
 	terminate() {
 		this.#deleteElements();
