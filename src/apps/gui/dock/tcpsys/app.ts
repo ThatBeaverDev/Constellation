@@ -136,7 +136,17 @@ export default class dockAndDesktop extends Application {
 	): void | undefined | null {
 		// dock focus code
 		if (this.dockFocus && code !== "KeyD") {
-			this.dockFocus = false;
+			if (this.dock == undefined) return;
+
+			switch (code) {
+				case "escape":
+					this.dock.endFocus();
+					this.dockFocus = false;
+					break;
+				default:
+					if (this.dock == undefined) return;
+					this.dock.updateFocus(code);
+			}
 		}
 
 		if (altKey) {
@@ -167,11 +177,13 @@ export default class dockAndDesktop extends Application {
 					focusedWindow.move(0, this.menubar.barHeight);
 					break;
 				case "KeyD":
-					if (altKey) {
-						this.dockFocus = true;
-						this.env.log("focus");
-					}
+					if (this.dock == undefined) return;
+
+					this.dockFocus = true;
+					this.dock.triggerFocus();
+					this.env.log("focus");
 					break;
+				case "ArrowLeft":
 			}
 		}
 	}
