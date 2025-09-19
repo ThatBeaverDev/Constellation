@@ -103,10 +103,6 @@
 		--main-accent-tertiary: rgb(var(--main-accent-tertiary-val), 0, var(--main-accent-tertiary-val));
 	}
 
-	.windowButton {
-		filter: invert(100%);
-	}
-
 	.bootImage {
 		filter: invert(100%) brightness(10000%) !important;
 	}

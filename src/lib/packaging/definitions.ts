@@ -1,4 +1,4 @@
-import mimes from "../../syslib/mime/mimes.js"
+import mimes from "../../syslib/mime/mimes.js";
 import { tcpkg } from "./tcpkg.js";
 import { tcupkg } from "./tcupkg.js";
 
@@ -18,4 +18,4 @@ export function getMimeType(extension: string): string | null {
 	return null;
 }
 
-export { tcpkg, tcupkg }
+export { tcpkg, tcupkg };
