@@ -21,13 +21,45 @@ export class Icons {
 			throw new Error("Hidden container not found.");
 		}
 		hidden.appendChild(this.div);
+
+		this.eventListenerTarget = window.matchMedia(
+			"(prefers-color-scheme: dark)"
+		);
+
+		this.eventListenerTarget.addEventListener(
+			"change",
+			this.resetCache.bind(this)
+		);
+	}
+
+	eventListenerTarget: MediaQueryList;
+
+	resetCache() {
+		this.#ConstellationKernel.lib.logging.debug(path, "Resetting Cache...");
+		this.cache = {};
+	}
+
+	get isDarkMode() {
+		if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	get iconsPath(): "/assets/icons/dark/" | "/assets/icons/light/" {
+		if (this.isDarkMode) {
+			return "/assets/icons/dark/";
+		} else {
+			return "/assets/icons/light/";
+		}
 	}
 
 	initIcon(name: string) {
 		const icon = document.createElement("img");
 		icon.dataset.type = name;
 		icon.className = "uikitIcon";
-		icon.src = "/icons/icons/" + name + ".svg";
+		icon.src = this.iconsPath + name + ".svg";
 		icon.id = String(window.renderID++);
 
 		this.div.appendChild(icon);
@@ -47,6 +79,12 @@ export class Icons {
 		icon.height = 24;
 		icon.alt = name;
 
+		const finalIcon = this.applyIcon(icon, id, name);
+
+		return finalIcon;
+	}
+
+	applyIcon(icon: HTMLImageElement, id: string, name: string) {
 		if (name[0] == "/" || name.startsWith("http")) {
 			if (!this.cache[name]) {
 				// load from url or fs
@@ -126,5 +164,9 @@ export class Icons {
 
 	async terminate() {
 		this.div.remove();
+		this.eventListenerTarget.removeEventListener(
+			"change",
+			this.resetCache.bind(this)
+		);
 	}
 }

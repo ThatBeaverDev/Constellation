@@ -1,6 +1,6 @@
 [submodule "icons"]
-	path = icons
-	url = https://github.com/lucide-icons/lucide
+	path = assets/icons
+	url = https://github.com/ThatBeaverDev/ConstellationIcons
 
 [submodule "app-template"]
 	path = src/apps/app-template
