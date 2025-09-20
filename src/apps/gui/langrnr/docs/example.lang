@@ -1,0 +1,3 @@
+const var = "words"
+
+log(var)
