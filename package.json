@@ -12,7 +12,7 @@
 		"build-nofix": "./scripts/runtime-info.sh && ./scripts/build.sh --no-fix",
 		"newenv": "npm install && git submodule update && npm run build && echo \"Open http://localhost:5173 to use Constellation!\" && npm run dev",
 		"reclone-test": "./scripts/reclone.sh",
-		"test": "npx playwright install && npx vitest ./src",
+		"test": "npx tsc && node build/tests/all.test.js",
 		"showUnused": "npx ts-prune -p tsconfig.json --ignore src/apps | grep -v 'used in module'"
 	},
 	"devDependencies": {
