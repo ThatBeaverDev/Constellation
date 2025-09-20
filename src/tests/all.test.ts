@@ -6,6 +6,7 @@ if (typeof global == "undefined") {
 	throw new Error("Tests must be run in nodejs!");
 }
 
+// string utilities
 declare global {
 	interface String {
 		textAfter(after: string): string;
@@ -36,6 +37,13 @@ String.prototype.textBeforeLast = function (before) {
 		.join("");
 };
 
+// get whether we are hiding successful tests
+let hideSuccessfulTests = false;
+process.argv.forEach((item) => {
+	if (item == "--hideSuccess") hideSuccessfulTests = true;
+});
+
+// list files
 const filepath = "./" + path.relative(process.cwd(), process.argv[1]);
 
 const result = await new Promise((resolve: (data: string) => void) =>
@@ -73,8 +81,16 @@ for (const i in files) {
 		badFormats.push(files[i]);
 		continue;
 	} else {
-		console.log(files[i]);
-		console.log(result);
+		console.log("###" + files[i]);
+
+		if (hideSuccessfulTests) {
+			const logs = result
+				.split("\n")
+				.filter((item) => !item.startsWith("[/] PASSED"))
+				.join("\n");
+
+			console.log(logs);
+		} else console.log(result);
 	}
 
 	totalSuccesses += passed;

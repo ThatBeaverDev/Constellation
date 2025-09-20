@@ -55,7 +55,7 @@ export async function runTests(
 			if (result == "none")
 				logs += `[ ] FAILED: ${JSON.stringify(test.args)} threw this error \`${error}\`, rather than returning ${JSON.stringify(test.expectedResult)}\n`;
 			else
-				logs += `[ ] FAILED: ${JSON.stringify(test.args)} returned ${result}, not ${test.expectedResult}.\n`;
+				logs += `[ ] FAILED: ${JSON.stringify(test.args)} returned ${JSON.stringify(result)}, not ${JSON.stringify(test.expectedResult)}.\n`;
 		}
 
 		totalTests++;
