@@ -289,7 +289,7 @@ export default class finder extends Application {
 		this.ok = true;
 	}
 
-	async frame() {
+	frame() {
 		// pipe messages (for picker)
 		if (this.pipes !== undefined) {
 			// only check this if we have a pipes value

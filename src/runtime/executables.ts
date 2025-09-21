@@ -214,7 +214,7 @@ export class Process extends Framework {
 	/**
 	 * The initial function called when the program is executed.
 	 */
-	async init() {}
+	async init(args: any[]) {}
 	/**
 	 * The function called within the main execution loop after init and before terminate.
 	 */

@@ -45,6 +45,7 @@ export interface ProcessInformation {
 	// origination
 	directory: string;
 	startTime: number;
+	args: any[];
 
 	// state
 	program: Process;
@@ -119,11 +120,6 @@ export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
 
 	AppsTimeStamp(`Terminate process ${procDir}`, start);
 }
-
-const activeIterators = new WeakMap<
-	Process,
-	Iterator<any> | AsyncIterator<any>
->();
 
 export function appName(proc: executables.Framework) {
 	// @ts-expect-error
@@ -518,6 +514,7 @@ export class ProgramRuntime {
 			kernel: this.#ConstellationKernel,
 			directory,
 			startTime: Date.now(),
+			args,
 			program: live,
 			children: []
 		};
@@ -539,7 +536,7 @@ export class ProgramRuntime {
 		return result;
 	}
 
-	importsRewriter: importRewriter;
+	importsRewriter: importRewriter & Terminatable;
 
 	async showPrompt(
 		type: "error" | "warning" | "log",
@@ -610,32 +607,10 @@ export class ProgramRuntime {
 		try {
 			process.executing = true;
 
-			let iter = activeIterators.get(process);
-
-			if (!iter) {
-				const result = process[subset]();
-				// @ts-expect-error
-				if (result && typeof result.next === "function") {
-					// @ts-expect-error
-					iter = result;
-					// @ts-expect-error
-					activeIterators.set(process, iter);
-				} else {
-					// normal function
-					await result;
-					process.executing = false;
-					return;
-				}
-			}
-
-			// @ts-expect-error
-			const { done } = await iter.next();
-
-			if (done) {
-				activeIterators.delete(process);
-			}
+			await process[subset](info.args);
 
 			process.executing = false;
+			return;
 		} catch (e: any) {
 			process.executing = false;
 			this.#ConstellationKernel.lib.logging.warn(path, e);
@@ -684,6 +659,8 @@ export class ProgramRuntime {
 			document.removeEventListener("keydown", this.documentKeyDown);
 			document.removeEventListener("keyup", this.documentKeyUp);
 		}
+
+		await this.importsRewriter.terminate();
 	}
 }
 

@@ -64,16 +64,23 @@ const { logs } = await runTests([
 	{
 		function: generateTokenAST,
 		args: ["echo()"],
-		expectedResult: { type: "call", value: [] }
+		expectedResult: {
+			type: "code",
+			value: {
+				function: { type: "var", value: "echo" },
+				type: "functionCall",
+				args: []
+			}
+		}
 	},
 	{
 		function: generateTokenAST,
 		args: ['log("Hello, world!")'],
 		expectedResult: {
-			type: "call",
+			type: "code",
 			value: {
+				function: { type: "var", value: "log" },
 				type: "functionCall",
-				name: "log",
 				args: [{ type: "str", value: "Hello, world!" }]
 			}
 		}
@@ -116,19 +123,19 @@ const { logs } = await runTests([
 	{
 		function: generateTokenAST,
 		args: ["TRUE"],
-		expectedResult: { type: "call", value: "TRUE" }
+		expectedResult: { type: "var", value: "TRUE" }
 	},
 	{
 		function: generateTokenAST,
 		args: ["False"],
-		expectedResult: { type: "call", value: "False" }
+		expectedResult: { type: "var", value: "False" }
 	},
 	{
 		function: generateTokenAST,
 		args: ["truefalse"],
 		expectedResult: {
-			type: "call",
-			value: { type: "functionCall", name: "truefalse", args: [] }
+			type: "var",
+			value: "truefalse"
 		}
 	},
 
@@ -147,7 +154,11 @@ const { logs } = await runTests([
 		args: ["123abc"],
 		expectedResult: { type: "var", value: "123abc" }
 	},
-	{ function: generateTokenAST, args: ["echo"], expectedResult: "none" },
+	{
+		function: generateTokenAST,
+		args: ["echo"],
+		expectedResult: { type: "var", value: "echo" }
+	},
 
 	// List/dict stubs
 	{
@@ -159,6 +170,44 @@ const { logs } = await runTests([
 		function: generateTokenAST,
 		args: ["{}"],
 		expectedResult: { type: "dict", value: new Map() }
+	},
+
+	// conditions
+	{
+		function: generateTokenAST,
+		args: ["7 == 5"],
+		expectedResult: {
+			type: "conditional",
+			value: {
+				type: "isEqual",
+				first: { type: "num", value: 7 },
+				second: { type: "num", value: 5 }
+			}
+		}
+	},
+	{
+		function: generateTokenAST,
+		args: ["7 > 5"],
+		expectedResult: {
+			type: "conditional",
+			value: {
+				type: "greaterThan",
+				first: { type: "num", value: 7 },
+				second: { type: "num", value: 5 }
+			}
+		}
+	},
+	{
+		function: generateTokenAST,
+		args: ["7 < 5"],
+		expectedResult: {
+			type: "conditional",
+			value: {
+				type: "lessThan",
+				first: { type: "num", value: 7 },
+				second: { type: "num", value: 5 }
+			}
+		}
 	}
 ]);
 

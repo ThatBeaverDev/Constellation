@@ -3,16 +3,53 @@ import {
 	getParentDirectory,
 	resolveDirectory as resolvePath
 } from "../fs/fspath.js";
+import { Terminatable } from "../kernel.js";
 import { AppsTimeStamp, ProgramRuntime } from "./runtime.js";
 
-export class importRewriter {
+export class importRewriter implements Terminatable {
 	constructor(fs: FilesystemAPI, runtime: ProgramRuntime) {
-		this.fs = fs;
+		this.#fs = fs;
 		this.#runtime = runtime;
+
+		this.cacheInvalidationLoop = setInterval(() => {
+			const time = Date.now();
+
+			for (const [path, record] of this.contentCache) {
+				const age = Math.abs(record.date - time);
+
+				if (age > this.contentTimeout) {
+					this.contentCache.delete(path);
+				}
+			}
+		}, 1000);
 	}
 
-	fs: FilesystemAPI;
+	#fs: FilesystemAPI;
 	#runtime: ProgramRuntime;
+
+	contentTimeout: number = 1000;
+	/**
+	 * A Cache of file contents which invalidates after one second.
+	 */
+	contentCache = new Map<
+		string,
+		{
+			date: number;
+			contents: string | undefined;
+		}
+	>();
+	cacheInvalidationLoop: ReturnType<typeof setInterval>;
+
+	async readFile(directory: string) {
+		const cacheResult = this.contentCache.get(directory);
+		if (cacheResult !== undefined) return cacheResult.contents;
+
+		const contents = await this.#fs.readFile(directory);
+
+		this.contentCache.set(directory, { date: Date.now(), contents });
+
+		return contents;
+	}
 
 	/**
 	 * a Cache of blobs which *never* invalidates! this will surely cause a some problems.
@@ -33,7 +70,7 @@ export class importRewriter {
 			if (this.blobCache.has(path)) return this.blobCache.get(path)!;
 		}
 
-		let code = await this.fs.readFile(path);
+		let code = await this.readFile(path);
 
 		if (code == undefined) {
 			throw new Error(
@@ -42,7 +79,7 @@ export class importRewriter {
 		}
 
 		// Rewrite imports to blob URLs AND include references to env.
-		code = await this.processCode(code, path);
+		code = await this.processCode(code, path, importerPath);
 
 		const blob = new Blob([code], { type: "text/javascript" });
 		const blobUrl = URL.createObjectURL(blob);
@@ -51,10 +88,15 @@ export class importRewriter {
 		return blobUrl;
 	}
 
-	async processCode(code: string, directory: string): Promise<string> {
+	async processCode(
+		code: string,
+		directory: string,
+		importer?: string
+	): Promise<string> {
 		const rewrittenImports = await this.rewriteImportsAsync(
 			code,
-			directory
+			directory,
+			importer
 		);
 		const envDeclaration = this.includeEnv(rewrittenImports);
 
@@ -68,7 +110,8 @@ export class importRewriter {
 	 */
 	async rewriteImportsAsync(
 		code: string,
-		currentPath: string
+		currentPath: string,
+		importer?: string
 	): Promise<string> {
 		const start = performance.now();
 
@@ -95,10 +138,16 @@ export class importRewriter {
 					);
 				}
 
+				if (resolved == importer) {
+					throw new Error(
+						"Direct circular import detected. aborting."
+					);
+				}
+
 				// blobify it
 				const blobUrl = await this.blobifyModule(
 					resolved,
-					undefined,
+					true,
 					currentPath
 				);
 				return {
@@ -182,5 +231,9 @@ export class importRewriter {
 	async include(path: string): Promise<any> {
 		const blobUrl = await this.blobifyModule(path);
 		return await import(blobUrl);
+	}
+
+	async terminate() {
+		clearInterval(this.cacheInvalidationLoop);
 	}
 }

@@ -1,3 +1,6 @@
+import { Scope } from "./runtime/scope.js";
+import { AstConditional } from "./types/conditionals.js";
+
 export type Ast = AstNode[];
 export type AstTokenType =
 	| "str"
@@ -5,48 +8,55 @@ export type AstTokenType =
 	| "num"
 	| "list"
 	| "dict"
-	| "call"
+	| "code"
 	| "var"
-	| "none";
+	| "none"
+	| "block";
 
-export interface AstNode {
-	type: AstTokenType;
-	value: any;
-}
+export type AstNode<T = any> =
+	| AstStringNode
+	| AstNumberNode
+	| AstBooleanNode
+	| AstListNode<T>
+	| AstDictNode
+	| AstVariableNode
+	| AstCallNode
+	| AstBlockNode
+	| AstConditionalNode;
 
 // AST NODES
-export interface AstStringNode extends AstNode {
+export interface AstStringNode {
 	type: "str";
 	value: string;
 }
 
-export interface AstNumberNode extends AstNode {
+export interface AstNumberNode {
 	type: "num";
 	value: number;
 }
 
-export interface AstBooleanNode extends AstNode {
+export interface AstBooleanNode {
 	type: "bool";
 	value: boolean;
 }
 
-export interface AstListNode<T> extends AstNode {
+export interface AstListNode<T> {
 	type: "list";
 	value: T[];
 }
 
-export interface AstDictNode extends AstNode {
-	type: "bool";
+export interface AstDictNode {
+	type: "dict";
 	value: Map<any, any>;
 }
 
-export interface AstVariableNode extends AstNode {
+export interface AstVariableNode {
 	type: "var";
 	value: string;
 }
 
-export interface AstCallNode extends AstNode {
-	type: "call";
+export interface AstCallNode {
+	type: "code";
 	value: AstGeneralDeclaration | AstFunctionCall;
 }
 
@@ -55,6 +65,15 @@ interface AstFunctionCall {
 	type: "functionCall";
 	function: AstNode;
 	args: AstNode[];
+}
+
+export interface AstBlockNode {
+	type: "block";
+	value: AstNode[];
+}
+export interface AstConditionalNode {
+	type: "conditional";
+	value: AstConditional;
 }
 
 // Variable declarations
@@ -77,3 +96,46 @@ export interface AstGlobalDeclaration extends AstGeneralDeclaration {
 export function removeBlanks(array: string[]): string[] {
 	return array.filter((item) => !["", " ", "\t", "\n"].includes(item));
 }
+
+// RUNTIME
+export interface RuntimeScope {
+	variables: Map<string, RuntimeVariable>;
+}
+export interface RuntimeVariable<T = RuntimeValue> {
+	type: "constant" | "variable" | "global";
+	value: T;
+}
+
+export interface RuntimeString {
+	type: "string";
+	value: string;
+}
+export interface RuntimeNumber {
+	type: "number";
+	value: number;
+}
+export interface RuntimeBoolean {
+	type: "boolean";
+	value: boolean;
+}
+export interface RuntimeNone {
+	type: "none";
+	value: undefined;
+}
+
+type RuntimeCallable = (
+	scope: Scope[],
+	nodes: AstNode[],
+	...args: any[]
+) => RuntimeValue;
+export interface RuntimeFunction {
+	type: "programFunction";
+	value: AstNode[] | RuntimeCallable;
+}
+
+export type RuntimeValue =
+	| RuntimeString
+	| RuntimeNumber
+	| RuntimeBoolean
+	| RuntimeNone
+	| RuntimeFunction;

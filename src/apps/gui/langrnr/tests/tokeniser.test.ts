@@ -1,5 +1,5 @@
 import { runTests } from "../../../../tests/libtest.js";
-import { tokenise } from "../components/ast/tokenAst.js";
+import { tokenise } from "../components/ast/tokenise.js";
 
 const { logs } = await runTests([
 	// simple comma-separated values
@@ -199,7 +199,7 @@ const { logs } = await runTests([
 
 	// variable declaration
 	{
-		args: ['let var = "text!"'],
+		args: ['let var = "text!"', true],
 		function: tokenise,
 		expectedResult: ["let", "var", "=", '"text!"']
 	},
@@ -240,7 +240,7 @@ const { logs } = await runTests([
 
 	// chaos line: spaces, tabs, and newlines (splitOnSpaces test)
 	{
-		args: ['let   foo\t=  "bar, baz"'],
+		args: ['let   foo\t=  "bar, baz"', true],
 		function: tokenise,
 		expectedResult: ["let", "foo", "=", '"bar, baz"']
 	},

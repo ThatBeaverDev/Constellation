@@ -2,6 +2,8 @@ import { AstTokenType } from "../definitions.js";
 
 export function getTokenType(text: string): AstTokenType {
 	let token = text.trim();
+	if (token[0] == "(" && token.at(-1) == ")")
+		token = token.substring(1, token.length - 1);
 
 	if (isString(token)) return "str";
 	if (isNumber(token)) return "num";
@@ -10,9 +12,9 @@ export function getTokenType(text: string): AstTokenType {
 	if (isDict(token)) return "dict";
 
 	if (isVar(token)) return "var";
-	if (isFunctionCall(token)) return "call";
+	if (isFunctionCall(token) || isVariableDeclaration(token)) return "code";
 
-	throw new Error("Tokentype of " + token + " cannot be obtained.");
+	throw new Error("Tokentype of `" + token + "` cannot be obtained.");
 }
 
 function isString(token: string): Boolean {
@@ -36,6 +38,7 @@ function isNumber(token: string): Boolean {
 
 	const characters = token.split("");
 
+	let totalDots = 0;
 	let i = 0;
 	for (const char of characters) {
 		switch (char) {
@@ -51,6 +54,11 @@ function isNumber(token: string): Boolean {
 			case "0":
 				break;
 			case ".":
+				if (totalDots > 0) {
+					return false;
+				}
+
+				totalDots++;
 				// dot can't be at the start or end
 				if (i !== 0 && i !== characters.length) break;
 			case "-":
@@ -136,6 +144,18 @@ function isFunctionCall(token: string): Boolean {
 	const func = token.textBefore("(").trim();
 
 	return isVar(func) && token.includes("(");
+}
+function isVariableDeclaration(token: string): Boolean {
+	const starts = ["let ", "const ", "global "];
+
+	let ok = false;
+	for (const start of starts) {
+		if (token.startsWith(start)) {
+			ok = true;
+		}
+	}
+
+	return ok;
 }
 
 function detectFunction(token: string): Boolean {

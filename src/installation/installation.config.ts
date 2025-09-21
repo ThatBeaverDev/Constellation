@@ -127,6 +127,12 @@ export const files: Record<
 	"/build/services.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreServices"
+	},
+
+	// languageRunner
+	"/build/apps/com.constellation.langrnr.idx": {
+		type: "application",
+		directory: "/System/CoreExecutables/languageRunner.appl"
 	}
 };
 

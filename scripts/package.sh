@@ -64,6 +64,9 @@ compile() {
 
     # Package CoreServices directory
     ./scripts/tcpkg build/services build/services.idx -override=true
+
+    # Build languageRuntime
+    ./scripts/tcpkg build/apps/gui/langrnr build/apps/com.constellation.langrnr.idx -override=true
 }
 
 # first param is directory, second param is name
