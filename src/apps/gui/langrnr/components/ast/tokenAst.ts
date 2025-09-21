@@ -7,6 +7,7 @@ import {
 	AstCallNode,
 	removeBlanks
 } from "../definitions.js";
+import { tokenise } from "./tokenise.js";
 import { getTokenType } from "./types.js";
 
 function tokenToNumber(token: string) {
@@ -55,10 +56,8 @@ export function generateTokenAST(token: string): AstNode {
 
 			return obj;
 		}
-		case "call": {
+		case "code": {
 			const tokens = tokenise(token, true);
-
-			console.log(tokens);
 
 			switch (tokens[0]) {
 				case "let": {
@@ -69,7 +68,7 @@ export function generateTokenAST(token: string): AstNode {
 					}
 
 					const obj: AstCallNode = {
-						type: "call",
+						type: "code",
 						value: {
 							type: "newVariable",
 							name: tokens[1],
@@ -87,7 +86,7 @@ export function generateTokenAST(token: string): AstNode {
 					}
 
 					const obj: AstCallNode = {
-						type: "call",
+						type: "code",
 						value: {
 							type: "newConstant",
 							name: tokens[1],
@@ -105,7 +104,7 @@ export function generateTokenAST(token: string): AstNode {
 					}
 
 					const obj: AstCallNode = {
-						type: "call",
+						type: "code",
 						value: {
 							type: "newGlobal",
 							name: tokens[1],
@@ -122,14 +121,16 @@ export function generateTokenAST(token: string): AstNode {
 						.trim()
 						.substring(0, args.length - 1);
 
-					const argsTokens = tokenise(argsWithoutBrackets);
+					const argsTokens = removeBlanks(
+						tokenise(argsWithoutBrackets)
+					);
 
 					const argsNodes = argsTokens.map((token) =>
 						generateTokenAST(token)
 					);
 
 					const obj: AstCallNode = {
-						type: "call",
+						type: "code",
 						value: {
 							function: generateTokenAST(target),
 							type: "functionCall",
@@ -143,161 +144,4 @@ export function generateTokenAST(token: string): AstNode {
 	}
 
 	throw new Error("Type '" + type + "' was not handled in token generation.");
-}
-
-export function tokenise(
-	text: string,
-	splitOnSpaces: boolean = false
-): string[] {
-	const result: string[] = [];
-	let staging = "";
-
-	let brackets: ("[]" | "()" | "{}")[] = [];
-	//let quotes: '"' | "'" | "`" | "" = "";
-	let quotes: string = "";
-
-	const characters = text.split("");
-
-	function commit() {
-		result.push(staging.trim());
-		staging = "";
-	}
-
-	for (const char of characters) {
-		function stage() {
-			staging += char;
-		}
-
-		switch (char) {
-			case "\t":
-			case " ":
-				if (!splitOnSpaces) {
-					stage();
-					break;
-				}
-			case ",":
-				if (quotes == "" && brackets.length == 0) {
-					commit();
-				} else {
-					stage();
-				}
-				break;
-
-			// brackets
-			case "(":
-				if (quotes !== "") {
-					stage();
-					break;
-				}
-
-				brackets.push("()");
-				stage();
-				break;
-			case ")":
-				if (quotes !== "") {
-					stage();
-					break;
-				}
-
-				if (brackets.at(-1) == "()") {
-					brackets.pop();
-				} else {
-					throw new Error(
-						"SyntaxError: Bracket closure was invalid."
-					);
-				}
-				stage();
-				break;
-
-			// square brackets
-			case "[":
-				if (quotes !== "") {
-					stage();
-					break;
-				}
-
-				brackets.push("[]");
-				stage();
-				break;
-			case "]":
-				if (quotes !== "") {
-					stage();
-					break;
-				}
-
-				if (brackets.at(-1) == "[]") {
-					brackets.pop();
-				} else {
-					throw new Error(
-						"SyntaxError: Bracket closure was invalid."
-					);
-				}
-				stage();
-				break;
-
-			// curly brackets
-			case "{":
-				if (quotes !== "") {
-					stage();
-					break;
-				}
-
-				brackets.push("{}");
-				stage();
-				break;
-			case "}":
-				if (quotes !== "") {
-					stage();
-					break;
-				}
-
-				if (brackets.at(-1) == "{}") {
-					brackets.pop();
-				} else {
-					throw new Error(
-						"SyntaxError: Bracket closure was invalid."
-					);
-				}
-				stage();
-				break;
-
-			// quotes
-			case '"':
-			case "'":
-			case "`":
-				if (brackets.length !== 0) {
-					stage();
-					break;
-				}
-
-				if (quotes == char) {
-					quotes = "";
-				} else {
-					if (quotes == "") {
-						quotes = char;
-					}
-				}
-
-				stage();
-				break;
-
-			default:
-				stage();
-		}
-	}
-
-	commit();
-
-	if (brackets.length !== 0) {
-		throw new Error("More brackets where opened than were closed!");
-	}
-	if (quotes !== "") {
-		throw new Error("Quotes were not closed properly!");
-	}
-
-	if (splitOnSpaces == true) {
-		return removeBlanks(result);
-	} else {
-		return result;
-	}
 }

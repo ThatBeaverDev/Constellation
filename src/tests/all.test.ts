@@ -81,7 +81,7 @@ for (const i in files) {
 		badFormats.push(files[i]);
 		continue;
 	} else {
-		console.log("###" + files[i]);
+		console.log("### " + files[i]);
 
 		if (hideSuccessfulTests) {
 			const logs = result
