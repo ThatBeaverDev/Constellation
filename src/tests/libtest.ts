@@ -50,7 +50,7 @@ export async function runTests(
 
 		if (isOK) {
 			passes++;
-			logs += `[/] PASSED: ${JSON.stringify(test.args)} is ${test.expectedResult}.\n`;
+			logs += `[/] PASSED: ${JSON.stringify(test.args)} is ${JSON.stringify(test.expectedResult)}.\n`;
 		} else {
 			if (result == "none")
 				logs += `[ ] FAILED: ${JSON.stringify(test.args)} threw this error \`${error}\`, rather than returning ${JSON.stringify(test.expectedResult)}\n`;

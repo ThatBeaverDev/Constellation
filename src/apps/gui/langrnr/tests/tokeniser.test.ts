@@ -1,5 +1,10 @@
 import { runTests } from "../../../../tests/libtest.js";
-import { tokenise } from "../components/ast/tokenise.js";
+import {
+	findEndOfFirstBracket,
+	findFirstValid,
+	tokenBasedSplit,
+	tokenise
+} from "../components/ast/tokenise.js";
 
 const { logs } = await runTests([
 	// simple comma-separated values
@@ -252,6 +257,123 @@ const { logs } = await runTests([
 		expectedResult: [
 			"outer(inner1(a, [b, c], {d: 'e,f'}), inner2(\"x,y\", `z`))"
 		]
+	},
+
+	// a silly little if statement
+	{
+		args: ["if (5 < 3) {}", true],
+		function: tokenise,
+		expectedResult: ["if", "(5 < 3)", "{}"]
+	},
+
+	// find end of first bracket
+	{
+		function: findEndOfFirstBracket,
+		args: ["if (3 > 5) {}"],
+		expectedResult: 9
+	},
+	{
+		function: findEndOfFirstBracket,
+		args: ["echo()"],
+		expectedResult: 5
+	},
+
+	// finds first + outside of any brackets or quotes
+	{
+		function: findFirstValid,
+		args: ["a + b", "+"],
+		expectedResult: 2
+	},
+
+	// ignores + inside ()
+	{
+		function: findFirstValid,
+		args: ["(a + b) + c", "+"],
+		expectedResult: 8
+	},
+
+	// ignores + inside {}
+	{
+		function: findFirstValid,
+		args: ["{a + b} + c", "+"],
+		expectedResult: 8
+	},
+
+	// ignores + inside []
+	{
+		function: findFirstValid,
+		args: ["[a + b] + c", "+"],
+		expectedResult: 8
+	},
+
+	// ignores + inside quotes
+	{
+		function: findFirstValid,
+		args: [`"a + b" + c`, "+"],
+		expectedResult: 8
+	},
+
+	// no match found
+	{
+		function: findFirstValid,
+		args: ["abcdef", "+"],
+		expectedResult: -1
+	},
+
+	// throws when character arg is not length 1
+	{
+		function: findFirstValid,
+		args: ["abc", "++"],
+		expectedResult: "none"
+	},
+
+	// detects mismatched bracket error
+	{
+		function: findFirstValid,
+		args: ["(a + b]", "+"],
+		expectedResult: "none"
+	},
+
+	// splits simple expression on '+'
+	{
+		function: tokenBasedSplit,
+		args: ["a+b", "+"],
+		expectedResult: ["a", "b"]
+	},
+
+	// respects () nesting
+	{
+		function: tokenBasedSplit,
+		args: ["a+(b+c)", "+"],
+		expectedResult: ["a", "(b+c)"]
+	},
+
+	// respects {} nesting
+	{
+		function: tokenBasedSplit,
+		args: ["foo+{bar+baz}", "+"],
+		expectedResult: ["foo", "{bar+baz}"]
+	},
+
+	// respects [] nesting
+	{
+		function: tokenBasedSplit,
+		args: ["arr[0+1]+2", "+"],
+		expectedResult: ["arr[0+1]", "2"]
+	},
+
+	// ignores + inside quotes
+	{
+		function: tokenBasedSplit,
+		args: [`"a+b"+c+d`, "+"],
+		expectedResult: [`"a+b"`, "c", "d"]
+	},
+
+	// throws when splitter is invalid
+	{
+		function: tokenBasedSplit,
+		args: ["a+b", "++"],
+		expectedResult: "none"
 	}
 ]);
 

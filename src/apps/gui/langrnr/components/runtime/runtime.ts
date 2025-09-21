@@ -3,6 +3,7 @@ import {
 	RuntimeBoolean,
 	RuntimeFunction,
 	RuntimeNone,
+	RuntimeNumber,
 	RuntimeScope,
 	RuntimeString,
 	RuntimeValue,
@@ -66,11 +67,45 @@ export class LanguageRuntime {
 				};
 				return obj;
 			}
+			case "num": {
+				const obj: RuntimeNumber = {
+					type: "number",
+					value: node.value
+				};
+
+				return obj;
+			}
 
 			case "bool": {
 				const obj: RuntimeBoolean = {
 					type: "boolean",
 					value: node.value
+				};
+
+				return obj;
+			}
+
+			case "conditional": {
+				const first = this.evalNode(scopes, node.value.first);
+				const second = this.evalNode(scopes, node.value.second);
+
+				let result: boolean;
+
+				switch (node.value.type) {
+					case "isEqual":
+						result = first == second;
+						break;
+					case "greaterThan":
+						result = first > second;
+						break;
+					case "lessThan":
+						result = first < second;
+						break;
+				}
+
+				const obj: RuntimeBoolean = {
+					type: "boolean",
+					value: result
 				};
 
 				return obj;

@@ -1,5 +1,5 @@
 import { runTests } from "../../../../tests/libtest.js";
-import { generateTokenAST } from "../components/ast/tokenAst.js";
+import { generateTokenAST } from "../components/ast/ast.js";
 
 const { logs } = await runTests([
 	// string tokens
@@ -168,7 +168,7 @@ const { logs } = await runTests([
 	},
 	{
 		function: generateTokenAST,
-		args: ["{}"],
+		args: ["obj{}"],
 		expectedResult: { type: "dict", value: new Map() }
 	},
 
@@ -206,6 +206,32 @@ const { logs } = await runTests([
 				type: "lessThan",
 				first: { type: "num", value: 7 },
 				second: { type: "num", value: 5 }
+			}
+		}
+	},
+
+	{
+		function: generateTokenAST,
+		args: ["if (3 > 5) {}"],
+		expectedResult: {
+			type: "code",
+			value: {
+				function: { type: "var", value: "if" },
+				type: "functionCall",
+				args: [
+					{
+						type: "conditional",
+						value: {
+							type: "greaterThan",
+							first: { type: "num", value: 3 },
+							second: { type: "num", value: 5 }
+						}
+					},
+					{
+						type: "block",
+						value: []
+					}
+				]
 			}
 		}
 	}

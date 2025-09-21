@@ -1,0 +1,14 @@
+// tester
+
+const a = 5;
+const b = 7;
+
+if (b > a) {
+	println("B is greater than A");
+};
+if (a < b) {
+	println("A is less than B");
+};
+
+println(a);
+println(b);
