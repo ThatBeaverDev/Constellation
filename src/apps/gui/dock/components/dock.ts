@@ -175,6 +175,7 @@ export default class Dock {
 
 	#dockFocus: string = "";
 	triggerFocus() {
+		this.#dockFocus;
 		// focus the first program on the dock
 		for (const keyname in this.programs) {
 			this.#dockFocus = keyname;
@@ -182,7 +183,7 @@ export default class Dock {
 		}
 	}
 	updateFocus(code: string) {
-		const character = this.keycodeToCharacter(code);
+		//const character = this.keycodeToCharacter(code);
 
 		for (const keyname in this.programs) {
 			const program = this.programs[keyname];
