@@ -1,4 +1,5 @@
 import { AstTokenType } from "../definitions.js";
+import { tokenise } from "./tokenise.js";
 
 export function getTokenType(text: string): AstTokenType {
 	let token = text.trim();
@@ -13,6 +14,8 @@ export function getTokenType(text: string): AstTokenType {
 
 	if (isVar(token)) return "var";
 	if (isFunctionCall(token) || isVariableDeclaration(token)) return "code";
+	if (isConditional(token)) return "conditional";
+	if (isBlock(token)) return "block";
 
 	throw new Error("Tokentype of `" + token + "` cannot be obtained.");
 }
@@ -34,11 +37,16 @@ function isNumber(token: string): Boolean {
 	switch (token) {
 		case "infinity":
 			return true;
+		case ".":
+		case "-":
+		case "-.":
+			return false;
 	}
 
 	const characters = token.split("");
 
 	let totalDots = 0;
+	let hasDigits: boolean = false;
 	let i = 0;
 	for (const char of characters) {
 		switch (char) {
@@ -52,11 +60,15 @@ function isNumber(token: string): Boolean {
 			case "8":
 			case "9":
 			case "0":
+				hasDigits = true;
 				break;
 			case ".":
 				if (totalDots > 0) {
 					return false;
 				}
+
+				// can't just have '-'
+				if (token.length == 1) return false;
 
 				totalDots++;
 				// dot can't be at the start or end
@@ -71,6 +83,10 @@ function isNumber(token: string): Boolean {
 		i++;
 	}
 
+	if (hasDigits == false) {
+		return false;
+	}
+
 	return true;
 }
 
@@ -79,13 +95,11 @@ function isBoolean(token: string): Boolean {
 }
 
 function isList(token: string): Boolean {
-	// TODO: IMPLEMENT!
-	return false;
+	return token[0] == "[" && token.at(-1) == "]";
 }
 
 function isDict(token: string): Boolean {
-	// TODO: IMPLEMENT!
-	return false;
+	return token.startsWith("obj{") && token.at(-1) == "}";
 }
 
 function isVar(token: string): Boolean {
@@ -131,10 +145,19 @@ function isVar(token: string): Boolean {
 
 	const chars = token.split("");
 
+	if (chars.length == 0) return false;
+
+	let hasValidCharacters: boolean = false;
 	for (const char of chars) {
-		if (!whitelist.includes(char.toLocaleLowerCase())) {
+		if (whitelist.includes(char.toLocaleLowerCase())) {
+			hasValidCharacters = true;
+		} else {
 			return false;
 		}
+	}
+
+	if (hasValidCharacters == false) {
+		return false;
 	}
 
 	return true;
@@ -158,7 +181,21 @@ function isVariableDeclaration(token: string): Boolean {
 	return ok;
 }
 
-function detectFunction(token: string): Boolean {
-	return false;
+function isConditional(token: string): Boolean {
+	const tokens = tokenise(token, true);
+
+	if (tokens.length !== 3) {
+		return false;
+	}
+
+	const conditionals = ["==", ">", "<"];
+	if (!conditionals.includes(tokens[1])) {
+		return false;
+	}
+
+	return true;
 }
-detectFunction;
+
+function isBlock(token: string): Boolean {
+	return token[0] == "{" && token.at(-1) == "}";
+}

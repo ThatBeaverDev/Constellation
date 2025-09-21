@@ -18,7 +18,7 @@ const { logs } = await runTests([
 	},
 	{
 		function: generateAST,
-		args: [`global name = "Constellation"\n\nlog(name)`],
+		args: [`global name = "Constellation";\n\nlog(name);`],
 		expectedResult: [
 			{
 				type: "code",
@@ -68,7 +68,7 @@ const { logs } = await runTests([
 	{
 		function: generateAST,
 		args: [
-			'// tester\n\nconst a = 5\nconst b = 7\n\nif (b > a) {\n\tprintln("B is greater than A")\n}\nif (b < a) {\n\tprintln("A is greater than B")\n}\n\nprintln(a)\nprintln(b)'
+			'// tester\n\nconst a = 5;\nconst b = 7;\n\nif (b > a) {\n\tprintln("B is greater than A");\n};\nif (b < a) {\n\tprintln("A is greater than B");\n};\n\nprintln(a);\nprintln(b);'
 		],
 		expectedResult: [
 			{
@@ -97,8 +97,8 @@ const { logs } = await runTests([
 							type: "conditional",
 							value: {
 								type: "greaterThan",
-								second: { type: "var", value: "b" },
-								first: { type: "var", value: "a" }
+								first: { type: "var", value: "b" },
+								second: { type: "var", value: "a" }
 							}
 						},
 						{
@@ -135,8 +135,8 @@ const { logs } = await runTests([
 							type: "conditional",
 							value: {
 								type: "lessThan",
-								second: { type: "var", value: "b" },
-								first: { type: "var", value: "a" }
+								first: { type: "var", value: "b" },
+								second: { type: "var", value: "a" }
 							}
 						},
 						{

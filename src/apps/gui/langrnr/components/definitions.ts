@@ -11,7 +11,8 @@ export type AstTokenType =
 	| "code"
 	| "var"
 	| "none"
-	| "block";
+	| "block"
+	| "conditional";
 
 export type AstNode<T = any> =
 	| AstStringNode
@@ -40,7 +41,7 @@ export interface AstBooleanNode {
 	value: boolean;
 }
 
-export interface AstListNode<T> {
+export interface AstListNode<T = any> {
 	type: "list";
 	value: T[];
 }

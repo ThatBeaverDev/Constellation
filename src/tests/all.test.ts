@@ -81,12 +81,13 @@ for (const i in files) {
 		badFormats.push(files[i]);
 		continue;
 	} else {
-		console.log("### " + files[i]);
+		console.log("\n### " + files[i]);
 
 		if (hideSuccessfulTests) {
 			const logs = result
 				.split("\n")
-				.filter((item) => !item.startsWith("[/] PASSED"))
+				.filter((item) => item.startsWith("[ ] FAILED"))
+				.filter((item) => !["", " ", "\n", "\t"].includes(item))
 				.join("\n");
 
 			console.log(logs);
