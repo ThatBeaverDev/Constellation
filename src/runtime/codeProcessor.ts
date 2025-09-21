@@ -140,7 +140,7 @@ export class importRewriter implements Terminatable {
 
 				if (resolved == importer) {
 					throw new Error(
-						"Direct circular import detected. aborting."
+						`Direct circular import detected between ${currentPath} and ${resolved}. aborting.`
 					);
 				}
 
