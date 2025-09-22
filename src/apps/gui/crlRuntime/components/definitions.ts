@@ -1,6 +1,11 @@
 import { Scope } from "./runtime/scope.js";
 import { AstConditional } from "./types/conditionals.js";
 
+// configuration
+const libraryPaths = "/System/CoreLibraries/xlng";
+libraryPaths;
+
+// types
 export type Ast = AstNode[];
 export type AstTokenType =
 	| "str"
@@ -124,10 +129,14 @@ export interface RuntimeNone {
 	value: undefined;
 }
 
-type RuntimeCallable = (
+export interface RuntimeBlock {
+	type: "block";
+	value: AstNode[];
+}
+
+export type RuntimeCallable = (
 	scope: Scope[],
-	nodes: AstNode[],
-	...args: any[]
+	...args: RuntimeValue[]
 ) => RuntimeValue;
 export interface RuntimeFunction {
 	type: "programFunction";
@@ -139,4 +148,5 @@ export type RuntimeValue =
 	| RuntimeNumber
 	| RuntimeBoolean
 	| RuntimeNone
-	| RuntimeFunction;
+	| RuntimeFunction
+	| RuntimeBlock;

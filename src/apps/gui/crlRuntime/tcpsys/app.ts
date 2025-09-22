@@ -1,11 +1,11 @@
-import LanguageInstance from "../components/core/core.js";
+import CrlRunnerInstance from "../components/core/core.js";
 
-export default class CoreLanguageRuntime extends Application {
+export default class CrlRunner extends Application {
 	constructor(directory: string, args: any[]) {
 		super(directory, args);
 	}
 
-	runtime?: LanguageInstance;
+	runtime?: CrlRunnerInstance;
 	async init(args: any[]) {
 		const targetFile = args[0] || "/System/test";
 
@@ -13,7 +13,7 @@ export default class CoreLanguageRuntime extends Application {
 		if (!read.ok) throw read.data;
 		const code = read.data;
 
-		this.runtime = new LanguageInstance(code);
+		this.runtime = new CrlRunnerInstance(code, this);
 	}
 
 	frame() {

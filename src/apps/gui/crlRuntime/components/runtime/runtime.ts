@@ -1,5 +1,8 @@
+import CrlRunner from "../../tcpsys/app";
+import CrlRunnerInstance from "../core/core";
 import {
 	AstCallNode,
+	RuntimeBlock,
 	RuntimeBoolean,
 	RuntimeFunction,
 	RuntimeNone,
@@ -11,13 +14,19 @@ import {
 } from "../definitions";
 import { AstNode } from "../definitions.js";
 import { GlobalScope } from "./globals.js";
+import { unwrapValue } from "./utils.js";
 
 export function runBlock(scope: any, block: AstNode[]) {}
 
-export class LanguageRuntime {
+export class CrlRuntime {
 	ast: AstNode[];
-	constructor(ast: AstNode[]) {
+	app: CrlRunner;
+	constructor(
+		ast: AstNode[],
+		public parent: CrlRunnerInstance
+	) {
 		this.globalScope = new GlobalScope(this);
+		this.app = parent.parent;
 		this.ast = ast;
 
 		// start the script
@@ -57,8 +66,12 @@ export class LanguageRuntime {
 
 		switch (node.type) {
 			case "block":
-				this.evalBlock(scopes, node.value);
-				break;
+				const obj: RuntimeBlock = {
+					type: "block",
+					value: node.value
+				};
+
+				return obj;
 
 			case "str": {
 				const obj: RuntimeString = {
@@ -86,12 +99,17 @@ export class LanguageRuntime {
 			}
 
 			case "conditional": {
-				const first = this.evalNode(scopes, node.value.first);
-				const second = this.evalNode(scopes, node.value.second);
+				const first = unwrapValue(
+					this.evalNode(scopes, node.value.first)
+				);
+				const second = unwrapValue(
+					this.evalNode(scopes, node.value.second)
+				);
 
 				let result: boolean;
+				const conditionalType = node.value.type;
 
-				switch (node.value.type) {
+				switch (conditionalType) {
 					case "isEqual":
 						result = first == second;
 						break;
@@ -101,6 +119,10 @@ export class LanguageRuntime {
 					case "lessThan":
 						result = first < second;
 						break;
+					default:
+						throw new Error(
+							"Unknown conditional type: " + conditionalType
+						);
 				}
 
 				const obj: RuntimeBoolean = {
@@ -210,7 +232,7 @@ export class LanguageRuntime {
 					throw new Error("This is not a function!");
 
 				if (typeof callee.value == "function") {
-					result = callee.value(scopes, [], ...args);
+					result = callee.value(scopes, ...args);
 				} else {
 					// TODO: Make a new scope
 					this.evalBlock(scopes, callee.value);

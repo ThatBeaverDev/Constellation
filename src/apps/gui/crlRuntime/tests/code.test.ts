@@ -180,6 +180,50 @@ const { logs } = await runTests([
 				}
 			}
 		]
+	},
+	// block during variable declaration
+	{
+		function: generateAST,
+		args: ["let func = function() {\n\tprintln('Hello!')\n}"],
+		expectedResult: [
+			{
+				type: "code",
+				value: {
+					type: "newVariable",
+					name: "func",
+					value: {
+						type: "code",
+						value: {
+							function: { type: "var", value: "function" },
+							type: "functionCall",
+							args: [
+								{
+									type: "block",
+									value: [
+										{
+											type: "code",
+											value: {
+												function: {
+													type: "var",
+													value: "println"
+												},
+												type: "functionCall",
+												args: [
+													{
+														type: "str",
+														value: "Hello!"
+													}
+												]
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				}
+			}
+		]
 	}
 ]);
 console.log(logs);

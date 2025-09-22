@@ -130,9 +130,9 @@ export const files: Record<
 	},
 
 	// languageRunner
-	"/build/apps/com.constellation.langrnr.idx": {
+	"/build/apps/com.constellation.crlRuntime.idx": {
 		type: "application",
-		directory: "/System/CoreExecutables/languageRunner.appl"
+		directory: "/System/CoreExecutables/crlRuntime.appl"
 	}
 };
 

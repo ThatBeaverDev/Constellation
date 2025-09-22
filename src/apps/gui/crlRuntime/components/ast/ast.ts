@@ -221,7 +221,9 @@ export function generateTokenAST(token: string): AstNode {
 						value: {
 							type: "newVariable",
 							name: tokens[1],
-							value: generateTokenAST(tokens[3])
+							value: generateTokenAST(
+								tokens.splice(3, Infinity).join(" ")
+							)
 						}
 					};
 
