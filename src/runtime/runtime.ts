@@ -73,13 +73,14 @@ export function getProcessFromID(id: number): Process | undefined {
 	}
 }
 
-type executionFiletype = "js";
+type executionFiletype = "js" | "crl";
 export type executionResult = {
 	promise: Promise<any>;
 	hasExited: boolean;
 };
 
-let popupDirectory = "/System/CoreExecutables/Popup.appl";
+const popupDirectory = "/System/CoreExecutables/Popup.appl";
+const crlDirectory = "/System/CoreExecutables/crlRuntime.appl";
 
 /**
  * Removes a process from execution
@@ -296,7 +297,7 @@ export class ProgramRuntime {
 	 * @returns an Object containing a promise with the Process Waiting object - this promise will resolve when the process exits, and return the value the process exited with.
 	 */
 	async execute(
-		directory: string,
+		appdir: string,
 		args: any[] = [],
 		user: string,
 		password: string,
@@ -310,7 +311,7 @@ export class ProgramRuntime {
 
 		this.#ConstellationKernel.lib.logging.debug(
 			path,
-			"Executing program from " + directory
+			"Executing program from " + appdir
 		);
 
 		/**
@@ -323,7 +324,7 @@ export class ProgramRuntime {
 			dir: string,
 			throwIfEmpty: Boolean = true
 		): Promise<string> => {
-			const rel = this.#ConstellationKernel.fs.resolve(directory, dir);
+			const rel = this.#ConstellationKernel.fs.resolve(appdir, dir);
 
 			const content = await this.#ConstellationKernel.fs.readFile(rel);
 
@@ -349,7 +350,7 @@ export class ProgramRuntime {
 
 		if (config.allowMultipleInstances == false) {
 			for (const process of processes) {
-				if (process.directory == directory) {
+				if (process.directory == appdir) {
 					throw new Error(
 						"This application may not run more than once."
 					);
@@ -357,19 +358,19 @@ export class ProgramRuntime {
 			}
 		}
 
-		const allowedExtensions: executionFiletype[] = ["js"];
+		const allowedExtensions: executionFiletype[] = ["js", "crl"];
 
 		let executableDirectory: string | undefined;
 		let type: executionFiletype | undefined;
 		const tcpsys = await this.#ConstellationKernel.fs.readdir(
-			this.#ConstellationKernel.fs.resolve(directory, "tcpsys")
+			this.#ConstellationKernel.fs.resolve(appdir, "tcpsys")
 		);
 
 		// get the script
 		for (const ext of allowedExtensions) {
 			if (tcpsys.includes("app." + ext)) {
 				executableDirectory = this.#ConstellationKernel.fs.resolve(
-					directory,
+					appdir,
 					"tcpsys/app." + ext
 				);
 				type = ext;
@@ -382,32 +383,45 @@ export class ProgramRuntime {
 
 		let data: string = "";
 
+		const finalProgramArgs: any[] = [...args];
+		let directory = String(appdir);
+
 		switch (type) {
+			case "crl":
+				executableDirectory = this.#ConstellationKernel.fs.resolve(
+					String(crlDirectory),
+					"tcpsys/app.js"
+				);
+
+				finalProgramArgs.splice(
+					0,
+					0,
+					this.#ConstellationKernel.fs.resolve(
+						directory,
+						"tcpsys/app.crl"
+					)
+				);
+
 			case "js":
-				{
-					const content =
-						await this.#ConstellationKernel.fs.readFile(
-							executableDirectory
-						);
+				const content =
+					await this.#ConstellationKernel.fs.readFile(
+						executableDirectory
+					);
 
-					if (content == undefined) {
-						throw new AppInitialisationError(
-							this.#ConstellationKernel.fs.resolve(
-								directory,
-								"tcpsys/app.js"
-							) + " is empty and cannot be executed"
-						);
-					}
-
-					const importsResolved =
-						await this.importsRewriter.processCode(
-							content,
-							executableDirectory
-						);
-
-					data = importsResolved;
+				if (content == undefined) {
+					throw new AppInitialisationError(
+						executableDirectory + " is empty and cannot be executed"
+					);
 				}
+
+				const importsResolved = await this.importsRewriter.processCode(
+					content,
+					executableDirectory
+				);
+
+				data = importsResolved;
 				break;
+
 			default:
 				throw new AppInitialisationError(
 					"Type '" + type + "' is not executable."
@@ -489,7 +503,7 @@ export class ProgramRuntime {
 		const live = new Executable(
 			this.#ConstellationKernel,
 			directory,
-			args,
+			finalProgramArgs,
 			user,
 			password
 		);
@@ -514,7 +528,7 @@ export class ProgramRuntime {
 			kernel: this.#ConstellationKernel,
 			directory,
 			startTime: Date.now(),
-			args,
+			args: finalProgramArgs,
 			program: live,
 			children: []
 		};
