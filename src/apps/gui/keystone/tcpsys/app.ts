@@ -1,9 +1,8 @@
 import { IPCMessage } from "../../../../runtime/messages";
 import { fileInfo } from "../lib/appfind";
+import { Fzf } from "fzf";
 
 export default class KeystoneSearch extends Popup {
-	fzfLib?: typeof import("../../../../lib/external/fzf");
-
 	results: object[] = [];
 	files: string[] = [];
 	fileInfo: fileInfo[] = [];
@@ -20,8 +19,6 @@ export default class KeystoneSearch extends Popup {
 		this.registerKeyboardShortcut("ScrollDown", "ArrowDown", []);
 		this.registerKeyboardShortcut("ScrollUp", "ArrowUp", []);
 		this.registerKeyboardShortcut("Open", "Enter", []);
-
-		this.fzfLib = await this.env.include("/System/CoreLibraries/fzf.js");
 
 		await this.env.shell.index();
 
@@ -51,9 +48,7 @@ export default class KeystoneSearch extends Popup {
 	index?: Function;
 
 	async search(term: string) {
-		if (this.fzfLib == undefined) return;
-
-		const fzf = new this.fzfLib.Fzf(this.files);
+		const fzf = new Fzf(this.files);
 
 		// object stating item, score and start/end points
 		const entries = fzf.find(term);

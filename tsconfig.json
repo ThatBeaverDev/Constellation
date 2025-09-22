@@ -27,7 +27,7 @@
 			"pathinf": ["./src/syslib/pathinf.ts"],
 			"blob": ["./src/syslib/blob.ts"],
 			"mime": ["./src/syslib/mime.ts"],
-			"keyboardUtils": ["./src/syslib/keyboardUtils.ts"]
+			"fzf": ["./src/syslib/external/fzf.ts"]
 		},
 		"noUnusedLocals": true,
 
