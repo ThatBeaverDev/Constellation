@@ -66,7 +66,7 @@ compile() {
     ./scripts/tcpkg build/services build/services.idx -override=true
 
     # Build languageRuntime
-    ./scripts/tcpkg build/apps/gui/langrnr build/apps/com.constellation.langrnr.idx -override=true
+    ./scripts/tcpkg build/apps/gui/crlRuntime build/apps/com.constellation.crlRuntime.idx -override=true
 }
 
 # first param is directory, second param is name

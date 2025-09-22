@@ -1,7 +1,7 @@
 const manifest: ApplicationManifest = {
-	name: "langrn",
+	name: "CRL Runtime",
 	author: "ThatBeaverDev",
-	description: "Constellation's core language runtime",
+	description: "Constellation's runner for CRL.",
 	category: "Developer",
 	version: 0,
 	icon: "component"
