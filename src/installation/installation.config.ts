@@ -38,7 +38,7 @@ export const files: Record<
 	// libraries
 	"/build/syslib/pathinf.js": "/System/CoreLibraries/pathinf.js",
 	"/build/syslib/blob.js": "/System/CoreLibraries/blob.js",
-	"/build/lib/external/fzf.js": "/System/CoreLibraries/fzf.js",
+	"/build/syslib/external/fzf.js": "/System/CoreLibraries/fzf.js",
 
 	// mime library
 	"/build/syslib/mime/mimes.js": "/System/CoreLibraries/mimes/mimes.js",
