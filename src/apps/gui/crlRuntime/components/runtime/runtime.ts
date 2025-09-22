@@ -1,5 +1,5 @@
-import CrlRunner from "../../tcpsys/app";
-import CrlRunnerInstance from "../core/core";
+import CrlRunner from "../../tcpsys/app.js";
+import CrlRunnerInstance from "../core/core.js";
 import {
 	AstCallNode,
 	RuntimeBlock,
@@ -11,7 +11,7 @@ import {
 	RuntimeString,
 	RuntimeValue,
 	RuntimeVariable
-} from "../definitions";
+} from "../definitions.js";
 import { AstNode } from "../definitions.js";
 import { GlobalScope } from "./globals.js";
 import { unwrapValue } from "./utils.js";
