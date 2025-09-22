@@ -1050,6 +1050,11 @@ const mimes: Record<string, string[]> = {
 	"text/x-uuencode": ["uu"],
 	"text/x-vcalendar": ["vcs"],
 	"text/x-vcard": ["vcf"],
+
+	// mine
+	"text/x-typescript": ["ts", "tsx"],
+	"text/x-constellation-runner-language": ["crl"],
+
 	"video/vnd.dece.hd": ["uvh", "uvvh"],
 	"video/vnd.dece.mobile": ["uvm", "uvvm"],
 	"video/vnd.dece.pd": ["uvp", "uvvp"],

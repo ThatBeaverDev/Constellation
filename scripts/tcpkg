@@ -12,7 +12,13 @@ const mime = new Mime(standardTypes, otherTypes);
 // custom types
 mime.define(
 	{
-		"text/x.typescript": ["ts", "tsx"]
+		"text/x-typescript": ["ts", "tsx"]
+	},
+	true
+);
+mime.define(
+	{
+		"text/x-constellation-runner-language": ["crl"]
 	},
 	true
 );
