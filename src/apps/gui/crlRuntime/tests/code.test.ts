@@ -49,7 +49,7 @@ const { logs } = await runTests([
 					type: "functionCall",
 					args: [
 						{
-							type: "conditional",
+							type: "operation",
 							value: {
 								type: "greaterThan",
 								first: { type: "num", value: 5 },
@@ -94,7 +94,7 @@ const { logs } = await runTests([
 					type: "functionCall",
 					args: [
 						{
-							type: "conditional",
+							type: "operation",
 							value: {
 								type: "greaterThan",
 								first: { type: "var", value: "b" },
@@ -132,7 +132,7 @@ const { logs } = await runTests([
 					type: "functionCall",
 					args: [
 						{
-							type: "conditional",
+							type: "operation",
 							value: {
 								type: "lessThan",
 								first: { type: "var", value: "b" },

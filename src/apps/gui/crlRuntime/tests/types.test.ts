@@ -31,11 +31,11 @@ const { logs } = await runTests([
 	{ function: getTokenType, args: ["[1,2,3]"], expectedResult: "list" },
 	{ function: getTokenType, args: ["obj{}"], expectedResult: "dict" },
 	{ function: getTokenType, args: ['obj{"a":1}'], expectedResult: "dict" },
-	// conditionals
-	{ function: getTokenType, args: ["7 == 5"], expectedResult: "conditional" },
-	{ function: getTokenType, args: ["7 > 5"], expectedResult: "conditional" },
-	{ function: getTokenType, args: ["7 < 5"], expectedResult: "conditional" },
-	{ function: getTokenType, args: ["a == b"], expectedResult: "conditional" },
+	// operations
+	{ function: getTokenType, args: ["7 == 5"], expectedResult: "operation" },
+	{ function: getTokenType, args: ["7 > 5"], expectedResult: "operation" },
+	{ function: getTokenType, args: ["7 < 5"], expectedResult: "operation" },
+	{ function: getTokenType, args: ["a == b"], expectedResult: "operation" },
 	// others
 	{ function: getTokenType, args: ["word"], expectedResult: "var" },
 	{ function: getTokenType, args: ["foo(bar)"], expectedResult: "code" },
@@ -74,14 +74,35 @@ const { logs } = await runTests([
 	{ function: getTokenType, args: ["obj{a:1}"], expectedResult: "dict" }, // compact form
 
 	{ function: getTokenType, args: ["{"], expectedResult: "none" }, // broken
-	// conditionals
-	{ function: getTokenType, args: ["a == b"], expectedResult: "conditional" },
-	{ function: getTokenType, args: ["a==b"], expectedResult: "none" }, // no whitespace → not conditional
-	{ function: getTokenType, args: ["7 > 5"], expectedResult: "conditional" },
+	// operations
+	{ function: getTokenType, args: ["a == b"], expectedResult: "operation" },
+	{ function: getTokenType, args: ["a==b"], expectedResult: "none" }, // no whitespace → not operation
+	{ function: getTokenType, args: ["7 > 5"], expectedResult: "operation" },
 	{ function: getTokenType, args: ["7>5"], expectedResult: "none" }, // no whitespace
-	{ function: getTokenType, args: ["7 >= 5"], expectedResult: "none" }, // >= not supported
-	{ function: getTokenType, args: ["x < y < z"], expectedResult: "none" }, // multi-step not supported
+	{
+		function: getTokenType,
+		args: ["x < y < z"],
+		expectedResult: "operation"
+	}, // multi-step supported
 	{ function: getTokenType, args: ["=="], expectedResult: "none" }, // bare operator
+	{ function: getTokenType, args: ["x >= y"], expectedResult: "operation" },
+	{ function: getTokenType, args: ["x => y"], expectedResult: "none" }, // not a real operation
+	{ function: getTokenType, args: ["x + y"], expectedResult: "operation" },
+	{ function: getTokenType, args: ["x - y"], expectedResult: "operation" },
+	{ function: getTokenType, args: ["x / y"], expectedResult: "operation" },
+	{ function: getTokenType, args: ["x * y"], expectedResult: "operation" },
+	{ function: getTokenType, args: ["x ** y"], expectedResult: "operation" },
+	{ function: getTokenType, args: ["x % y"], expectedResult: "operation" },
+	{
+		function: getTokenType,
+		args: ['"Hello" + punctuation + " World!"'],
+		expectedResult: "operation"
+	},
+	{
+		function: getTokenType,
+		args: ["(1 + 2) > (2 * 3)"],
+		expectedResult: "operation"
+	},
 
 	// variables
 	{ function: getTokenType, args: ["abc123"], expectedResult: "var" },

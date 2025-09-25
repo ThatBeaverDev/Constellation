@@ -1,4 +1,5 @@
 import CrlRunner from "../../tcpsys/app.js";
+import { OperationReference } from "../config.js";
 import CrlRunnerInstance from "../core/core.js";
 import {
 	AstCallNode,
@@ -98,7 +99,7 @@ export class CrlRuntime {
 				return obj;
 			}
 
-			case "conditional": {
+			case "operation": {
 				const first = unwrapValue(
 					this.evalNode(scopes, node.value.first)
 				);
@@ -106,29 +107,75 @@ export class CrlRuntime {
 					this.evalNode(scopes, node.value.second)
 				);
 
-				let result: boolean;
-				const conditionalType = node.value.type;
+				let result: number | boolean;
+				const operationType: OperationReference = node.value.type;
 
-				switch (conditionalType) {
-					case "isEqual":
-						result = first == second;
+				switch (operationType) {
+					case "addition":
+						result = first + second;
+						break;
+					case "and":
+						result = first && second;
+						break;
+					case "division":
+						result = first / second;
+						break;
+					case "exponent":
+						result = first ** second;
 						break;
 					case "greaterThan":
 						result = first > second;
 						break;
+					case "greaterThanOrEqual":
+						result = first >= second;
+						break;
+					case "isEqual":
+						result = first == second;
+						break;
+					case "isNotEqual":
+						result = first != second;
+						break;
 					case "lessThan":
 						result = first < second;
 						break;
+					case "lessThanOrEqual":
+						result = first <= second;
+						break;
+					case "multiplication":
+						result = first * second;
+						break;
+					case "or":
+						result = first || second;
+						break;
+					case "remainder":
+						result = first % second;
+						break;
+					case "subtraction":
+						result = first - second;
+						break;
 					default:
+						const exhaustiveCheck: never = operationType;
+						exhaustiveCheck;
 						throw new Error(
-							"Unknown conditional type: " + conditionalType
+							"Unknown operation type: " + operationType
 						);
 				}
 
-				const obj: RuntimeBoolean = {
-					type: "boolean",
-					value: result
-				};
+				let obj: RuntimeValue;
+				switch (typeof result) {
+					case "number":
+						obj = {
+							type: "number",
+							value: result
+						};
+						break;
+					case "boolean":
+						obj = {
+							type: "boolean",
+							value: result
+						};
+						break;
+				}
 
 				return obj;
 			}

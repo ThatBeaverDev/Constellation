@@ -28,7 +28,10 @@
 		"linux"
 	],
 	"dependencies": {
+		"@types/jsdom": "^21.1.7",
 		"bun": "^1.2.21",
+		"canvas": "^3.2.0",
+		"jsdom": "^27.0.0",
 		"mime": "4.0.7",
 		"remove-empty-directories": "^0.0.1",
 		"ts-prune": "^0.10.3"

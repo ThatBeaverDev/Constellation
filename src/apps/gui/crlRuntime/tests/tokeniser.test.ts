@@ -374,6 +374,13 @@ const { logs } = await runTests([
 		function: tokenBasedSplit,
 		args: ["a+b", "++"],
 		expectedResult: "none"
+	},
+
+	// brackets
+	{
+		function: tokenise,
+		args: ["(1 + 2) * 3", true],
+		expectedResult: ["(1 + 2)", "*", "3"]
 	}
 ]);
 

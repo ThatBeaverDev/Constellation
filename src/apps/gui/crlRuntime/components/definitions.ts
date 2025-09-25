@@ -1,5 +1,5 @@
 import { Scope } from "./runtime/scope.js";
-import { AstConditional } from "./types/conditionals.js";
+import { AstOperation } from "./types/operations.js";
 
 // configuration
 const libraryPaths = "/System/CoreLibraries/xlng";
@@ -17,7 +17,7 @@ export type AstTokenType =
 	| "var"
 	| "none"
 	| "block"
-	| "conditional";
+	| "operation";
 
 export type AstNode<T = any> =
 	| AstStringNode
@@ -28,7 +28,7 @@ export type AstNode<T = any> =
 	| AstVariableNode
 	| AstCallNode
 	| AstBlockNode
-	| AstConditionalNode;
+	| AstOperationNode;
 
 // AST NODES
 export interface AstStringNode {
@@ -77,9 +77,9 @@ export interface AstBlockNode {
 	type: "block";
 	value: AstNode[];
 }
-export interface AstConditionalNode {
-	type: "conditional";
-	value: AstConditional;
+export interface AstOperationNode {
+	type: "operation";
+	value: AstOperation;
 }
 
 // Variable declarations
