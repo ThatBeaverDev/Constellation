@@ -177,7 +177,7 @@ const { logs } = await runTests([
 		function: generateTokenAST,
 		args: ["7 == 5"],
 		expectedResult: {
-			type: "conditional",
+			type: "operation",
 			value: {
 				type: "isEqual",
 				first: { type: "num", value: 7 },
@@ -189,7 +189,7 @@ const { logs } = await runTests([
 		function: generateTokenAST,
 		args: ["7 > 5"],
 		expectedResult: {
-			type: "conditional",
+			type: "operation",
 			value: {
 				type: "greaterThan",
 				first: { type: "num", value: 7 },
@@ -201,7 +201,7 @@ const { logs } = await runTests([
 		function: generateTokenAST,
 		args: ["7 < 5"],
 		expectedResult: {
-			type: "conditional",
+			type: "operation",
 			value: {
 				type: "lessThan",
 				first: { type: "num", value: 7 },
@@ -220,7 +220,7 @@ const { logs } = await runTests([
 				type: "functionCall",
 				args: [
 					{
-						type: "conditional",
+						type: "operation",
 						value: {
 							type: "greaterThan",
 							first: { type: "num", value: 3 },
@@ -234,7 +234,176 @@ const { logs } = await runTests([
 				]
 			}
 		}
-	}
+	},
+
+	// multi-step operations
+	{
+		function: generateTokenAST,
+		args: ['"Hello, " + name + "!"'],
+		expectedResult: {
+			type: "operation",
+			value: {
+				type: "addition",
+				first: { type: "str", value: "Hello, " },
+				second: {
+					type: "operation",
+					value: {
+						type: "addition",
+						first: { type: "var", value: "name" },
+						second: { type: "str", value: "!" }
+					}
+				}
+			}
+		}
+	},
+
+	// --- Existing baseline cases (from you) ---
+	// (keep all your original ones unchanged)
+
+	// --- Extra tricky operations ---
+
+	// Missing right-hand side of operation
+	{
+		function: generateTokenAST,
+		args: ["7 +"],
+		expectedResult: "none" // should throw: second operand missing
+	},
+	// Missing left-hand side of operation
+	{
+		function: generateTokenAST,
+		args: ["+ 5"],
+		expectedResult: "none"
+	},
+	// Unknown operation
+	{
+		function: generateTokenAST,
+		args: ["3 %% 4"],
+		expectedResult: "none" // should error: operation not valid
+	},
+	// Nested parentheses inside operations
+	{
+		function: generateTokenAST,
+		args: ["(2 + 3) * 5"],
+		expectedResult: {
+			type: "operation",
+			value: {
+				type: "multiplication",
+				first: {
+					type: "operation",
+					value: {
+						type: "addition",
+						first: { type: "num", value: 2 },
+						second: { type: "num", value: 3 }
+					}
+				},
+				second: { type: "num", value: 5 }
+			}
+		}
+	},
+	// Chain of operations without spacing (which is required)
+	{
+		function: generateTokenAST,
+		args: ["1+2+3"],
+		expectedResult: "none"
+	},
+	// String concatenation chain with mixed spaces (should break)
+	{
+		function: generateTokenAST,
+		args: ['"a"+"b" + "c"'],
+		expectedResult: "none"
+	},
+	// Boolean operations
+	{
+		function: generateTokenAST,
+		args: ["true && false"],
+		expectedResult: {
+			type: "operation",
+			value: {
+				type: "and",
+				first: { type: "bool", value: true },
+				second: { type: "bool", value: false }
+			}
+		}
+	},
+	{
+		function: generateTokenAST,
+		args: ["true || false"],
+		expectedResult: {
+			type: "operation",
+			value: {
+				type: "or",
+				first: { type: "bool", value: true },
+				second: { type: "bool", value: false }
+			}
+		}
+	},
+	// Unary minus (edge case: not currently handled by your code)
+	{
+		function: generateTokenAST,
+		args: ["-5"],
+		expectedResult: { type: "num", value: -5 }
+	},
+	// Double equals inside variable name (should NOT be parsed as op)
+	{
+		function: generateTokenAST,
+		args: ["foo==bar"],
+		expectedResult: "none"
+	},
+
+	// --- Nested tricky mixed ops ---
+	// Multiple chained arithmetic ops
+	{
+		function: generateTokenAST,
+		args: ["1 + 2 * 3"],
+		expectedResult: {
+			type: "operation",
+			value: {
+				type: "addition",
+				first: { type: "num", value: 1 },
+				second: {
+					type: "operation",
+					value: {
+						type: "multiplication",
+						first: { type: "num", value: 2 },
+						second: { type: "num", value: 3 }
+					}
+				}
+			}
+		}
+	},
+	// Nested with booleans and arithmetic
+	{
+		function: generateTokenAST,
+		args: ["(1 + 2) > (2 * 3)"],
+		expectedResult: {
+			type: "operation",
+			value: {
+				type: "greaterThan",
+				first: {
+					type: "operation",
+					value: {
+						type: "addition",
+						first: { type: "num", value: 1 },
+						second: { type: "num", value: 2 }
+					}
+				},
+				second: {
+					type: "operation",
+					value: {
+						type: "multiplication",
+						first: { type: "num", value: 2 },
+						second: { type: "num", value: 3 }
+					}
+				}
+			}
+		}
+	},
+
+	// --- Totally malformed cases ---
+	{ function: generateTokenAST, args: [""], expectedResult: "none" },
+	{ function: generateTokenAST, args: ["   "], expectedResult: "none" },
+	{ function: generateTokenAST, args: ["()"], expectedResult: "none" },
+	{ function: generateTokenAST, args: ["=="], expectedResult: "none" }
 ]);
 
 console.log(logs);

@@ -1,10 +1,19 @@
+import { operations } from "../config.js";
 import { AstTokenType } from "../definitions.js";
-import { tokenise } from "./tokenise.js";
+import {
+	findEndOfFirstBracket,
+	findEndOfFirstQuotation,
+	tokenise
+} from "./tokenise.js";
 
 export function getTokenType(text: string): AstTokenType {
 	let token = text.trim();
-	if (token[0] == "(" && token.at(-1) == ")")
-		token = token.substring(1, token.length - 1);
+	if (token[0] == "(") {
+		const endOfFirstBracket = findEndOfFirstBracket(token);
+		if (endOfFirstBracket == text.length - 1) {
+			token = token.substring(1, token.length - 1).trim();
+		}
+	}
 
 	if (isString(token)) return "str";
 	if (isNumber(token)) return "num";
@@ -14,7 +23,7 @@ export function getTokenType(text: string): AstTokenType {
 
 	if (isVar(token)) return "var";
 	if (isFunctionCall(token) || isVariableDeclaration(token)) return "code";
-	if (isConditional(token)) return "conditional";
+	if (isOperation(token)) return "operation";
 	if (isBlock(token)) return "block";
 
 	throw new Error("Tokentype of `" + token + "` cannot be obtained.");
@@ -23,13 +32,20 @@ export function getTokenType(text: string): AstTokenType {
 function isString(token: string): Boolean {
 	let quotes = ['"', '"', "`", "'"];
 
-	if (token[0] == token.at(-1)) {
-		if (quotes.includes(token[0])) {
-			return true;
-		}
+	if (token[0] !== token.at(-1)) {
+		return false;
 	}
 
-	return false;
+	if (!quotes.includes(token[0])) {
+		return false;
+	}
+
+	const indexOfStringExit = findEndOfFirstQuotation(token);
+	if (indexOfStringExit !== token.length - 1) {
+		return false;
+	}
+
+	return true;
 }
 
 function isNumber(token: string): Boolean {
@@ -181,16 +197,24 @@ function isVariableDeclaration(token: string): Boolean {
 	return ok;
 }
 
-function isConditional(token: string): Boolean {
+function isOperation(token: string): Boolean {
 	const tokens = tokenise(token, true);
 
-	if (tokens.length !== 3) {
+	if (tokens.length % 2 == 0 || tokens.length == 1) {
 		return false;
 	}
 
-	const conditionals = ["==", ">", "<"];
-	if (!conditionals.includes(tokens[1])) {
-		return false;
+	const operationsList = Object.keys(operations);
+
+	let i = 0;
+	for (const innerToken of tokens) {
+		if (i % 2 !== 0) {
+			if (!operationsList.includes(innerToken)) {
+				return false;
+			}
+		}
+
+		i++;
 	}
 
 	return true;

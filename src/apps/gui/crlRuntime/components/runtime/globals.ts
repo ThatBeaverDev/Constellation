@@ -90,7 +90,9 @@ export class GlobalScope extends Scope {
 			"function",
 			(scopes: Scope[], block: RuntimeValue): RuntimeFunction => {
 				if (block?.type !== "block") {
-					throw new Error("Block is required.");
+					throw new Error(
+						"Block is required in function declaration."
+					);
 				}
 
 				const fnc: RuntimeFunction = {

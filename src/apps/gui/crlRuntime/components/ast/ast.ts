@@ -1,8 +1,9 @@
+import { OperationReference, operations } from "../config.js";
 import {
 	AstBlockNode,
 	AstBooleanNode,
 	AstCallNode,
-	AstConditionalNode,
+	AstOperationNode,
 	AstListNode,
 	AstNode,
 	AstNumberNode,
@@ -132,47 +133,37 @@ export function generateTokenAST(token: string): AstNode {
 			return obj;
 		}
 
-		case "conditional": {
-			const tokens = tokenise(token, true);
+		case "operation": {
+			let activeToken =
+				token[0] == "(" &&
+				findEndOfFirstBracket(token) == token.length - 1
+					? token.substring(1, token.length - 1).trim()
+					: token;
 
-			const first = generateTokenAST(tokens[0]);
-			const second = generateTokenAST(tokens[2]);
+			const tokens = tokenise(activeToken, true);
 
-			let obj: AstConditionalNode;
-			switch (tokens[1]) {
-				case "==":
-					obj = {
-						type: "conditional",
-						value: { type: "isEqual", first: first, second: second }
-					};
+			const rightHandSize = tokens.slice(2).join(" ");
 
-					return obj;
-				case ">": {
-					obj = {
-						type: "conditional",
-						value: {
-							type: "greaterThan",
-							first: first,
-							second: second
-						}
-					};
+			let first = generateTokenAST(tokens[0]);
+			let second = generateTokenAST(rightHandSize);
 
-					return obj;
+			const operationType: OperationReference | undefined =
+				// @ts-expect-error
+				operations[tokens[1]];
+
+			if (operationType == undefined)
+				throw new Error(`operation ${tokens[1]} is not valid.`);
+
+			const obj: AstOperationNode = {
+				type: "operation",
+				value: {
+					type: operationType,
+					first: first,
+					second: second
 				}
-				case "<":
-					obj = {
-						type: "conditional",
-						value: {
-							type: "lessThan",
-							first: first,
-							second: second
-						}
-					};
+			};
 
-					return obj;
-				default:
-					throw new Error(`Conditional ${tokens[2]} is not valid.`);
-			}
+			return obj;
 		}
 
 		case "list": {
