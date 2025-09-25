@@ -18,9 +18,19 @@ export function getTextWidth(text: string, size = 15, fontFamily = font) {
 	init();
 
 	if (ctx == null) throw new uiKitInitialisationError("ctx is null.");
-
 	ctx.font = `${size}px ${fontFamily}`;
-	return ctx.measureText(text).width;
+
+	let maxWidth: number = 0;
+	const lines = text.split("\n");
+	for (const line of lines) {
+		const width = ctx.measureText(line).width;
+
+		if (width > maxWidth) {
+			maxWidth = width;
+		}
+	}
+
+	return maxWidth;
 }
 
 export function getTextHeight(text: string, size = 15, fontFamily = font) {
