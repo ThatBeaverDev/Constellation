@@ -12,6 +12,7 @@ import ConstellationKernel, { Terminatable } from "../kernel.js";
 import { importRewriter } from "./codeProcessor.js";
 import { dump } from "./crashed.js";
 import ConstellationConfiguration from "../constellation.config.js";
+import { UserPromptConfig } from "../gui/windows/windows.js";
 
 const path = "/System/runtime.js";
 
@@ -79,7 +80,6 @@ export type executionResult = {
 	hasExited: boolean;
 };
 
-const popupDirectory = "/System/CoreExecutables/Popup.appl";
 const crlDirectory = "/System/CoreExecutables/crlRuntime.appl";
 
 /**
@@ -555,50 +555,41 @@ export class ProgramRuntime {
 	async showPrompt(
 		type: "error" | "warning" | "log",
 		title: string,
-		description?: any,
-		buttons?: String[]
+		description?: string,
+		buttons?: string[]
 	) {
-		const popup = await this.#ConstellationKernel.fs.readFile(
-			popupDirectory + "/config.js"
-		);
+		const gui = this.#ConstellationKernel.GraphicalInterface;
 
-		if (popup == undefined) {
-			throw new Error(
-				"Popupapp at " + popupDirectory + " does not exist?"
-			);
-		} else {
-			const pipe: any[] = [];
-			await this.execute(
-				popupDirectory,
-				[type, title, title, description, buttons, pipe],
-				"guest",
-				""
-			);
+		if (gui == undefined) return;
 
-			if (buttons !== undefined) {
-				return await new Promise((resolve: Function) => {
-					let interval = setInterval(() => {
-						for (const _ in pipe) {
-							_;
-							const msg = pipe[0];
+		let icon: string;
+		switch (type) {
+			case "log":
+				icon = "scroll-text";
+				break;
+			case "warning":
+				icon = "triangle-alert";
+				break;
+			case "error":
+				icon = "circle-x";
+				break;
+		}
 
-							if (typeof msg == "object") {
-								switch (msg.intent) {
-									case "popupResult":
-										// we can exit now
-										clearInterval(interval);
-										resolve(msg.data);
-										return;
-								}
-							}
+		const config: UserPromptConfig = {
+			title: String(title),
+			subtext: String(description) || "",
+			primary: String(buttons?.[0] || "Cancel")
+		};
+		if (buttons?.[1]) {
+			config.secondary = String(buttons[1]);
+		}
 
-							pipe.splice(0, 1);
-						}
-					});
-				});
-			} else {
-				return;
-			}
+		const choice = await gui.windows.showUserPrompt(icon, config);
+		switch (choice) {
+			case "primary":
+				return buttons?.[0] || "Cancel";
+			case "secondary":
+				return buttons?.[0] || undefined;
 		}
 	}
 
