@@ -2,7 +2,7 @@ import { IPCMessage } from "../../../../runtime/messages";
 import { fileInfo } from "../lib/appfind";
 import { Fzf } from "fzf";
 
-export default class KeystoneSearch extends Popup {
+export default class KeystoneSearch extends Overlay {
 	results: object[] = [];
 	files: string[] = [];
 	fileInfo: fileInfo[] = [];

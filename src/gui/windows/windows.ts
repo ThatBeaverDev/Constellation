@@ -36,6 +36,13 @@ interface snappingWindowInfo {
 	side: "left" | "right" | "fullscreen";
 }
 
+export interface UserPromptConfig {
+	title: string;
+	subtext: string;
+	primary: string;
+	secondary?: string;
+}
+
 export default class WindowSystem {
 	// constants
 	readonly EDGE_THRESHOLD = 8;
@@ -362,12 +369,7 @@ export default class WindowSystem {
 	 */
 	async showUserPrompt(
 		icon: string,
-		config: {
-			title: string;
-			subtext: string;
-			primary: string;
-			secondary?: string;
-		}
+		config: UserPromptConfig
 	): Promise<"primary" | "secondary" | never> {
 		return await showUserPrompt(
 			this.#ConstellationKernel,

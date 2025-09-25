@@ -1,4 +1,4 @@
-export default class Dialogue extends Popup {
+export default class Dialogue extends Overlay {
 	params!: {
 		type: string;
 		title: string;

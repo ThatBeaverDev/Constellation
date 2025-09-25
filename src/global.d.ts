@@ -26,7 +26,7 @@ declare global {
 		directory: string,
 		args: any[]
 	) => executables.BackgroundProcess;
-	const Popup: new (directory: string, args: any[]) => executables.Popup;
+	const Overlay: new (directory: string, args: any[]) => executables.Overlay;
 	const Module: new (directory: string, args: any[]) => executables.Module;
 
 	type ApplicationManifest = executables.ProgramManifest;
