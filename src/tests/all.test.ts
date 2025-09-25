@@ -111,5 +111,5 @@ if (badFormats.length !== 0) {
 }
 
 console.log(
-	`TOTAL: ${totalSuccesses} / ${totalTests} tests passed. (${Math.round(percentage)}%)`
+	`TOTAL: ${totalSuccesses} / ${totalTests} tests passed. (${Math.floor(percentage)}%)`
 );
