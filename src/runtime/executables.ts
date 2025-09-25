@@ -349,7 +349,7 @@ export class Application extends Process {
 /**
  * An application made for acting on a higher level of the layering. Not to be used in normal applications.
  */
-export class Popup extends Application {
+export class Overlay extends Application {
 	constructor(
 		ConstellationKernel: ConstellationKernel,
 		directory: string,

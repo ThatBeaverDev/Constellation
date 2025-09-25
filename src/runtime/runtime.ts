@@ -30,7 +30,7 @@ declare global {
 		renderID: number;
 		Application: typeof executables.Application;
 		BackgroundProcess: typeof executables.BackgroundProcess;
-		Popup: typeof executables.Popup;
+		Popup: typeof executables.Overlay;
 		Module: typeof executables.Module;
 		env: ApplicationAuthorisationAPI;
 	}
@@ -62,7 +62,7 @@ window.renderID = 0;
 // allow processes to access this
 window.Application = executables.Application;
 window.BackgroundProcess = executables.BackgroundProcess;
-window.Popup = executables.Popup;
+window.Popup = executables.Overlay;
 window.Module = executables.Module;
 
 export function getProcessFromID(id: number): Process | undefined {
