@@ -180,15 +180,33 @@ function isVar(token: string): Boolean {
 }
 
 function isFunctionCall(token: string): Boolean {
-	const func = token.textBefore("(").trim();
+	// find first bracket / curly bracket
+	const indexOfBracket = token.indexOf("(");
+	const indexOfCurlyBracket = token.indexOf("{");
 
-	return isVar(func) && token.includes("(");
+	let firstTerminator = Math.min(indexOfBracket, indexOfCurlyBracket);
+	if (indexOfBracket == -1) {
+		firstTerminator = indexOfCurlyBracket;
+	}
+	if (indexOfCurlyBracket == -1) {
+		firstTerminator = indexOfBracket;
+	}
+
+	// extract variable part of name
+	const func = token.substring(0, firstTerminator).trim();
+
+	// construct checks
+	const isValidVariable = isVar(func);
+	const containsBracket = token.includes("(");
+	const containsCurlyBracket = token.includes("{");
+
+	return isValidVariable && (containsBracket || containsCurlyBracket);
 }
 function isVariableDeclaration(token: string): Boolean {
-	const starts = ["let ", "const ", "global "];
+	const starters = ["let ", "const ", "global "];
 
 	let ok = false;
-	for (const start of starts) {
+	for (const start of starters) {
 		if (token.startsWith(start)) {
 			ok = true;
 		}

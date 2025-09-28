@@ -129,6 +129,18 @@ const { logs } = await runTests([
 		args: ["global myVar = 1"],
 		expectedResult: "code"
 	},
+	// has a block
+	{
+		function: getTokenType,
+		args: ['function() {\nprintln("Hello!");\n};'],
+		expectedResult: "code"
+	},
+	// no arguement container with a block
+	{
+		function: getTokenType,
+		args: ['function {\nprintln("Hi!");\n};'],
+		expectedResult: "code"
+	},
 
 	// code blocks
 	{

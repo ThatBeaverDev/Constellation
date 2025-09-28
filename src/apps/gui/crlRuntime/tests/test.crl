@@ -1,0 +1,18 @@
+const fnc = function() {
+	println("Hello!", 5, false);
+};
+
+fnc();
+
+const bracketLess = function {
+	println("Bracketless functions!");
+};
+
+bracketLess();
+
+const firstVariable = 7;
+const secondVariable = 5;
+
+if (firstVariable > secondVariable) {
+	println("it would appear that " + firstVariable + " is greater than " + secondVariable);
+};

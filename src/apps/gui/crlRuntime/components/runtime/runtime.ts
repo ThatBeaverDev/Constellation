@@ -6,6 +6,7 @@ import {
 	RuntimeBlock,
 	RuntimeBoolean,
 	RuntimeFunction,
+	RuntimeList,
 	RuntimeNone,
 	RuntimeNumber,
 	RuntimeScope,
@@ -15,6 +16,7 @@ import {
 } from "../definitions.js";
 import { AstNode } from "../definitions.js";
 import { GlobalScope } from "./globals.js";
+import { Scope } from "./scope.js";
 import { unwrapValue } from "./utils.js";
 
 export function runBlock(scope: any, block: AstNode[]) {}
@@ -30,15 +32,20 @@ export class CrlRuntime {
 	) {
 		this.debug = isDebug ? this.parent.debug : (...args: any[]) => {};
 
+		if (typeof this.parent.parent.renderer !== "undefined") {
+		}
 		this.globalScope = new GlobalScope(this, isDebug);
 		this.app = parent.parent;
 		this.ast = ast;
 
 		// start the script
-		this.evalBlock([this.globalScope], this.ast);
+		const scopes = [this.globalScope, ...this.loadedLibraries];
+		this.debug("Starting execution of init with scopes", scopes);
+		this.evalBlock(scopes, this.ast);
 	}
 
 	globalScope: GlobalScope;
+	loadedLibraries: Scope[] = [];
 
 	readVariableFromScopes(scopes: RuntimeScope[], name: string) {
 		let variable: RuntimeVariable | undefined = undefined;
@@ -65,8 +72,11 @@ export class CrlRuntime {
 	}
 
 	evalBlock(scopes: RuntimeScope[], block: AstNode[]) {
+		const extendingScope = new Scope(this, this.isDebug);
+		const extendedScopes = [...scopes, extendingScope];
+
 		for (const node of block) {
-			this.evalNode(scopes, node);
+			this.evalNode(extendedScopes, node);
 		}
 	}
 
@@ -106,6 +116,15 @@ export class CrlRuntime {
 				const obj: RuntimeBoolean = {
 					type: "boolean",
 					value: node.value
+				};
+
+				return obj;
+			}
+
+			case "list": {
+				const obj: RuntimeList = {
+					type: "list",
+					value: node.value.map((item) => this.evalNode(scopes, item))
 				};
 
 				return obj;
@@ -320,7 +339,12 @@ export class CrlRuntime {
 
 			case "functionCall": {
 				if (this.isDebug)
-					this.parent.debug("deploy function", data.function);
+					this.parent.debug(
+						"Deploy function",
+						data.function,
+						"scoped with",
+						scopes
+					);
 
 				const callee = this.evalNode(
 					scopes,

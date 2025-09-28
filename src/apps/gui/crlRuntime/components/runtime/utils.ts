@@ -4,6 +4,7 @@ import {
 	RuntimeBoolean,
 	RuntimeCallable,
 	RuntimeFunction,
+	RuntimeList,
 	RuntimeNone,
 	RuntimeNumber,
 	RuntimeString,
@@ -35,6 +36,10 @@ export function unwrapValue(
 	debug: typeof console.debug
 ): undefined;
 export function unwrapValue(
+	runtimeValue: RuntimeList,
+	debug: typeof console.debug
+): any;
+export function unwrapValue(
 	runtimeValue: RuntimeValue,
 	debug: typeof console.debug
 ): any;
@@ -62,6 +67,10 @@ export function unwrapValue(
 		case "block":
 		case "programFunction":
 			result = runtimeValue.value;
+			break;
+
+		case "list":
+			result = runtimeValue.value.map((item) => unwrapValue(item, debug));
 			break;
 
 		case "none":
