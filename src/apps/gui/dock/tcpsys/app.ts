@@ -108,7 +108,10 @@ export default class dockAndDesktop extends Application {
 	frame() {
 		// resize and reposition
 		this.renderer.moveWindow(0, 0);
-		this.renderer.resizeWindow(window.innerWidth, window.innerHeight);
+		this.renderer.resizeWindow(
+			this.renderer.displayWidth,
+			this.renderer.displayHeight
+		);
 
 		// save config if it's changed.
 		if (this.oldConfig !== JSON.stringify(this.config)) {
@@ -165,16 +168,8 @@ export default class dockAndDesktop extends Application {
 					const focusedWindow = this.env.windows.getFocus();
 
 					if (focusedWindow == undefined) return;
-					if (this.menubar == undefined) return;
-					if (this.dock == undefined) return;
 
-					focusedWindow.resize(
-						window.innerWidth,
-						window.innerHeight -
-							this.menubar.barHeight -
-							this.dock.dockHeight
-					);
-					focusedWindow.move(0, this.menubar.barHeight);
+					focusedWindow.fullscreen();
 					break;
 				case "KeyD":
 					if (this.dock == undefined) return;

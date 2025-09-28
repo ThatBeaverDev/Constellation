@@ -11,16 +11,72 @@ export class GraphicalInterface implements Terminatable {
 	keyboardShortcuts: keyboardShortcutsAPI & Terminatable;
 	uiKit: UiKitInstanceCreator & Terminatable;
 
+	// GUI
+	#containerDiv: HTMLDivElement;
+	shadowRoot: ShadowRoot;
+	container: HTMLDivElement = document.createElement("div");
+
+	mainStyles: HTMLStyleElement = document.createElement("style");
+	bootStyles: HTMLStyleElement = document.createElement("style");
+
 	constructor(ConstellationKernel: ConstellationKernel) {
+		this.#containerDiv = document.createElement("div");
+		const d = this.#containerDiv;
+		d.className = "graphicalOutput";
+
+		const shadowDOM = this.#containerDiv.attachShadow({ mode: "open" });
+		this.shadowRoot = shadowDOM;
+
+		// body div
+		this.container.className = "overlay";
+		this.shadowRoot.appendChild(this.container);
+
+		// styles ID
+		this.mainStyles.id = "/styles/styles.css";
+		this.bootStyles.id = "/styles/boot.css";
+
+		// add styles to shadowDOM
+		this.container.appendChild(this.bootStyles);
+		this.container.appendChild(this.mainStyles);
+
+		// submodules
+		// icon stuff
 		this.icons = new Icons(ConstellationKernel);
 		this.getIcon = this.icons.getIcon.bind(this.icons);
-		this.windows = new WindowSystem(ConstellationKernel);
+		// UiKit
+		this.uiKit = new UiKitInstanceCreator(ConstellationKernel, this);
+		// GUI Windows
+		this.windows = new WindowSystem(ConstellationKernel, this);
+		// keyboard shortcuts
 		this.keyboardShortcuts = new keyboardShortcutsAPI(ConstellationKernel);
 
-		this.uiKit = new UiKitInstanceCreator(ConstellationKernel);
+		// add shadowDOM to screen
+		document.body.appendChild(this.#containerDiv);
+	}
+
+	get displayWidth() {
+		return this.container.clientWidth;
+	}
+	set displayWidth(width: number) {
+		this.container.style.width = `${width}px`;
+	}
+
+	get displayHeight() {
+		return this.container.clientHeight;
+	}
+	set displayHeight(height: number) {
+		this.container.style.height = `${height}px`;
 	}
 
 	async init() {
+		this.mainStyles.textContent = await (
+			await fetch("/styles/styles.css")
+		).text();
+
+		this.bootStyles.textContent = await (
+			await fetch("/styles/boot.css")
+		).text();
+
 		await this.uiKit.init();
 	}
 
@@ -46,7 +102,7 @@ export class GraphicalInterface implements Terminatable {
 				width: 100%;
 			}
 			`;
-			document.body.appendChild(style);
+			this.container.appendChild(style);
 
 			setTimeout(() => {
 				throw text;
@@ -58,5 +114,7 @@ export class GraphicalInterface implements Terminatable {
 		await this.windows.terminate();
 		await this.keyboardShortcuts.terminate();
 		await this.uiKit.terminate();
+
+		this.#containerDiv.remove();
 	}
 }

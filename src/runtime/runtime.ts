@@ -31,7 +31,7 @@ declare global {
 		renderID: number;
 		Application: typeof executables.Application;
 		BackgroundProcess: typeof executables.BackgroundProcess;
-		Popup: typeof executables.Overlay;
+		Overlay: typeof executables.Overlay;
 		Module: typeof executables.Module;
 		env: ApplicationAuthorisationAPI;
 	}
@@ -63,7 +63,7 @@ window.renderID = 0;
 // allow processes to access this
 window.Application = executables.Application;
 window.BackgroundProcess = executables.BackgroundProcess;
-window.Popup = executables.Overlay;
+window.Overlay = executables.Overlay;
 window.Module = executables.Module;
 
 export function getProcessFromID(id: number): Process | undefined {
@@ -346,17 +346,9 @@ export class ProgramRuntime {
 				configSrc,
 				"text/javascript"
 			);
-		const config = (await import(configBlob)).default;
-
-		if (config.allowMultipleInstances == false) {
-			for (const process of processes) {
-				if (process.directory == appdir) {
-					throw new Error(
-						"This application may not run more than once."
-					);
-				}
-			}
-		}
+		const config = (await import(configBlob))
+			.default as executables.ProgramManifest;
+		config;
 
 		const allowedExtensions: executionFiletype[] = ["js", "crl"];
 

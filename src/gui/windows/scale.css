@@ -3,8 +3,8 @@
 	}
 
 	to {
-		top: 100vh;
-		left: 50vw;
+		top: 100%;
+		left: 50%;
 
 		width: 0px;
 		height: 0px;
@@ -22,7 +22,7 @@
 
 @media (prefers-reduced-motion: reduce) {
 	.windowContainer.gone {
-		top: -10vh;
+		top: -10%;
 		height: 0px;
 
 		transform: scale(0.1);
