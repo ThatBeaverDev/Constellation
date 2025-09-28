@@ -18,7 +18,10 @@ import {
 } from "./tokenise.js";
 import { getTokenType } from "./types.js";
 
-export function generateAST(code: string, debug: typeof console.debug) {
+export function generateAST(
+	code: string,
+	debug: typeof console.debug = (...args: any[]) => {}
+) {
 	const lines = removeBlanks(
 		tokenBasedSplit(code, ";").map((line) => removeComments(line))
 	);
@@ -97,7 +100,10 @@ function removeCommentsOnLine(line: string) {
 	return staging;
 }
 
-function generateLineAST(line: string, debug: typeof console.debug) {
+function generateLineAST(
+	line: string,
+	debug: typeof console.debug = (...args: any[]) => {}
+) {
 	return generateTokenAST(line, debug);
 }
 
@@ -112,8 +118,9 @@ function tokenToNumber(token: string) {
 
 export function generateTokenAST(
 	token: string,
-	debug: typeof console.debug
+	debug: typeof console.debug = (...args: any[]) => {}
 ): AstNode {
+	debug("Getting token type of '" + token + "'");
 	const type = getTokenType(token);
 
 	debug("typeof", token, "is", type);
@@ -182,14 +189,14 @@ export function generateTokenAST(
 				type: "list",
 				value: removeBlanks(
 					tokenise(token.substring(1, token.length - 1))
-				)
+				).map((item) => generateTokenAST(item))
 			};
 
 			return obj;
 		}
 
 		case "block": {
-			const code = token.substring(1, token.length - 1);
+			const code = token.substring(1, token.length - 1).trim();
 
 			const obj: AstBlockNode = {
 				type: "block",
@@ -280,8 +287,21 @@ export function generateTokenAST(
 				default:
 					debug("token", token, " is function call");
 
-					const target = token.trim().textBefore("(").trim();
-					const argsWithNoPrebracket = token
+					let tkn = String(token);
+					if (
+						tkn.indexOf("(") == -1 ||
+						tkn.indexOf("(") > tkn.indexOf("{")
+					) {
+						tkn = tkn.replace("{", "() {");
+						debug("Patched", token, "to", tkn);
+					}
+
+					// extract variable name
+					const target = tkn.trim().textBefore("(").trim();
+
+					debug("Target is", target, "from", tkn);
+
+					const argsWithNoPrebracket = tkn
 						.trim()
 						.textAfter("(")
 						.trim();
@@ -292,15 +312,15 @@ export function generateTokenAST(
 						.trim()
 						.substring(1, endOfBrackets);
 
-					const postArgs = token
-						.substring(findEndOfFirstBracket(token) + 1, Infinity)
+					const postArgs = tkn
+						.substring(findEndOfFirstBracket(tkn) + 1, Infinity)
 						.trim();
 
 					const arr = [...tokenise(argsWithoutBrackets), postArgs];
 					const argsTokens = removeBlanks(arr);
 
-					const argsNodes = argsTokens.map((token) =>
-						generateTokenAST(token, debug)
+					const argsNodes = argsTokens.map((tkn) =>
+						generateTokenAST(tkn, debug)
 					);
 
 					const obj: AstCallNode = {
@@ -311,6 +331,8 @@ export function generateTokenAST(
 							args: argsNodes
 						}
 					};
+
+					debug("Result of", token, "is", obj);
 
 					return obj;
 			}

@@ -1,4 +1,3 @@
-import { Scope } from "./runtime/scope.js";
 import { AstOperation } from "./types/operations.js";
 
 // configuration
@@ -135,12 +134,17 @@ export interface RuntimeBlock {
 }
 
 export type RuntimeCallable = (
-	scope: Scope[],
+	scope: RuntimeScope[],
 	...args: RuntimeValue[]
 ) => RuntimeValue;
 export interface RuntimeFunction {
 	type: "programFunction";
 	value: AstNode[] | RuntimeCallable;
+}
+
+export interface RuntimeList {
+	type: "list";
+	value: RuntimeValue[];
 }
 
 export type RuntimeValue =
@@ -149,4 +153,5 @@ export type RuntimeValue =
 	| RuntimeBoolean
 	| RuntimeNone
 	| RuntimeFunction
-	| RuntimeBlock;
+	| RuntimeBlock
+	| RuntimeList;
