@@ -40,7 +40,8 @@ String.prototype.textBeforeLast = function (before) {
 // get whether we are hiding successful tests
 let hideSuccessfulTests = false;
 process.argv.forEach((item) => {
-	if (item == "--hideSuccess") hideSuccessfulTests = true;
+	if (item == "--hideSuccess" || item == "--hide-success")
+		hideSuccessfulTests = true;
 });
 
 // list files
