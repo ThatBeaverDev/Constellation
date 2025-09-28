@@ -22,11 +22,15 @@ export function runBlock(scope: any, block: AstNode[]) {}
 export class CrlRuntime {
 	ast: AstNode[];
 	app: CrlRunner;
+	debug: typeof console.debug;
 	constructor(
 		ast: AstNode[],
-		public parent: CrlRunnerInstance
+		public parent: CrlRunnerInstance,
+		public isDebug: boolean = false
 	) {
-		this.globalScope = new GlobalScope(this);
+		this.debug = isDebug ? this.parent.debug : (...args: any[]) => {};
+
+		this.globalScope = new GlobalScope(this, isDebug);
 		this.app = parent.parent;
 		this.ast = ast;
 
@@ -42,6 +46,12 @@ export class CrlRuntime {
 		for (const scope of scopes) {
 			let val = scope.variables.get(name);
 
+			this.debug(
+				"\tScope",
+				scope.variables,
+				val == undefined ? "doesn't have" : "has",
+				name
+			);
 			if (val !== undefined) {
 				variable = val;
 				break;
@@ -64,6 +74,8 @@ export class CrlRuntime {
 		function none(): RuntimeNone {
 			return { type: "none", value: undefined };
 		}
+
+		this.debug("Evaluating node", node);
 
 		switch (node.type) {
 			case "block":
@@ -100,13 +112,29 @@ export class CrlRuntime {
 			}
 
 			case "operation": {
-				const first = unwrapValue(
-					this.evalNode(scopes, node.value.first)
-				);
-				const second = unwrapValue(
-					this.evalNode(scopes, node.value.second)
-				);
+				if (node.value.first == undefined)
+					throw new Error("First operation node is undefined.");
+				if (node.value.second == undefined)
+					throw new Error("Second operation node is undefined.");
 
+				this.debug("Evaluate first argument token", node.value.first);
+				const firstRuntimeValue = this.evalNode(
+					scopes,
+					node.value.first
+				);
+				this.debug("Unwrap first argument token", firstRuntimeValue);
+				const first = unwrapValue(firstRuntimeValue, this.debug);
+
+				// second token
+				this.debug("Evaluate second argument token", node.value.second);
+				const secondRuntimeValue = this.evalNode(
+					scopes,
+					node.value.second
+				);
+				this.debug("Unwrap second argument token", secondRuntimeValue);
+				const second = unwrapValue(secondRuntimeValue, this.debug);
+
+				// handling
 				let result: number | boolean;
 				const operationType: OperationReference = node.value.type;
 
@@ -161,8 +189,21 @@ export class CrlRuntime {
 						);
 				}
 
+				if (result == undefined) {
+					throw new Error(
+						"Operation has yielded undefined: " +
+							JSON.stringify(node)
+					);
+				}
+
 				let obj: RuntimeValue;
 				switch (typeof result) {
+					case "string":
+						obj = {
+							type: "string",
+							value: result
+						};
+						break;
 					case "number":
 						obj = {
 							type: "number",
@@ -175,6 +216,14 @@ export class CrlRuntime {
 							value: result
 						};
 						break;
+					default:
+						const exhaustiveCheck: never = result;
+						exhaustiveCheck;
+						throw new Error(
+							"Type " +
+								typeof result +
+								" is wrappable by operation handling."
+						);
 				}
 
 				return obj;
@@ -192,7 +241,12 @@ export class CrlRuntime {
 			}
 
 			case "var": {
-				return this.readVariableFromScopes(scopes, node.value).value;
+				const variable = this.readVariableFromScopes(
+					scopes,
+					node.value
+				);
+
+				return variable.value;
 			}
 
 			default:
@@ -265,6 +319,9 @@ export class CrlRuntime {
 			}
 
 			case "functionCall": {
+				if (this.isDebug)
+					this.parent.debug("deploy function", data.function);
+
 				const callee = this.evalNode(
 					scopes,
 					data.function

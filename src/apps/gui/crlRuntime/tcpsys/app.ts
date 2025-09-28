@@ -13,7 +13,9 @@ export default class CrlRunner extends Application {
 		if (!read.ok) throw read.data;
 		const code = read.data;
 
-		this.runtime = new CrlRunnerInstance(code, this);
+		const isDebug = args[1] == true;
+
+		this.runtime = new CrlRunnerInstance(code, this, undefined, isDebug);
 	}
 
 	frame() {

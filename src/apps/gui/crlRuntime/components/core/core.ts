@@ -10,15 +10,29 @@ export default class CrlRunnerInstance {
 	constructor(
 		public code: string,
 		public parent: CrlRunner,
-		public logs?: any[]
+		public logs?: any[],
+		public isDebug: boolean = false
 	) {
-		this.ast = generateAST(code);
+		const debug = isDebug ? this.debug.bind(this) : (...args: any[]) => {};
 
-		parent.env.debug(this.ast);
+		this.ast = generateAST(code, debug);
 
-		this.runtime = new CrlRuntime(this.ast, this);
+		if (isDebug) {
+			parent.env.debug(this.ast);
+		}
+
+		this.runtime = new CrlRuntime(this.ast, this, isDebug);
 	}
 
+	debug = ((...optionalData: any[]) => {
+		if (this.isDebug == false) return;
+
+		if (this.logs) {
+			this.logs.push(optionalData);
+		} else {
+			this.parent.env.debug(...optionalData);
+		}
+	}).bind(this);
 	log(...optionalData: any[]) {
 		if (this.logs) {
 			this.logs.push(optionalData);

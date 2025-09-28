@@ -18,14 +18,20 @@ import {
 } from "./tokenise.js";
 import { getTokenType } from "./types.js";
 
-export function generateAST(code: string) {
+export function generateAST(code: string, debug: typeof console.debug) {
 	const lines = removeBlanks(
 		tokenBasedSplit(code, ";").map((line) => removeComments(line))
 	);
 
+	debug(lines);
+
 	const ast = [];
 	for (const line of lines) {
-		ast.push(generateLineAST(line));
+		const lineAst = generateLineAST(line, debug);
+
+		debug("AST for line:" + line + " is ", lineAst);
+
+		ast.push(lineAst);
 	}
 
 	return ast;
@@ -91,8 +97,8 @@ function removeCommentsOnLine(line: string) {
 	return staging;
 }
 
-function generateLineAST(line: string) {
-	return generateTokenAST(line);
+function generateLineAST(line: string, debug: typeof console.debug) {
+	return generateTokenAST(line, debug);
 }
 
 function tokenToNumber(token: string) {
@@ -104,8 +110,13 @@ function tokenToNumber(token: string) {
 	return Number(token);
 }
 
-export function generateTokenAST(token: string): AstNode {
+export function generateTokenAST(
+	token: string,
+	debug: typeof console.debug
+): AstNode {
 	const type = getTokenType(token);
+
+	debug("typeof", token, "is", type);
 
 	switch (type) {
 		case "str": {
@@ -144,8 +155,8 @@ export function generateTokenAST(token: string): AstNode {
 
 			const rightHandSize = tokens.slice(2).join(" ");
 
-			let first = generateTokenAST(tokens[0]);
-			let second = generateTokenAST(rightHandSize);
+			let first = generateTokenAST(tokens[0], debug);
+			let second = generateTokenAST(rightHandSize, debug);
 
 			const operationType: OperationReference | undefined =
 				// @ts-expect-error
@@ -182,7 +193,7 @@ export function generateTokenAST(token: string): AstNode {
 
 			const obj: AstBlockNode = {
 				type: "block",
-				value: generateAST(code)
+				value: generateAST(code, debug)
 			};
 
 			return obj;
@@ -201,6 +212,8 @@ export function generateTokenAST(token: string): AstNode {
 
 			switch (tokens[0]) {
 				case "let": {
+					debug("token", token, " is let declaration");
+
 					if (tokens[2] !== "=") {
 						throw new Error(
 							`(${tokens[2]} is not valid during variable declaration`
@@ -213,7 +226,8 @@ export function generateTokenAST(token: string): AstNode {
 							type: "newVariable",
 							name: tokens[1],
 							value: generateTokenAST(
-								tokens.splice(3, Infinity).join(" ")
+								tokens.splice(3, Infinity).join(" "),
+								debug
 							)
 						}
 					};
@@ -221,6 +235,8 @@ export function generateTokenAST(token: string): AstNode {
 					return obj;
 				}
 				case "const": {
+					debug("token", token, " is const declaration");
+
 					if (tokens[2] !== "=") {
 						throw new Error(
 							`(${tokens[2]} is not valid during variable declaration`
@@ -232,13 +248,18 @@ export function generateTokenAST(token: string): AstNode {
 						value: {
 							type: "newConstant",
 							name: tokens[1],
-							value: generateTokenAST(tokens[3])
+							value: generateTokenAST(
+								tokens.splice(3, Infinity).join(" "),
+								debug
+							)
 						}
 					};
 
 					return obj;
 				}
 				case "global": {
+					debug("token", token, " is global declaration");
+
 					if (tokens[2] !== "=") {
 						throw new Error(
 							`(${tokens[2]} is not valid during variable declaration`
@@ -250,13 +271,15 @@ export function generateTokenAST(token: string): AstNode {
 						value: {
 							type: "newGlobal",
 							name: tokens[1],
-							value: generateTokenAST(tokens[3])
+							value: generateTokenAST(tokens[3], debug)
 						}
 					};
 
 					return obj;
 				}
 				default:
+					debug("token", token, " is function call");
+
 					const target = token.trim().textBefore("(").trim();
 					const argsWithNoPrebracket = token
 						.trim()
@@ -277,13 +300,13 @@ export function generateTokenAST(token: string): AstNode {
 					const argsTokens = removeBlanks(arr);
 
 					const argsNodes = argsTokens.map((token) =>
-						generateTokenAST(token)
+						generateTokenAST(token, debug)
 					);
 
 					const obj: AstCallNode = {
 						type: "code",
 						value: {
-							function: generateTokenAST(target),
+							function: generateTokenAST(target, debug),
 							type: "functionCall",
 							args: argsNodes
 						}
