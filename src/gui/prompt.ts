@@ -1,9 +1,5 @@
 import ConstellationKernel from "../kernel.js";
-import {
-	getTextHeight,
-	getTextWidth,
-	insertNewlines
-} from "./uiKit/components/textUtils.js";
+import { getTextHeight, getTextWidth } from "./uiKit/components/textUtils.js";
 import { UserPrompt } from "./windows/windows.js";
 
 interface StatementConfig {
