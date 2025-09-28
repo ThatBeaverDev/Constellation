@@ -81,4 +81,4 @@ export interface uikitIconOptions {
 	noProcess?: boolean;
 }
 
-export const font = "Inter";
+export const font = "system-ui";

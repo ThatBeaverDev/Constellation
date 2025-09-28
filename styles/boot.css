@@ -4,6 +4,11 @@ body {
 	background-color: black;
 }
 
+canvas {
+	font-size: 15px;
+	font-family: system-ui !important;
+}
+
 * {
 	font-family: monospace;
 	font-optical-sizing: auto;

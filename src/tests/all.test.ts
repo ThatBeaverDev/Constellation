@@ -1,41 +1,13 @@
 /// <reference path="../../node_modules/@types/node/index.d.ts" />
 import { exec } from "child_process";
 import path from "path";
+import applyStringPrototypes from "../stringPrototypes.js";
+
+applyStringPrototypes();
 
 if (typeof global == "undefined") {
 	throw new Error("Tests must be run in nodejs!");
 }
-
-// string utilities
-declare global {
-	interface String {
-		textAfter(after: string): string;
-		textAfterAll(after: string): string;
-		textBefore(before: string): string;
-		textBeforeLast(before: string): string;
-	}
-}
-String.prototype.textAfter = function (after) {
-	return this.split(after).splice(1, Infinity).join(after);
-};
-
-String.prototype.textAfterAll = function (after) {
-	return this.split(after).pop() ?? "";
-};
-
-String.prototype.textBefore = function (before) {
-	return this.substring(0, this.indexOf(before));
-};
-
-String.prototype.textBeforeLast = function (before) {
-	return this.split("")
-		.reverse()
-		.join("")
-		.textAfter(before)
-		.split("")
-		.reverse()
-		.join("");
-};
 
 // get whether we are hiding successful tests
 let hideSuccessfulTests = false;
