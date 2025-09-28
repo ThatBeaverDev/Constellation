@@ -16,9 +16,16 @@ function none(): RuntimeNone {
 // default global scope
 export class GlobalScope extends Scope {
 	#runtime: CrlRuntime;
-	constructor(runtime: CrlRuntime) {
+	constructor(
+		runtime: CrlRuntime,
+		public isDebug: boolean = false
+	) {
 		super();
 		this.#runtime = runtime;
+
+		const debug = isDebug
+			? this.#runtime.parent.debug
+			: (...args: any[]) => {};
 
 		// logging
 		this.newGlobalFunction(
@@ -29,7 +36,7 @@ export class GlobalScope extends Scope {
 				...otherParams: any[]
 			): RuntimeValue => {
 				const arr = [first, ...otherParams].map((item) =>
-					unwrapValue(item)
+					unwrapValue(item, debug)
 				);
 
 				this.#runtime.parent.log(...arr);
@@ -53,7 +60,7 @@ export class GlobalScope extends Scope {
 					throw new Error("Cannot execute non-block.");
 				}
 
-				const bool = unwrapValue(condition);
+				const bool = unwrapValue(condition, debug);
 
 				if (bool) {
 					const extendingScope = new Scope();
@@ -61,7 +68,7 @@ export class GlobalScope extends Scope {
 					// run it
 					this.#runtime.evalBlock(
 						[...scopes, extendingScope],
-						unwrapValue(block)
+						unwrapValue(block, debug)
 					);
 				}
 
@@ -79,7 +86,7 @@ export class GlobalScope extends Scope {
 				if (condition.type !== "boolean")
 					throw new Error("Boolean is required.");
 
-				const value = unwrapValue(condition);
+				const value = unwrapValue(condition, debug);
 
 				return { type: "boolean", value: value == false };
 			}
@@ -98,7 +105,10 @@ export class GlobalScope extends Scope {
 				const fnc: RuntimeFunction = {
 					type: "programFunction",
 					value: (scopes: Scope[]): RuntimeValue => {
-						this.#runtime.evalBlock(scopes, unwrapValue(block));
+						this.#runtime.evalBlock(
+							scopes,
+							unwrapValue(block, debug)
+						);
 
 						// TODO: FUNCTION RETURNS
 
@@ -112,11 +122,24 @@ export class GlobalScope extends Scope {
 	}
 
 	newGlobalFunction(name: string, func: RuntimeCallable) {
+		let fnc = func.bind(this);
+
+		if (this.isDebug)
+			fnc = ((scope: Scope[], ...args: RuntimeValue[]) => {
+				this.#runtime.parent.debug(
+					"functionCall of",
+					name,
+					"recieved."
+				);
+
+				return func.bind(this)(scope, ...args);
+			}).bind(this);
+
 		const variable: RuntimeVariable<RuntimeFunction> = {
 			type: "global",
 			value: {
 				type: "programFunction",
-				value: func.bind(this)
+				value: fnc
 			}
 		};
 
