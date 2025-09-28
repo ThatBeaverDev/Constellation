@@ -20,6 +20,8 @@ build_tsc() {
     node scripts/copy.mjs
 
     build_apps_d_ts
+
+    node build/security/hash/secureHash.js
 }
 
 build_apps_d_ts() {    
