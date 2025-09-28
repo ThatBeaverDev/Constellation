@@ -1,6 +1,6 @@
 /* uiKit styling */
 
-:root {
+:host {
 	--uikitClickableExpandDuration: 0.15s;
 }
 
@@ -11,7 +11,7 @@
 
 * {
 	font-size: 15px;
-	font-family: "Inter", sans-serif;
+	font-family: "Inter", sans-serif !important;
 }
 
 body {

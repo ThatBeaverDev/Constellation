@@ -74,7 +74,7 @@ async function check() {
 
 		const style = document.createElement("style");
 		style.textContent =
-			':root {--wallpaper-url: "/wallpapers/Sahara Night Sky.jpg"}';
+			':host {--wallpaper-url: "/wallpapers/Sahara Night Sky.jpg"}';
 		document.body.appendChild(style);
 
 		SystemInitialiserTimestamp("Report no Build", start);

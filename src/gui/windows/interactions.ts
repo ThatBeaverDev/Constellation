@@ -1,10 +1,13 @@
+import { GraphicalInterface } from "../gui.js";
 import WindowSystem from "./windows.js";
 
 export default class WindowSystemInteractions {
 	#parent: WindowSystem;
+	#GraphicalInterface: GraphicalInterface;
 
-	constructor(parent: WindowSystem) {
+	constructor(parent: WindowSystem, GraphicalInterface: GraphicalInterface) {
 		this.#parent = parent;
+		this.#GraphicalInterface = GraphicalInterface;
 	}
 
 	windowPointerDown(e: PointerEvent) {
@@ -83,15 +86,27 @@ export default class WindowSystemInteractions {
 			switch (parent.snappingWindow.side) {
 				case "left":
 					win.move(0, 0);
-					win.resize(window.innerWidth / 2, window.innerHeight, true);
+					win.resize(
+						this.#GraphicalInterface.displayWidth / 2,
+						this.#GraphicalInterface.displayHeight,
+						true
+					);
 					break;
 				case "right":
-					win.move(window.innerWidth / 2, 0);
-					win.resize(window.innerWidth / 2, window.innerHeight, true);
+					win.move(this.#GraphicalInterface.displayWidth / 2, 0);
+					win.resize(
+						this.#GraphicalInterface.displayWidth / 2,
+						this.#GraphicalInterface.displayHeight,
+						true
+					);
 					break;
 				case "fullscreen":
 					win.move(0, 0);
-					win.resize(window.innerWidth, window.innerHeight, true);
+					win.resize(
+						this.#GraphicalInterface.displayWidth,
+						this.#GraphicalInterface.displayHeight,
+						true
+					);
 			}
 
 			parent.snappingWindow = undefined;

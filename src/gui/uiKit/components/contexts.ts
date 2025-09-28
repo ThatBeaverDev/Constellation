@@ -13,6 +13,9 @@ export class ContextMenu {
 		headerText: string,
 		items: Record<string, Function>
 	) {
+		if (!ConstellationKernel.GraphicalInterface)
+			throw new Error("Graphical system is required!");
+
 		let maxWidth = 0;
 		for (const i of [headerText, ...Object.keys(items)]) {
 			const width = getTextWidth(i);
@@ -27,7 +30,7 @@ export class ContextMenu {
 		height += 5; // divider
 		height += Object.keys(items).length * (padding * 2 + 5); // items, 2 padding each and 5px.
 
-		if (y + height > window.innerHeight) {
+		if (y + height > ConstellationKernel.GraphicalInterface.displayHeight) {
 			// need to show ABOVE the mouse
 			y -= height;
 		}
@@ -109,14 +112,25 @@ export class ContextMenu {
 			return { text: elem, icon };
 		});
 
-		document.body.appendChild(this.container);
-		this.container = document.querySelector("div#" + this.container.id)!;
+		ConstellationKernel.GraphicalInterface.container.appendChild(
+			this.container
+		);
+		this.container =
+			ConstellationKernel.GraphicalInterface.container.querySelector(
+				"div#" + this.container.id
+			)!;
 
 		this.container.appendChild(this.header);
-		this.header = document.querySelector("p#" + this.header.id)!;
+		this.header =
+			ConstellationKernel.GraphicalInterface.container.querySelector(
+				"p#" + this.header.id
+			)!;
 
 		this.container.appendChild(this.divider);
-		this.divider = document.querySelector("div#" + this.divider.id)!;
+		this.divider =
+			ConstellationKernel.GraphicalInterface.container.querySelector(
+				"div#" + this.divider.id
+			)!;
 
 		for (const i in this.items) {
 			const elems: { text: HTMLButtonElement; icon?: HTMLImageElement } =

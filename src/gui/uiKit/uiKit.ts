@@ -23,6 +23,7 @@ import canvasKit from "./components/canvasKit.js";
 import uikitEventCreators from "./components/eventCreators.js";
 import uiKitTransitioners from "./components/transitioners.js";
 import ConstellationKernel from "../../kernel.js";
+import { GraphicalInterface } from "../gui.js";
 
 const uiKitStart = performance.now();
 
@@ -97,6 +98,21 @@ class UiKitRendererClass {
 	}
 	set windowShortName(name: string | undefined) {
 		this.#window.shortname = name;
+	}
+
+	get displayWidth() {
+		const gui = this.#ConstellationKernel.GraphicalInterface;
+
+		if (gui == undefined) throw new Error("No GUI found");
+
+		return gui.displayWidth;
+	}
+	get displayHeight() {
+		const gui = this.#ConstellationKernel.GraphicalInterface;
+
+		if (gui == undefined) throw new Error("No GUI found");
+
+		return gui.displayHeight;
 	}
 
 	setIcon(name: string) {
@@ -909,11 +925,15 @@ class UiKitRendererClass {
 export default class UiKitInstanceCreator {
 	#ConstellationKernel: ConstellationKernel;
 	style: HTMLStyleElement;
-	constructor(ConstellationKernel: ConstellationKernel) {
+	constructor(
+		ConstellationKernel: ConstellationKernel,
+		GraphicalInterface: GraphicalInterface
+	) {
 		this.#ConstellationKernel = ConstellationKernel;
 
 		this.style = document.createElement("style");
-		document.body.appendChild(this.style);
+		this.style.id = "/src/gui/uiKit/styles/styles.css";
+		GraphicalInterface.container.appendChild(this.style);
 	}
 
 	async init() {

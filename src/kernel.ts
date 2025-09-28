@@ -152,12 +152,13 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 		await this.runtime.init();
 
 		if (this.GraphicalInterface !== undefined) {
-			const bootBackground = document.querySelector("div.bootCover")!;
-			bootBackground.classList.add("fadeOut");
+			const bootBackground = document.querySelector("div.bootCover");
+
+			if (bootBackground) bootBackground.classList.add("fadeOut");
 
 			clearInterval(this.verboseBootUIInterval);
 
-			setTimeout(() => bootBackground.remove(), 5000);
+			if (bootBackground) setTimeout(() => bootBackground.remove(), 5000);
 
 			// startup sound
 			const bootSound = await this.fs.readFile(

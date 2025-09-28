@@ -5,6 +5,7 @@ import ConstellationKernel, { Terminatable } from "../../kernel.js";
 import cssVariables from "./css.js";
 import { showUserPrompt } from "../prompt.js";
 import WindowSystemInteractions from "./interactions.js";
+import { GraphicalInterface } from "../gui.js";
 
 const start = performance.now();
 const name = "/System/windows.js";
@@ -84,17 +85,10 @@ export default class WindowSystem {
 	#ConstellationKernel: ConstellationKernel;
 	cssVariables: cssVariables & Terminatable;
 	interactions: WindowSystemInteractions & Terminatable;
+	wallpaper: HTMLDivElement = document.createElement("div");
 
 	_snappingWindow: snappingWindowInfo | undefined;
-	_snappingWindowDisplay: HTMLDivElement = (() => {
-		const elem = document.createElement("div");
-		elem.id = String(window.renderID++);
-		elem.className = "windowSnappingIndicator";
-
-		document.body.appendChild(elem);
-
-		return elem;
-	})();
+	_snappingWindowDisplay: HTMLDivElement;
 	set snappingWindow(info: snappingWindowInfo | undefined) {
 		// make it snap
 
@@ -146,18 +140,40 @@ export default class WindowSystem {
 
 	update: ReturnType<typeof setInterval>;
 
-	constructor(ConstellationKernel: ConstellationKernel) {
+	constructor(
+		ConstellationKernel: ConstellationKernel,
+		GraphicalInterface: GraphicalInterface
+	) {
 		this.#ConstellationKernel = ConstellationKernel;
 
+		// window snapping
+		const elem = document.createElement("div");
+		elem.id = String(window.renderID++);
+		elem.className = "windowSnappingIndicator";
+
+		this.wallpaper.id = String(window.renderID++);
+		this.wallpaper.className = "wallpaper";
+
+		GraphicalInterface.container.appendChild(elem);
+		GraphicalInterface.container.appendChild(this.wallpaper);
+
+		this._snappingWindowDisplay = elem;
+
 		// init css styles
-		this.cssVariables = new cssVariables(ConstellationKernel);
+		this.cssVariables = new cssVariables(
+			ConstellationKernel,
+			GraphicalInterface
+		);
 		this.cssVariables.applyWindowCSS();
 		this.setCSSVariable = this.cssVariables.setCSSVariable.bind(
 			this.cssVariables
 		);
 
 		// init interactions
-		this.interactions = new WindowSystemInteractions(this);
+		this.interactions = new WindowSystemInteractions(
+			this,
+			GraphicalInterface
+		);
 
 		// event listeners
 		window.addEventListener(
@@ -191,7 +207,7 @@ export default class WindowSystem {
 		this.styleElem.id = String(window.renderID++);
 		this.styleElem.className = "windowsAnimationStyles";
 
-		document.body.appendChild(this.styleElem);
+		GraphicalInterface.container.appendChild(this.styleElem);
 
 		this.update = setInterval(() => {
 			if (this.minimiseAnimation !== this.oldMinimiseAnimation) {
@@ -405,6 +421,7 @@ class GraphicalWindowClass {
 		Application?: Application
 	) {
 		this.#ConstellationKernel = ConstellationKernel;
+
 		if (ConstellationKernel.GraphicalInterface == undefined)
 			throw new Error("Windows cannot exist on a non-graphical system.");
 
@@ -421,8 +438,8 @@ class GraphicalWindowClass {
 		const width: number = 500;
 		const height: number = 300;
 
-		const left = (window.innerWidth - width) / 2;
-		const top = (window.innerHeight - height) / 2;
+		const left = (this.portWidth - width) / 2;
+		const top = (this.portHeight - height) / 2;
 
 		this.title = document.createElement("p");
 		const t = this.title;
@@ -517,17 +534,21 @@ class GraphicalWindowClass {
 		this.move(left, top);
 		this.resize(width, height);
 
-		document.body.appendChild(this.container);
+		const shadowDom = ConstellationKernel.GraphicalInterface.shadowRoot;
 
-		this.container = document.getElementById(this.container.id)!;
-		this.body = document.getElementById(this.body.id)!;
-		this.header = document.getElementById(this.header.id)!;
-		this.title = document.getElementById(this.title.id)!;
-		this.iconDiv = document.getElementById(this.iconDiv.id)!;
+		ConstellationKernel.GraphicalInterface.container.appendChild(
+			this.container
+		);
 
-		this.closeButton = document.getElementById(this.closeButton.id)!;
-		this.maximiseButton = document.getElementById(this.maximiseButton.id)!;
-		this.minimiseButton = document.getElementById(this.minimiseButton.id)!;
+		this.container = shadowDom.getElementById(this.container.id)!;
+		this.body = shadowDom.getElementById(this.body.id)!;
+		this.header = shadowDom.getElementById(this.header.id)!;
+		this.title = shadowDom.getElementById(this.title.id)!;
+		this.iconDiv = shadowDom.getElementById(this.iconDiv.id)!;
+
+		this.closeButton = shadowDom.getElementById(this.closeButton.id)!;
+		this.maximiseButton = shadowDom.getElementById(this.maximiseButton.id)!;
+		this.minimiseButton = shadowDom.getElementById(this.minimiseButton.id)!;
 
 		const headerPointerDown = (e: PointerEvent) => {
 			this.#WindowSystem.target = {
@@ -592,6 +613,21 @@ class GraphicalWindowClass {
 		});
 
 		this.resizeObserver.observe(this.container);
+	}
+
+	get gui() {
+		const gui = this.#ConstellationKernel.GraphicalInterface;
+
+		if (gui == undefined) throw new Error("GUI is required.");
+
+		return gui;
+	}
+
+	get portWidth() {
+		return this.gui.displayWidth;
+	}
+	get portHeight() {
+		return this.gui.displayHeight;
 	}
 
 	name: string;
@@ -669,8 +705,8 @@ class GraphicalWindowClass {
 		}
 
 		const clamped = {
-			x: clamp(x, 0, window.innerWidth - this.dimensions.width),
-			y: clamp(y, 0, window.innerHeight - this.dimensions.height)
+			x: clamp(x, 0, this.portWidth - this.dimensions.width),
+			y: clamp(y, 0, this.portHeight - this.dimensions.height)
 		};
 
 		if (x !== undefined) this.container.dataset.left = String(clamped.x);
@@ -888,8 +924,8 @@ export class UserPrompt extends GraphicalWindowClass {
 		// position windows where requested or at the default location
 		const height: number = 200;
 
-		const left = (window.innerWidth - width) / 2;
-		const top = (window.innerHeight - height) / 2;
+		const left = (this.portWidth - width) / 2;
+		const top = (this.portHeight - height) / 2;
 
 		this.resize(width, height);
 		this.move(left, top);

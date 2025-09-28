@@ -1,9 +1,25 @@
-:root {
+:host {
+	display: block;
+	box-sizing: border-box;
+	pointer-events: auto;
+
 	--window-header-height: 26px;
 	--window-buttons-padding: 3.75px;
 	--window-border-radius: 5px;
-
+	
 	--window-transition-duration: 0.15s;
+}
+
+.overlay {
+	position: absolute;
+
+	inset: 0;
+	pointer-events: none;
+	overflow: hidden;
+}
+
+.overlay > * {
+	pointer-events: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -18,7 +34,7 @@
 
 
 @media (prefers-color-scheme: light) {
-	:root {
+	:host {
 		--main-theme-contrast: -15;
 		--main-accent-contrast: 20;
 
@@ -60,7 +76,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-	:root {
+	:host {
 		--main-theme-contrast: 20;
 		--main-accent-contrast: -20;
 
@@ -108,7 +124,7 @@
 	}
 }
 
-:root {
+:host {
 	color: var(--main-text-color);
 	background-color: rgb(22, 18, 34);
 	background-color: var(--main-background-color);
@@ -132,8 +148,8 @@ p, h1, h2, h3 {
 }
 
 body {
-	width: 100vw;
-	height: 100vh;
+	width: 100%;
+	height: 100%;
 
 	position: absolute;
 	left: 0px;
@@ -156,8 +172,8 @@ body {
 	position: absolute;
 	left: 0px;
 	top: 0px;
-	width: 100vw;
-	height: 100vh;
+	width: 100%;
+	height: 100%;
 	z-index: -250000;
 
 	background-image: var(--wallpaper-url);

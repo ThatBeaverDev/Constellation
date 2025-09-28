@@ -3,10 +3,13 @@ export default class outOfBoxInstaller extends Application {
 
 	async init() {
 		this.renderer.hideWindowHeader();
-		this.renderer.moveWindow(window.innerWidth / 4, window.innerWidth / 4);
+		this.renderer.moveWindow(
+			this.renderer.displayWidth / 4,
+			this.renderer.displayHeight / 4
+		);
 		this.renderer.resizeWindow(
-			window.innerWidth / 2,
-			window.innerHeight / 2
+			this.renderer.displayWidth / 2,
+			this.renderer.displayHeight / 2
 		);
 
 		this.renderer.setIcon("disk");

@@ -116,7 +116,7 @@ export default class menubar {
 		const timeWidth = this.renderer.getTextWidth(time);
 
 		this.renderer.text(
-			window.innerWidth - timeWidth - textPadding,
+			this.renderer.windowWidth - timeWidth - textPadding,
 			textPadding,
 			time
 		);
