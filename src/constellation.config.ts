@@ -48,7 +48,7 @@ export default class ConstellationConfiguration {
 		if (state == "error") {
 			this.#ConstellationKernel.lib.logging.error(path, text);
 		} else {
-			this.#ConstellationKernel.lib.logging.log(path, text);
+			this.#ConstellationKernel.lib.logging.debug(path, text);
 		}
 	}
 }

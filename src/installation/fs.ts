@@ -4,9 +4,7 @@ import ConstellationKernel from "../kernel.js";
 
 export async function preinstall(ConstellationKernel: ConstellationKernel) {
 	const start = performance.now();
-	ConstellationKernel.config.setStatus(
-		`Installation: Initialising Preinstall`
-	);
+	ConstellationKernel.config.setStatus(`Initialising Preinstall`);
 
 	try {
 		const installer = new FilesystemInstaller(ConstellationKernel);
@@ -22,7 +20,7 @@ export async function preinstall(ConstellationKernel: ConstellationKernel) {
 		throw e; // escalate again to make sure main knows something went wrong
 	}
 
-	ConstellationKernel.config.setStatus("Installation: Preinstall Complete");
+	ConstellationKernel.config.setStatus("Preinstall Complete");
 
 	installationTimestamp(
 		"Erase, Download, and Write System",
