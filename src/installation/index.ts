@@ -5,7 +5,7 @@ import ConstellationKernel from "../kernel.js";
 
 export async function install(ConstellationKernel: ConstellationKernel) {
 	const start = performance.now();
-	ConstellationKernel.config.setStatus(`Installation: Initialising`);
+	ConstellationKernel.config.setStatus(`Initialising`);
 
 	try {
 		await preinstall(ConstellationKernel);
@@ -51,7 +51,7 @@ export async function install(ConstellationKernel: ConstellationKernel) {
 
 	installationTimestamp("Initialise System", initialisationStart, "primary");
 
-	ConstellationKernel.config.setStatus("Installation: Complete");
+	ConstellationKernel.config.setStatus("Complete");
 
 	installationTimestamp("Install System", start, "primary");
 }

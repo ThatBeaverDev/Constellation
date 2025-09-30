@@ -44,9 +44,7 @@ export class FilesystemInstaller {
 
 	async folders() {
 		const start = performance.now();
-		this.#ConstellationKernel.config.setStatus(
-			`Installation: Creating Folders...`
-		);
+		this.#ConstellationKernel.config.setStatus(`Creating Folders...`);
 
 		for (const directory of folders) {
 			const start = performance.now();
@@ -107,9 +105,7 @@ export class FilesystemInstaller {
 					return await req.text();
 				};
 
-		this.#ConstellationKernel.config.setStatus(
-			`Installation: Writing Files...`
-		);
+		this.#ConstellationKernel.config.setStatus(`Writing Files...`);
 
 		// download everything simultaneously
 		const downloadingContents: Record<string, Promise<string>> = {};
@@ -156,7 +152,7 @@ export class FilesystemInstaller {
 					const start = performance.now();
 
 					this.#ConstellationKernel.config.setStatus(
-						`Installation: Cloning ${location}`
+						`Cloning ${location}`
 					);
 
 					content = downloadedContents[location];
@@ -183,7 +179,7 @@ export class FilesystemInstaller {
 					const start = performance.now();
 
 					this.#ConstellationKernel.config.setStatus(
-						`Installation: Unpackaging ${location}`
+						`Unpackaging ${location}`
 					);
 
 					content = downloadedContents[location];
@@ -214,7 +210,7 @@ export class FilesystemInstaller {
 					const start = performance.now();
 
 					this.#ConstellationKernel.config.setStatus(
-						`Installation: Cloning and Encoding ${location}`
+						`Cloning and Encoding ${location}`
 					);
 
 					content = (await this.downloadAndConvert(
