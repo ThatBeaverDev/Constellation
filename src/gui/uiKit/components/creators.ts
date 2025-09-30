@@ -264,6 +264,8 @@ export default class uiKitCreators {
 		config?: uikitBoxConfig
 	) => {
 		const box = document.createElement("div");
+		box.id = String(window.renderID++);
+		box.classList.add("uikitBox");
 
 		box.style.left = `${x}px`;
 		box.style.top = `${y}px`;
@@ -276,10 +278,8 @@ export default class uiKitCreators {
 			box.style.background = `${config?.background || "var(--main-theme-tertiary)"}`;
 		}
 		box.style.borderRadius = `${config?.borderRadius}px`;
-		box.style.backdropFilter = `${config?.blur || 0}px`;
 
-		box.id = String(window.renderID++);
-		box.className = "uikitBox";
+		if (config?.isFrosted == true) box.classList.add("frosted");
 
 		this.#window.body.appendChild(box);
 

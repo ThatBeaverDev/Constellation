@@ -17,8 +17,9 @@ export default class menubar {
 	}
 	render() {
 		this.renderer.box(0, 0, this.renderer.windowWidth, this.barHeight, {
-			background: "var(--main-theme-secondary)",
-			borderRadius: "0px 0px 10px 10"
+			background: "rgb(from var(--backgroundColour) r g b / 0.5)",
+			borderRadius: "0px 0px 10px 10",
+			isFrosted: true
 		});
 
 		const iconPadding = (this.barHeight - 24) / 2;

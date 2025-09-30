@@ -55,7 +55,7 @@ export type uikitTextareaConfig = {
 };
 export type uikitBoxConfig = {
 	borderRadius?: number | string;
-	blur?: number;
+	isFrosted?: boolean;
 	background?: string | "sidebar";
 };
 export type uikitCanvasOptions = {
