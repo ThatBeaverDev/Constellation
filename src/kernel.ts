@@ -42,10 +42,12 @@ export interface Terminatable {
 	terminate(): Promise<void>;
 }
 
+let kernelID = 0;
 export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 	implements Terminatable
 {
 	verboseBootUIInterval?: ReturnType<typeof setInterval>;
+	id: number = kernelID++;
 
 	// subsystems
 	fs: FilesystemAPI & Terminatable;
