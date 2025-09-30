@@ -51,7 +51,7 @@ class UiKitRendererClass {
 		},
 		uikitBox: {
 			borderRadius: 5,
-			blur: 0,
+			isFrosted: false,
 			background: "rgb(155, 155, 155)"
 		},
 		uikitCanvasStep: {

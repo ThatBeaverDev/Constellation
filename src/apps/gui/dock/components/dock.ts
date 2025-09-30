@@ -236,7 +236,7 @@ export default class Dock {
 			{
 				background:
 					"rgba(var(--main-theme-primary-val), var(--main-theme-primary-val), var(--main-theme-primary-val), 0.25)",
-				blur: 10,
+				isFrosted: true,
 				borderRadius: "10"
 			}
 		);
@@ -328,10 +328,9 @@ export default class Dock {
 					// menu items
 					let contextMenuItems: Record<string, Function> = {
 						"folder-open-:-Show in Finder": () =>
-							this.env.exec(
-								"/System/CoreExecutables/Finder.appl",
-								[this.env.fs.resolve(directory, "..")]
-							)
+							this.env.exec("/Applications/Finder.appl", [
+								this.env.fs.resolve(directory, "..")
+							])
 					};
 
 					if (win !== undefined) {

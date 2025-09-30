@@ -32,6 +32,11 @@
         z-index var(--window-transition-duration) ease-in-out;
 }
 
+.frosted {
+    background: rgb(from var(--backgroundColour) r g b / 50%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
 
 .windowContainer.focused {
     border: var(--main-accent-primary) solid 2px;

@@ -91,4 +91,56 @@ export default class uiKitTransitioners {
 
 		return true;
 	};
+
+	readonly uikitBox = (
+		box: HTMLElement,
+		oldStep: step,
+		newStep: step
+	): boolean => {
+		for (const i in newStep.args) {
+			const oldArg = oldStep.args[i];
+			const newArg = newStep.args[i];
+
+			if (oldArg == newArg) continue;
+
+			switch (Number(i)) {
+				case 0:
+					// X position
+					box.style.left = `${newArg}px`;
+					break;
+				case 1:
+					// Y position
+					box.style.top = `${newArg}px`;
+					break;
+				case 2:
+					// width
+					box.style.width = `${newArg}px`;
+					break;
+				case 3:
+					// height
+					box.style.height = `${newArg}px`;
+					break;
+				case 4:
+					// config
+					box.style.borderRadius = `${newArg?.borderRadius}px`;
+
+					if (newArg?.isFrosted == true) {
+						box.classList.add("frosted");
+					} else {
+						box.classList.remove("frosted");
+					}
+
+					if (newArg?.background == "sidebar") {
+						box.style.background = `var(--headerColour)`;
+					} else {
+						box.style.background = `${newArg?.background || "var(--main-theme-tertiary)"}`;
+					}
+					break;
+				default:
+					throw new Error("Unknown key: " + i);
+			}
+		}
+
+		return true;
+	};
 }
