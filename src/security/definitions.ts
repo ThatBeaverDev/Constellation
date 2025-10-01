@@ -61,7 +61,7 @@ export type WindowAlias = {
 	};
 };
 
-export type UserAlias = {
+export interface UserAlias {
 	name: string;
 	fullName: string;
 	pictures: {
@@ -71,4 +71,17 @@ export type UserAlias = {
 	directory: string;
 	lastLogin: number;
 	allowGraphicalLogin: boolean;
-};
+}
+
+export interface ProcessAlias {
+	directory: string;
+	args: any[];
+	children: ProcessAlias[];
+	kernelID: number;
+
+	username: string;
+	id: number;
+	startTime: number;
+
+	terminate: Function;
+}

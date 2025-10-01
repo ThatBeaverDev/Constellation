@@ -1,11 +1,17 @@
 import { FilesystemAPI } from "../fs/fs.js";
-import { appName } from "../runtime/runtime.js";
+import {
+	appName,
+	processes,
+	ProcessInformation,
+	terminate
+} from "../runtime/runtime.js";
 import { PermissionsError } from "../errors.js";
 import { Framework, Process } from "../runtime/executables.js";
 import Shell from "../lib/shell.js";
 import {
 	directoryPointType as directoryPoint,
 	fsResponse,
+	ProcessAlias,
 	securityTimestamp,
 	UserAlias,
 	WindowAlias
@@ -244,7 +250,7 @@ export class ApplicationAuthorisationAPI {
 	fs = {
 		createDirectory: async (
 			directory: string
-		): Promise<fsResponse<Error | true>> => {
+		): Promise<fsResponse<true>> => {
 			try {
 				this.#directoryActionCheck(directory, true);
 
@@ -754,7 +760,7 @@ export class ApplicationAuthorisationAPI {
 		/**
 		 * @returns an array for every users's UserAlias
 		 */
-		all: () => {
+		all: (): Record<UserAlias["name"], UserAlias> => {
 			const start = performance.now();
 
 			this.#checkPermission("users");
@@ -816,6 +822,35 @@ export class ApplicationAuthorisationAPI {
 				ok: true,
 				data: undefined
 			};
+		}
+	};
+
+	#processToAlias(Program: ProcessInformation): ProcessAlias {
+		const obj: ProcessAlias = {
+			directory: Program.directory,
+			args: Program.args,
+
+			children: Program.children.map((child) =>
+				this.#processToAlias(child)
+			),
+			kernelID: Program.kernel.id,
+
+			id: Program.id,
+			username: Program.user,
+			startTime: Program.startTime,
+
+			terminate: () => {
+				terminate(Program.program);
+			}
+		};
+
+		return obj;
+	}
+	processes = {
+		all: (): ProcessAlias[] => {
+			this.#checkPermission("processes");
+
+			return processes.map((process) => this.#processToAlias(process));
 		}
 	};
 }
