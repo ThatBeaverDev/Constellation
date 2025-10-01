@@ -643,7 +643,7 @@ export class ProgramRuntime {
 
 			const choice = await this.#ConstellationKernel.runtime.showPrompt(
 				"warning",
-				`${name} quit unexpectedly.`,
+				`${name} has crashed unexpectedly.`,
 				this.#ConstellationKernel.lib.blobifier.translateAllBlobURIsToDirectories(
 					e.stack
 				),
