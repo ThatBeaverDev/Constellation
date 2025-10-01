@@ -18,7 +18,6 @@ export default class CrlRunnerInstance {
 		this.ast = generateAST(code, debug);
 
 		this.debug(this.ast);
-		debugger;
 
 		this.runtime = new CrlRuntime(this.ast, this, isDebug);
 	}
