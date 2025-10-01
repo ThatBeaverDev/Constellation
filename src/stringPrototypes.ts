@@ -50,9 +50,12 @@ export default function applyStringPrototypes() {
 		let start = 0;
 		let end = text.length - 1;
 
+		const isWhitespace = (c: string) =>
+			c === " " || c === "\t" || c === "\n" || c == " ";
+
 		while (start <= end) {
 			const c = text[start];
-			if (c === " " || c === "\t" || c === "\n") {
+			if (isWhitespace(c)) {
 				start++;
 			} else {
 				break;
@@ -61,7 +64,7 @@ export default function applyStringPrototypes() {
 
 		while (end >= start) {
 			const c = text[end];
-			if (c === " " || c === "\t" || c === "\n") {
+			if (isWhitespace(c)) {
 				end--;
 			} else {
 				break;
