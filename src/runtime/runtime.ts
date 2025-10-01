@@ -284,7 +284,11 @@ export class ProgramRuntime {
 		for (const pid in processes) {
 			const process = processes[pid];
 
-			this.procExec(process);
+			if (process.kernel == this.#ConstellationKernel) {
+				this.procExec(process);
+			} else {
+				// this isn't our process - that's another kernel's problem.
+			}
 		}
 
 		AppsTimeStamp("Processes frame", start);
