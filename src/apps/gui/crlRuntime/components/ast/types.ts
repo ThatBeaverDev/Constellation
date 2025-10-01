@@ -6,11 +6,16 @@ import {
 	tokenise
 } from "./tokenise.js";
 
-export function getTokenType(text: string): AstTokenType {
-	let token = text.trim();
+/**
+ * Finds the token type of a token
+ * @param {string} string - The token to find the typ eof
+ * @returns Token type of the token
+ */
+export function getTokenType(string: string): AstTokenType {
+	let token = string.trim();
 	if (token[0] == "(") {
 		const endOfFirstBracket = findEndOfFirstBracket(token);
-		if (endOfFirstBracket == text.length - 1) {
+		if (endOfFirstBracket == string.length - 1) {
 			token = token.substring(1, token.length - 1).trim();
 		}
 	}
