@@ -40,41 +40,4 @@ export default function applyStringPrototypes() {
 
 		return text;
 	};
-
-	/**
-	 * Removes leading and trailing spaces, newlines and tabs.
-	 * @param text - The text to act on
-	 * @returns the trimmed text
-	 */
-	function trim(text: string): string {
-		let start = 0;
-		let end = text.length - 1;
-
-		const isWhitespace = (c: string) =>
-			c === " " || c === "\t" || c === "\n" || c == " ";
-
-		while (start <= end) {
-			const c = text[start];
-			if (isWhitespace(c)) {
-				start++;
-			} else {
-				break;
-			}
-		}
-
-		while (end >= start) {
-			const c = text[end];
-			if (isWhitespace(c)) {
-				end--;
-			} else {
-				break;
-			}
-		}
-
-		return text.substring(start, end + 1);
-	}
-
-	String.prototype.trim = function () {
-		return trim(this as string);
-	};
 }
