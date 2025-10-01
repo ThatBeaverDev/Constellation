@@ -17,6 +17,7 @@ export type Permission =
 	| "systemFiles"
 	| "userFiles"
 	| "users"
+	| "processes"
 	| "network"
 	| "audioPlayback"
 	| "microphone"
@@ -58,6 +59,7 @@ export class Permissions {
 			systemFiles: false,
 			userFiles: false,
 			users: false,
+			processes: false,
 			network: false,
 			audioPlayback: false,
 			microphone: false,
@@ -207,6 +209,10 @@ export class Permissions {
 		users: {
 			description:
 				"Allows the application to view and edit users. DO NOT PROVIDE TO UNKNOWN APPS."
+		},
+		processes: {
+			description:
+				"Allows the application to view information about other processes and terminate these processes. DO NOT PROVIDE TO UNKNOWN APPS."
 		},
 		network: {
 			description:

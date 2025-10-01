@@ -13,6 +13,7 @@ import { importRewriter } from "./codeProcessor.js";
 import { dump } from "./crashed.js";
 import ConstellationConfiguration from "../constellation.config.js";
 import { UserPromptConfig } from "../gui/windows/windows.js";
+import ApplicationVerifier from "../security/runtimeDefender.js";
 
 const path = "/System/runtime.js";
 
@@ -42,6 +43,7 @@ export interface ProcessInformation {
 	id: number;
 	counter: number;
 	kernel: ConstellationKernel;
+	user: string;
 
 	// origination
 	directory: string;
@@ -147,6 +149,7 @@ window.envs = new Map();
 let nextProgramRuntimeId = 0;
 export class ProgramRuntime {
 	EnvironmentCreator: EnvironmentCreator & Terminatable;
+	Verifier: ApplicationVerifier & Terminatable;
 	associations: Record<string, Process["id"]> = {};
 	id: number = nextProgramRuntimeId++;
 	#ConstellationKernel: ConstellationKernel;
@@ -162,6 +165,7 @@ export class ProgramRuntime {
 			this.#ConstellationKernel.fs,
 			this
 		);
+		this.Verifier = new ApplicationVerifier(ConstellationKernel);
 	}
 
 	documentKeyDown(event: KeyboardEvent) {
@@ -313,6 +317,12 @@ export class ProgramRuntime {
 			path,
 			"Executing program from " + appdir
 		);
+
+		const isOk = await this.Verifier.verifyApplication(appdir);
+		if (!isOk)
+			throw new Error(
+				`Application at ${appdir} is damaged and can't be ran.`
+			);
 
 		/**
 		 * Reads a file from an application package
@@ -516,6 +526,8 @@ export class ProgramRuntime {
 			id: Number(executables.nextPID),
 			counter: 0,
 			kernel: this.#ConstellationKernel,
+			user: user,
+
 			directory,
 			startTime: Date.now(),
 			args: finalProgramArgs,
