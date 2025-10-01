@@ -29,8 +29,8 @@ const { logs } = await runTests([
 	// lists / dicts
 	{ function: getTokenType, args: ["[]"], expectedResult: "list" },
 	{ function: getTokenType, args: ["[1,2,3]"], expectedResult: "list" },
-	{ function: getTokenType, args: ["obj{}"], expectedResult: "dict" },
-	{ function: getTokenType, args: ['obj{"a":1}'], expectedResult: "dict" },
+	{ function: getTokenType, args: ["#{}"], expectedResult: "dict" },
+	{ function: getTokenType, args: ['#{"a":1}'], expectedResult: "dict" },
 	// operations
 	{ function: getTokenType, args: ["7 == 5"], expectedResult: "operation" },
 	{ function: getTokenType, args: ["7 > 5"], expectedResult: "operation" },
@@ -43,6 +43,12 @@ const { logs } = await runTests([
 	{ function: getTokenType, args: ["３"], expectedResult: "none" },
 	{ function: getTokenType, args: ['"你好"'], expectedResult: "str" },
 	{ function: getTokenType, args: ["let var = 3"], expectedResult: "code" },
+	{ function: getTokenType, args: ["const var = 3"], expectedResult: "code" },
+	{
+		function: getTokenType,
+		args: ["const arr = [1, 2, 3]"],
+		expectedResult: "code"
+	},
 
 	// meaner tests
 	// strings
@@ -55,7 +61,7 @@ const { logs } = await runTests([
 	// numbers
 	{ function: getTokenType, args: ["-42"], expectedResult: "num" },
 	{ function: getTokenType, args: ["42."], expectedResult: "num" },
-	{ function: getTokenType, args: ["1.2.3"], expectedResult: "none" },
+	{ function: getTokenType, args: ["1.2.3"], expectedResult: "property" },
 	{ function: getTokenType, args: ["--42"], expectedResult: "none" },
 	{ function: getTokenType, args: ["0xFF"], expectedResult: "var" }, // hex unsupported
 	{ function: getTokenType, args: ["infinity"], expectedResult: "num" },
@@ -69,9 +75,9 @@ const { logs } = await runTests([
 	{ function: getTokenType, args: ["[]"], expectedResult: "list" },
 	{ function: getTokenType, args: ["[1, 2, 3]"], expectedResult: "list" }, // spaced commas
 	{ function: getTokenType, args: ["[1,2,3]"], expectedResult: "list" }, // compact still ok
-	{ function: getTokenType, args: ["obj{}"], expectedResult: "dict" },
-	{ function: getTokenType, args: ['obj{"a": 1}'], expectedResult: "dict" }, // space after colon
-	{ function: getTokenType, args: ["obj{a:1}"], expectedResult: "dict" }, // compact form
+	{ function: getTokenType, args: ["#{}"], expectedResult: "dict" },
+	{ function: getTokenType, args: ['#{"a": 1}'], expectedResult: "dict" }, // space after colon
+	{ function: getTokenType, args: ["#{a:1}"], expectedResult: "dict" }, // compact form
 
 	{ function: getTokenType, args: ["{"], expectedResult: "none" }, // broken
 	// operations
@@ -117,6 +123,11 @@ const { logs } = await runTests([
 		expectedResult: "none"
 	},
 	{ function: getTokenType, args: ["$dollar"], expectedResult: "none" },
+	{
+		function: getTokenType,
+		args: ["foo.bar"],
+		expectedResult: "property"
+	},
 
 	// code
 	{ function: getTokenType, args: ["foo(bar)"], expectedResult: "code" },
@@ -141,11 +152,22 @@ const { logs } = await runTests([
 		args: ['function {\nprintln("Hi!");\n};'],
 		expectedResult: "code"
 	},
+	// a dot.
+	{
+		function: getTokenType,
+		args: ['foo.bar("baz")'],
+		expectedResult: "code"
+	},
 
 	// code blocks
 	{
 		function: getTokenType,
 		args: ['{\n\tprintln("Hello!");\n}'],
+		expectedResult: "block"
+	},
+	{
+		function: getTokenType,
+		args: ['{\n\tfoo.bar("baz")\n}'],
 		expectedResult: "block"
 	},
 

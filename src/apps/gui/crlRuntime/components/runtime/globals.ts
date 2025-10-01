@@ -11,7 +11,7 @@ import { Scope } from "./scope.js";
 import { unwrapValue } from "./utils.js";
 
 function none(): RuntimeNone {
-	return { type: "none", value: undefined };
+	return { type: "none", value: null };
 }
 
 export class DynamicScope extends Scope {
@@ -77,11 +77,11 @@ export class GlobalScope extends DynamicScope {
 		// program flow
 		this.newScopeFunction(
 			"if",
-			(
+			async (
 				scopes: RuntimeScope[],
 				condition: RuntimeValue, // boolean
 				block: RuntimeValue // block
-			): RuntimeValue => {
+			): Promise<RuntimeValue> => {
 				if (condition.type !== "boolean")
 					throw new Error("Boolean is required.");
 
@@ -93,7 +93,10 @@ export class GlobalScope extends DynamicScope {
 
 				if (bool) {
 					// run it
-					this.runtime.evalBlock(scopes, unwrapValue(block, debug));
+					await this.runtime.evalBlock(
+						scopes,
+						unwrapValue(block, debug)
+					);
 				}
 
 				return none();
@@ -128,20 +131,34 @@ export class GlobalScope extends DynamicScope {
 
 				const fnc: RuntimeFunction = {
 					type: "programFunction",
-					value: (scopes: RuntimeScope[]): RuntimeValue => {
-						this.runtime.evalBlock(
+					value: async (
+						scopes: RuntimeScope[]
+					): Promise<RuntimeValue> => {
+						await this.runtime.evalBlock(
 							scopes,
 							unwrapValue(block, debug)
 						);
 
 						// TODO: FUNCTION RETURNS
 
-						return { type: "none", value: undefined };
+						return none();
 					}
 				};
 
 				return fnc;
 			}
 		);
+
+		this.newScopeFunction("include", (scopes: RuntimeScope[]) => {
+			/**
+			 * Hello!
+			 * this function is never called.
+			 * See the implementation of code within `CrlRuntime.evalCode` for the case of a function call - import is overwritten there.
+			 * Happy coding!
+			 */
+
+			// shut up typescript.
+			return none();
+		});
 	}
 }

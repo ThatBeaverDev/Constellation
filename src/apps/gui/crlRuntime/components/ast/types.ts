@@ -21,10 +21,11 @@ export function getTokenType(text: string): AstTokenType {
 	if (isList(token)) return "list";
 	if (isDict(token)) return "dict";
 
-	if (isVar(token)) return "var";
 	if (isFunctionCall(token) || isVariableDeclaration(token)) return "code";
-	if (isOperation(token)) return "operation";
 	if (isBlock(token)) return "block";
+	if (isProperty(token)) return "property";
+	if (isVar(token)) return "var";
+	if (isOperation(token)) return "operation";
 
 	throw new Error("Tokentype of `" + token + "` cannot be obtained.");
 }
@@ -115,7 +116,7 @@ function isList(token: string): Boolean {
 }
 
 function isDict(token: string): Boolean {
-	return token.startsWith("obj{") && token.at(-1) == "}";
+	return token.startsWith("#{") && token.at(-1) == "}";
 }
 
 function isVar(token: string): Boolean {
@@ -156,7 +157,8 @@ function isVar(token: string): Boolean {
 		"6",
 		"7",
 		"8",
-		"9"
+		"9",
+		"."
 	];
 
 	const chars = token.split("");
@@ -177,6 +179,10 @@ function isVar(token: string): Boolean {
 	}
 
 	return true;
+}
+
+function isProperty(token: string) {
+	return token.includes(".") && token[0] !== ".";
 }
 
 function isFunctionCall(token: string): Boolean {

@@ -9,7 +9,9 @@ import {
 	AstNumberNode,
 	AstStringNode,
 	AstVariableNode,
-	removeBlanks
+	removeBlanks,
+	AstDictNode,
+	AstPropertyReadoutNode
 } from "../definitions.js";
 import {
 	findEndOfFirstBracket,
@@ -100,10 +102,7 @@ function removeCommentsOnLine(line: string) {
 	return staging;
 }
 
-function generateLineAST(
-	line: string,
-	debug: typeof console.debug = (...args: any[]) => {}
-) {
+function generateLineAST(line: string, debug: typeof console.debug) {
 	return generateTokenAST(line, debug);
 }
 
@@ -118,7 +117,7 @@ function tokenToNumber(token: string) {
 
 export function generateTokenAST(
 	token: string,
-	debug: typeof console.debug = (...args: any[]) => {}
+	debug: typeof console.debug
 ): AstNode {
 	debug("Getting token type of '" + token + "'");
 	const type = getTokenType(token);
@@ -189,8 +188,47 @@ export function generateTokenAST(
 				type: "list",
 				value: removeBlanks(
 					tokenise(token.substring(1, token.length - 1))
-				).map((item) => generateTokenAST(item))
+				).map((item) => generateTokenAST(item, debug))
 			};
+
+			return obj;
+		}
+
+		case "dict": {
+			const obj: AstDictNode = {
+				type: "dict",
+				value: new Map()
+			};
+
+			const open = token.textAfter("#{").textBeforeLast("}");
+			// debugging
+			debug("Open dict is", open);
+
+			const tokens = tokenise(open);
+			debug("Dict tokens are", tokens);
+
+			const data = removeBlanks(tokens).map((item) =>
+				removeBlanks(tokenBasedSplit(item, ":"))
+			);
+
+			debug("Dict segmented and split is", data);
+
+			for (const set of data) {
+				debug("Considering set", set);
+
+				if (set.length !== 2) {
+					throw new Error(
+						`Object found with ${set.length} tokens. only 2 way splits are valid.`
+					);
+				}
+
+				const key: AstStringNode = { type: "str", value: set[0] };
+				const value: AstNode = generateTokenAST(set[1], debug);
+
+				debug("Set result is", key, ":", value);
+
+				obj.value.set(key, value);
+			}
 
 			return obj;
 		}
@@ -206,6 +244,22 @@ export function generateTokenAST(
 			return obj;
 		}
 
+		case "property": {
+			const lastDot = token.lastIndexOf(".");
+			const leftSide = token.substring(0, lastDot);
+			const rightSide = token.substring(lastDot + 1, Infinity);
+
+			const obj: AstPropertyReadoutNode = {
+				type: "getProperty",
+				value: {
+					target: generateTokenAST(leftSide, debug),
+					propertyName: { type: "str", value: rightSide }
+				}
+			};
+
+			return obj;
+		}
+
 		case "var": {
 			const obj: AstVariableNode = {
 				type: "var",
@@ -214,6 +268,7 @@ export function generateTokenAST(
 
 			return obj;
 		}
+
 		case "code": {
 			const tokens = tokenise(token, true);
 

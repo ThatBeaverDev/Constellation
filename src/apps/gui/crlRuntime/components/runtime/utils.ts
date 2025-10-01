@@ -3,6 +3,7 @@ import {
 	RuntimeBlock,
 	RuntimeBoolean,
 	RuntimeCallable,
+	RuntimeDict,
 	RuntimeFunction,
 	RuntimeList,
 	RuntimeNone,
@@ -40,6 +41,10 @@ export function unwrapValue(
 	debug: typeof console.debug
 ): any;
 export function unwrapValue(
+	runtimeValue: RuntimeDict,
+	debug: typeof console.debug
+): Map<RuntimeValue, RuntimeValue>;
+export function unwrapValue(
 	runtimeValue: RuntimeValue,
 	debug: typeof console.debug
 ): any;
@@ -64,6 +69,7 @@ export function unwrapValue(
 			result = runtimeValue.value == true;
 			break;
 
+		case "dict":
 		case "block":
 		case "programFunction":
 			result = runtimeValue.value;
@@ -78,10 +84,65 @@ export function unwrapValue(
 			break;
 		default:
 			throw new Error(
-				JSON.stringify(runtimeValue) +
-					" is not valid and has no runtime value."
+				`${JSON.stringify(runtimeValue)} is not valid and has no runtime value.')`
 			);
 	}
 
 	return result;
+}
+
+export function wrapValue(
+	value: string | number | boolean | RuntimeCallable | undefined,
+	debug: typeof console.debug
+): RuntimeValue {
+	debug("Wrapping", value);
+
+	switch (typeof value) {
+		case "string": {
+			const obj: RuntimeString = {
+				type: "string",
+				value: String(value)
+			};
+
+			return obj;
+		}
+
+		case "number": {
+			const obj: RuntimeNumber = {
+				type: "number",
+				value: value
+			};
+
+			return obj;
+		}
+
+		case "boolean": {
+			const obj: RuntimeBoolean = {
+				type: "boolean",
+				value: value
+			};
+
+			return obj;
+		}
+
+		case "function": {
+			const obj: RuntimeFunction = {
+				type: "programFunction",
+				value: value
+			};
+
+			return obj;
+		}
+
+		case "undefined": {
+			const obj: RuntimeNone = {
+				type: "none",
+				value: null
+			};
+
+			return obj;
+		}
+		default:
+			throw new Error(`Type ${typeof value} cannot be wrapped.`);
+	}
 }
