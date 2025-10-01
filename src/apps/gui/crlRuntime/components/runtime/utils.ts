@@ -80,13 +80,15 @@ export function unwrapValue(
 			break;
 
 		case "none":
-			result = undefined;
+			result = null;
 			break;
 		default:
 			throw new Error(
 				`${JSON.stringify(runtimeValue)} is not valid and has no runtime value.')`
 			);
 	}
+
+	debug("Unwrapped to", result);
 
 	return result;
 }
