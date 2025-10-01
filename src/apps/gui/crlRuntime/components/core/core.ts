@@ -17,9 +17,8 @@ export default class CrlRunnerInstance {
 
 		this.ast = generateAST(code, debug);
 
-		if (isDebug) {
-			parent.env.debug(this.ast);
-		}
+		this.debug(this.ast);
+		debugger;
 
 		this.runtime = new CrlRuntime(this.ast, this, isDebug);
 	}

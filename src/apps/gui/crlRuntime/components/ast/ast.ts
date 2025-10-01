@@ -207,9 +207,11 @@ export function generateTokenAST(
 			const tokens = tokenise(open);
 			debug("Dict tokens are", tokens);
 
-			const data = removeBlanks(tokens).map((item) =>
-				removeBlanks(tokenBasedSplit(item, ":"))
-			);
+			const data = removeBlanks(tokens).map((item) => {
+				{
+					return tokenBasedSplit(item, ":");
+				}
+			});
 
 			debug("Dict segmented and split is", data);
 
@@ -223,7 +225,7 @@ export function generateTokenAST(
 				}
 
 				const key: AstStringNode = { type: "str", value: set[0] };
-				const value: AstNode = generateTokenAST(set[1], debug);
+				const value: AstNode = generateTokenAST(set[1].trim(), debug);
 
 				debug("Set result is", key, ":", value);
 
