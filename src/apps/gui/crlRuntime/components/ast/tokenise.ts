@@ -147,7 +147,9 @@ export function tokenise(
 	commit();
 
 	if (brackets.length !== 0) {
-		throw new Error("More brackets where opened than were closed!");
+		throw new Error(
+			`More brackets where opened than were closed! (in ${text})`
+		);
 	}
 	if (quotes !== "") {
 		throw new Error("Quotes were not closed properly!");

@@ -16,7 +16,8 @@ export type AstTokenType =
 	| "var"
 	| "none"
 	| "block"
-	| "operation";
+	| "operation"
+	| "property";
 
 export type AstNode<T = any> =
 	| AstStringNode
@@ -27,7 +28,9 @@ export type AstNode<T = any> =
 	| AstVariableNode
 	| AstCallNode
 	| AstBlockNode
-	| AstOperationNode;
+	| AstOperationNode
+	| AstPropertyReadoutNode
+	| AstNoneNode;
 
 // AST NODES
 export interface AstStringNode {
@@ -52,7 +55,7 @@ export interface AstListNode<T = any> {
 
 export interface AstDictNode {
 	type: "dict";
-	value: Map<any, any>;
+	value: Map<AstNode, AstNode>;
 }
 
 export interface AstVariableNode {
@@ -80,6 +83,10 @@ export interface AstOperationNode {
 	type: "operation";
 	value: AstOperation;
 }
+export interface AstPropertyReadoutNode {
+	type: "getProperty";
+	value: { target: AstNode; propertyName: AstNode };
+}
 
 // Variable declarations
 export interface AstGeneralDeclaration {
@@ -97,9 +104,13 @@ export interface AstVariableDeclaration extends AstGeneralDeclaration {
 export interface AstGlobalDeclaration extends AstGeneralDeclaration {
 	type: "newGlobal";
 }
+export interface AstNoneNode {
+	type: "none";
+	value: null;
+}
 
 export function removeBlanks(array: string[]): string[] {
-	return array.filter((item) => !["", " ", "\t", "\n"].includes(item));
+	return array.filter((item) => !["", " ", "\t", "\n"].includes(item.trim()));
 }
 
 // RUNTIME
@@ -125,7 +136,7 @@ export interface RuntimeBoolean {
 }
 export interface RuntimeNone {
 	type: "none";
-	value: undefined;
+	value: null;
 }
 
 export interface RuntimeBlock {
@@ -136,7 +147,7 @@ export interface RuntimeBlock {
 export type RuntimeCallable = (
 	scope: RuntimeScope[],
 	...args: RuntimeValue[]
-) => RuntimeValue;
+) => RuntimeValue | Promise<RuntimeValue>;
 export interface RuntimeFunction {
 	type: "programFunction";
 	value: AstNode[] | RuntimeCallable;
@@ -147,6 +158,11 @@ export interface RuntimeList {
 	value: RuntimeValue[];
 }
 
+export interface RuntimeDict {
+	type: "dict";
+	value: Map<RuntimeValue, RuntimeValue>;
+}
+
 export type RuntimeValue =
 	| RuntimeString
 	| RuntimeNumber
@@ -154,4 +170,5 @@ export type RuntimeValue =
 	| RuntimeNone
 	| RuntimeFunction
 	| RuntimeBlock
-	| RuntimeList;
+	| RuntimeList
+	| RuntimeDict;

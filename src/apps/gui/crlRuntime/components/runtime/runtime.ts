@@ -5,6 +5,7 @@ import {
 	AstCallNode,
 	RuntimeBlock,
 	RuntimeBoolean,
+	RuntimeDict,
 	RuntimeFunction,
 	RuntimeList,
 	RuntimeNone,
@@ -15,7 +16,7 @@ import {
 	RuntimeVariable
 } from "../definitions.js";
 import { AstNode } from "../definitions.js";
-import { GlobalScope } from "./globals.js";
+import { DynamicScope, GlobalScope } from "./globals.js";
 import { Scope } from "./scope.js";
 import { unwrapValue } from "./utils.js";
 
@@ -32,8 +33,6 @@ export class CrlRuntime {
 	) {
 		this.debug = isDebug ? this.parent.debug : (...args: any[]) => {};
 
-		if (typeof this.parent.parent.renderer !== "undefined") {
-		}
 		this.globalScope = new GlobalScope(this, isDebug);
 		this.app = parent.parent;
 		this.ast = ast;
@@ -47,42 +46,39 @@ export class CrlRuntime {
 	globalScope: GlobalScope;
 	loadedLibraries: Scope[] = [];
 
-	readVariableFromScopes(scopes: RuntimeScope[], name: string) {
-		let variable: RuntimeVariable | undefined = undefined;
-
+	readVariableFromScopes(
+		scopes: RuntimeScope[],
+		name: string
+	): RuntimeVariable {
 		for (const scope of scopes) {
 			let val = scope.variables.get(name);
 
-			this.debug(
-				"\tScope",
-				scope.variables,
-				val == undefined ? "doesn't have" : "has",
-				name
-			);
-			if (val !== undefined) {
-				variable = val;
-				break;
+			if (val == undefined) {
+				this.debug("Scope", scope.variables, `doesn't have ${name}`);
+			} else {
+				this.debug("Scope", scope.variables, `has ${name}`);
+				return val;
 			}
 		}
 
-		if (typeof variable == "undefined")
-			throw new Error("Variable by name " + name + " is not declared.");
-
-		return variable;
+		throw new Error("Variable by name " + name + " is not declared.");
 	}
 
-	evalBlock(scopes: RuntimeScope[], block: AstNode[]) {
+	async evalBlock(scopes: RuntimeScope[], block: AstNode[]) {
 		const extendingScope = new Scope(this, this.isDebug);
 		const extendedScopes = [...scopes, extendingScope];
 
 		for (const node of block) {
-			this.evalNode(extendedScopes, node);
+			await this.evalNode(extendedScopes, node);
 		}
 	}
 
-	evalNode(scopes: RuntimeScope[], node: AstNode): RuntimeValue {
+	async evalNode(
+		scopes: RuntimeScope[],
+		node: AstNode
+	): Promise<RuntimeValue> {
 		function none(): RuntimeNone {
-			return { type: "none", value: undefined };
+			return { type: "none", value: null };
 		}
 
 		this.debug("Evaluating node", node);
@@ -124,11 +120,63 @@ export class CrlRuntime {
 			case "list": {
 				const obj: RuntimeList = {
 					type: "list",
-					value: node.value.map((item) => this.evalNode(scopes, item))
+					value: await Promise.all(
+						node.value.map(
+							async (item) => await this.evalNode(scopes, item)
+						)
+					)
 				};
 
 				return obj;
 			}
+
+			case "dict": {
+				const astMapping = node.value;
+				const runtimeMapping: Map<RuntimeValue, RuntimeValue> =
+					new Map();
+
+				for (const [key, value] of astMapping) {
+					const runtimeKey = await this.evalNode(scopes, key);
+					const runtimeValue = await this.evalNode(scopes, value);
+
+					runtimeMapping.set(
+						unwrapValue(runtimeKey, this.debug),
+						runtimeValue
+					);
+				}
+
+				const obj: RuntimeDict = {
+					type: "dict",
+					value: runtimeMapping
+				};
+
+				return obj;
+			}
+
+			case "getProperty":
+				const target = await this.evalNode(scopes, node.value.target);
+
+				if (target.type !== "dict") {
+					throw new Error("Properties of non-dicts cannot be read.");
+				}
+
+				const propertyName = await this.evalNode(
+					scopes,
+					node.value.propertyName
+				);
+
+				const returnValue = target.value.get(
+					unwrapValue(propertyName, this.debug)
+				);
+
+				if (returnValue == undefined) {
+					this.debug(target, "lacks property", propertyName);
+					throw new Error(
+						`Property ${JSON.stringify(propertyName)} doesn't exist on ${JSON.stringify(target)}`
+					);
+				}
+
+				return returnValue;
 
 			case "operation": {
 				if (node.value.first == undefined)
@@ -137,7 +185,7 @@ export class CrlRuntime {
 					throw new Error("Second operation node is undefined.");
 
 				this.debug("Evaluate first argument token", node.value.first);
-				const firstRuntimeValue = this.evalNode(
+				const firstRuntimeValue = await this.evalNode(
 					scopes,
 					node.value.first
 				);
@@ -146,7 +194,7 @@ export class CrlRuntime {
 
 				// second token
 				this.debug("Evaluate second argument token", node.value.second);
-				const secondRuntimeValue = this.evalNode(
+				const secondRuntimeValue = await this.evalNode(
 					scopes,
 					node.value.second
 				);
@@ -251,7 +299,7 @@ export class CrlRuntime {
 			case "code": {
 				if (node.type !== "code") break;
 
-				const obj: RuntimeValue = this.evalCode(
+				const obj: RuntimeValue = await this.evalCode(
 					scopes,
 					node as AstCallNode
 				);
@@ -277,12 +325,15 @@ export class CrlRuntime {
 		return none();
 	}
 
-	evalCode(scopes: RuntimeScope[], node: AstCallNode): RuntimeValue {
+	async evalCode(
+		scopes: RuntimeScope[],
+		node: AstCallNode
+	): Promise<RuntimeValue> {
 		const data = node.value;
 		const type = data.type;
 
 		function none(): RuntimeNone {
-			return { type: "none", value: undefined };
+			return { type: "none", value: null };
 		}
 
 		const holdingScope = scopes.at(-1);
@@ -296,7 +347,7 @@ export class CrlRuntime {
 						`Variable ${data.name} is already defined in this scope!`
 					);
 
-				const value = this.evalNode(scopes, data.value);
+				const value = await this.evalNode(scopes, data.value);
 				const variable: RuntimeVariable = { type: "variable", value };
 
 				holdingScope.variables.set(data.name, variable);
@@ -309,7 +360,7 @@ export class CrlRuntime {
 						`Variable ${data.name} is already defined in this scope!`
 					);
 
-				const value = this.evalNode(scopes, data.value);
+				const value = await this.evalNode(scopes, data.value);
 				const constant: RuntimeVariable = {
 					type: "constant",
 					value
@@ -327,7 +378,7 @@ export class CrlRuntime {
 						`Variable ${data.name} is already defined in this scope!`
 					);
 
-				const value = this.evalNode(scopes, data.value);
+				const value = await this.evalNode(scopes, data.value);
 				const variable: RuntimeVariable = {
 					type: "global",
 					value
@@ -346,24 +397,37 @@ export class CrlRuntime {
 						scopes
 					);
 
-				const callee = this.evalNode(
+				const callee = (await this.evalNode(
 					scopes,
 					data.function
-				) as RuntimeFunction;
+				)) as RuntimeFunction;
 
-				const args = data.args.map((item) =>
-					this.evalNode(scopes, item)
+				const args = await Promise.all(
+					data.args.map((item) => this.evalNode(scopes, item))
 				);
+
+				if (
+					callee == this.globalScope.variables.get("include")?.value
+				) {
+					// this is an import statement. it acts differently
+					await this.handleImport(
+						scopes,
+						{ type: "none", value: null },
+						args[0]
+					);
+
+					return none();
+				}
 
 				let result: RuntimeValue;
 				if (callee.type !== "programFunction")
 					throw new Error("This is not a function!");
 
 				if (typeof callee.value == "function") {
-					result = callee.value(scopes, ...args);
+					result = await callee.value(scopes, ...args);
 				} else {
 					// TODO: Make a new scope
-					this.evalBlock(scopes, callee.value);
+					await this.evalBlock(scopes, callee.value);
 
 					// TODO: return value!
 					result = none();
@@ -377,5 +441,35 @@ export class CrlRuntime {
 		}
 
 		return none();
+	}
+
+	async handleImport(
+		scopes: RuntimeScope[],
+		importingFile: RuntimeValue,
+		importTarget: RuntimeValue
+	) {
+		if (importTarget.type !== "string")
+			throw new Error("Import target must be of type string.");
+
+		// TODO: ALLOW IMPORT FROM FILES
+
+		const target = unwrapValue(importTarget, this.debug);
+		const hostFS = this.app.env.fs;
+
+		// get the path
+		const coreLibraryPath = hostFS.resolve(
+			this.app.directory,
+			`./components/runtime/corelib/${target}.js`
+		);
+
+		// get the library
+		const exportee = await this.app.env.include(coreLibraryPath);
+		const lib = exportee.default as typeof DynamicScope;
+
+		// create it
+		const libraryInstance = new lib(this, this.isDebug);
+
+		// done
+		scopes.push(libraryInstance);
 	}
 }

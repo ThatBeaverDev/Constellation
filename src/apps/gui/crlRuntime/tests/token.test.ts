@@ -1,69 +1,71 @@
 import { runTests } from "../../../../tests/libtest.js";
 import { generateTokenAST } from "../components/ast/ast.js";
 
+const debug = console.debug;
+
 const { logs } = await runTests([
 	// string tokens
 	{
 		function: generateTokenAST,
-		args: ['"hello"'],
+		args: ['"hello"', debug],
 		expectedResult: { type: "str", value: "hello" }
 	},
 	{
 		function: generateTokenAST,
-		args: ['""'],
+		args: ['""', debug],
 		expectedResult: { type: "str", value: "" }
 	},
 	{
 		function: generateTokenAST,
-		args: ["`template`"],
+		args: ["`template`", debug],
 		expectedResult: { type: "str", value: "template" }
 	},
 	{
 		function: generateTokenAST,
-		args: ["'single-quoted'"],
+		args: ["'single-quoted'", debug],
 		expectedResult: { type: "str", value: "single-quoted" }
 	},
 
 	// boolean tokens
 	{
 		function: generateTokenAST,
-		args: ["true"],
+		args: ["true", debug],
 		expectedResult: { type: "bool", value: true }
 	},
 	{
 		function: generateTokenAST,
-		args: ["false"],
+		args: ["false", debug],
 		expectedResult: { type: "bool", value: false }
 	},
 
 	// number tokens
 	{
 		function: generateTokenAST,
-		args: ["42"],
+		args: ["42", debug],
 		expectedResult: { type: "num", value: 42 }
 	},
 	{
 		function: generateTokenAST,
-		args: ["0xFF"],
+		args: ["0xFF", debug],
 		expectedResult: { type: "var", value: "0xFF" }
 	},
 	{
 		function: generateTokenAST,
-		args: ["1e3"],
+		args: ["1e3", debug],
 		expectedResult: { type: "var", value: "1e3" }
 	},
 
 	// variables
 	{
 		function: generateTokenAST,
-		args: ["myVar"],
+		args: ["myVar", debug],
 		expectedResult: { type: "var", value: "myVar" }
 	},
 
 	// commands
 	{
 		function: generateTokenAST,
-		args: ["echo()"],
+		args: ["echo()", debug],
 		expectedResult: {
 			type: "code",
 			value: {
@@ -75,7 +77,7 @@ const { logs } = await runTests([
 	},
 	{
 		function: generateTokenAST,
-		args: ['log("Hello, world!")'],
+		args: ['log("Hello, world!")', debug],
 		expectedResult: {
 			type: "code",
 			value: {
@@ -89,50 +91,50 @@ const { logs } = await runTests([
 	// tricky ones
 	{
 		function: generateTokenAST,
-		args: ['"42"'],
+		args: ['"42"', debug],
 		expectedResult: { type: "str", value: "42" }
 	},
 	{
 		function: generateTokenAST,
-		args: ["'false'"],
+		args: ["'false'", debug],
 		expectedResult: { type: "str", value: "false" }
 	},
 
 	{
 		function: generateTokenAST,
-		args: ["000123"],
+		args: ["000123", debug],
 		expectedResult: { type: "num", value: 123 }
 	},
 	{
 		function: generateTokenAST,
-		args: ["-0"],
+		args: ["-0", debug],
 		expectedResult: { type: "num", value: -0 }
 	},
 	{
 		function: generateTokenAST,
-		args: ["infinity"],
+		args: ["infinity", debug],
 		expectedResult: { type: "num", value: Infinity }
 	},
 	{
 		function: generateTokenAST,
-		args: ["NaN"],
+		args: ["NaN", debug],
 		expectedResult: { type: "var", value: "NaN" }
 	},
 
 	// Booleans hidden in other forms
 	{
 		function: generateTokenAST,
-		args: ["TRUE"],
+		args: ["TRUE", debug],
 		expectedResult: { type: "var", value: "TRUE" }
 	},
 	{
 		function: generateTokenAST,
-		args: ["False"],
+		args: ["False", debug],
 		expectedResult: { type: "var", value: "False" }
 	},
 	{
 		function: generateTokenAST,
-		args: ["truefalse"],
+		args: ["truefalse", debug],
 		expectedResult: {
 			type: "var",
 			value: "truefalse"
@@ -146,36 +148,41 @@ const { logs } = await runTests([
 	// Variables vs commands
 	{
 		function: generateTokenAST,
-		args: ["_var123"],
+		args: ["_var123", debug],
 		expectedResult: { type: "var", value: "_var123" }
 	},
 	{
 		function: generateTokenAST,
-		args: ["123abc"],
+		args: ["123abc", debug],
 		expectedResult: { type: "var", value: "123abc" }
 	},
 	{
 		function: generateTokenAST,
-		args: ["echo"],
+		args: ["echo", debug],
 		expectedResult: { type: "var", value: "echo" }
 	},
 
 	// List/dict stubs
 	{
 		function: generateTokenAST,
-		args: ["[]"],
+		args: ["[]", debug],
 		expectedResult: { type: "list", value: [] }
 	},
 	{
 		function: generateTokenAST,
-		args: ["obj{}"],
+		args: ["#{}", debug],
+		expectedResult: { type: "dict", value: new Map() }
+	},
+	{
+		function: generateTokenAST,
+		args: ['#{ greeting: "Hello", subject: "World" }', debug],
 		expectedResult: { type: "dict", value: new Map() }
 	},
 
 	// conditions
 	{
 		function: generateTokenAST,
-		args: ["7 == 5"],
+		args: ["7 == 5", debug],
 		expectedResult: {
 			type: "operation",
 			value: {
@@ -187,7 +194,7 @@ const { logs } = await runTests([
 	},
 	{
 		function: generateTokenAST,
-		args: ["7 > 5"],
+		args: ["7 > 5", debug],
 		expectedResult: {
 			type: "operation",
 			value: {
@@ -199,7 +206,7 @@ const { logs } = await runTests([
 	},
 	{
 		function: generateTokenAST,
-		args: ["7 < 5"],
+		args: ["7 < 5", debug],
 		expectedResult: {
 			type: "operation",
 			value: {
@@ -212,7 +219,7 @@ const { logs } = await runTests([
 
 	{
 		function: generateTokenAST,
-		args: ["if (3 > 5) {}"],
+		args: ["if (3 > 5) {}", debug],
 		expectedResult: {
 			type: "code",
 			value: {
@@ -239,7 +246,7 @@ const { logs } = await runTests([
 	// multi-step operations
 	{
 		function: generateTokenAST,
-		args: ['"Hello, " + name + "!"'],
+		args: ['"Hello, " + name + "!"', debug],
 		expectedResult: {
 			type: "operation",
 			value: {
@@ -265,25 +272,25 @@ const { logs } = await runTests([
 	// Missing right-hand side of operation
 	{
 		function: generateTokenAST,
-		args: ["7 +"],
+		args: ["7 +", debug],
 		expectedResult: "none" // should throw: second operand missing
 	},
 	// Missing left-hand side of operation
 	{
 		function: generateTokenAST,
-		args: ["+ 5"],
+		args: ["+ 5", debug],
 		expectedResult: "none"
 	},
 	// Unknown operation
 	{
 		function: generateTokenAST,
-		args: ["3 %% 4"],
+		args: ["3 %% 4", debug],
 		expectedResult: "none" // should error: operation not valid
 	},
 	// Nested parentheses inside operations
 	{
 		function: generateTokenAST,
-		args: ["(2 + 3) * 5"],
+		args: ["(2 + 3) * 5", debug],
 		expectedResult: {
 			type: "operation",
 			value: {
@@ -303,19 +310,19 @@ const { logs } = await runTests([
 	// Chain of operations without spacing (which is required)
 	{
 		function: generateTokenAST,
-		args: ["1+2+3"],
+		args: ["1+2+3", debug],
 		expectedResult: "none"
 	},
 	// String concatenation chain with mixed spaces (should break)
 	{
 		function: generateTokenAST,
-		args: ['"a"+"b" + "c"'],
+		args: ['"a"+"b" + "c"', debug],
 		expectedResult: "none"
 	},
 	// Boolean operations
 	{
 		function: generateTokenAST,
-		args: ["true && false"],
+		args: ["true && false", debug],
 		expectedResult: {
 			type: "operation",
 			value: {
@@ -327,7 +334,7 @@ const { logs } = await runTests([
 	},
 	{
 		function: generateTokenAST,
-		args: ["true || false"],
+		args: ["true || false", debug],
 		expectedResult: {
 			type: "operation",
 			value: {
@@ -340,13 +347,13 @@ const { logs } = await runTests([
 	// Unary minus (edge case: not currently handled by your code)
 	{
 		function: generateTokenAST,
-		args: ["-5"],
+		args: ["-5", debug],
 		expectedResult: { type: "num", value: -5 }
 	},
 	// Double equals inside variable name (should NOT be parsed as op)
 	{
 		function: generateTokenAST,
-		args: ["foo==bar"],
+		args: ["foo==bar", debug],
 		expectedResult: "none"
 	},
 
@@ -354,7 +361,7 @@ const { logs } = await runTests([
 	// Multiple chained arithmetic ops
 	{
 		function: generateTokenAST,
-		args: ["1 + 2 * 3"],
+		args: ["1 + 2 * 3", debug],
 		expectedResult: {
 			type: "operation",
 			value: {
@@ -374,7 +381,7 @@ const { logs } = await runTests([
 	// Nested with booleans and arithmetic
 	{
 		function: generateTokenAST,
-		args: ["(1 + 2) > (2 * 3)"],
+		args: ["(1 + 2) > (2 * 3)", debug],
 		expectedResult: {
 			type: "operation",
 			value: {
@@ -403,7 +410,55 @@ const { logs } = await runTests([
 	{ function: generateTokenAST, args: [""], expectedResult: "none" },
 	{ function: generateTokenAST, args: ["   "], expectedResult: "none" },
 	{ function: generateTokenAST, args: ["()"], expectedResult: "none" },
-	{ function: generateTokenAST, args: ["=="], expectedResult: "none" }
+	{ function: generateTokenAST, args: ["=="], expectedResult: "none" },
+
+	// property reading
+	{
+		function: generateTokenAST,
+		args: ["foo.bar", debug],
+		expectedResult: {
+			type: "getProperty",
+			value: {
+				target: { type: "var", value: "foo" },
+				propertyName: { type: "str", value: "bar" }
+			}
+		}
+	},
+	{
+		function: generateTokenAST,
+		args: ["foo.bar.baz", debug],
+		expectedResult: {
+			type: "getProperty",
+			value: {
+				target: {
+					type: "getProperty",
+					value: {
+						target: { type: "var", value: "foo" },
+						propertyName: { type: "str", value: "bar" }
+					}
+				},
+				propertyName: { type: "str", value: "baz" }
+			}
+		}
+	},
+	{
+		function: generateTokenAST,
+		args: ['foo.bar("baz")', debug],
+		expectedResult: {
+			type: "code",
+			value: {
+				function: {
+					type: "getProperty",
+					value: {
+						target: { type: "var", value: "foo" },
+						propertyName: { type: "str", value: "bar" }
+					}
+				},
+				type: "functionCall",
+				args: [{ type: "str", value: "baz" }]
+			}
+		}
+	}
 ]);
 
 console.log(logs);
