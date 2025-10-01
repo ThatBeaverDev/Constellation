@@ -50,7 +50,7 @@ export interface ProcessInformation {
 
 	// state
 	program: Process;
-	children: Process[];
+	children: ProcessInformation[];
 }
 
 export const processes: ProcessInformation[] = [];
@@ -108,7 +108,7 @@ export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
 	for (const process of processes) {
 		if (process.children instanceof Array)
 			process.children = process.children.filter(
-				(child) => child !== proc
+				(child) => child.program !== proc
 			);
 	}
 
@@ -512,8 +512,6 @@ export class ProgramRuntime {
 			throw error;
 		}
 
-		if (parent?.children !== undefined) parent.children.push(live);
-
 		const info: ProcessInformation = {
 			id: Number(executables.nextPID),
 			counter: 0,
@@ -524,6 +522,17 @@ export class ProgramRuntime {
 			program: live,
 			children: []
 		};
+
+		if (parent !== undefined) {
+			if (parent?.children !== undefined) parent.children.push(live);
+
+			const parentInfo =
+				processes[
+					processes.map((info) => info.program).indexOf(parent)
+				];
+
+			parentInfo.children.push(info);
+		}
 
 		// add to the processes list
 		processes.push(info);
