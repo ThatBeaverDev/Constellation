@@ -3,6 +3,11 @@ import { preinstall } from "./fs.js";
 import devinstall from "./devinstall.js";
 import ConstellationKernel from "../kernel.js";
 
+/**
+ * Runs the non-graphical installer
+ * @param ConstellationKernel - The kernel to install within.
+ * @returns Whether the graphical postinstaller is required
+ */
 export async function install(ConstellationKernel: ConstellationKernel) {
 	const start = performance.now();
 	ConstellationKernel.config.setStatus(`Initialising`);
@@ -35,25 +40,21 @@ export async function install(ConstellationKernel: ConstellationKernel) {
 		}
 	);
 
-	if (ConstellationKernel.config.isDevmode) {
-		await devinstall(ConstellationKernel);
-	} else {
-		// TODO: download n execute the installer
-	}
-
-	// mark this boot as postinstall, allows CoreExecutable to start the graphical part of installation.
-	if (window.location && window.history) {
-		const params = new URL(window.location.href).searchParams;
-		params.set("postinstall", "true");
-
-		window.history.pushState({}, "", "?" + params.toString());
-	}
-
 	installationTimestamp("Initialise System", initialisationStart, "primary");
 
 	ConstellationKernel.config.setStatus("Complete");
 
 	installationTimestamp("Install System", start, "primary");
+
+	if (
+		ConstellationKernel.config.isDevmode &&
+		!ConstellationKernel.config.isTestingInstaller
+	) {
+		await devinstall(ConstellationKernel);
+		return false;
+	} else {
+		return true;
+	}
 }
 
 export function installationTimestamp(
