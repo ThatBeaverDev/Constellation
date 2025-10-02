@@ -1,11 +1,7 @@
 import CrlRunnerInstance from "../components/core/core.js";
 
 export default class CrlRunner extends Application {
-	constructor(directory: string, args: any[]) {
-		super(directory, args);
-	}
-
-	runtime?: CrlRunnerInstance;
+	#runtime?: CrlRunnerInstance;
 	async init(args: any[]) {
 		const targetFile =
 			args[0] ||
@@ -17,12 +13,12 @@ export default class CrlRunner extends Application {
 
 		const isDebug = args[1] == true;
 
-		this.runtime = new CrlRunnerInstance(code, this, undefined, isDebug);
+		this.#runtime = new CrlRunnerInstance(code, this, undefined, isDebug);
 	}
 
 	frame() {
-		if (this.runtime == undefined) return;
+		if (this.#runtime == undefined) return;
 
-		this.runtime.frame();
+		this.#runtime.frame();
 	}
 }
