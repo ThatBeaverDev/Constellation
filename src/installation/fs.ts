@@ -9,9 +9,7 @@ export async function preinstall(ConstellationKernel: ConstellationKernel) {
 	try {
 		const installer = new FilesystemInstaller(ConstellationKernel);
 
-		await installer.rm_rf();
-		await installer.folders();
-		await installer.files();
+		await installer.install();
 
 		if (ConstellationKernel.GraphicalInterface)
 			ConstellationKernel.GraphicalInterface.windows.reapplyStyles();
