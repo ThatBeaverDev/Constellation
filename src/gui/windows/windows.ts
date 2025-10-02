@@ -8,7 +8,7 @@ import WindowSystemInteractions from "./interactions.js";
 import { GraphicalInterface } from "../gui.js";
 
 const start = performance.now();
-const name = "/System/windows.js";
+const path = "/System/windows.js";
 
 export function windowsTimestamp(
 	label: string,
@@ -353,7 +353,7 @@ export default class WindowSystem {
 		const start = performance.now();
 
 		this.#ConstellationKernel.lib.logging.debug(
-			name,
+			path,
 			"Loading windowing CSS for minimise animation: " +
 				this.minimiseAnimation
 		);
@@ -367,7 +367,7 @@ export default class WindowSystem {
 		}
 
 		this.#ConstellationKernel.lib.logging.debug(
-			name,
+			path,
 			"CSS retrieved successfully for minimise animation: " +
 				this.minimiseAnimation
 		);
@@ -645,6 +645,7 @@ class GraphicalWindowClass {
 	resizeObserver: ResizeObserver;
 	iconName: string = "app-window-mac";
 	forcedZIndex?: number;
+	isRemoved: boolean = false;
 
 	reposition() {
 		const start = performance.now();
@@ -857,7 +858,16 @@ class GraphicalWindowClass {
 	}
 
 	remove() {
+		if (this.isRemoved == true) return;
+		this.isRemoved = true;
+
 		const start = performance.now();
+
+		this.#ConstellationKernel.lib.logging.debug(
+			path,
+			"Closing window",
+			this
+		);
 
 		// animate the window's removal
 		this.container.animate(
@@ -875,6 +885,12 @@ class GraphicalWindowClass {
 		);
 
 		const del = () => {
+			if (this.Application) {
+				terminate(this.Application);
+			}
+			// insure we don't loop.
+			this.Application = undefined;
+
 			this.container.remove();
 
 			const idx = this.#WindowSystem.windows.indexOf(this);
@@ -898,9 +914,7 @@ class GraphicalWindowClass {
 	}
 
 	close() {
-		if (this.Application) {
-			terminate(this.Application);
-		}
+		this.remove();
 	}
 }
 
