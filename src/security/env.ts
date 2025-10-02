@@ -1,6 +1,7 @@
 import { FilesystemAPI } from "../fs/fs.js";
 import {
 	appName,
+	executionResult,
 	processes,
 	ProcessInformation,
 	terminate
@@ -56,7 +57,8 @@ export class EnvironmentCreator {
 		directory: string,
 		user: string,
 		password: string,
-		process?: Framework,
+		process: Framework | undefined,
+		processInfo: ProcessInformation | undefined,
 		isGlobal: boolean = false
 	) {
 		return new ApplicationAuthorisationAPI(
@@ -66,6 +68,7 @@ export class EnvironmentCreator {
 			user,
 			password,
 			process,
+			processInfo,
 			isGlobal
 		);
 	}
@@ -84,6 +87,7 @@ export class ApplicationAuthorisationAPI {
 		user: string,
 		password: string,
 		process?: Framework,
+		processInfo?: ProcessInformation,
 		isGlobal: boolean = false
 	) {
 		const start = performance.now();
@@ -117,6 +121,7 @@ export class ApplicationAuthorisationAPI {
 		this.#user = user;
 		this.#password = password;
 		this.#process = process;
+		this.#programInfo = processInfo;
 
 		this.#ConstellationKernel.lib.logging.debug(
 			name,
@@ -135,6 +140,7 @@ export class ApplicationAuthorisationAPI {
 	}
 	readonly #process?: Framework;
 	readonly #isGlobal: boolean;
+	#programInfo?: ProcessInformation;
 
 	#checkPermission(permission: Permission) {
 		this.#environmentCreator.permissions.checkDirectoryPermission(
@@ -523,20 +529,24 @@ export class ApplicationAuthorisationAPI {
 		args: any[] = [],
 		user: string = String(this.#user),
 		password: string = String(this.#password)
-	) => {
+	): Promise<executionResult> => {
 		if (this.#isGlobal)
 			throw new Error(
 				"Global env cannot be used to start applications to insure applications are properly parented."
 			);
 
-		if (this.#process instanceof Process)
+		if (this.#process instanceof Process) {
+			if (this.#programInfo == undefined)
+				throw new Error("No program info is present to execute with.");
+
 			return this.#ConstellationKernel.runtime.execute(
 				directory,
 				args,
 				user,
 				password,
-				this.#process
+				this.#programInfo
 			);
+		}
 
 		throw new Error("Framework may not execute processes.");
 	};

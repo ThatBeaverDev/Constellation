@@ -262,6 +262,7 @@ export class ProgramRuntime {
 			"guest",
 			"",
 			undefined,
+			undefined,
 			true
 		);
 		window.envs.set(this.id, env);
@@ -309,7 +310,7 @@ export class ProgramRuntime {
 		args: any[] = [],
 		user: string,
 		password: string,
-		parent?: Process,
+		parent?: ProcessInformation,
 		waitForInit: boolean = true
 	): Promise<executionResult> {
 		if (this.isTerminating)
@@ -505,14 +506,32 @@ export class ProgramRuntime {
 			);
 		}
 
+		const info: ProcessInformation = {
+			id: Number(executables.nextPID),
+			counter: 0,
+			kernel: this.#ConstellationKernel,
+			user: user,
+
+			directory,
+			startTime: Date.now(),
+			args: finalProgramArgs,
+			// @ts-expect-error
+			program: undefined,
+			children: []
+		};
+
 		// create the process
 		const live = new Executable(
 			this.#ConstellationKernel,
 			directory,
 			finalProgramArgs,
 			user,
-			password
+			password,
+			info
 		);
+
+		info.program = live;
+
 		try {
 			await live.validateCredentials(
 				this.#ConstellationKernel,
@@ -526,28 +545,10 @@ export class ProgramRuntime {
 			throw error;
 		}
 
-		const info: ProcessInformation = {
-			id: Number(executables.nextPID),
-			counter: 0,
-			kernel: this.#ConstellationKernel,
-			user: user,
-
-			directory,
-			startTime: Date.now(),
-			args: finalProgramArgs,
-			program: live,
-			children: []
-		};
-
 		if (parent !== undefined) {
-			if (parent?.children !== undefined) parent.children.push(live);
-
-			const parentInfo =
-				processes[
-					processes.map((info) => info.program).indexOf(parent)
-				];
-
-			parentInfo.children.push(info);
+			if (parent.children !== undefined) parent.children.push(info);
+			if (parent.program.children !== undefined)
+				parent.program.children.push(live);
 		}
 
 		// add to the processes list

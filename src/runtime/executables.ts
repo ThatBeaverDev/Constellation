@@ -1,6 +1,6 @@
 import { UiKitRenderer } from "../gui/uiKit/uiKit.js";
 import { ApplicationAuthorisationAPI } from "../security/env.js";
-import { terminate } from "./runtime.js";
+import { ProcessInformation, terminate } from "./runtime.js";
 import { IPCMessage, replyCallback, sendMessage } from "./messages.js";
 import ConstellationKernel from "../kernel.js";
 
@@ -71,14 +71,16 @@ export class Framework {
 		directory: string,
 		args: any[],
 		user: string,
-		password: string
+		password: string,
+		processInfo: ProcessInformation
 	) {
 		this.directory = directory;
 		this.env = ConstellationKernel.security.env.newEnv(
 			directory,
 			user,
 			password,
-			this
+			this,
+			processInfo
 		);
 
 		this.id = nextPID++;
@@ -167,9 +169,17 @@ export class Process extends Framework {
 		directory: string,
 		args: any[],
 		user: string,
-		password: string
+		password: string,
+		processInfo: ProcessInformation
 	) {
-		super(ConstellationKernel, directory, args, user, password);
+		super(
+			ConstellationKernel,
+			directory,
+			args,
+			user,
+			password,
+			processInfo
+		);
 
 		this.shout = function shout(name: string) {
 			if (ConstellationKernel.runtime.associations[name] == undefined) {
@@ -324,9 +334,17 @@ export class Application extends Process {
 		directory: string,
 		args: any[],
 		user: string,
-		password: string
+		password: string,
+		processInfo: ProcessInformation
 	) {
-		super(ConstellationKernel, directory, args, user, password);
+		super(
+			ConstellationKernel,
+			directory,
+			args,
+			user,
+			password,
+			processInfo
+		);
 		const UserInterface = ConstellationKernel.GraphicalInterface;
 		if (UserInterface == undefined) {
 			throw new Error(
@@ -355,9 +373,17 @@ export class Overlay extends Application {
 		directory: string,
 		args: any[],
 		user: string,
-		password: string
+		password: string,
+		processInfo: ProcessInformation
 	) {
-		super(ConstellationKernel, directory, args, user, password);
+		super(
+			ConstellationKernel,
+			directory,
+			args,
+			user,
+			password,
+			processInfo
+		);
 
 		const no = popupNo++;
 
