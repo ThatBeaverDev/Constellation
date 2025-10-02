@@ -177,6 +177,9 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 			this.TextInterface.init();
 		}
 
+		// start kernel execution loop
+		this.executionLoop();
+
 		if (guiInstallerRequired) {
 			const guiInstallerPath =
 				"/System/CoreExecutables/OOBEInstaller.appl";
@@ -222,8 +225,6 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 			panic(e, "executeCoreExecutableDuringStartup");
 			return;
 		}
-
-		this.executionLoop();
 
 		await exec.promise;
 		// now this means that the core process has terminated and the system can power off.
