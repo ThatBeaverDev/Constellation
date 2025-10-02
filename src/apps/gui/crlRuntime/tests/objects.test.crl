@@ -1,0 +1,13 @@
+const obj = #{
+    foo: "bar",
+    exec: function() {
+        println(obj.foo);
+    }
+};
+
+println(obj);
+println(obj.exec());
+
+const arr = [1, 2, 3];
+
+println(arr.0, arr.2);
