@@ -17,6 +17,12 @@ export class FilesystemInstaller {
 		this.fs = ConstellationKernel.fs;
 	}
 
+	async install() {
+		await this.rm_rf();
+		await this.folders();
+		await this.files();
+	}
+
 	async rm_rf() {
 		const fs = this.#ConstellationKernel.fs;
 
