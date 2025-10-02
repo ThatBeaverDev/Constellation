@@ -69,7 +69,7 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 	};
 	logs: [CapitalisedLogLevel, string, ...any[]][];
 	isTerminated: boolean = false;
-	install: (ConstellationKernel: ConstellationKernel) => Promise<void>;
+	install: (ConstellationKernel: ConstellationKernel) => Promise<boolean>;
 
 	// property types
 	GraphicalInterface?: KernelType extends { isGraphical: true }
@@ -96,6 +96,8 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 				? installer.install
 				: async () => {
 						await tcupkg(this, configuration.installationIdx, "/");
+
+						return false;
 					};
 
 		// subsystems
@@ -144,7 +146,7 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 	async init() {
 		await this.fs.init();
 
-		await this.install(this);
+		const guiInstallerRequired = await this.install(this);
 
 		await this.security.init();
 
@@ -173,6 +175,22 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 			sound.remove();
 		} else if (this.TextInterface !== undefined) {
 			this.TextInterface.init();
+		}
+
+		if (guiInstallerRequired) {
+			const guiInstallerPath =
+				"/System/CoreExecutables/OOBEInstaller.appl";
+
+			const exec = await this.runtime.execute(
+				guiInstallerPath,
+				[],
+				"system",
+				this.config.systemPassword,
+				undefined,
+				true
+			);
+
+			await exec.promise;
 		}
 
 		const coreExecDirectory =

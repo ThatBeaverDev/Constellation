@@ -23,6 +23,9 @@ export default class ConstellationConfiguration {
 	];
 	isDevmode: boolean = getFlagValue("dev") == "true";
 	static isDevmode: boolean = getFlagValue("dev") == "true";
+	isTestingInstaller: boolean = getFlagValue("installerTest") == "true";
+	static isTestingInstaller: boolean =
+		getFlagValue("installerTest") == "true";
 	systemPassword = "TODO:systemPasswordThatNeedsToBeChanged";
 
 	status: string = "";
