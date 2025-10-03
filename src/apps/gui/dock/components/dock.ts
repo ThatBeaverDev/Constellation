@@ -227,7 +227,7 @@ export default class Dock {
 		let y =
 			this.renderer.windowHeight - this.dockHeight * scale + dockPadding;
 
-		// render back
+		// render dock panel
 		this.renderer.box(
 			dockLeft,
 			this.renderer.windowHeight - this.dockHeight * scale,
@@ -276,62 +276,90 @@ export default class Dock {
 
 			x += iconGap * scale;
 
-			this.renderer.onClick(
-				iconID,
-				(left: number, top: number) => {
-					if (win == undefined) {
-						// check whether the app is even running at all
-						if (program.windows.length == 0) {
-							// start the app.
-							this.env.exec(directory);
-						} else {
-							// show preview box of all the windows
-							let contextMenuItems: Record<string, Function> = {};
-
-							for (const i in program.windows) {
-								const win = program.windows[i];
-
-								contextMenuItems[
-									`${win.iconName}-:-${win.name};${i}`
-								] = () => {
-									if (win.minimised) {
-										win.unminimise();
-									} else {
-										win.minimise();
-									}
-
-									this.env.windows.focusWindow(win.winID);
-								};
-							}
-
-							this.renderer.setContextMenu(
-								left,
-								top,
-								`Windows of ${name}`,
-								contextMenuItems
-							);
-						}
+			const leftClickCallback = (left: number, top: number) => {
+				if (win == undefined) {
+					// check whether the app is even running at all
+					if (program.windows.length == 0) {
+						// start the app.
+						this.env.exec(directory);
 					} else {
-						// just focus the one window we have.
-						if (win.minimised) {
-							win.unminimise();
-						} else {
-							win.minimise();
+						// show preview box of all the windows
+						let contextMenuItems: Record<string, Function> = {};
+
+						for (const i in program.windows) {
+							const win = program.windows[i];
+
+							contextMenuItems[
+								`${win.iconName}-:-${win.name};${i}`
+							] = () => {
+								if (win.minimised) {
+									win.unminimise();
+								} else {
+									win.minimise();
+								}
+
+								this.env.windows.focusWindow(win.winID);
+							};
 						}
 
-						this.env.windows.focusWindow(win.winID);
+						this.renderer.setContextMenu(
+							left,
+							top,
+							`Windows of ${name}`,
+							contextMenuItems
+						);
+					}
+				} else {
+					// just focus the one window we have.
+					if (win.minimised) {
+						win.unminimise();
+					} else {
+						win.minimise();
 					}
 
-					this.refresh();
-				},
-				(left: number, top: number) => {
-					// menu items
-					let contextMenuItems: Record<string, Function> = {
-						"folder-open-:-Show in Finder": () =>
-							this.env.exec("/Applications/Finder.appl", [
-								this.env.fs.resolve(directory, "..")
-							])
+					this.env.windows.focusWindow(win.winID);
+				}
+
+				this.refresh();
+			};
+			const rightClickCallback = (left: number, top: number) => {
+				// menu items
+				let contextMenuItems: Record<string, Function> = {};
+				let contextTitle = String(name);
+
+				if (directory == this.parent.directory) {
+					// it's us - show login shell options.
+
+					//buttons[`book-open-text-:-About ${this.parent.config.name}`];
+					//buttons[`cog-:-Settings`];
+					//buttons["rotate-cw-:-Restart"];
+					//buttons["power-:-Shut Down"];
+					//buttons["lock-:-Lock"];
+					//buttons[`log-out-:-Logout from ${this.env.user}`];
+
+					contextTitle = String(this.parent.config.name);
+
+					contextMenuItems[
+						`info-:-TODO:About ${this.parent.config.name}`
+					] = () => {};
+
+					contextMenuItems[`cog-:-Settings`] = () => {
+						this.env.exec("/Applications/Settings.appl");
 					};
+					contextMenuItems[`rotate-cw-:-TODO:Restart`] = () => {}; // restart
+					contextMenuItems[`power-:-TODO:Shutdown`] = () => {}; // shutdown once it's implemented
+					contextMenuItems[`lock-:-TODO:Lock`] = () => {}; // lock somehow
+					contextMenuItems[`log-out-:-Logout ${this.env.user}`] =
+						() => {
+							this.parent.exit();
+							return;
+						};
+				} else {
+					// it's just a normal app
+					contextMenuItems["folder-open-:-Show in Finder"] = () =>
+						this.env.exec("/Applications/Finder.appl", [
+							this.env.fs.resolve(directory, "..")
+						]);
 
 					if (win !== undefined) {
 						contextMenuItems = {
@@ -373,21 +401,26 @@ export default class Dock {
 						}
 					}
 
-					contextMenuItems = {
-						...contextMenuItems,
-						"dock-:-Unpin From Dock": () => {}
-					};
-
-					// show menu
-					this.renderer.setContextMenu(
-						left,
-						top,
-						name,
-						contextMenuItems
-					);
-
-					this.refresh();
+					contextMenuItems["dock-:-TODO:Unpin from Dock"] = () => {};
 				}
+
+				// show menu
+				this.renderer.setContextMenu(
+					left,
+					top,
+					contextTitle,
+					contextMenuItems
+				);
+
+				this.refresh();
+			};
+
+			this.renderer.onClick(
+				iconID,
+				directory == this.parent.directory
+					? rightClickCallback
+					: leftClickCallback,
+				rightClickCallback
 			);
 		};
 
