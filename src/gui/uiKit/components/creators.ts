@@ -162,6 +162,10 @@ export default class uiKitCreators {
 		this.textboxElems[id] = textbox;
 		if (this.focusedTextbox == undefined) this.focusedTextbox = textbox;
 
+		textbox.addEventListener("pointerdown", () => {
+			this.focusedTextbox = textbox;
+		});
+
 		return textbox;
 	};
 
@@ -262,6 +266,12 @@ export default class uiKitCreators {
 
 		area.value = String(this.textboxElems[id]?.value || ""); // make the value stay
 		this.textboxElems[id] = area;
+
+		if (this.focusedTextbox == undefined) this.focusedTextbox = area;
+
+		area.addEventListener("pointerdown", () => {
+			this.focusedTextbox = area;
+		});
 
 		return area;
 	};
