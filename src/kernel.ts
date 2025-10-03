@@ -2,7 +2,11 @@ import * as installer from "./installation/index.js";
 
 import { FilesystemAPI } from "./fs/fs.js";
 
-import { executionResult, ProgramRuntime } from "./runtime/runtime.js";
+import {
+	executionResult,
+	ProgramRuntime,
+	terminate
+} from "./runtime/runtime.js";
 import panic from "./lib/panic.js";
 import ConstellationConfiguration from "./constellation.config.js";
 import Security from "./security/index.js";
@@ -13,6 +17,7 @@ import { TextInterface } from "./tui/tui.js";
 import { tcupkg } from "./lib/packaging/tcupkg.js";
 import { ConstellationFileIndex } from "./lib/packaging/definitions.js";
 import { tcpkg } from "./lib/packaging/tcpkg.js";
+import postinstall from "./installation/postinstall.js";
 
 if (ConstellationConfiguration.isDevmode) {
 	(window as any).kernels = [];
@@ -180,20 +185,45 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 		// start kernel execution loop
 		this.executionLoop();
 
-		if (guiInstallerRequired) {
+		const runGuiInstaller = async () => {
+			const log = this.lib.logging.log.bind(this.lib.logging, path);
+			const debug = this.lib.logging.debug.bind(this.lib.logging, path);
+
 			const guiInstallerPath =
 				"/System/CoreExecutables/OOBEInstaller.appl";
 
+			const pipe: any[] = [];
+
+			log("Running GUI installer");
 			const exec = await this.runtime.execute(
 				guiInstallerPath,
-				[],
+				pipe,
 				"system",
 				this.config.systemPassword,
 				undefined,
+				true,
 				true
 			);
 
+			debug("Attaching background check for GUI installer completion");
+			let interval = setInterval(() => {
+				if (pipe.length > 0) {
+					log("GUI installer has completed.");
+					postinstall(this, pipe[0]);
+
+					debug("Terminating GUI installer.");
+					terminate(exec.process);
+
+					clearInterval(interval);
+					return;
+				}
+			});
+
 			await exec.promise;
+		};
+
+		if (guiInstallerRequired) {
+			await runGuiInstaller();
 		}
 
 		const coreExecDirectory =
