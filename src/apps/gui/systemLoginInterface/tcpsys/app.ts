@@ -203,7 +203,7 @@ export default class systemLoginInterface extends Application {
 			userInfo.fullName
 		);
 
-		this.renderer.textbox(
+		const textbox = this.renderer.textbox(
 			textboxLeft,
 			iconTop + iconSize + gap + nameHeight + gap,
 			textboxWidth,
@@ -211,7 +211,7 @@ export default class systemLoginInterface extends Application {
 			"Enter your password...",
 			{
 				enter: async () => {
-					const value = this.renderer.getTextboxContent();
+					const value = this.renderer.getTextboxContent(textbox);
 
 					if (value == null) {
 						return;

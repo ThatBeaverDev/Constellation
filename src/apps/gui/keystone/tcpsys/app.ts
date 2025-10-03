@@ -11,6 +11,7 @@ export default class KeystoneSearch extends Overlay {
 	entries: any;
 	rendering: any[] = [];
 	selector: number = 0;
+	counter: number = 0;
 
 	async init() {
 		this.renderer.windowName = "Keystone Search";
@@ -34,15 +35,6 @@ export default class KeystoneSearch extends Overlay {
 		this.fileInfo = obj.files;
 
 		await this.search("");
-		this.searchInterval = setInterval(async () => {
-			const query = this.renderer.getTextboxContent();
-
-			if (query == null) {
-				return;
-			}
-
-			await this.search(query);
-		}, 250);
 	}
 
 	index?: Function;
@@ -126,7 +118,7 @@ export default class KeystoneSearch extends Overlay {
 
 		this.renderer.clear();
 
-		this.renderer.textbox(
+		const textbox = this.renderer.textbox(
 			0,
 			0,
 			this.renderer.windowWidth,
@@ -139,6 +131,18 @@ export default class KeystoneSearch extends Overlay {
 				}
 			}
 		);
+
+		if (++this.counter == 0) {
+			this.searchInterval = setInterval(async () => {
+				const query = this.renderer.getTextboxContent(textbox);
+
+				if (query == null) {
+					return;
+				}
+
+				await this.search(query);
+			}, 250);
+		}
 
 		let y = 50;
 		for (const idx in this.rendering) {
