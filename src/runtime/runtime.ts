@@ -77,10 +77,13 @@ export function getProcessFromID(id: number): Process | undefined {
 }
 
 type executionFiletype = "js" | "crl";
-export type executionResult = {
+export interface executionResult {
 	promise: Promise<any>;
 	hasExited: boolean;
-};
+}
+export interface executionProcessResult extends executionResult {
+	process: executables.Process;
+}
 
 const crlDirectory = "/System/CoreExecutables/crlRuntime.appl";
 
@@ -307,12 +310,31 @@ export class ProgramRuntime {
 	 */
 	async execute(
 		appdir: string,
+		args: any[],
+		user: string,
+		password: string,
+		parent?: ProcessInformation,
+		waitForInit?: boolean,
+		includeProcess?: false
+	): Promise<executionResult>;
+	async execute(
+		appdir: string,
+		args: any[],
+		user: string,
+		password: string,
+		parent?: ProcessInformation,
+		waitForInit?: boolean,
+		includeProcess?: true
+	): Promise<executionProcessResult>;
+	async execute(
+		appdir: string,
 		args: any[] = [],
 		user: string,
 		password: string,
 		parent?: ProcessInformation,
-		waitForInit: boolean = true
-	): Promise<executionResult> {
+		waitForInit: boolean = true,
+		includeProcess: boolean = false
+	): Promise<executionResult | executionProcessResult> {
 		if (this.isTerminating)
 			throw new Error("Execution blocked: this kernel is terminating.");
 
@@ -390,7 +412,8 @@ export class ProgramRuntime {
 
 		let data: string = "";
 
-		const finalProgramArgs: any[] = [...args];
+		//const finalProgramArgs: any[] = [...args];
+		const finalProgramArgs: any[] = args;
 		let directory = String(appdir);
 
 		switch (type) {
@@ -564,6 +587,8 @@ export class ProgramRuntime {
 		AppsTimeStamp(`Open program from ${directory}`, start);
 
 		const result = ProcessWaitingObject(live);
+
+		if (includeProcess) return { ...result, process: live };
 
 		return result;
 	}
