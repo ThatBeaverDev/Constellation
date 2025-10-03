@@ -421,14 +421,7 @@ class UiKitRendererClass {
 	}
 
 	getTextboxContent(id: number) {
-		// insure there is actually a textbox
-		if (this.#creators.textboxElems !== undefined) {
-			// return the value
-			return this.#creators.textboxElems[id]?.value;
-		}
-
-		// return null otherwise
-		return null;
+		return this.#creators.textboxElems[id]?.value;
 	}
 
 	get darkmode() {
@@ -717,7 +710,7 @@ class UiKitRendererClass {
 					}
 
 					// @ts-expect-error // run the creator
-					const element = creator(i, ...newStep.args);
+					const element = creator(i + 1, ...newStep.args);
 
 					if (newStep.passthrough == true) {
 						element.style.pointerEvents = "none";
