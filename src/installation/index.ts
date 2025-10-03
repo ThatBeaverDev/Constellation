@@ -1,7 +1,8 @@
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
 import { preinstall } from "./fs.js";
-import devinstall from "./devinstall.js";
+import postinstall from "./postinstall.js";
 import ConstellationKernel from "../kernel.js";
+import { developmentOptions } from "./installation.config.js";
 
 /**
  * Runs the non-graphical installer
@@ -50,7 +51,7 @@ export async function install(ConstellationKernel: ConstellationKernel) {
 		ConstellationKernel.config.isDevmode &&
 		!ConstellationKernel.config.isTestingInstaller
 	) {
-		await devinstall(ConstellationKernel);
+		await postinstall(ConstellationKernel, developmentOptions);
 		return false;
 	} else {
 		return true;
