@@ -199,7 +199,6 @@ class UiKitRendererClass {
 	}
 
 	clear = () => {
-		this.#creators.hasTextbox = false;
 		this.#steps.splice(0, this.#steps.length + 10);
 
 		// window dimensions
@@ -265,13 +264,6 @@ class UiKitRendererClass {
 		callbacks: textboxCallbackObject,
 		options: uikitTextboxConfig = this.defaultConfig.uikitTextbox
 	) {
-		if (this.#creators.hasTextbox == true) {
-			throw new UIError("UI cannot have more than one textbox.");
-		}
-
-		// mark the textbox as present to prevent another from being created
-		this.#creators.hasTextbox = true;
-
 		// insure all values are met. if not, apply the default
 		const opts = {};
 		for (const i in this.defaultConfig.uikitTextbox) {
@@ -324,12 +316,6 @@ class UiKitRendererClass {
 		callbacks: textboxCallbackObject,
 		options: uikitTextareaConfig = this.defaultConfig.uikitTextarea
 	) {
-		if (this.#creators.hasTextbox == true) {
-			throw new UIError("UI cannot have more than one textbox.");
-		}
-
-		this.#creators.hasTextbox = true;
-
 		const obj: step = {
 			type: "uikitTextarea",
 			args: [x, y, width, height, callbacks, options]
@@ -421,19 +407,24 @@ class UiKitRendererClass {
 	readonly getTextHeight = getTextHeight;
 	readonly insertNewlines = insertNewlines;
 
-	setTextboxContent(content: string) {
+	setTextboxContent(id: number, content: string) {
 		// insure there is actually a textbox
-		if (this.#creators.textboxElem !== undefined) {
+		if (this.#creators.textboxElems !== undefined) {
 			// set the value
-			this.#creators.textboxElem.value = content;
+			const elem = this.#creators.textboxElems[id];
+
+			if (elem == undefined)
+				throw new UIError(`Textbox by ID ${id} doesn't exist.`);
+
+			elem.value = content;
 		}
 	}
 
-	getTextboxContent() {
+	getTextboxContent(id: number) {
 		// insure there is actually a textbox
-		if (this.#creators.textboxElem !== undefined) {
+		if (this.#creators.textboxElems !== undefined) {
 			// return the value
-			return this.#creators.textboxElem.value;
+			return this.#creators.textboxElems[id]?.value;
 		}
 
 		// return null otherwise
@@ -558,7 +549,7 @@ class UiKitRendererClass {
 
 			// just incase
 			if (item !== null) {
-				item.remove();
+				this.removeElement(item);
 			}
 			// @ts-ignore
 			this.#items.splice(i, 1);
@@ -568,19 +559,29 @@ class UiKitRendererClass {
 		this.#window.body.innerHTML = "";
 	}
 
-	#focusTextbox() {
-		const UserInterface = this.#ConstellationKernel.GraphicalInterface;
-		if (UserInterface == undefined) return;
+	removeElement = (element: HTMLElement) => {
+		const c = this.#creators;
 
-		const windowFocus = UserInterface.windows.getWindowOfId(
-			UserInterface.windows.focusedWindow
-		);
-		if (windowFocus == this.#window) {
-			if (this.#creators.textboxElem !== undefined) {
-				this.#creators.textboxElem.focus();
-			}
+		if (c.focusedTextbox == element) {
+			c.focusedTextbox = undefined;
 		}
-	}
+
+		if (
+			Object.values(c.textboxElems).includes(element as HTMLInputElement)
+		) {
+			const entries = Object.entries(c.textboxElems);
+
+			const index = entries
+				.map((item) => item[1])
+				.indexOf(element as HTMLInputElement);
+
+			const keyname = Number(entries[index][0]);
+
+			c.textboxElems[keyname] = undefined;
+		}
+
+		element.remove();
+	};
 
 	/**
 	 * Commits all UI elements since the last `renderer.clear()` call.
@@ -594,9 +595,12 @@ class UiKitRendererClass {
 		this.windowWidth = this.#window.body.clientWidth;
 		this.windowHeight = this.#window.body.clientHeight;
 
-		if (this.#creators.textboxElem !== undefined) {
-			if (UserInterface.windows.focusedWindow == this.#window.winID)
-				this.#creators.textboxElem.focus();
+		if (this.#creators.textboxElems !== undefined) {
+			if (UserInterface.windows.focusedWindow == this.#window.winID) {
+				const focusedBox = this.#creators.focusedTextbox;
+
+				if (focusedBox) focusedBox.focus();
+			}
 		}
 
 		function objectEquality(
@@ -683,7 +687,7 @@ class UiKitRendererClass {
 
 			// if the element has disappeared, simply remove the old one.
 			if (newStep == undefined) {
-				oldElement.remove();
+				this.removeElement(oldElement);
 				continue;
 			}
 
@@ -696,12 +700,13 @@ class UiKitRendererClass {
 
 			if (stepChanged) {
 				const applyCreator = () => {
-					if (oldElement) oldElement.remove();
+					if (oldElement) this.removeElement(oldElement);
 
 					const creator: (
+						id: number,
 						x: number,
 						y: number,
-						...args: any
+						...args: any[]
 					) => HTMLElement = this.#creators[newStep.type].bind(
 						this.#creators
 					);
@@ -712,7 +717,7 @@ class UiKitRendererClass {
 					}
 
 					// @ts-expect-error // run the creator
-					const element = creator(...newStep.args);
+					const element = creator(i, ...newStep.args);
 
 					if (newStep.passthrough == true) {
 						element.style.pointerEvents = "none";
@@ -907,8 +912,6 @@ class UiKitRendererClass {
 
 		this.#items = newItems;
 		this.#displayedSteps = newDisplayedSteps;
-
-		this.#focusTextbox();
 
 		uiKitTimestamp("Commit to Window", start);
 	}

@@ -9,9 +9,7 @@ export class uiKitInitialisationError extends Error {
 	}
 }
 
-export type uikitCreatorName = {
-	[K in keyof uiKitCreators]: K extends `uikit${string}` ? K : never;
-}[keyof uiKitCreators];
+export type uikitCreatorName = Extract<keyof uiKitCreators, `uikit${string}`>;
 
 // onClick types
 export interface onClickOptions {

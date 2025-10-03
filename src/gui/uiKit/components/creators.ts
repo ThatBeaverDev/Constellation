@@ -14,8 +14,10 @@ import { UiKitRenderer } from "../uiKit.js";
 export default class uiKitCreators {
 	#parent: UiKitRenderer;
 	#window: GraphicalWindow;
-	textboxElem: HTMLInputElement | HTMLTextAreaElement | undefined;
-	hasTextbox: boolean = false;
+	textboxElems: Partial<
+		Record<number, HTMLInputElement | HTMLTextAreaElement>
+	> = {};
+	focusedTextbox?: HTMLInputElement | HTMLTextAreaElement;
 	#ConstellationKernel: ConstellationKernel;
 
 	constructor(
@@ -31,6 +33,7 @@ export default class uiKitCreators {
 	}
 
 	uikitIcon = (
+		id: number,
 		x = 0,
 		y = 0,
 		name = "circle-help",
@@ -66,6 +69,7 @@ export default class uiKitCreators {
 	};
 
 	uikitText = (
+		id: number,
 		x = 0,
 		y = 0,
 		string = "",
@@ -91,6 +95,7 @@ export default class uiKitCreators {
 	};
 
 	uikitButton = (
+		id: number,
 		x = 0,
 		y = 0,
 		string = "",
@@ -114,6 +119,7 @@ export default class uiKitCreators {
 	};
 
 	uikitTextbox = (
+		id: number,
 		x = 0,
 		y = 0,
 		width = 200,
@@ -151,13 +157,15 @@ export default class uiKitCreators {
 			throw new UIError("uikit element has disappeared in processing");
 
 		if (options.isEmpty == false)
-			textbox.value = String(this.textboxElem?.value || ""); // make the value stay
-		this.textboxElem = textbox;
+			textbox.value = String(this.textboxElems[id]?.value || ""); // make the value stay
+
+		this.textboxElems[id] = textbox;
+		if (this.focusedTextbox == undefined) this.focusedTextbox = textbox;
 
 		return textbox;
 	};
 
-	uikitVerticalLine = (x: number, y: number, height: number) => {
+	uikitVerticalLine = (id: number, x: number, y: number, height: number) => {
 		const line = document.createElement("div");
 		line.className = "uikitVerticalLine";
 
@@ -172,7 +180,7 @@ export default class uiKitCreators {
 		return line;
 	};
 
-	uikitHorizontalLine = (x: number, y: number, width: number) => {
+	uikitHorizontalLine = (id: number, x: number, y: number, width: number) => {
 		const line = document.createElement("div");
 		line.className = "uikitHorizontalLine";
 
@@ -188,6 +196,7 @@ export default class uiKitCreators {
 	};
 
 	uikitProgressBar = (
+		id: number,
 		x: number,
 		y: number,
 		width: number,
@@ -217,6 +226,7 @@ export default class uiKitCreators {
 	};
 
 	uikitTextarea = (
+		id: number,
 		x: number = 0,
 		y: number = 0,
 		width: number = 100,
@@ -250,13 +260,14 @@ export default class uiKitCreators {
 
 		if (focusedWindow == this.#window.winID) area.focus();
 
-		area.value = String(this.textboxElem?.value || ""); // make the value stay
-		this.textboxElem = area;
+		area.value = String(this.textboxElems[id]?.value || ""); // make the value stay
+		this.textboxElems[id] = area;
 
 		return area;
 	};
 
 	uikitBox = (
+		id: number,
 		x: number = 0,
 		y: number = 100,
 		width: number = 100,
@@ -289,6 +300,7 @@ export default class uiKitCreators {
 		return box;
 	};
 	uikitCanvas2D = (
+		id: number,
 		x: number,
 		y: number,
 		width: number,
@@ -393,6 +405,3 @@ export default class uiKitCreators {
 const imageCache: Record<string, HTMLImageElement> = {};
 const dataUriKeyMap: Record<string, string> = {};
 let dataUriCounter = 0;
-
-// @ts-expect-error
-window.imageCache = imageCache;

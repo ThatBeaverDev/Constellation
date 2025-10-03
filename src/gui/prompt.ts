@@ -187,7 +187,7 @@ export async function showUserPrompt(
 	} else if (type == "question") {
 		return new Promise((resolve: (result: string) => void) => {
 			// textbox
-			ui.textbox(
+			const textbox = ui.textbox(
 				outerPadding,
 				y,
 				windowWidth - outerPadding - outerPadding,
@@ -207,7 +207,7 @@ export async function showUserPrompt(
 			const done = ui.button(doneLeft, y, "Done");
 			ui.onClick(done, () => {
 				popup.remove();
-				resolve(ui.getTextboxContent() || "");
+				resolve(ui.getTextboxContent(textbox) || "");
 			});
 			y += doneHeight + innerPadding;
 
