@@ -96,14 +96,23 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 
 		this.logs = logs;
 
-		this.install =
-			configuration?.installationIdx == undefined
-				? installer.install
-				: async () => {
-						await tcupkg(this, configuration.installationIdx, "/");
+		try {
+			this.install =
+				configuration?.installationIdx == undefined
+					? installer.install
+					: async () => {
+							await tcupkg(
+								this,
+								configuration.installationIdx,
+								"/"
+							);
 
-						return false;
-					};
+							return false;
+						};
+		} catch (e) {
+			// TODO: PANIC
+			throw e;
+		}
 
 		// subsystems
 		this.fs = new FilesystemAPI(rootPoint);
