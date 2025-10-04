@@ -247,10 +247,6 @@ export function findEndOfFirstBracket(text: string): number {
 			case '"':
 			case "'":
 			case "`":
-				if (brackets.length !== 0) {
-					break;
-				}
-
 				if (quotes == char) {
 					quotes = "";
 				} else {
@@ -350,10 +346,6 @@ export function findEndOfFirstQuotation(text: string): number {
 			case '"':
 			case "'":
 			case "`":
-				if (brackets.length !== 0) {
-					break;
-				}
-
 				if (quotes == char) {
 					quotes = "";
 					if (brackets.length == 0) return i;
@@ -456,10 +448,6 @@ export function findFirstValid(text: string, character: string): number {
 			case '"':
 			case "'":
 			case "`":
-				if (brackets.length !== 0) {
-					break;
-				}
-
 				if (quotes == char) {
 					quotes = "";
 				} else {
