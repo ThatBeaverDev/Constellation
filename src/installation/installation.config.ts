@@ -118,6 +118,8 @@ export const files: Record<
 		directory: "/System/CoreExecutables/OOBEInstaller.appl"
 	},
 
+	"/build/syslib/gui.js": "/System/CoreLibraries/gui.js",
+
 	// Filetype database manager
 	"/build/apps/background/com.constellation.fTypeDbMgr.idx": {
 		type: "application",
@@ -133,6 +135,10 @@ export const files: Record<
 	"/build/apps/com.constellation.crlRuntime.idx": {
 		type: "application",
 		directory: "/System/CoreExecutables/crlRuntime.appl"
+	// preview
+	"/build/apps/com.constellation.preview.idx": {
+		type: "application",
+		directory: "/Applications/Preview.appl"
 	}
 };
 
