@@ -388,6 +388,18 @@ export class CrlRuntime {
 				break;
 			}
 
+			case "reassignment": {
+				const target = holdingScope.variables.get(data.name);
+				if (target == undefined)
+					throw new Error(`Variable ${data.name} is not defined!`);
+
+				const value = await this.evalNode(scopes, data.value);
+				target.value = value;
+
+				holdingScope.variables.set(data.name, target);
+				break;
+			}
+
 			case "functionCall": {
 				if (this.isDebug)
 					this.parent.debug(
