@@ -1,4 +1,10 @@
-import { OperationReference, operations } from "../config.js";
+import {
+	OperationReference,
+	operations,
+	reassignmentOperators,
+	ReassignmentReference,
+	ReassignmentType
+} from "../config.js";
 import {
 	AstBlockNode,
 	AstBooleanNode,
@@ -335,63 +341,123 @@ export function generateTokenAST(
 						value: {
 							type: "newGlobal",
 							name: tokens[1],
-							value: generateTokenAST(tokens[3], debug)
+							value: generateTokenAST(
+								tokens.splice(3, Infinity).join(" "),
+								debug
+							)
 						}
 					};
 
 					return obj;
 				}
 				default:
-					debug("token", token, " is function call");
-
-					let tkn = String(token);
-					if (
-						tkn.indexOf("(") == -1 ||
-						tkn.indexOf("(") > tkn.indexOf("{")
-					) {
-						tkn = tkn.replace("{", "() {");
-						debug("Patched", token, "to", tkn);
-					}
-
-					// extract variable name
-					const target = tkn.trim().textBefore("(").trim();
-
-					debug("Target is", target, "from", tkn);
-
-					const argsWithNoPrebracket = tkn
-						.trim()
-						.textAfter("(")
-						.trim();
-					const args = "(" + argsWithNoPrebracket;
-
-					const endOfBrackets = findEndOfFirstBracket(args);
-					const argsWithoutBrackets = args
-						.trim()
-						.substring(1, endOfBrackets);
-
-					const postArgs = tkn
-						.substring(findEndOfFirstBracket(tkn) + 1, Infinity)
-						.trim();
-
-					const arr = [...tokenise(argsWithoutBrackets), postArgs];
-					const argsTokens = removeBlanks(arr);
-
-					const argsNodes = argsTokens.map((tkn) =>
-						generateTokenAST(tkn, debug)
+					const reassignmentSymbols = Object.keys(
+						reassignmentOperators
 					);
 
-					const obj: AstCallNode = {
-						type: "code",
-						value: {
-							function: generateTokenAST(target, debug),
-							type: "functionCall",
-							args: argsNodes
+					if (reassignmentSymbols.includes(tokens[1])) {
+						// reassignment
+						debug("token", token, " is reassignment");
+
+						let reassignmentType: ReassignmentReference;
+						switch (tokens[1] as ReassignmentType) {
+							case "=":
+								reassignmentType = "assign";
+								break;
+							case "+=":
+								reassignmentType = "add";
+								break;
+							case "-=":
+								reassignmentType = "minus";
+								break;
+							case "*=":
+								reassignmentType = "multiply";
+								break;
+							case "/=":
+								reassignmentType = "divide";
+								break;
+							case "**=":
+								reassignmentType = "exponent";
+								break;
+							case "%=":
+								reassignmentType = "remainder";
+								break;
+							default:
+								throw new Error(
+									`${tokens[1]} is not implemented in AST generation for reassignment.`
+								);
 						}
-					};
 
-					debug("Result of", token, "is", obj);
+						const obj: AstCallNode = {
+							type: "code",
+							value: {
+								type: "reassignment",
+								name: tokens[0],
+								reassignmentType,
+								value: generateTokenAST(
+									tokens.splice(2, Infinity).join(" "),
+									debug
+								)
+							}
+						};
 
-					return obj;
+						return obj;
+					} else {
+						// function call
+						debug("token", token, " is function call");
+
+						let tkn = String(token);
+						if (
+							tkn.indexOf("(") == -1 ||
+							tkn.indexOf("(") > tkn.indexOf("{")
+						) {
+							tkn = tkn.replace("{", "() {");
+							debug("Patched", token, "to", tkn);
+						}
+
+						// extract variable name
+						const target = tkn.trim().textBefore("(").trim();
+
+						debug("Target is", target, "from", tkn);
+
+						const argsWithNoPrebracket = tkn
+							.trim()
+							.textAfter("(")
+							.trim();
+						const args = "(" + argsWithNoPrebracket;
+
+						const endOfBrackets = findEndOfFirstBracket(args);
+						const argsWithoutBrackets = args
+							.trim()
+							.substring(1, endOfBrackets);
+
+						const postArgs = tkn
+							.substring(findEndOfFirstBracket(tkn) + 1, Infinity)
+							.trim();
+
+						const arr = [
+							...tokenise(argsWithoutBrackets),
+							postArgs
+						];
+						const argsTokens = removeBlanks(arr);
+
+						const argsNodes = argsTokens.map((tkn) =>
+							generateTokenAST(tkn, debug)
+						);
+
+						const obj: AstCallNode = {
+							type: "code",
+							value: {
+								function: generateTokenAST(target, debug),
+								type: "functionCall",
+								args: argsNodes
+							}
+						};
+
+						debug("Result of", token, "is", obj);
+
+						return obj;
+					}
 			}
 		}
 	}
