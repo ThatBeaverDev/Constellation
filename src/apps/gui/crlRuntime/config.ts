@@ -4,7 +4,8 @@ const manifest: ApplicationManifest = {
 	description: "Constellation's runner for CRL.",
 	category: "Developer",
 	version: 0,
-	icon: "component"
+	icon: "component",
+	filetypes: [".crl", ".crlib"]
 };
 
 export default manifest;
