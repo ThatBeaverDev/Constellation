@@ -39,7 +39,7 @@ export function unwrapValue(
 export function unwrapValue(
 	runtimeValue: RuntimeList,
 	debug: typeof console.debug
-): any;
+): any[];
 export function unwrapValue(
 	runtimeValue: RuntimeDict,
 	debug: typeof console.debug
