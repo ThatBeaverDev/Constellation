@@ -1,4 +1,4 @@
-import TerminalAlias from "../../../../lib/terminalAlias";
+import TerminalAlias from "../../../../lib/terminalAlias.js";
 import { getType } from "mime";
 
 interface TCPackage {

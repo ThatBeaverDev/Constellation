@@ -1,4 +1,4 @@
-import { appFindResult, fileInfo } from "../../keystone/lib/appfind";
+import { appFindResult, fileInfo } from "../../keystone/lib/appfind.js";
 
 export default class library extends Application {
 	index: { files: fileInfo[]; names: string[] } = { files: [], names: [] };

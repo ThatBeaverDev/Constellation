@@ -1,4 +1,4 @@
-import { uikitTextboxConfig } from "../../../../gui/uiKit/definitions";
+import { uikitTextboxConfig } from "../../../../gui/uiKit/definitions.js";
 
 // convert anything to a string, NICELY (no [object Object] here)
 function stringify(content: object, fancy: boolean = false) {

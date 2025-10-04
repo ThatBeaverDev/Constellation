@@ -1,4 +1,4 @@
-import { UiKitRenderer } from "../uiKit";
+import { UiKitRenderer } from "../uiKit.js";
 
 export default class UIKitEventListeners {
 	#parent: UiKitRenderer;

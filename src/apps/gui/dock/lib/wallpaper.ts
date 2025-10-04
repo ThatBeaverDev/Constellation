@@ -1,4 +1,4 @@
-//import TerminalAlias from "../../../lib/terminalAlias";
+//import TerminalAlias from "../../../lib/terminalAlias.js";
 //const windowsAPI = await env.include("/System/windows.js");
 //
 //export default async function wallpaper(

@@ -1,4 +1,4 @@
-import { ApplicationAuthorisationAPI } from "../security/env";
+import { ApplicationAuthorisationAPI } from "../security/env.js";
 
 /**
  * The type which is exposed to CLI utilities as a proxy to the executing app, providing a standardised interface.

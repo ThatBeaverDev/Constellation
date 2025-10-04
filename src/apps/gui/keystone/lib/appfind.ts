@@ -1,4 +1,4 @@
-import TerminalAlias from "../../../../lib/terminalAlias";
+import TerminalAlias from "../../../../lib/terminalAlias.js";
 import { pathName, pathIcon, pathVisible, getAppConfig } from "pathinf";
 
 export type fileInfo = {

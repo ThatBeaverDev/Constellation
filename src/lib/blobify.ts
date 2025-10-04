@@ -1,4 +1,4 @@
-import { FilesystemAPI } from "../fs/fs";
+import { FilesystemAPI } from "../fs/fs.js";
 
 const blobifyCache: Record<string, string> = {};
 

@@ -1,4 +1,4 @@
-import { ApplicationAuthorisationAPI } from "../security/env";
+import { ApplicationAuthorisationAPI } from "../security/env.js";
 
 const applicationExtensions = ["appl", "backgr"];
 

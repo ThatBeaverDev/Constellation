@@ -1,5 +1,5 @@
 import { runTests } from "../../../../tests/libtest.js";
-import { generateTokenAST } from "../components/ast/ast.js";
+import { generateTokenAST } from "../components/ast/generateTokenAst.js";
 
 const debug = console.debug;
 

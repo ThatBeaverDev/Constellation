@@ -1,5 +1,5 @@
-import TerminalAlias from "../../../../lib/terminalAlias";
-import { filetypeDatabase } from "../tcpsys/app";
+import TerminalAlias from "../../../../lib/terminalAlias.js";
+import { filetypeDatabase } from "../tcpsys/app.js";
 
 export default async function getApplicationOfFiletype(
 	parent: TerminalAlias,

@@ -1,5 +1,5 @@
-import { UiKitRenderer } from "../../../../gui/uiKit/uiKit";
-import dockAndDesktop from "../tcpsys/app";
+import { UiKitRenderer } from "../../../../gui/uiKit/uiKit.js";
+import dockAndDesktop from "../tcpsys/app.js";
 
 export interface menubarConfig {}
 
