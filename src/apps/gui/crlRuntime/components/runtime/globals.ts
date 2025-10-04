@@ -122,7 +122,21 @@ export class GlobalScope extends DynamicScope {
 		// function declarations
 		this.newScopeFunction(
 			"function",
-			(scopes: RuntimeScope[], block: RuntimeValue): RuntimeFunction => {
+			(
+				scopes: RuntimeScope[],
+				...args: RuntimeValue[]
+			): RuntimeFunction => {
+				const functionParameters = args.slice(0, args.length - 1);
+
+				functionParameters.forEach((item) => {
+					if (item.type !== "string") {
+						throw new Error(
+							"Arguement names are required to be strings."
+						);
+					}
+				});
+
+				const block = args.at(-1);
 				if (block?.type !== "block") {
 					throw new Error(
 						"Block is required in function declaration."
@@ -132,11 +146,21 @@ export class GlobalScope extends DynamicScope {
 				const fnc: RuntimeFunction = {
 					type: "programFunction",
 					value: async (
-						scopes: RuntimeScope[]
+						holdeeScope: RuntimeScope[],
+						...args: RuntimeValue[]
 					): Promise<RuntimeValue> => {
+						const variables: Map<string, RuntimeValue> = new Map();
+
+						for (const i in functionParameters) {
+							const param = functionParameters[i];
+
+							variables.set(unwrapValue(param, debug), args[i]);
+						}
+
 						await this.runtime.evalBlock(
 							scopes,
-							unwrapValue(block, debug)
+							unwrapValue(block, debug),
+							variables
 						);
 
 						// TODO: FUNCTION RETURNS
