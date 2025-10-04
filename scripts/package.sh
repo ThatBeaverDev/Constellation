@@ -67,6 +67,9 @@ compile() {
 
     # Build languageRuntime
     ./scripts/tcpkg build/apps/gui/crlRuntime build/apps/com.constellation.crlRuntime.idx -override=true
+
+    # Build previewer
+    ./scripts/tcpkg build/apps/gui/preview build/apps/com.constellation.preview.idx -override=true
 }
 
 # first param is directory, second param is name

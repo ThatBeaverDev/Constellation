@@ -1,4 +1,5 @@
 import finder, { listing } from "../tcpsys/app.js";
+import { openFile } from "gui";
 
 export default class finderInteractions {
 	renderer: finder["renderer"];
@@ -43,11 +44,8 @@ export default class finderInteractions {
 			// select and submit the file
 			this.parent.pickerSubmit();
 		} else {
-			/* TODO: OPEN THE FILE! */
-			this.renderer.prompt(
-				"Functionality not implemented: opening files",
-				"no current API for opening files in applications."
-			);
+			// just open it with the gui utilities
+			openFile(this.env, directory);
 		}
 	}
 	async openDirectory(directory: string) {

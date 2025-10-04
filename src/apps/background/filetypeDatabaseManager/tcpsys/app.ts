@@ -5,11 +5,12 @@ export interface filetypeDatabase {
 	/**
 	 * Filetype-to-directory mapping
 	 */
-	assignments: Record<string, string>;
+	assignments: Record<string, string[]>;
 	apps: fileInfo[];
 }
 
 let running: boolean = false;
+let extraAssignments: typeof requiredAllocations = [];
 export default class filetypeDatabaseManager extends BackgroundProcess {
 	databaseDirectory = "/System/ftypedb.json";
 	database?: filetypeDatabase;
@@ -20,35 +21,59 @@ export default class filetypeDatabaseManager extends BackgroundProcess {
 	indexingInterval: number = 25000;
 
 	indexLock: boolean = false;
+
+	buildAssignments(db: filetypeDatabase) {
+		db.assignments = {};
+		const assignments = db.assignments;
+
+		function assign(filetype: string, directory: string) {
+			if (assignments[filetype] == undefined) {
+				assignments[filetype] = [directory];
+			} else {
+				assignments[filetype].push(directory);
+			}
+		}
+
+		for (const program of db.apps) {
+			for (const filetype of program.filetypes) {
+				assign(filetype, program.directory);
+			}
+		}
+
+		extraAssignments = [...extraAssignments, ...requiredAllocations];
+
+		for (const assignment of extraAssignments) {
+			assign(assignment.filetype, assignment.application);
+		}
+
+		return db;
+	}
+
 	async index() {
+		// startup, prevent double indexing
 		this.env.debug("indexing...");
 		if (this.indexLock == true) return;
 		this.indexLock = true;
 
+		// init db
 		const db: typeof this.database = { apps: [], assignments: {} };
 
-		// code
+		// run appfind
 		const shellResult = await this.env.shell.exec("appfind");
 		if (shellResult == undefined)
 			throw new Error(
 				"System binary 'appfind' is not present. Application indexing is not available."
 			);
 
+		// process appfind
 		const appfind = shellResult.result as appFindResult;
 		db.apps = appfind.files;
 
-		// run through requested allocations from the shell utility and reflect it
-		while (requiredAllocations.length > 0) {
-			this.env.debug(requiredAllocations);
-			const allocation = requiredAllocations[0];
-
-			db.assignments[allocation.filetype] = allocation.application;
-
-			requiredAllocations.splice(0, 1);
-		}
+		// build assignments
+		let finalDb = this.buildAssignments(db);
 
 		// commit to the main object and write to disk
-		this.database = db;
+		this.database = finalDb;
 		await this.env.fs.writeFile(
 			this.databaseDirectory,
 			JSON.stringify(this.database)

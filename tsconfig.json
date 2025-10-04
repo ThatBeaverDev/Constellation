@@ -27,6 +27,7 @@
 			"pathinf": ["./src/syslib/pathinf.ts"],
 			"blob": ["./src/syslib/blob.ts"],
 			"mime": ["./src/syslib/mime.ts"],
+			"gui": ["./src/syslib/gui.ts"],
 			"fzf": ["./src/syslib/external/fzf.ts"]
 		},
 		"noUnusedLocals": true,
