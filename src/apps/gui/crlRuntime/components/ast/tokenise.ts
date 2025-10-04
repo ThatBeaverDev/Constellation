@@ -121,11 +121,6 @@ export function tokenise(
 			case '"':
 			case "'":
 			case "`":
-				if (brackets.length !== 0) {
-					stage();
-					break;
-				}
-
 				if (quotes == char) {
 					quotes = "";
 				} else {
@@ -148,11 +143,11 @@ export function tokenise(
 
 	if (brackets.length !== 0) {
 		throw new Error(
-			`More brackets where opened than were closed! (in ${text})`
+			`More brackets where opened than were closed! (in '${text}')`
 		);
 	}
 	if (quotes !== "") {
-		throw new Error("Quotes were not closed properly!");
+		throw new Error(`Quotes were not closed properly! (in '${text}')`);
 	}
 
 	if (splitOnSpaces == true) {
