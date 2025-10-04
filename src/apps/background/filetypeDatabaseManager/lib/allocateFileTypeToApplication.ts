@@ -1,4 +1,4 @@
-import TerminalAlias from "../../../../lib/terminalAlias";
+import TerminalAlias from "../../../../lib/terminalAlias.js";
 
 export const requiredAllocations: { application: string; filetype: string }[] =
 	[];

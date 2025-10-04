@@ -1,4 +1,4 @@
-import systemSettings from "../../tcpsys/app";
+import systemSettings from "../../tcpsys/app.js";
 
 export const list = ["home", "windows"];
 

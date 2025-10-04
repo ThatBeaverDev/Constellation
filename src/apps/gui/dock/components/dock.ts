@@ -1,6 +1,6 @@
-import { UiKitRenderer } from "../../../../gui/uiKit/uiKit";
-import { WindowAlias } from "../../../../security/definitions";
-import dockAndDesktop from "../tcpsys/app";
+import { UiKitRenderer } from "../../../../gui/uiKit/uiKit.js";
+import { WindowAlias } from "../../../../security/definitions.js";
+import dockAndDesktop from "../tcpsys/app.js";
 import { getAppConfig, pathIcon } from "pathinf";
 
 export interface dockConfig {

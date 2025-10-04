@@ -1,4 +1,4 @@
-import { UserAlias } from "../../../../security/definitions";
+import { UserAlias } from "../../../../security/definitions.js";
 
 export default class systemLoginInterface extends Application {
 	users: Record<UserAlias["name"], UserAlias> = {};

@@ -1,4 +1,4 @@
-import TerminalAlias from "../../../../lib/terminalAlias";
+import TerminalAlias from "../../../../lib/terminalAlias.js";
 
 export default async function ls(parent: TerminalAlias, directory = ".") {
 	const dir = parent.env.fs.resolve(parent.path, directory);

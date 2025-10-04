@@ -1,5 +1,5 @@
-import body from "../resources/panels/body";
-import sidebar from "../resources/panels/sidebar";
+import body from "../resources/panels/body.js";
+import sidebar from "../resources/panels/sidebar.js";
 
 export default class systemSettings extends Application {
 	sidebar?: sidebar;
