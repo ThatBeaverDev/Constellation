@@ -1,4 +1,4 @@
-import { operations } from "../config.js";
+import { operations, reassignmentOperators } from "../config.js";
 import { AstTokenType } from "../definitions.js";
 import {
 	findEndOfFirstBracket,
@@ -26,7 +26,12 @@ export function getTokenType(string: string): AstTokenType {
 	if (isList(token)) return "list";
 	if (isDict(token)) return "dict";
 
-	if (isFunctionCall(token) || isVariableDeclaration(token)) return "code";
+	if (
+		isFunctionCall(token) ||
+		isVariableDeclaration(token) ||
+		isVariableAssignment(token)
+	)
+		return "code";
 	if (isBlock(token)) return "block";
 	if (isProperty(token)) return "property";
 	if (isVar(token)) return "var";
@@ -224,6 +229,17 @@ function isVariableDeclaration(token: string): Boolean {
 	}
 
 	return ok;
+}
+function isVariableAssignment(token: string): Boolean {
+	const tokens = tokenise(token, true);
+
+	const reassignmentSymbols = Object.keys(reassignmentOperators);
+
+	if (reassignmentSymbols.includes(tokens[1])) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 function isOperation(token: string): Boolean {
