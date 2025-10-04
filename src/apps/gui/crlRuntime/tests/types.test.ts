@@ -128,6 +128,16 @@ const { logs } = await runTests([
 		args: ["foo.bar"],
 		expectedResult: "property"
 	},
+	{
+		function: getTokenType,
+		args: ["foo.[bar]"],
+		expectedResult: "property"
+	},
+	{
+		function: getTokenType,
+		args: ['token != "."'],
+		expectedResult: "operation"
+	},
 
 	// code
 	{ function: getTokenType, args: ["foo(bar)"], expectedResult: "code" },
@@ -176,7 +186,10 @@ const { logs } = await runTests([
 	{ function: getTokenType, args: ["\ntrue\n"], expectedResult: "bool" },
 	{ function: getTokenType, args: [" "], expectedResult: "none" },
 	{ function: getTokenType, args: [" word "], expectedResult: "var" }, // unicode spaces
-	{ function: getTokenType, args: ["\u200Bhidden"], expectedResult: "none" } // zero-width space
+	{ function: getTokenType, args: ["\u200Bhidden"], expectedResult: "none" }, // zero-width space
+
+	// reassignment
+	{ function: getTokenType, args: ["foo = bar"], expectedResult: "code" }
 ]);
 
 console.log(logs);

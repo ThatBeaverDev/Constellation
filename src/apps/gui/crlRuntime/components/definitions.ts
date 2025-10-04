@@ -159,9 +159,14 @@ export type RuntimeCallable = (
 	scope: RuntimeScope[],
 	...args: RuntimeValue[]
 ) => RuntimeValue | Promise<RuntimeValue>;
-export interface RuntimeFunction {
+
+interface RuntimeBaseFunction {
 	type: "programFunction";
-	value: AstNode[] | RuntimeCallable;
+	isLazy: boolean;
+	value: RuntimeCallable;
+}
+export interface RuntimeFunction extends RuntimeBaseFunction {
+	isLazy: false;
 }
 
 export interface RuntimeList {
@@ -174,6 +179,15 @@ export interface RuntimeDict {
 	value: Map<RuntimeValue, RuntimeValue>;
 }
 
+// lazy stuff
+export interface RuntimeLazyFunction extends RuntimeBaseFunction {
+	isLazy: true;
+}
+export interface RuntimeLazyValue {
+	type: "lazyValue";
+	value: { scopes: RuntimeScope[]; value: AstNode };
+}
+
 export type RuntimeValue =
 	| RuntimeString
 	| RuntimeNumber
@@ -182,4 +196,6 @@ export type RuntimeValue =
 	| RuntimeFunction
 	| RuntimeBlock
 	| RuntimeList
-	| RuntimeDict;
+	| RuntimeDict
+	| RuntimeLazyFunction
+	| RuntimeLazyValue;
