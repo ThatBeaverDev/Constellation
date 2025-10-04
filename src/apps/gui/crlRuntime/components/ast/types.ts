@@ -175,6 +175,8 @@ function isVar(token: string): Boolean {
 
 	if (chars.length == 0) return false;
 
+	if (chars[0] == "." || chars.at(-1) == ".") return false;
+
 	let hasValidCharacters: boolean = false;
 	for (const char of chars) {
 		if (whitelist.includes(char.toLocaleLowerCase())) {
@@ -192,7 +194,9 @@ function isVar(token: string): Boolean {
 }
 
 function isProperty(token: string) {
-	return token.includes(".") && token[0] !== ".";
+	return (
+		token.includes(".") && isVar(token.textBefore(".")) && token[0] !== "."
+	);
 }
 
 function isFunctionCall(token: string): Boolean {
