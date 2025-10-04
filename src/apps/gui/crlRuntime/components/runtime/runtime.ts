@@ -6,7 +6,6 @@ import {
 	RuntimeBlock,
 	RuntimeBoolean,
 	RuntimeDict,
-	RuntimeFunction,
 	RuntimeList,
 	RuntimeNone,
 	RuntimeNumber,
@@ -18,7 +17,7 @@ import {
 import { AstNode } from "../definitions.js";
 import { DynamicScope, GlobalScope } from "./globals.js";
 import { Scope } from "./scope.js";
-import { unwrapValue } from "./utils.js";
+import { makeValueLazy, unwrapValue } from "./utils.js";
 
 export function runBlock(scope: any, block: AstNode[]) {}
 
@@ -111,12 +110,24 @@ export class CrlRuntime {
 			const variableScope = new Scope(this, this.isDebug);
 			extendedScopes = [...extendedScopes, variableScope];
 
+			const variableList = variables.keys();
+			this.debug(
+				"Evaluation of block has local variables passed.",
+				variableList,
+				variables
+			);
+
 			// assign variables
-			for (const variableName in variables) {
+			for (const variableName of variables.keys()) {
+				this.debug(
+					`Attaching variable ${variableName} to scope,`,
+					variableScope
+				);
+
 				const variableValue = variables.get(variableName);
 				if (!variableValue)
 					throw new Error(
-						"Arguement passed in function call went missing."
+						"Argument passed in function call went missing."
 					);
 
 				variableScope.variables.set(variableName, {
@@ -470,40 +481,41 @@ export class CrlRuntime {
 						scopes
 					);
 
-				const callee = (await this.evalNode(
-					scopes,
-					data.function
-				)) as RuntimeFunction;
-
-				const args = await Promise.all(
-					data.args.map((item) => this.evalNode(scopes, item))
-				);
-
-				if (
-					callee == this.globalScope.variables.get("include")?.value
-				) {
-					// this is an import statement. it acts differently
-					await this.handleImport(
-						scopes,
-						{ type: "none", value: null },
-						args[0]
-					);
-
-					return none();
-				}
+				const callee = await this.evalNode(scopes, data.function);
 
 				let result: RuntimeValue;
+
 				if (callee.type !== "programFunction")
 					throw new Error("This is not a function!");
 
-				if (typeof callee.value == "function") {
+				if (callee.isLazy) {
+					// lazy
+					const args = await Promise.all(
+						data.args.map((item) => makeValueLazy(scopes, item))
+					);
+
 					result = await callee.value(scopes, ...args);
 				} else {
-					// TODO: Make a new scope
-					await this.evalBlock(scopes, callee.value);
+					const args = await Promise.all(
+						data.args.map((item) => this.evalNode(scopes, item))
+					);
 
-					// TODO: return value!
-					result = none();
+					// extra case for include
+					if (
+						callee ==
+						this.globalScope.variables.get("include")?.value
+					) {
+						// this is an import statement. it acts differently
+						await this.handleImport(
+							scopes,
+							{ type: "none", value: null },
+							args[0]
+						);
+
+						return none();
+					}
+
+					result = await callee.value(scopes, ...args);
 				}
 
 				return result;

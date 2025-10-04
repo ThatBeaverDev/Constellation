@@ -5,9 +5,11 @@ import {
 	RuntimeCallable,
 	RuntimeDict,
 	RuntimeFunction,
+	RuntimeLazyValue,
 	RuntimeList,
 	RuntimeNone,
 	RuntimeNumber,
+	RuntimeScope,
 	RuntimeString,
 	RuntimeValue
 } from "../definitions.js";
@@ -89,6 +91,10 @@ export function unwrapValue(
 	}
 
 	debug("Unwrapped to", result);
+	if (result == undefined) {
+		debug("runtimeValue", runtimeValue, "unwrapped to undefined.");
+		throw new Error("runtimeValue unwrapped to undefined.");
+	}
 
 	return result;
 }
@@ -130,6 +136,7 @@ export function wrapValue(
 		case "function": {
 			const obj: RuntimeFunction = {
 				type: "programFunction",
+				isLazy: false,
 				value: value
 			};
 
@@ -147,4 +154,16 @@ export function wrapValue(
 		default:
 			throw new Error(`Type ${typeof value} cannot be wrapped.`);
 	}
+}
+
+export function makeValueLazy(scopes: RuntimeScope[], value: AstNode) {
+	const obj: RuntimeLazyValue = {
+		type: "lazyValue",
+		value: {
+			scopes,
+			value
+		}
+	};
+
+	return obj;
 }
