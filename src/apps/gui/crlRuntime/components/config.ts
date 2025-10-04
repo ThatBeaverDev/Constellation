@@ -34,3 +34,23 @@ export type OperationReference =
 	| "multiplication"
 	| "exponent"
 	| "remainder";
+
+// reassignment
+export type ReassignmentType = keyof typeof reassignmentOperators;
+export type ReassignmentReference =
+	| "assign"
+	| "add"
+	| "minus"
+	| "divide"
+	| "multiply"
+	| "exponent"
+	| "remainder";
+export const reassignmentOperators = {
+	"=": "assign",
+	"+=": "add",
+	"-=": "minus",
+	"/=": "divide",
+	"*=": "multiply",
+	"**=": "exponent",
+	"%=": "remainder"
+};
