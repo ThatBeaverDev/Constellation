@@ -1,3 +1,4 @@
+import { ReassignmentReference } from "./config.js";
 import { AstOperation } from "./types/operations.js";
 
 // configuration
@@ -65,7 +66,7 @@ export interface AstVariableNode {
 
 export interface AstCallNode {
 	type: "code";
-	value: AstGeneralDeclaration | AstFunctionCall;
+	value: AstGeneralDeclaration | AstFunctionCall | AstReassignent;
 }
 
 // general command body
@@ -104,6 +105,16 @@ export interface AstVariableDeclaration extends AstGeneralDeclaration {
 export interface AstGlobalDeclaration extends AstGeneralDeclaration {
 	type: "newGlobal";
 }
+
+// reassignment
+export interface AstReassignent {
+	type: "reassignment";
+	name: string;
+	reassignmentType: ReassignmentReference;
+	value: AstNode;
+}
+
+// none
 export interface AstNoneNode {
 	type: "none";
 	value: null;
