@@ -1,5 +1,5 @@
-import { RuntimeScope, RuntimeVariable } from "../definitions.js";
-import { CrlRuntime } from "./runtime.js";
+import { RuntimeScope, RuntimeVariable } from "../../definitions.js";
+import { CrlRuntime } from "../runtime.js";
 
 export class Scope implements RuntimeScope {
 	runtime: CrlRuntime;

@@ -1,11 +1,10 @@
-import { ReassignmentReference } from "./config.js";
-import { AstOperation } from "./types/operations.js";
+import { OperationReference, ReassignmentReference } from "./config.js";
 
-// configuration
-const libraryPaths = "/System/CoreLibraries/xlng";
-libraryPaths;
+export function removeBlanks(array: string[]): string[] {
+	return array.filter((item) => !["", " ", "\t", "\n"].includes(item.trim()));
+}
 
-// types
+// AST Nodes
 export type Ast = AstNode[];
 export type AstTokenType =
 	| "str"
@@ -120,10 +119,6 @@ export interface AstNoneNode {
 	value: null;
 }
 
-export function removeBlanks(array: string[]): string[] {
-	return array.filter((item) => !["", " ", "\t", "\n"].includes(item.trim()));
-}
-
 // RUNTIME
 export interface RuntimeScope {
 	variables: Map<string, RuntimeVariable>;
@@ -187,6 +182,26 @@ export interface RuntimeLazyValue {
 	type: "lazyValue";
 	value: { scopes: RuntimeScope[]; value: AstNode };
 }
+export interface RuntimeConstructor {
+	type: "constructor";
+	value:
+		| {
+				isExtensive: true;
+				superClass: RuntimeConstructor;
+				function: RuntimeFunction;
+		  }
+		| {
+				isExtensive: false;
+				function: RuntimeFunction;
+		  };
+}
+export interface RuntimeClass {
+	type: "classInstance";
+	value: {
+		constructor: RuntimeConstructor;
+		properties: RuntimeDict;
+	};
+}
 
 export type RuntimeValue =
 	| RuntimeString
@@ -198,4 +213,12 @@ export type RuntimeValue =
 	| RuntimeList
 	| RuntimeDict
 	| RuntimeLazyFunction
-	| RuntimeLazyValue;
+	| RuntimeLazyValue
+	| RuntimeConstructor
+	| RuntimeClass; // operation structure
+
+export interface AstOperation {
+	type: OperationReference;
+	first: AstNode;
+	second: AstNode;
+}
