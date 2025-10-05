@@ -1,5 +1,8 @@
 import { runTests } from "../../../../tests/libtest.js";
-import { generateAST } from "../components/ast/ast.js";
+import AstGenerator from "../components/ast/ast.js";
+
+const astGenerator = new AstGenerator();
+const generateAST = astGenerator.generateAST.bind(astGenerator);
 
 const { logs } = await runTests([
 	{

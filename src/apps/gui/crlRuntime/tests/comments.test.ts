@@ -1,5 +1,5 @@
 import { runTests } from "../../../../tests/libtest.js";
-import { removeComments } from "../components/ast/ast.js";
+import { removeComments } from "../components/ast/comments.js";
 
 const { logs } = await runTests([
 	// simple comment removal

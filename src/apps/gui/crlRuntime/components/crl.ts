@@ -1,9 +1,10 @@
-import CrlRunner from "../../tcpsys/app.js";
-import { generateAST } from "../ast/ast.js";
-import { AstNode } from "../definitions.js";
-import { CrlRuntime } from "../runtime/runtime.js";
+import CrlRunner from "../tcpsys/app.js";
+import AstGenerator from "./ast/ast.js";
+import { AstNode } from "./definitions.js";
+import { CrlRuntime } from "./runtime/runtime.js";
 
-export default class CrlRunnerInstance {
+export default class CrlInstance {
+	astGenerator: AstGenerator;
 	ast: AstNode[];
 	runtime: CrlRuntime;
 
@@ -15,7 +16,8 @@ export default class CrlRunnerInstance {
 	) {
 		const debug = isDebug ? this.debug.bind(this) : (...args: any[]) => {};
 
-		this.ast = generateAST(code, debug);
+		this.astGenerator = new AstGenerator();
+		this.ast = this.astGenerator.generateAST(code, debug);
 
 		this.debug(this.ast);
 

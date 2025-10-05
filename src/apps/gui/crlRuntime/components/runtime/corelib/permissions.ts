@@ -6,7 +6,7 @@ import {
 	RuntimeScope,
 	RuntimeValue
 } from "../../definitions.js";
-import { DynamicScope } from "../globals.js";
+import { DynamicScope } from "../scopes/DynamicScope.js";
 import { CrlRuntime } from "../runtime.js";
 import { unwrapValue } from "../utils.js";
 
