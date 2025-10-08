@@ -21,20 +21,6 @@ export function windowsTimestamp(
 	performanceLog(label, start, "WindowSystem", colour);
 }
 
-export function clamp(n: number | undefined, min: number, max: number) {
-	if (n == undefined) {
-		return 0;
-	}
-
-	if (n < min) {
-		return min;
-	}
-	if (max < n) {
-		return max;
-	}
-	return n;
-}
-
 export default class WindowSystem {
 	windows: GraphicalWindow[] = [];
 	windowTypes = { GraphicalWindow, OverlayWindow, UnderlayWindow };

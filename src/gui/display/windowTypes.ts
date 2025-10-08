@@ -1,7 +1,8 @@
 import ConstellationKernel from "../../kernel.js";
 import { Application } from "../../runtime/executables.js";
 import { terminate } from "../../runtime/runtime.js";
-import WindowSystem, { windowsTimestamp, clamp, path } from "./windowSystem.js";
+import { windowFocusPadding } from "./definitions.js";
+import WindowSystem, { windowsTimestamp, path } from "./windowSystem.js";
 
 export class GraphicalWindow {
 	#WindowSystem: WindowSystem;
@@ -294,8 +295,16 @@ export class GraphicalWindow {
 		}
 
 		const clamped = {
-			x: clamp(x, 0, this.portWidth - this.dimensions.width),
-			y: clamp(y, 0, this.portHeight - this.dimensions.height)
+			x: clamp(
+				x,
+				-windowFocusPadding,
+				this.portWidth - this.dimensions.width
+			),
+			y: clamp(
+				y,
+				-windowFocusPadding,
+				this.portHeight - this.dimensions.height + windowFocusPadding
+			)
 		};
 
 		if (x !== undefined) this.container.dataset.left = String(clamped.x);
@@ -530,4 +539,18 @@ export class OverlayWindow extends GraphicalWindow {
 		this.resize(width, height);
 		this.move(left, top);
 	}
+}
+
+function clamp(n: number | undefined, min: number, max: number) {
+	if (n == undefined) {
+		return 0;
+	}
+
+	if (n < min) {
+		return min;
+	}
+	if (max < n) {
+		return max;
+	}
+	return n;
 }

@@ -10,3 +10,5 @@ export interface snappingWindowInfo {
 	window: GraphicalWindow;
 	side: "left" | "right" | "fullscreen";
 }
+
+export const windowFocusPadding = 2;
