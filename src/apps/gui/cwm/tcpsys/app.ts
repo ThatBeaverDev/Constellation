@@ -41,9 +41,10 @@ export default class ConstellationWindowManager
 			this
 		);
 
-		window.move(-5, -5);
+		window.move(0, 0);
 		window.resize(globalThis.innerWidth + 10, globalThis.innerHeight + 10);
 		window.hideHeader();
+		window.hide();
 
 		this.renderer = gui.uiKit.newRenderer(this, window);
 	}

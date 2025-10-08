@@ -33,16 +33,26 @@ export default class WindowSystemInteractions {
 
 		if (parent.target.hasMoved) {
 			//setTimeout(() => {
-			const snappingInfo = win.move(x, y);
+			win.move(x, y);
 			win.unfullscreen();
 
 			let side: "left" | "right" | "fullscreen" | undefined = undefined;
 
-			if (snappingInfo.snapLeft) {
+			//if (snappingInfo.snapLeft) {
+			//	side = "left";
+			//} else if (snappingInfo.snapRight) {
+			//	side = "right";
+			//} else if (snappingInfo.snapFullscreen) {
+			//	side = "fullscreen";
+			//}
+			if (x < 0) {
 				side = "left";
-			} else if (snappingInfo.snapRight) {
+			} else if (
+				x + win.dimensions.width >
+				this.#GraphicalInterface.displayWidth
+			) {
 				side = "right";
-			} else if (snappingInfo.snapFullscreen) {
+			} else if (y < 0) {
 				side = "fullscreen";
 			}
 
