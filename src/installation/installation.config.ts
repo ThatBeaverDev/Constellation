@@ -96,7 +96,6 @@ export const files: Record<
 		type: "jsonFilesIndex",
 		directory: "/System/CoreAssets/Sounds"
 	},
-	// vectors
 	"/build/assets/vectors.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreAssets/Vectors"
