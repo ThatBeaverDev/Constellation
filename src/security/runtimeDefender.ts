@@ -27,6 +27,8 @@ export default class ApplicationVerifier implements Terminatable {
 		);
 
 		const listing = await this.#ConstellationKernel.fs.readdir(directory);
+		if (listing == undefined)
+			throw new Error(`Application at ${directory} doesn't exist.`);
 
 		if (!listing.includes("tcpsys") || !listing.includes("config.js")) {
 			this.#ConstellationKernel.lib.logging.warn(

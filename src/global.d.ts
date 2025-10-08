@@ -14,20 +14,22 @@ declare global {
 	}
 
 	interface Window {
+		renderID: number;
+		Application: typeof executables.Application;
+		Process: typeof executables.Process;
+		BackgroundProcess: typeof executables.BackgroundProcess;
+		Overlay: typeof executables.Overlay;
+		Module: typeof executables.Module;
+		env: ApplicationAuthorisationAPI;
 		runtime: "nodejs" | "browser" | "deno";
 	}
 
 	const env: ApplicationAuthorisationAPI;
-	const Application: new (
-		directory: string,
-		args: any[]
-	) => executables.Application;
-	const BackgroundProcess: new (
-		directory: string,
-		args: any[]
-	) => executables.BackgroundProcess;
-	const Overlay: new (directory: string, args: any[]) => executables.Overlay;
-	const Module: new (directory: string, args: any[]) => executables.Module;
+	const Application: typeof executables.Application;
+	const Process: typeof executables.Process;
+	const BackgroundProcess: typeof executables.BackgroundProcess;
+	const Overlay: typeof executables.Overlay;
+	const Module: typeof executables.Module;
 
 	type ApplicationManifest = executables.ProgramManifest;
 

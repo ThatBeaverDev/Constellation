@@ -1,13 +1,13 @@
 import { keyboardShortcutsAPI } from "../fs/keyboardShortcuts.js";
 import { Icons } from "./icons.js";
 import ConstellationKernel, { Terminatable } from "../kernel.js";
-import WindowSystem from "./windows/windows.js";
+import WindowSystem from "./display/windowSystem.js";
 import UiKitInstanceCreator from "./uiKit/uiKit.js";
 
 export class GraphicalInterface implements Terminatable {
 	icons: Icons & Terminatable;
 	getIcon: Icons["getIcon"];
-	windows: WindowSystem & Terminatable;
+	windowSystem: WindowSystem & Terminatable;
 	keyboardShortcuts: keyboardShortcutsAPI & Terminatable;
 	uiKit: UiKitInstanceCreator & Terminatable;
 
@@ -46,7 +46,7 @@ export class GraphicalInterface implements Terminatable {
 		// UiKit
 		this.uiKit = new UiKitInstanceCreator(ConstellationKernel, this);
 		// GUI Windows
-		this.windows = new WindowSystem(ConstellationKernel, this);
+		this.windowSystem = new WindowSystem(ConstellationKernel, this);
 		// keyboard shortcuts
 		this.keyboardShortcuts = new keyboardShortcutsAPI(ConstellationKernel);
 
@@ -111,7 +111,7 @@ export class GraphicalInterface implements Terminatable {
 	}
 
 	async terminate() {
-		await this.windows.terminate();
+		await this.windowSystem.terminate();
 		await this.keyboardShortcuts.terminate();
 		await this.uiKit.terminate();
 

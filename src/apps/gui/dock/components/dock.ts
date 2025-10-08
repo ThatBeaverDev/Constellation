@@ -1,4 +1,5 @@
 import { UiKitRenderer } from "../../../../gui/uiKit/uiKit.js";
+import { ProgramManifest } from "../../../../runtime/executables.js";
 import { WindowAlias } from "../../../../security/definitions.js";
 import dockAndDesktop from "../tcpsys/app.js";
 import { getAppConfig, pathIcon } from "pathinf";
@@ -60,16 +61,21 @@ export default class Dock {
 
 		this.pinsInfo = [];
 
+		const pins: (
+			| { directory: string; manifest: ProgramManifest }
+			| undefined
+		)[] = [];
 		for (const i in this.config.pins) {
 			const pin = this.config.pins[i];
 
-			this.pinsInfo[i] = {
+			pins[i] = {
 				directory: pin,
 				manifest: await getAppConfig(this.env, pin)
 			};
 		}
+		this.pinsInfo = pins.filter((item) => item !== undefined);
 
-		const programs: Record<string, Program> = {};
+		const programs: Record<string, Program | undefined> = {};
 
 		programs[this.parent.directory] = {
 			windows: [],
@@ -104,12 +110,30 @@ export default class Dock {
 					manifest: await getAppConfig(this.env, winDir),
 					icon: await pathIcon(this.env, winDir)
 				};
+
+				if (programs[winDir].manifest.userspace == false) {
+					programs[winDir] = undefined;
+				}
 			}
 
-			programs[winDir].windows.push(win);
+			if (programs[winDir]) programs[winDir].windows.push(win);
 		}
 
-		this.programs = programs;
+		function filter(programs: any): any {
+			const obj: any = {};
+
+			for (const key in programs) {
+				const value = programs[key];
+
+				if (value !== undefined) {
+					obj[key] = value;
+				}
+			}
+
+			return obj;
+		}
+
+		this.programs = filter(programs);
 
 		this.tick = 0;
 	}

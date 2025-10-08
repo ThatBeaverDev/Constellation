@@ -12,7 +12,7 @@ import ConstellationKernel, { Terminatable } from "../kernel.js";
 import { importRewriter } from "./codeProcessor.js";
 import { dump } from "./crashed.js";
 import ConstellationConfiguration from "../constellation.config.js";
-import { UserPromptConfig } from "../gui/windows/windows.js";
+import { UserPromptConfig } from "../gui/display/definitions.js";
 import ApplicationVerifier from "../security/runtimeDefender.js";
 
 const path = "/System/runtime.js";
@@ -26,17 +26,6 @@ export function AppsTimeStamp(
 }
 
 const appsStart = performance.now();
-
-declare global {
-	interface Window {
-		renderID: number;
-		Application: typeof executables.Application;
-		BackgroundProcess: typeof executables.BackgroundProcess;
-		Overlay: typeof executables.Overlay;
-		Module: typeof executables.Module;
-		env: ApplicationAuthorisationAPI;
-	}
-}
 
 export interface ProcessInformation {
 	// attachment info
@@ -64,6 +53,7 @@ window.renderID = 0;
 
 // allow processes to access this
 window.Application = executables.Application;
+window.Process = executables.Process;
 window.BackgroundProcess = executables.BackgroundProcess;
 window.Overlay = executables.Overlay;
 window.Module = executables.Module;
@@ -83,33 +73,75 @@ export interface executionResult {
 }
 export interface executionProcessResult extends executionResult {
 	process: executables.Process;
+	info: ProcessInformation;
 }
 
 const crlDirectory = "/System/CoreExecutables/crlRuntime.appl";
+
+function generateTerminationCode(length: number) {
+	var result = "";
+	var characters =
+		"§1234567890-=qwertyuiop[]asdfghjkl;'\\`zxcvbnm,./±!@£$%^&*()_+QWERTYUIOP{}ASDFGHJKL:\"|ZXCVBNM<>?~¡€#¢∞§¶•ªº–≠œ∑´®†¥¨^øπ“‘åß∂ƒ©˙∆˚¬…æ«`Ω≈ç√∫~µ≤≥÷⁄™‹›ﬁﬂ‡°·‚—±Œ„‰ÂÊÁË∏”’/* ÍÌ */";
+	var charactersLength = characters.length;
+	for (var i = 0; i < length; i++) {
+		result += characters.charAt(
+			Math.floor(Math.random() * charactersLength)
+		);
+	}
+	return result;
+}
+
+const randomTerminationCode = generateTerminationCode(10000);
+if (ConstellationConfiguration.isDevmode) {
+	(window as any).randomTerminationCode = randomTerminationCode;
+}
 
 /**
  * Removes a process from execution
  * @param proc - the Process object of the target to terminate.
  * @param isDueToCrash - whether this is from a crash - true means the process' terminate function is not called.
  */
-export async function terminate(proc: Process, isDueToCrash: Boolean = false) {
+export async function terminate(
+	ConstellationKernel: ConstellationKernel,
+	proc: Process,
+	isDueToCrash: Boolean = false
+) {
 	const start = performance.now();
-	const procDir = String(proc.directory);
 
+	const procDir = String(proc?.directory);
 	const idx = processes.map((item) => item.program).indexOf(proc);
+	if (idx < 0) return;
 
+	const info = processes[idx];
+
+	if (info.kernel !== ConstellationKernel)
+		throw new Error(
+			"Process cannot be terminated because it is not posessed by this kernel."
+		);
+
+	if ((proc as any).terminationCode == randomTerminationCode) {
+		// whatever.
+		throw new Error(`Process ${proc.directory} is already terminated.`);
+	}
+
+	(proc as any).terminationCode = randomTerminationCode;
+	console.debug("Terminating process", proc);
+
+	// if it's not from a crash, run termination code
 	if (!isDueToCrash) {
 		try {
 			await proc.terminate();
 		} catch {}
 	}
 
+	// if it's a GUI app, remove the UiKit instance and therefore the GUI window.
 	if (proc instanceof Application) {
 		try {
 			proc?.renderer?.terminate();
 		} catch {}
 	}
 
+	// remove the parent's child item
 	for (const process of processes) {
 		if (process.children instanceof Array)
 			process.children = process.children.filter(
@@ -177,8 +209,8 @@ export class ProgramRuntime {
 
 		const keylisteners = new Set([
 			// focused window
-			UserInterface.windows.getWindowOfId(
-				UserInterface.windows.focusedWindow
+			UserInterface.windowSystem.getWindowOfId(
+				UserInterface.windowSystem.focusedWindow
 			)?.Application,
 
 			// key listeners
@@ -219,8 +251,8 @@ export class ProgramRuntime {
 		if (UserInterface == undefined) return;
 
 		const keylisteners = [
-			UserInterface.windows.getWindowOfId(
-				UserInterface.windows.focusedWindow
+			UserInterface.windowSystem.getWindowOfId(
+				UserInterface.windowSystem.focusedWindow
 			)?.Application,
 			...processes.filter((proc) =>
 				proc.program.env.hasPermission("keylogger")
@@ -627,7 +659,7 @@ export class ProgramRuntime {
 			config.secondary = String(buttons[1]);
 		}
 
-		const choice = await gui.windows.showUserPrompt(icon, config);
+		const choice = await gui.windowSystem.showUserPrompt(icon, config);
 		switch (choice) {
 			case "primary":
 				return buttons?.[0] || "Cancel";
@@ -669,7 +701,7 @@ export class ProgramRuntime {
 
 			const name = appName(process);
 
-			await terminate(process);
+			await terminate(this.#ConstellationKernel, process);
 
 			const choice = await this.#ConstellationKernel.runtime.showPrompt(
 				"warning",
@@ -699,7 +731,7 @@ export class ProgramRuntime {
 
 		processes.forEach((processInfo) => {
 			if (processInfo.kernel === this.#ConstellationKernel) {
-				terminate(processInfo.program);
+				terminate(this.#ConstellationKernel, processInfo.program);
 			}
 		});
 
@@ -712,4 +744,4 @@ export class ProgramRuntime {
 	}
 }
 
-AppsTimeStamp("Startup of src/apps/apps.js", appsStart, "primary");
+AppsTimeStamp("Startup of src/runtime/runtime.js", appsStart, "primary");

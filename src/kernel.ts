@@ -160,7 +160,7 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 	async init() {
 		await this.fs.init();
 
-		const guiInstallerRequired = await this.install(this);
+		const forceInstaller =
 
 		await this.security.init();
 
