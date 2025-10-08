@@ -1,7 +1,6 @@
 import ConstellationKernel from "../../kernel.js";
 import { Application } from "../../runtime/executables.js";
 import { terminate } from "../../runtime/runtime.js";
-import { windowFocusPadding } from "./definitions.js";
 import WindowSystem, { windowsTimestamp, path } from "./windowSystem.js";
 
 export class GraphicalWindow {
@@ -294,21 +293,8 @@ export class GraphicalWindow {
 			this.unsnappedHeight = undefined;
 		}
 
-		const clamped = {
-			x: clamp(
-				x,
-				-windowFocusPadding,
-				this.portWidth - this.dimensions.width
-			),
-			y: clamp(
-				y,
-				-windowFocusPadding,
-				this.portHeight - this.dimensions.height + windowFocusPadding
-			)
-		};
-
-		if (x !== undefined) this.container.dataset.left = String(clamped.x);
-		if (y !== undefined) this.container.dataset.top = String(clamped.y);
+		if (x !== undefined) this.container.dataset.left = String(x);
+		if (y !== undefined) this.container.dataset.top = String(y);
 
 		if (x !== undefined) this.position.left = x;
 		if (y !== undefined) this.position.top = y;
@@ -316,9 +302,9 @@ export class GraphicalWindow {
 		this.reposition();
 
 		return {
-			snapLeft: clamped.x !== x && Number(x) < this.dimensions.width / 2,
-			snapRight: clamped.x !== x && Number(x) > this.dimensions.width / 2,
-			snapFullscreen: clamped.y !== y && Number(y) < 0
+			snapLeft: x !== x && Number(x) < this.dimensions.width / 2,
+			snapRight: x !== x && Number(x) > this.dimensions.width / 2,
+			snapFullscreen: y !== y && Number(y) < 0
 		};
 	}
 
