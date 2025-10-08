@@ -4,7 +4,11 @@ import { join } from "path";
 const srcDir = "src";
 const outDir = "build";
 const blacklistFileExtensions = [".js", ".mjs", "cjs", ".jsx", ".ts", ".tsx"];
-const blacklistDirectories = ["src/apps/app-template/node_modules", "src/apps/app-template/.git", "src/apps/types"];
+const blacklistDirectories = [
+	"src/apps/app-template/node_modules",
+	"src/apps/app-template/.git",
+	"src/apps/types"
+];
 
 async function copyFiles(dir = "") {
 	const fullSrc = join(srcDir, dir);
