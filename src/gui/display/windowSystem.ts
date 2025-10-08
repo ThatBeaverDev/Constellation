@@ -89,6 +89,9 @@ export default class WindowSystem {
 			return;
 		}
 
+		this._snappingWindowDisplay.style.zIndex =
+			this._snappingWindow?.window.container.style.zIndex || "Infinity";
+
 		if (
 			this._snappingWindow?.window === info.window &&
 			this._snappingWindow.side == info.side
@@ -134,7 +137,8 @@ export default class WindowSystem {
 		// window snapping
 		const elem = document.createElement("div");
 		elem.id = String(window.renderID++);
-		elem.className = "windowSnappingIndicator";
+		elem.classList.add("windowSnappingIndicator");
+		elem.classList.add("frosted");
 
 		GraphicalInterface.container.appendChild(elem);
 
