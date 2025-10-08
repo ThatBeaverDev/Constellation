@@ -51,6 +51,8 @@
     border: none;
     padding: 0;
     margin: 0;
+    backdrop-filter: none;
+    pointer-events: none;
 
     box-shadow: none;
     -webkit-box-shadow: none;
@@ -59,11 +61,15 @@
     resize: none !important;
 }
 
+.windowContainer.invisible > .windowBody > * {
+    pointer-events: all;
+}
+
 .windowContainer.sqare {
     border-radius: 0px !important;
 }
 
-.windowContainer.sqare>.windowHeader {
+.windowContainer.sqare > .windowHeader {
     border-radius: 0px !important;
 }
 

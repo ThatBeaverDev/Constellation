@@ -21,6 +21,17 @@ export class FilesystemInstaller {
 		await this.rm_rf();
 		await this.folders();
 		await this.files();
+
+		const config = JSON.parse(
+			JSON.stringify(this.#ConstellationKernel.config)
+		);
+
+		// just so no programs can read it
+		delete config.systemPassword;
+		delete config.status;
+
+		const configString = JSON.stringify(config);
+		await this.fs.writeFile("/System/config.json", configString);
 	}
 
 	async rm_rf() {

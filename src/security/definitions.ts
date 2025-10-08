@@ -53,7 +53,6 @@ export type WindowAlias = {
 	position: {
 		left: number;
 		top: number;
-		zIndex: number;
 	};
 	dimensions: {
 		width: number;

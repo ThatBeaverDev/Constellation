@@ -13,12 +13,20 @@ export default class CoreExecutable extends BackgroundProcess {
 		const loginInterfaceDirectory =
 			"/System/CoreExecutables/systemLoginInterface.appl";
 		const finderDirectory = "/Applications/Finder.appl";
+		const guiManagerDirectory = "/System/CoreExecutables/guiManager.appl";
 
+		// dock permissions
 		this.env.setDirectoryPermission(dockDirectory, "windows", true);
 		this.env.setDirectoryPermission(dockDirectory, "keylogger", true);
+
+		// loginUI permissions
 		this.env.setDirectoryPermission(loginInterfaceDirectory, "users", true);
 
+		// finder permissions
 		this.env.setDirectoryPermission(finderDirectory, "userFiles", true);
+
+		// GUI manager permissions
+		this.env.setDirectoryPermission(guiManagerDirectory, "operator", true);
 
 		// this.windows
 		this.registerKeyboardShortcut("Close Window", "KeyW", ["AltLeft"]);
@@ -27,28 +35,7 @@ export default class CoreExecutable extends BackgroundProcess {
 		this.serviceManager = new ServiceManager(this);
 		await this.serviceManager.init();
 
-		const params = new URL(window.location.href).searchParams;
-		if (params.get("postinstall") == "true") {
-			await this.runPostinstaller();
-		}
-
 		this.startLoginProcess();
-	}
-
-	async runPostinstaller() {
-		// TODO: Graphical Postinstall
-
-		//const oobe = await this.env.exec(
-		//	"/System/CoreExecutables/OOBEInstaller.appl"
-		//);
-		//console.log(oobe);
-		//const result = await oobe.promise;
-		//console.log(result);
-
-		// remove postinstall indicator
-		const params = new URL(window.location.href).searchParams;
-		params.delete("postinstall");
-		window.history.pushState({}, "", "?" + params.toString());
 	}
 
 	/**

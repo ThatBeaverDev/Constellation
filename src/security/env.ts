@@ -25,7 +25,7 @@ import {
 	Permissions
 } from "./permissions.js";
 import ConstellationKernel from "../kernel.js";
-import { GraphicalWindow } from "../gui/windows/windows.js";
+import { GraphicalWindow } from "../gui/display/windowTypes.js";
 import { getParentDirectory } from "../fs/fspath.js";
 
 const start = performance.now();
@@ -554,6 +554,12 @@ export class ApplicationAuthorisationAPI {
 		return this.#environmentCreator.associations[name];
 	}
 
+	getKernel() {
+		this.#checkPermission("operator");
+
+		return this.#ConstellationKernel as ConstellationKernel;
+	}
+
 	/**
 	 *
 	 * @param directory - Target Directory
@@ -718,7 +724,7 @@ export class ApplicationAuthorisationAPI {
 
 			const obj: WindowAlias[] = [];
 
-			for (const win of UserInterface.windows.allWindows()) {
+			for (const win of UserInterface.windowSystem.allWindows()) {
 				const wn = this.#windowToAlias(win);
 
 				obj.push(wn);
@@ -738,8 +744,8 @@ export class ApplicationAuthorisationAPI {
 			const UserInterface = this.#ConstellationKernel.GraphicalInterface;
 			if (UserInterface == undefined) return undefined;
 
-			const target = UserInterface.windows.getWindowOfId(
-				UserInterface.windows.focusedWindow
+			const target = UserInterface.windowSystem.getWindowOfId(
+				UserInterface.windowSystem.focusedWindow
 			);
 
 			if (target == undefined) return undefined; // no window is focused
@@ -759,7 +765,7 @@ export class ApplicationAuthorisationAPI {
 			const UserInterface = this.#ConstellationKernel.GraphicalInterface;
 			if (UserInterface == undefined) return undefined;
 
-			UserInterface.windows.focusWindow(id);
+			UserInterface.windowSystem.focusWindow(id);
 		}
 	};
 
@@ -850,7 +856,7 @@ export class ApplicationAuthorisationAPI {
 			startTime: Program.startTime,
 
 			terminate: () => {
-				terminate(Program.program);
+				terminate(this.#ConstellationKernel, Program.program);
 			}
 		};
 
@@ -863,4 +869,10 @@ export class ApplicationAuthorisationAPI {
 			return processes.map((process) => this.#processToAlias(process));
 		}
 	};
+
+	get systemType() {
+		return this.#ConstellationKernel.GraphicalInterface == undefined
+			? "TUI"
+			: "GUI";
+	}
 }

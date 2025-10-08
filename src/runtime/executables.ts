@@ -3,9 +3,9 @@ import { ApplicationAuthorisationAPI } from "../security/env.js";
 import { ProcessInformation, terminate } from "./runtime.js";
 import { IPCMessage, replyCallback, sendMessage } from "./messages.js";
 import ConstellationKernel from "../kernel.js";
+import { OverlayWindow } from "../gui/display/windowTypes.js";
 
 export let nextPID = 0;
-let popupNo = 25000;
 
 /**
  * The Manifest to inform other programs of basic info about an app, like the name or icon.
@@ -164,6 +164,7 @@ export class Framework {
  * An entity with access to system APIs and a startup, repeating 'frame' loop and terminator function.
  */
 export class Process extends Framework {
+	#ConstellationKernel: ConstellationKernel;
 	constructor(
 		ConstellationKernel: ConstellationKernel,
 		directory: string,
@@ -180,6 +181,7 @@ export class Process extends Framework {
 			password,
 			processInfo
 		);
+		this.#ConstellationKernel = ConstellationKernel;
 
 		this.shout = function shout(name: string) {
 			if (ConstellationKernel.runtime.associations[name] == undefined) {
@@ -312,7 +314,7 @@ export class Process extends Framework {
 	exit(value?: Exclude<any, null>) {
 		this.data = value;
 
-		terminate(this);
+		terminate(this.#ConstellationKernel, this);
 
 		for (const i in this) {
 			if (i == "data") continue;
@@ -329,6 +331,7 @@ export class Module extends Framework {}
  * A Process but with builtin APIs for graphical output, like a pre-created window and uiKit instance.
  */
 export class Application extends Process {
+	renderer: UiKitRenderer;
 	constructor(
 		ConstellationKernel: ConstellationKernel,
 		directory: string,
@@ -355,8 +358,6 @@ export class Application extends Process {
 		this.renderer = UserInterface.uiKit.newRenderer(this);
 	}
 
-	renderer: UiKitRenderer;
-
 	exit(value?: any) {
 		this.renderer.terminate();
 
@@ -365,9 +366,11 @@ export class Application extends Process {
 }
 
 /**
- * An application made for acting on a higher level of the layering. Not to be used in normal applications.
+ * An application made for acting on a higher level of the layering. Not to be used in general applications.
  */
-export class Overlay extends Application {
+export class Overlay extends Process implements Application {
+	renderer: UiKitRenderer;
+	#window: OverlayWindow;
 	constructor(
 		ConstellationKernel: ConstellationKernel,
 		directory: string,
@@ -385,20 +388,20 @@ export class Overlay extends Application {
 			processInfo
 		);
 
-		const no = popupNo++;
+		const UserInterface = ConstellationKernel.GraphicalInterface;
+		if (UserInterface == undefined) {
+			throw new Error(
+				"Graphical applications cannot run in non-graphical environments."
+			);
+		}
 
-		this.renderer.moveWindow(undefined, undefined, no);
-
-		this.#windowPositioningInterval = setInterval(() => {
-			this.renderer.moveWindow(undefined, undefined, no);
-		}, 500);
-	}
-
-	#windowPositioningInterval: ReturnType<typeof setInterval>;
-
-	exit(value?: Exclude<any, null>) {
-		clearInterval(this.#windowPositioningInterval);
-
-		super.exit(value);
+		this.#window = new OverlayWindow(
+			ConstellationKernel,
+			directory,
+			undefined,
+			undefined,
+			this
+		);
+		this.renderer = UserInterface.uiKit.newRenderer(this, this.#window);
 	}
 }

@@ -1,6 +1,6 @@
 import { UIError } from "../../../errors.js";
 import ConstellationKernel from "../../../kernel.js";
-import { type GraphicalWindow } from "../../windows/windows.js";
+import { type GraphicalWindow } from "../../display/windowTypes.js";
 import {
 	canvasPosition,
 	canvasRenderingStep,
@@ -259,7 +259,7 @@ export default class uiKitCreators {
 		const focusedWindow =
 			this.#ConstellationKernel.GraphicalInterface == undefined
 				? undefined
-				: this.#ConstellationKernel.GraphicalInterface.windows
+				: this.#ConstellationKernel.GraphicalInterface.windowSystem
 						.focusedWindow;
 
 		if (focusedWindow == this.#window.winID) area.focus();

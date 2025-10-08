@@ -4,6 +4,7 @@ import CoreExecutable from "../tcpsys/app.js";
 export interface ServiceManifest {
 	directory: string;
 	restart: "once" | "always";
+	graphicalOnly?: boolean;
 }
 
 interface Program extends ServiceManifest {

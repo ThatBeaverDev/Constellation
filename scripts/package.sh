@@ -50,8 +50,9 @@ compile() {
     # assets files
     mkdir -p build/assets
 
-    # Package audio files
+    # Package media files
     ./scripts/tcpkg assets/sounds build/assets/sounds.idx -override=true
+    ./scripts/tcpkg assets/wallpapers build/assets/wallpapers.idx -override=true
 
     # Package vector files
     ./scripts/tcpkg assets/vectors build/assets/vectors.idx -override=true
@@ -70,6 +71,9 @@ compile() {
 
     # Build previewer
     ./scripts/tcpkg build/apps/gui/preview build/apps/com.constellation.preview.idx -override=true
+
+    # Build ConstellationGuiManager
+    ./scripts/tcpkg build/apps/gui/cwm build/apps/com.constellation.guiManager.idx -override=true
 }
 
 # first param is directory, second param is name

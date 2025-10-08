@@ -1,5 +1,5 @@
 import { GraphicalInterface } from "../gui.js";
-import WindowSystem from "./windows.js";
+import WindowSystem from "./windowSystem.js";
 
 export default class WindowSystemInteractions {
 	#parent: WindowSystem;

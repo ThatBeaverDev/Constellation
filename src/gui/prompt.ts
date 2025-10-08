@@ -1,6 +1,6 @@
 import ConstellationKernel from "../kernel.js";
 import { getTextHeight, getTextWidth } from "./uiKit/components/textUtils.js";
-import { UserPrompt } from "./windows/windows.js";
+import { OverlayWindow } from "./display/windowTypes.js";
 
 interface StatementConfig {
 	title: string;
@@ -91,7 +91,7 @@ export async function showUserPrompt(
 	const innerPadding = 10;
 
 	// create window
-	const popup = new UserPrompt(
+	const popup = new OverlayWindow(
 		ConstellationKernel,
 		"Popup",
 		calculateNeededWidth(),

@@ -8,7 +8,7 @@ interface config {
 	icon: string;
 }
 
-export default class dockAndDesktop extends Application {
+export default class dockAndDesktop extends Overlay {
 	dock?: Dock;
 	menubar?: menubar;
 	showApps: boolean = false;

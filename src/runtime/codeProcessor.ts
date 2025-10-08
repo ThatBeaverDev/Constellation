@@ -42,7 +42,9 @@ export class importRewriter implements Terminatable {
 
 	async readFile(directory: string) {
 		const cacheResult = this.contentCache.get(directory);
-		if (cacheResult !== undefined) return cacheResult.contents;
+		if (cacheResult !== undefined) {
+			return cacheResult.contents;
+		}
 
 		const contents = await this.#fs.readFile(directory);
 
@@ -67,7 +69,9 @@ export class importRewriter implements Terminatable {
 		importerPath?: string
 	): Promise<string> {
 		if (allowCache) {
-			if (this.blobCache.has(path)) return this.blobCache.get(path)!;
+			if (this.blobCache.has(path)) {
+				return this.blobCache.get(path)!;
+			}
 		}
 
 		let code = await this.readFile(path);

@@ -1,26 +1,20 @@
 import ConstellationKernel from "../../kernel.js";
 import { GraphicalInterface } from "../gui.js";
-import { windowsTimestamp } from "./windows.js";
+import { windowsTimestamp } from "./windowSystem.js";
 
 export default class cssVariables {
 	live: HTMLElement;
 	vars: Record<string, string> = {};
-	#ConstellationKernel: ConstellationKernel;
 	#GraphicalInterface: GraphicalInterface;
 
 	constructor(
 		ConstellationKernel: ConstellationKernel,
 		GraphicalInterface: GraphicalInterface
 	) {
-		this.#ConstellationKernel = ConstellationKernel;
 		this.#GraphicalInterface = GraphicalInterface;
 
 		// default variables
-		this.vars = {
-			"wallpaper-url": `url("${this.#ConstellationKernel.config.wallpaper}")`,
-			"wallpaper-position":
-				this.#ConstellationKernel.config.wallpaperPosition
-		};
+		this.vars = {};
 
 		// construct style element
 		let style = document.createElement("style");

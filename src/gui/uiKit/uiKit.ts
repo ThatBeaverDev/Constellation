@@ -1,4 +1,4 @@
-import { GraphicalWindow } from "../windows/windows.js";
+import { GraphicalWindow } from "../display/windowTypes.js";
 import {
 	getTextHeight,
 	getTextWidth,
@@ -82,8 +82,8 @@ class UiKitRendererClass {
 	windowX: number = 0;
 	windowY: number = 0;
 
-	moveWindow(x?: number, y?: number, z?: number) {
-		this.#window.move(x, y, z);
+	moveWindow(x?: number, y?: number) {
+		this.#window.move(x, y);
 	}
 
 	set windowName(name: string) {
@@ -176,7 +176,7 @@ class UiKitRendererClass {
 				windowName = process.directory;
 			}
 
-			this.#window = UserInterface.windows.newWindow(
+			this.#window = UserInterface.windowSystem.newWindow(
 				windowName,
 				process
 			).data;
@@ -472,7 +472,7 @@ class UiKitRendererClass {
 	 * @param subtext - the description of this statement
 	 */
 	prompt(title: string, subtext = "", icon = this.#window.iconName) {
-		const gui = this.#ConstellationKernel.GraphicalInterface?.windows;
+		const gui = this.#ConstellationKernel.GraphicalInterface?.windowSystem;
 		if (gui == undefined)
 			throw new Error(
 				"UiKit may not be used in a non-graphical environment"
@@ -492,7 +492,7 @@ class UiKitRendererClass {
 		secondary?: string,
 		icon: string = this.#window.iconName
 	) {
-		const gui = this.#ConstellationKernel.GraphicalInterface?.windows;
+		const gui = this.#ConstellationKernel.GraphicalInterface?.windowSystem;
 		if (gui == undefined)
 			throw new Error(
 				"UiKit may not be used in a non-graphical environment"
@@ -510,7 +510,7 @@ class UiKitRendererClass {
 		subtext: string,
 		icon: string = this.#window.iconName
 	) {
-		const gui = this.#ConstellationKernel.GraphicalInterface?.windows;
+		const gui = this.#ConstellationKernel.GraphicalInterface?.windowSystem;
 		if (gui == undefined)
 			throw new Error(
 				"UiKit may not be used in a non-graphical environment"
@@ -589,7 +589,9 @@ class UiKitRendererClass {
 		this.windowHeight = this.#window.body.clientHeight;
 
 		if (this.#creators.textboxElems !== undefined) {
-			if (UserInterface.windows.focusedWindow == this.#window.winID) {
+			if (
+				UserInterface.windowSystem.focusedWindow == this.#window.winID
+			) {
 				const focusedBox = this.#creators.focusedTextbox;
 
 				if (focusedBox) focusedBox.focus();

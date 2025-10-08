@@ -12,7 +12,7 @@ export async function preinstall(ConstellationKernel: ConstellationKernel) {
 		await installer.install();
 
 		if (ConstellationKernel.GraphicalInterface)
-			ConstellationKernel.GraphicalInterface.windows.reapplyStyles();
+			ConstellationKernel.GraphicalInterface.windowSystem.reapplyStyles();
 	} catch (e: any) {
 		ConstellationKernel.config.setStatus(e, "error");
 		throw e; // escalate again to make sure main knows something went wrong

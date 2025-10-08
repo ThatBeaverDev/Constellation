@@ -88,10 +88,10 @@ export const files: Record<
 	},
 
 	// windowing files
-	"/src/gui/windows/flick.css": "/System/windows/flick.css",
-	"/src/gui/windows/scale.css": "/System/windows/scale.css",
+	"/src/gui/display/css/flick.css": "/System/windows/flick.css",
+	"/src/gui/display/css/scale.css": "/System/windows/scale.css",
 
-	// sounds
+	// assets
 	"/build/assets/sounds.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreAssets/Sounds"
@@ -100,6 +100,10 @@ export const files: Record<
 	"/build/assets/vectors.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreAssets/Vectors"
+	},
+	"/build/assets/wallpapers.idx": {
+		type: "jsonFilesIndex",
+		directory: "/System/CoreAssets/Wallpapers"
 	},
 
 	// LoginUI
@@ -139,6 +143,12 @@ export const files: Record<
 	"/build/apps/com.constellation.preview.idx": {
 		type: "application",
 		directory: "/Applications/Preview.appl"
+	},
+
+	// gui manager
+	"/build/apps/com.constellation.guiManager.idx": {
+		type: "application",
+		directory: "/System/CoreExecutables/guiManager.appl"
 	}
 };
 
