@@ -6,7 +6,7 @@
 	--window-header-height: 26px;
 	--window-buttons-padding: 3.75px;
 	--window-border-radius: 5px;
-	
+
 	--window-transition-duration: 0.15s;
 }
 
@@ -32,7 +32,6 @@
 	}
 }
 
-
 @media (prefers-color-scheme: light) {
 	:host {
 		--main-theme-contrast: -15;
@@ -42,30 +41,46 @@
 		--main-shadow-colour: #ffffff;
 
 		--main-theme-primary-val: calc(255 + (var(--main-theme-contrast) * 1));
-		--main-theme-secondary-val: calc(255 + (var(--main-theme-contrast) * 2));
+		--main-theme-secondary-val: calc(
+			255 + (var(--main-theme-contrast) * 2)
+		);
 		--main-theme-tertiary-val: calc(255 + (var(--main-theme-contrast) * 3));
-		--main-theme-quaternary-val: calc(255 + (var(--main-theme-contrast) * 4));
+		--main-theme-quaternary-val: calc(
+			255 + (var(--main-theme-contrast) * 4)
+		);
 		--main-theme-quinary-val: calc(255 + (var(--main-theme-contrast) * 5));
 		--main-theme-senary-val: calc(255 + (var(--main-theme-contrast) * 6));
 
-		--main-theme-primary: rgb(var(--main-theme-primary-val),
-				var(--main-theme-primary-val),
-				var(--main-theme-primary-val));
-		--main-theme-secondary: rgb(var(--main-theme-secondary-val),
-				var(--main-theme-secondary-val),
-				var(--main-theme-secondary-val));
-		--main-theme-tertiary: rgb(var(--main-theme-tertiary-val),
-				var(--main-theme-tertiary-val),
-				var(--main-theme-tertiary-val));
-		--main-theme-quaternary: rgb(var(--main-theme-quaternary-val),
-				var(--main-theme-quaternary-val),
-				var(--main-theme-quaternary-val));
-		--main-theme-quinary: rgb(var(--main-theme-quinary-val),
-				var(--main-theme-quinary-val),
-				var(--main-theme-quinary-val));
-		--main-theme-senary: rgb(var(--main-theme-senary-val),
-				var(--main-theme-senary-val),
-				var(--main-theme-senary-val));
+		--main-theme-primary: rgb(
+			var(--main-theme-primary-val),
+			var(--main-theme-primary-val),
+			var(--main-theme-primary-val)
+		);
+		--main-theme-secondary: rgb(
+			var(--main-theme-secondary-val),
+			var(--main-theme-secondary-val),
+			var(--main-theme-secondary-val)
+		);
+		--main-theme-tertiary: rgb(
+			var(--main-theme-tertiary-val),
+			var(--main-theme-tertiary-val),
+			var(--main-theme-tertiary-val)
+		);
+		--main-theme-quaternary: rgb(
+			var(--main-theme-quaternary-val),
+			var(--main-theme-quaternary-val),
+			var(--main-theme-quaternary-val)
+		);
+		--main-theme-quinary: rgb(
+			var(--main-theme-quinary-val),
+			var(--main-theme-quinary-val),
+			var(--main-theme-quinary-val)
+		);
+		--main-theme-senary: rgb(
+			var(--main-theme-senary-val),
+			var(--main-theme-senary-val),
+			var(--main-theme-senary-val)
+		);
 
 		--main-text-color: rgb(0, 0, 0);
 
@@ -89,34 +104,64 @@
 		--main-theme-quinary-val: calc(var(--main-theme-contrast) * 5);
 		--main-theme-senary-val: calc(var(--main-theme-contrast) * 6);
 
-		--main-theme-primary: rgb(var(--main-theme-primary-val),
-				var(--main-theme-primary-val),
-				var(--main-theme-primary-val));
-		--main-theme-secondary: rgb(var(--main-theme-secondary-val),
-				var(--main-theme-secondary-val),
-				var(--main-theme-secondary-val));
-		--main-theme-tertiary: rgb(var(--main-theme-tertiary-val),
-				var(--main-theme-tertiary-val),
-				var(--main-theme-tertiary-val));
-		--main-theme-quaternary: rgb(var(--main-theme-quaternary-val),
-				var(--main-theme-quaternary-val),
-				var(--main-theme-quaternary-val));
-		--main-theme-quinary: rgb(var(--main-theme-quinary-val),
-				var(--main-theme-quinary-val),
-				var(--main-theme-quinary-val));
-		--main-theme-senary: rgb(var(--main-theme-senary-val),
-				var(--main-theme-senary-val),
-				var(--main-theme-senary-val));
+		--main-theme-primary: rgb(
+			var(--main-theme-primary-val),
+			var(--main-theme-primary-val),
+			var(--main-theme-primary-val)
+		);
+		--main-theme-secondary: rgb(
+			var(--main-theme-secondary-val),
+			var(--main-theme-secondary-val),
+			var(--main-theme-secondary-val)
+		);
+		--main-theme-tertiary: rgb(
+			var(--main-theme-tertiary-val),
+			var(--main-theme-tertiary-val),
+			var(--main-theme-tertiary-val)
+		);
+		--main-theme-quaternary: rgb(
+			var(--main-theme-quaternary-val),
+			var(--main-theme-quaternary-val),
+			var(--main-theme-quaternary-val)
+		);
+		--main-theme-quinary: rgb(
+			var(--main-theme-quinary-val),
+			var(--main-theme-quinary-val),
+			var(--main-theme-quinary-val)
+		);
+		--main-theme-senary: rgb(
+			var(--main-theme-senary-val),
+			var(--main-theme-senary-val),
+			var(--main-theme-senary-val)
+		);
 
 		--main-text-color: rgb(255, 255, 255);
 
-		--main-accent-primary-val: calc(215 + (var(--main-accent-contrast) * 1));
-		--main-accent-secondary-val: calc(215 + (var(--main-accent-contrast) * 2));
-		--main-accent-tertiary-val: calc(215 + (var(--main-accent-contrast) * 3));
+		--main-accent-primary-val: calc(
+			215 + (var(--main-accent-contrast) * 1)
+		);
+		--main-accent-secondary-val: calc(
+			215 + (var(--main-accent-contrast) * 2)
+		);
+		--main-accent-tertiary-val: calc(
+			215 + (var(--main-accent-contrast) * 3)
+		);
 
-		--main-accent-primary: rgb(var(--main-accent-primary-val), 0, var(--main-accent-primary-val));
-		--main-accent-secondary: rgb(var(--main-accent-secondary-val), 0, var(--main-accent-secondary-val));
-		--main-accent-tertiary: rgb(var(--main-accent-tertiary-val), 0, var(--main-accent-tertiary-val));
+		--main-accent-primary: rgb(
+			var(--main-accent-primary-val),
+			0,
+			var(--main-accent-primary-val)
+		);
+		--main-accent-secondary: rgb(
+			var(--main-accent-secondary-val),
+			0,
+			var(--main-accent-secondary-val)
+		);
+		--main-accent-tertiary: rgb(
+			var(--main-accent-tertiary-val),
+			0,
+			var(--main-accent-tertiary-val)
+		);
 	}
 
 	.bootImage {
@@ -143,7 +188,10 @@
 	/* remove highlight for selection */
 }
 
-p, h1, h2, h3 {
+p,
+h1,
+h2,
+h3 {
 	user-select: auto;
 }
 

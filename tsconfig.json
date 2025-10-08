@@ -3,7 +3,7 @@
 		"allowJs": true,
 		"checkJs": false,
 		"esModuleInterop": true,
-		
+
 		// modules
 		"target": "esnext",
 		"module": "esnext",
@@ -16,14 +16,7 @@
 		"strict": true,
 
 		// libraries
-		"lib": [
-			"esnext",
-			"ES2022",
-			"DOM",
-			"DOM.Iterable",
-			"ES5",
-			"ES6"
-		],
+		"lib": ["esnext", "ES2022", "DOM", "DOM.Iterable", "ES5", "ES6"],
 		"paths": {
 			"pathinf": ["./src/syslib/pathinf.ts"],
 			"blob": ["./src/syslib/blob.ts"],
@@ -46,10 +39,7 @@
 		"composite": true,
 		"noEmit": false
 	},
-	"include": [
-		"./src",
-		"./src/global.d.ts"
-	],
+	"include": ["./src", "./src/global.d.ts"],
 	"exclude": [
 		"./build",
 		"./src/apps/app-template",

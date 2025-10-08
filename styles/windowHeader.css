@@ -1,58 +1,58 @@
-.invisible>.windowHeader {
-    min-height: 0px !important;
-    opacity: 0%;
+.invisible > .windowHeader {
+	min-height: 0px !important;
+	opacity: 0%;
 }
 
 .windowHeader {
-    background-color: var(--headerColour);
+	background-color: var(--headerColour);
 
-    width: 100%;
-    height: var(--window-header-height);
-    min-height: var(--window-header-height);
-    overflow: hidden;
+	width: 100%;
+	height: var(--window-header-height);
+	min-height: var(--window-header-height);
+	overflow: hidden;
 
-    position: relative;
-    top: 0px;
-    left: 0px;
+	position: relative;
+	top: 0px;
+	left: 0px;
 
-    display: flex;
-    align-items: column;
-    justify-content: center;
+	display: flex;
+	align-items: column;
+	justify-content: center;
 
-    user-select: None;
-    cursor: grab;
+	user-select: None;
+	cursor: grab;
 }
 
-.windowContainer:not(.focused)>.windowHeader {
-    filter: grayscale(1);
+.windowContainer:not(.focused) > .windowHeader {
+	filter: grayscale(1);
 }
 
 .windowHeader:active {
-    cursor: grabbing;
+	cursor: grabbing;
 }
 
 .windowTitle {
-    margin: 0px;
-    margin-left: 5px;
+	margin: 0px;
+	margin-left: 5px;
 
-    height: 100%;
+	height: 100%;
 
-    line-height: var(--window-header-height);
+	line-height: var(--window-header-height);
 }
 
 .windowButton {
-    cursor: pointer;
+	cursor: pointer;
 }
 
 .windowButtonIcon {
-    width: 100%;
-    height: 100%;
+	width: 100%;
+	height: 100%;
 
-    position: relative;
-    left: 0px;
-    top: 0px;
+	position: relative;
+	left: 0px;
+	top: 0px;
 }
 
 .windowContainer.square > .windowHeader {
-    display: none;
+	display: none;
 }
