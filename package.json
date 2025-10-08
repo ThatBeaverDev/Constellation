@@ -16,17 +16,17 @@
 		"showUnused": "npx ts-prune -p tsconfig.json --ignore src/apps | grep -v 'used in module'"
 	},
 	"devDependencies": {
-		"@types/node": "^24.3.1",
-		"prettier": "3.5.3",
-		"rollup": "4.45.1",
-		"rollup-plugin-dts": "6.2.1",
-		"typescript": "^5.9.2",
-		"remove-empty-directories": "^0.0.1",
 		"@types/jsdom": "^21.1.7",
+		"@types/node": "^24.3.1",
 		"canvas": "^3.2.0",
 		"jsdom": "^27.0.0",
 		"mime": "4.0.7",
-		"ts-prune": "^0.10.3"
+		"prettier": "3.5.3",
+		"remove-empty-directories": "^0.0.1",
+		"rollup": "4.45.1",
+		"rollup-plugin-dts": "6.2.1",
+		"ts-prune": "^0.10.3",
+		"typescript": "^5.9.2"
 	},
 	"os": [
 		"darwin",
