@@ -116,6 +116,15 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 
 		// subsystems
 		this.fs = new FilesystemAPI(rootPoint);
+		this.lib = {
+			blobifier: new blobifier(this.fs),
+			logging: new LoggingAPI(this),
+			packaging: {
+				// preinsert the `ConstellationKernel` arguement.
+				tcpkg: tcpkg.bind(undefined, this),
+				tcupkg: tcupkg.bind(undefined, this)
+			}
+		};
 		this.security = new Security(this);
 		this.runtime = new ProgramRuntime(this);
 		this.config = new ConstellationConfiguration(this);
@@ -140,16 +149,6 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 			});
 		}
 
-		this.lib = {
-			blobifier: new blobifier(this.fs),
-			logging: new LoggingAPI(this),
-			packaging: {
-				// preinsert the `ConstellationKernel` arguement.
-				tcpkg: tcpkg.bind(undefined, this),
-				tcupkg: tcupkg.bind(undefined, this)
-			}
-		};
-
 		try {
 			this.init();
 		} catch (e) {
@@ -161,6 +160,17 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 		await this.fs.init();
 
 		const forceInstaller =
+			new URL(window.location.href).searchParams.get("forceInstall") !==
+			null;
+
+		let installerRequired =
+			this.fs.readFile("/System/config.json") == undefined ||
+			forceInstaller;
+
+		let guiInstallerRequired = false;
+		if (installerRequired) {
+			guiInstallerRequired = await this.install(this);
+		}
 
 		await this.security.init();
 
@@ -221,7 +231,7 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 					postinstall(this, pipe[0]);
 
 					debug("Terminating GUI installer.");
-					terminate(exec.process);
+					terminate(this, exec.process);
 
 					clearInterval(interval);
 					return;
