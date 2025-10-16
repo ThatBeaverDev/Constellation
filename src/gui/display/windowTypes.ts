@@ -280,7 +280,6 @@ export class GraphicalWindow {
 	 * @param x - the X position of the window.
 	 * @param y - the Y position of the window.
 	 * @param z - the Z position of the window.
-	 * @returns - Snapping information
 	 */
 	move(x?: number, y?: number, unsnap: boolean = true) {
 		if (this.lastResizeWasSnapping == true && unsnap == true) {
@@ -300,12 +299,6 @@ export class GraphicalWindow {
 		if (y !== undefined) this.position.top = y;
 
 		this.reposition();
-
-		return {
-			snapLeft: x !== x && Number(x) < this.dimensions.width / 2,
-			snapRight: x !== x && Number(x) > this.dimensions.width / 2,
-			snapFullscreen: y !== y && Number(y) < 0
-		};
 	}
 
 	lastResizeWasSnapping: boolean = false;
@@ -507,9 +500,9 @@ export class OverlayWindow extends GraphicalWindow {
 	constructor(
 		ConstellationKernel: ConstellationKernel,
 		name: string,
-		width: number | undefined,
-		height: number | undefined,
-		Application?: Application
+		Application?: Application,
+		width?: number,
+		height?: number
 	) {
 		super(ConstellationKernel, name, Application);
 		this.minimumWidth = 200;

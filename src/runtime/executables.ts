@@ -400,10 +400,16 @@ export class Overlay extends Process implements Application {
 		this.#window = new OverlayWindow(
 			ConstellationKernel,
 			directory,
-			undefined,
-			undefined,
-			this
+			this,
+			500,
+			300
 		);
 		this.renderer = UserInterface.uiKit.newRenderer(this, this.#window);
+	}
+
+	exit(value?: any) {
+		this.renderer.terminate();
+
+		super.exit(value);
 	}
 }

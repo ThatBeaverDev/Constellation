@@ -94,6 +94,7 @@ export async function showUserPrompt(
 	const popup = new OverlayWindow(
 		ConstellationKernel,
 		"Popup",
+		undefined,
 		calculateNeededWidth(),
 		calculateNeededHeight()
 	);

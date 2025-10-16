@@ -37,14 +37,15 @@ export default class WindowSystemInteractions {
 
 			let side: "left" | "right" | "fullscreen" | undefined = undefined;
 
-			if (x < 0) {
+			if (x < this.#parent.bounds.left) {
 				side = "left";
 			} else if (
 				x + win.dimensions.width >
-				this.#GraphicalInterface.displayWidth
+				this.#GraphicalInterface.displayWidth -
+					this.#parent.bounds.right
 			) {
 				side = "right";
-			} else if (y < 0) {
+			} else if (y < this.#parent.bounds.upper) {
 				side = "fullscreen";
 			}
 
