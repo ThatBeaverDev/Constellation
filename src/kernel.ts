@@ -194,16 +194,6 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 			if (bootBackground) bootBackground.classList.add("fadeOut");
 
 			if (bootBackground) setTimeout(() => bootBackground.remove(), 5000);
-
-			// startup sound
-			const bootSound = await this.fs.readFile(
-				"/System/CoreAssets/Sounds/boot/iMacG3.mp3"
-			);
-			const sound = new Audio(bootSound);
-			try {
-				sound.play();
-			} catch {}
-			sound.remove();
 		} else if (this.TextInterface !== undefined) {
 			this.TextInterface.init();
 		}
