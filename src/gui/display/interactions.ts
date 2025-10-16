@@ -32,19 +32,11 @@ export default class WindowSystemInteractions {
 		const win = parent.target.window;
 
 		if (parent.target.hasMoved) {
-			//setTimeout(() => {
 			win.move(x, y);
 			win.unfullscreen();
 
 			let side: "left" | "right" | "fullscreen" | undefined = undefined;
 
-			//if (snappingInfo.snapLeft) {
-			//	side = "left";
-			//} else if (snappingInfo.snapRight) {
-			//	side = "right";
-			//} else if (snappingInfo.snapFullscreen) {
-			//	side = "fullscreen";
-			//}
 			if (x < 0) {
 				side = "left";
 			} else if (
@@ -68,7 +60,6 @@ export default class WindowSystemInteractions {
 				window: win,
 				side
 			};
-			//}, 10);
 		} else {
 			const distanceX = Math.abs(
 				parent.target.windowX - parent.target.originX

@@ -231,8 +231,9 @@ export class Process extends Framework {
 	 * The function called within the main execution loop after init and before terminate.
 	 */
 	frame() {}
+
 	/**
-	 * The final function called when the program is closed. this does NOT execute if the program crashes.
+	 * The final function called when the program is closed. this is also ran upon program crash, in an attempt to clean up.
 	 */
 	async terminate() {}
 
@@ -348,6 +349,7 @@ export class Application extends Process {
 			password,
 			processInfo
 		);
+
 		const UserInterface = ConstellationKernel.GraphicalInterface;
 		if (UserInterface == undefined) {
 			throw new Error(

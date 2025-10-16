@@ -39,6 +39,9 @@ package_apps() {
 # need for Constellation to know it is built
 date_file() {
     node -e "console.log(Date.now())" > build/date.txt
+
+    # increment build number
+    echo "export const buildNumber =" $(node -e "import { buildNumber } from './build/buildVer.js'; console.log(buildNumber + 1)") ";" > src/buildver.ts
 }
 
 clean
