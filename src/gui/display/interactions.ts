@@ -84,32 +84,56 @@ export default class WindowSystemInteractions {
 		if (parent.snappingWindow !== undefined) {
 			// we need to actually snap the window
 
+			const leftBound = this.#GraphicalInterface.windowSystem.bounds.left;
+			const rightBound =
+				this.#GraphicalInterface.windowSystem.bounds.right;
+			const topBound = this.#GraphicalInterface.windowSystem.bounds.upper;
+			const bottomBound =
+				this.#GraphicalInterface.windowSystem.bounds.lower;
+
+			let x = 0;
+			let y = 0;
+			let width = 0;
+			let height = 0;
+
 			const win = parent.snappingWindow.window;
 			switch (parent.snappingWindow.side) {
 				case "left":
-					win.move(0, 0);
-					win.resize(
-						this.#GraphicalInterface.displayWidth / 2,
-						this.#GraphicalInterface.displayHeight,
-						true
-					);
+					x = leftBound;
+					y = topBound;
+
+					width =
+						this.#GraphicalInterface.displayWidth / 2 - leftBound;
+					height =
+						this.#GraphicalInterface.displayHeight -
+						(topBound + bottomBound);
+
 					break;
 				case "right":
-					win.move(this.#GraphicalInterface.displayWidth / 2, 0);
-					win.resize(
-						this.#GraphicalInterface.displayWidth / 2,
-						this.#GraphicalInterface.displayHeight,
-						true
-					);
+					x = this.#GraphicalInterface.displayWidth / 2 - rightBound;
+					y = topBound;
+
+					width =
+						this.#GraphicalInterface.displayWidth / 2 - rightBound;
+					height =
+						this.#GraphicalInterface.displayHeight -
+						(topBound + bottomBound);
+
 					break;
 				case "fullscreen":
-					win.move(0, 0);
-					win.resize(
-						this.#GraphicalInterface.displayWidth,
-						this.#GraphicalInterface.displayHeight,
-						true
-					);
+					x = leftBound;
+					y = topBound;
+
+					width =
+						this.#GraphicalInterface.displayWidth -
+						(leftBound + rightBound);
+					height =
+						this.#GraphicalInterface.displayHeight -
+						(topBound + bottomBound);
 			}
+
+			win.move(x, y);
+			win.resize(width, height, true);
 
 			parent.snappingWindow = undefined;
 		}
