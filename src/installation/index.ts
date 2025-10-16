@@ -11,12 +11,12 @@ import { developmentOptions } from "./installation.config.js";
  */
 export async function install(ConstellationKernel: ConstellationKernel) {
 	const start = performance.now();
-	ConstellationKernel.config.setStatus(`Initialising`);
+	ConstellationKernel.setBootStatus(`Initialising`);
 
 	try {
 		await preinstall(ConstellationKernel);
 	} catch (e: any) {
-		ConstellationKernel.config.setStatus(e, "error");
+		ConstellationKernel.setBootStatus(e, "error");
 		throw e; // escalate again to make sure main knows something went wrong
 	}
 
@@ -43,13 +43,13 @@ export async function install(ConstellationKernel: ConstellationKernel) {
 
 	installationTimestamp("Initialise System", initialisationStart, "primary");
 
-	ConstellationKernel.config.setStatus("Complete");
+	ConstellationKernel.setBootStatus("Complete");
 
 	installationTimestamp("Install System", start, "primary");
 
 	if (
-		ConstellationKernel.config.isDevmode &&
-		!ConstellationKernel.config.isTestingInstaller
+		ConstellationKernel.config.dynamic.isDevmode &&
+		!ConstellationKernel.config.dynamic.isTestingInstaller
 	) {
 		await postinstall(ConstellationKernel, developmentOptions);
 		return false;

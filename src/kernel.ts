@@ -8,7 +8,10 @@ import {
 	terminate
 } from "./runtime/runtime.js";
 import panic from "./lib/panic.js";
-import ConstellationConfiguration from "./constellation.config.js";
+import {
+	ConstellationConfiguration,
+	defaultConfiguration
+} from "./constellation.config.js";
 import Security from "./security/index.js";
 import { GraphicalInterface } from "./gui/gui.js";
 import blobifier from "./lib/blobify.js";
@@ -19,19 +22,19 @@ import { ConstellationFileIndex } from "./lib/packaging/definitions.js";
 import { tcpkg } from "./lib/packaging/tcpkg.js";
 import postinstall from "./installation/postinstall.js";
 
-if (ConstellationConfiguration.isDevmode) {
+if (defaultConfiguration.dynamic.isDevmode) {
 	(window as any).kernels = [];
 }
 const path = "/System/kernel.js";
 path;
 
-interface GraphicalKernel extends Terminatable {
+export interface GraphicalKernel extends Terminatable {
 	isGraphical: true;
 	GraphicalInterface: GraphicalInterface;
 	TextInterface?: never;
 }
 
-interface CommandLineKernel extends Terminatable {
+export interface CommandLineKernel extends Terminatable {
 	isGraphical: false;
 	GraphicalInterface?: never;
 	TextInterface?: TextInterface;
@@ -40,18 +43,17 @@ interface CommandLineKernel extends Terminatable {
 type Kernel = GraphicalKernel | CommandLineKernel;
 
 interface ConstellationKernelConfiguration {
-	installationIdx: ConstellationFileIndex;
+	installationIdx?: ConstellationFileIndex;
 }
 
 export interface Terminatable {
-	terminate(): Promise<void>;
+	terminate(): Promise<void> | void;
 }
 
 let kernelID = 0;
 export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 	implements Terminatable
 {
-	verboseBootUIInterval?: ReturnType<typeof setInterval>;
 	id: number = kernelID++;
 
 	// subsystems
@@ -85,30 +87,34 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 		: undefined;
 
 	constructor(
-		rootPoint: string,
+		public rootPoint: string,
 		public isGraphical: boolean,
 		logs: any[] = [],
-		configuration?: ConstellationKernelConfiguration
+		public startupConfiguration?: ConstellationKernelConfiguration
 	) {
-		if (ConstellationConfiguration.isDevmode) {
+		if (defaultConfiguration.dynamic.isDevmode) {
 			(window as any).kernels.push(this);
 		}
 
 		this.logs = logs;
 
 		try {
-			this.install =
-				configuration?.installationIdx == undefined
-					? installer.install
-					: async () => {
-							await tcupkg(
-								this,
-								configuration.installationIdx,
-								"/"
-							);
+			if (startupConfiguration?.installationIdx) {
+				this.install = async () => {
+					if (startupConfiguration?.installationIdx == undefined)
+						return false;
 
-							return false;
-						};
+					await tcupkg(
+						this,
+						startupConfiguration.installationIdx,
+						"/"
+					);
+
+					return false;
+				};
+			} else {
+				this.install = installer.install;
+			}
 		} catch (e) {
 			// TODO: PANIC
 			throw e;
@@ -127,7 +133,7 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 		};
 		this.security = new Security(this);
 		this.runtime = new ProgramRuntime(this);
-		this.config = new ConstellationConfiguration(this);
+		this.config = structuredClone(defaultConfiguration);
 
 		// assign based on runtime flag
 		if (isGraphical) {
@@ -136,23 +142,26 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 			this.TextInterface = new TextInterface(this) as any;
 		}
 
-		if (isGraphical) {
-			this.verboseBootUIInterval = setInterval(() => {
-				const elem: HTMLParagraphElement =
-					document.querySelector("p.bootText")!;
-
-				if (elem !== null) {
-					if (elem.innerText !== String(status)) {
-						elem.innerText = String(status);
-					}
-				}
-			});
-		}
-
 		try {
 			this.init();
 		} catch (e) {
 			panic(e, "systemInit");
+		}
+	}
+
+	setBootStatus(
+		text: string | Error,
+		state?: "working" | "error" | "working"
+	) {
+		this.config.dynamic.status = String(text);
+
+		if (this.GraphicalInterface)
+			this.GraphicalInterface.setStatus(text, state);
+
+		if (state == "error") {
+			this.lib.logging.error(path, text);
+		} else {
+			this.lib.logging.debug(path, text);
 		}
 	}
 
@@ -179,12 +188,10 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 		}
 		await this.runtime.init();
 
+		// remove bootUI now that we're done
 		if (this.GraphicalInterface !== undefined) {
 			const bootBackground = document.querySelector("div.bootCover");
-
 			if (bootBackground) bootBackground.classList.add("fadeOut");
-
-			clearInterval(this.verboseBootUIInterval);
 
 			if (bootBackground) setTimeout(() => bootBackground.remove(), 5000);
 
@@ -301,8 +308,6 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 
 	async terminate() {
 		this.isTerminated = true;
-
-		clearInterval(this.verboseBootUIInterval);
 
 		await this.runtime.terminate();
 		await this.security.terminate();
