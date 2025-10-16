@@ -4,7 +4,7 @@ import ConstellationKernel from "../kernel.js";
 
 export async function preinstall(ConstellationKernel: ConstellationKernel) {
 	const start = performance.now();
-	ConstellationKernel.config.setStatus(`Initialising Preinstall`);
+	ConstellationKernel.setBootStatus(`Initialising Preinstall`);
 
 	try {
 		const installer = new FilesystemInstaller(ConstellationKernel);
@@ -14,11 +14,11 @@ export async function preinstall(ConstellationKernel: ConstellationKernel) {
 		if (ConstellationKernel.GraphicalInterface)
 			ConstellationKernel.GraphicalInterface.windowSystem.reapplyStyles();
 	} catch (e: any) {
-		ConstellationKernel.config.setStatus(e, "error");
+		ConstellationKernel.setBootStatus(e, "error");
 		throw e; // escalate again to make sure main knows something went wrong
 	}
 
-	ConstellationKernel.config.setStatus("Preinstall Complete");
+	ConstellationKernel.setBootStatus("Preinstall Complete");
 
 	installationTimestamp(
 		"Erase, Download, and Write System",

@@ -1,4 +1,4 @@
-import ConstellationConfiguration from "../constellation.config.js";
+import { defaultConfiguration } from "../constellation.config.js";
 import { isCommandLine } from "../getPlatform.js";
 import { DevToolsColor, performanceLog } from "../lib/debug.js";
 import {
@@ -47,7 +47,7 @@ await new Promise((resolve: Function) => {
 });
 
 const fs = BrowserFS.BFSRequire("fs");
-if (ConstellationConfiguration.isDevmode) {
+if (defaultConfiguration.dynamic.isDevmode) {
 	(window as any).BFS = fs;
 }
 

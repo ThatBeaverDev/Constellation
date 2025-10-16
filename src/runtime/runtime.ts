@@ -11,7 +11,7 @@ import { DevToolsColor, performanceLog } from "../lib/debug.js";
 import ConstellationKernel, { Terminatable } from "../kernel.js";
 import { importRewriter } from "./codeProcessor.js";
 import { dump } from "./crashed.js";
-import ConstellationConfiguration from "../constellation.config.js";
+import { defaultConfiguration } from "../constellation.config.js";
 import { UserPromptConfig } from "../gui/display/definitions.js";
 import ApplicationVerifier from "../security/runtimeDefender.js";
 
@@ -45,7 +45,7 @@ export interface ProcessInformation {
 }
 
 export const processes: ProcessInformation[] = [];
-if (ConstellationConfiguration.isDevmode) {
+if (defaultConfiguration.dynamic.isDevmode) {
 	(window as any).processes = processes;
 }
 
@@ -92,7 +92,7 @@ function generateTerminationCode(length: number) {
 }
 
 const randomTerminationCode = generateTerminationCode(10000);
-if (ConstellationConfiguration.isDevmode) {
+if (defaultConfiguration.dynamic.isDevmode) {
 	(window as any).randomTerminationCode = randomTerminationCode;
 }
 
@@ -103,8 +103,7 @@ if (ConstellationConfiguration.isDevmode) {
  */
 export async function terminate(
 	ConstellationKernel: ConstellationKernel,
-	proc: Process,
-	isDueToCrash: Boolean = false
+	proc: Process
 ) {
 	const start = performance.now();
 
@@ -121,18 +120,16 @@ export async function terminate(
 
 	if ((proc as any).terminationCode == randomTerminationCode) {
 		// whatever.
-		throw new Error(`Process ${proc.directory} is already terminated.`);
+		return;
 	}
 
 	(proc as any).terminationCode = randomTerminationCode;
 	console.debug("Terminating process", proc);
 
-	// if it's not from a crash, run termination code
-	if (!isDueToCrash) {
-		try {
-			await proc.terminate();
-		} catch {}
-	}
+	// run termination code
+	try {
+		await proc.terminate();
+	} catch {}
 
 	// if it's a GUI app, remove the UiKit instance and therefore the GUI window.
 	if (proc instanceof Application) {
