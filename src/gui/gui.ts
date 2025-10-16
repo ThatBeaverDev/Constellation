@@ -83,31 +83,31 @@ export class GraphicalInterface implements Terminatable {
 	setStatus(text: string | Error, state: "working" | "error" = "working") {
 		if (text instanceof Error) {
 			const style = document.createElement("style");
-			style.textContent = `
-			img.bootImage {
-				filter: hue-rotate(80deg) saturate(1000%) !important;
-			}
-	
-			p.bootText {
-				color: red !important;
-			}
-	
-			span.loader {
-				border-color: red !important;
-			}
-	
-			span.loader::after {
-				background-color: red !important;
-				animation: none !important;
-				width: 100%;
-			}
-			`;
-			this.container.appendChild(style);
+			style.textContent = `img.bootImage {
+	filter: invert(27%) sepia(98%) saturate(7471%) hue-rotate(357deg) brightness(104%) contrast(118%) !important;
+}
 
-			setTimeout(() => {
-				throw text;
-			}, 5000);
+p.bootText {
+	color: red !important;
+}
+
+span.loader {
+	border-color: red !important;
+}
+
+span.loader::after {
+	background-color: red !important;
+	animation: none !important;
+	width: 100%;
+}`;
+			style.id = "failedSystemBoot";
+			document.body.appendChild(style);
 		}
+
+		const bootText: HTMLParagraphElement =
+			document.querySelector("p.bootText")!;
+
+		if (bootText !== null) bootText.innerText = String(text);
 	}
 
 	async terminate() {

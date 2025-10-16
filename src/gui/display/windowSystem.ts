@@ -58,6 +58,13 @@ export default class WindowSystem {
 	cssVariables: cssVariables & Terminatable;
 	interactions: WindowSystemInteractions & Terminatable;
 
+	bounds: { upper: number; left: number; right: number; lower: number } = {
+		upper: 0,
+		left: 0,
+		right: 0,
+		lower: 0
+	};
+
 	_snappingWindow: snappingWindowInfo | undefined;
 	_snappingWindowDisplay: HTMLDivElement;
 	set snappingWindow(info: snappingWindowInfo | undefined) {
