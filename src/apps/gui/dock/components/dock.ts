@@ -1,4 +1,5 @@
 import { UiKitRenderer } from "../../../../gui/uiKit/uiKit.js";
+import { Terminatable } from "../../../../kernel.js";
 import { ProgramManifest } from "../../../../runtime/executables.js";
 import { WindowAlias } from "../../../../security/definitions.js";
 import dockAndDesktop from "../tcpsys/app.js";
@@ -15,7 +16,7 @@ interface Program {
 	icon: string;
 }
 
-export default class Dock {
+export default class Dock implements Terminatable {
 	readonly parent: dockAndDesktop;
 	readonly renderer: UiKitRenderer;
 	readonly env: dockAndDesktop["env"];
@@ -50,6 +51,8 @@ export default class Dock {
 		} catch {}
 
 		if (getPerms !== true) return;
+
+		this.env.windows.lowerBound += this.dockHeight;
 
 		await this.refresh();
 
@@ -451,5 +454,9 @@ export default class Dock {
 		for (const directory in this.programs) {
 			drawIcon(directory, this.programs[directory]);
 		}
+	}
+
+	terminate() {
+		this.env.windows.lowerBound -= this.dockHeight;
 	}
 }

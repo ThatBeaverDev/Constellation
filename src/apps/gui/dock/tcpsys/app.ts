@@ -186,4 +186,9 @@ export default class dockAndDesktop extends Overlay {
 	async search() {
 		await this.env.exec("/Applications/Search.appl");
 	}
+
+	async terminate() {
+		this.dock?.terminate();
+		this.menubar?.terminate();
+	}
 }
