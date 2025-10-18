@@ -1,6 +1,6 @@
 import { IPCMessage } from "../../../../system/runtime/components/messages.js";
 import { fileInfo } from "../lib/appfind.js";
-import { Fzf } from "../../../../system/CoreLibraries/fzf.js";
+import { Fzf } from "fzf";
 
 export default class KeystoneSearch extends Overlay {
 	results: object[] = [];
@@ -40,10 +40,10 @@ export default class KeystoneSearch extends Overlay {
 	index?: Function;
 
 	async search(term: string) {
-		const fzf = new Fzf(this.files);
+		const fuzzyFinder = new Fzf(this.files);
 
 		// object stating item, score and start/end points
-		const entries = fzf.find(term);
+		const entries = fuzzyFinder.find(term);
 
 		// just names
 		const results: string[] = entries.map(

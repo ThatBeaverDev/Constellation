@@ -27,12 +27,16 @@ export default class Shell {
 		const allApps: string[] = [];
 
 		for (const dir of directories) {
-			const list = await this.#env.fs.listDirectory(dir);
-			if (!list.ok) continue;
+			let list: string[];
+			try {
+				list = await this.#env.fs.listDirectory(dir);
+			} catch {
+				continue;
+			}
 
-			if (!(list.data instanceof Array)) continue;
+			if (!(list instanceof Array)) continue;
 
-			for (const item of list.data) {
+			for (const item of list) {
 				const rel = await this.#env.fs.resolve(dir, item);
 
 				if (rel.endsWith(".appl") || rel.endsWith(".backgr")) {
@@ -47,11 +51,9 @@ export default class Shell {
 			const lib = this.#env.fs.resolve(app, "lib");
 
 			const libListing = await this.#env.fs.listDirectory(lib);
+			if (libListing == undefined) continue;
 
-			if (!libListing.ok) continue;
-			if (libListing.data == undefined) continue;
-
-			for (const sub of libListing.data) {
+			for (const sub of libListing) {
 				commands.push(this.#env.fs.resolve(lib, sub));
 			}
 		}

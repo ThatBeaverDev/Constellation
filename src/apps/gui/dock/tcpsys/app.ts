@@ -63,31 +63,25 @@ export default class dockAndDesktop extends Overlay {
 
 	async loadConfig() {
 		const dir = this.env.fs.resolve(this.directory, "./data");
-		const list = await this.env.fs.listDirectory(dir);
-		if (!list.ok) throw list.data;
-		let configs = list.data;
+		let configs = await this.env.fs.listDirectory(dir);
 
 		if (configs == undefined) {
 			// the directory doesn't exist.
-			const mkdir = await this.env.fs.createDirectory(dir);
+			await this.env.fs.createDirectory(dir);
 
-			if (!mkdir.ok) throw mkdir.data;
-
-			const list = await this.env.fs.listDirectory(dir);
-			if (!list.ok) throw list.data;
-			configs = list.data;
+			configs = await this.env.fs.listDirectory(dir);
 		}
 
 		if (configs.includes(this.env.userID + ".json")) {
 			// we have the config, let's load it.
-			const read = await this.env.fs.readFile(
+			const configFile = await this.env.fs.readFile(
 				this.env.fs.resolve(
 					this.directory,
 					"./data/" + this.env.userID + ".json"
 				)
 			);
-			if (!read.ok) throw read.data;
-			const config = JSON.parse(read.data || "{}");
+
+			const config = JSON.parse(configFile || "{}");
 
 			this.config = config;
 		} else {

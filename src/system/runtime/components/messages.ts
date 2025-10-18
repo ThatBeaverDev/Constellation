@@ -23,14 +23,14 @@ export default class IPCMessageSender {
 			}
 		}
 
-		if (target instanceof Process) {
+		if (target instanceof window.Process) {
 			targetProcess = target;
 		} else {
 			targetProcess = getProcessFromID(target);
 
 			if (targetProcess == undefined)
 				throw new MessageError(
-					`Process with PID of '${target}' is not running. (sending message with intent '${intent}')`
+					`Process with PID of '${JSON.stringify(target)}' is not running. (sending message with intent '${intent}')`
 				);
 		}
 

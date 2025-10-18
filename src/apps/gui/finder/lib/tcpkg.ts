@@ -48,9 +48,7 @@ tcpkg \${inputDirectory} \${outputFile}`);
 	async function checkOutput() {
 		let content;
 		try {
-			const read = await parent.env.fs.readFile(output);
-			if (!read.ok) throw read.data;
-			content = read.data;
+			content = await parent.env.fs.readFile(output);
 		} catch (e) {}
 
 		if (content !== undefined) {
@@ -74,19 +72,13 @@ tcpkg \${inputDirectory} \${outputFile}`);
 	// walk the folder
 	async function walk(directory: string) {
 		if (verbose) logs.push(`Walking ${directory}...`);
-		const listDir = await parent.env.fs.listDirectory(directory);
-		if (!listDir.ok) throw listDir.data;
+		const directoryListing = await parent.env.fs.listDirectory(directory);
 
-		const ls = listDir.data;
-
-		for (const item of ls) {
+		for (const item of directoryListing) {
 			const dir = parent.env.fs.resolve(directory, item);
 
-			const stt = await parent.env.fs.stat(dir);
-			if (!stt.ok) throw stt.data;
-			const stat = stt.data;
-
-			const isDir = stat.isDirectory();
+			const stats = await parent.env.fs.stat(dir);
+			const isDir = stats.isDirectory();
 
 			const relative: string = parent.env.fs.relative(input, dir);
 
@@ -117,17 +109,12 @@ tcpkg \${inputDirectory} \${outputFile}`);
 						type.includes("json");
 
 					if (isText) {
-						const read = await parent.env.fs.readFile(dir);
-						if (!read.ok) throw read.data;
-
-						const content = read.data;
+						const content = await parent.env.fs.readFile(dir);
 
 						pkg.files[relative] = content;
 					} else {
 						// encode to dataURI
-						const read = await parent.env.fs.readFile(dir);
-						if (!read.ok) throw read.data;
-						const content = read.data;
+						const content = await parent.env.fs.readFile(dir);
 
 						const b64 = btoa(content);
 						const uri = `data:${type};base64,${b64}`;
@@ -159,8 +146,7 @@ tcpkg \${inputDirectory} \${outputFile}`);
 	// stringify it
 	const result = JSON.stringify(pkg, null, 8);
 
-	const write = await parent.env.fs.writeFile(output, result);
-	if (!write.ok) throw write.data;
+	await parent.env.fs.writeFile(output, result);
 
 	logs.push("App packaged to '" + output + "' successfully!");
 

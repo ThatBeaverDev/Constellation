@@ -2,12 +2,9 @@ import { filetypeDatabase } from "../../apps/background/filetypeDatabaseManager/
 import { ApplicationAuthorisationAPI } from "../security/env.js";
 
 async function typeOfPath(env: ApplicationAuthorisationAPI, directory: string) {
-	const stat = await env.fs.stat(directory);
+	const stats = await env.fs.stat(directory);
 
-	if (!stat.ok) throw stat.data;
-	const data = stat.data;
-
-	if (data.isDirectory()) {
+	if (stats.isDirectory()) {
 		return "folder";
 	} else {
 		const extension = directory.textAfterAll(".");
@@ -24,9 +21,9 @@ export async function openFile(
 	const filetype = await typeOfPath(env, directory);
 	if (filetype == undefined) return false;
 
-	const read = await env.fs.readFile("/System/ftypedb.json");
-	if (!read.ok) throw read.data;
-	const db = JSON.parse(read.data) as filetypeDatabase;
+	const dbContents = await env.fs.readFile("/System/ftypedb.json");
+
+	const db = JSON.parse(dbContents) as filetypeDatabase;
 
 	const app = db.assignments[filetype];
 

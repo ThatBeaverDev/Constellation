@@ -8,13 +8,6 @@ export function securityTimestamp(
 	performanceLog(label, start, "SystemSecurity", colour);
 }
 
-export type fsResponse<T> =
-	| {
-			data: Error;
-			ok: false;
-	  }
-	| { data: T; ok: true };
-
 export type directoryPointType =
 	| "blockDevice"
 	| "characterDevice"

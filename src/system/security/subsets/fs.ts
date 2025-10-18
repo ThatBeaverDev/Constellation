@@ -1,10 +1,7 @@
 import { Stats } from "../../../fs/BrowserFsTypes.js";
 import { getParentDirectory } from "../../io/fspath.js";
 import ConstellationKernel from "../..//kernel.js";
-import {
-	fsResponse,
-	directoryPointType as directoryPoint
-} from "../definitions.js";
+import { directoryPointType as directoryPoint } from "../definitions.js";
 
 export default class EnvFs {
 	#ConstellationKernel: ConstellationKernel;
@@ -27,35 +24,29 @@ export default class EnvFs {
 		this.relative = ConstellationKernel.fs.relative;
 	}
 
-	createDirectory = async (directory: string): Promise<fsResponse<true>> => {
+	createDirectory = async (directory: string): Promise<true> => {
 		try {
 			this.#directoryActionCheck(directory, true);
 
 			await this.#ConstellationKernel.fs.mkdir(directory);
-			return { data: true, ok: true };
+			return true;
 		} catch (error: any) {
-			return {
-				data: error,
-				ok: false
-			};
+			error.message = "env.fs.createDirectory: " + error.message;
+			throw error;
 		}
 	};
-	listDirectory = async (
-		directory: string = "/"
-	): Promise<fsResponse<string[]>> => {
+	listDirectory = async (directory: string = "/"): Promise<string[]> => {
 		try {
 			this.#directoryActionCheck(directory, false);
 
 			const list = await this.#ConstellationKernel.fs.readdir(directory);
-			return { data: list, ok: true };
+			return list;
 		} catch (error: any) {
-			return {
-				data: error,
-				ok: false
-			};
+			error.message = "env.fs.listDirectory: " + error.message;
+			throw error;
 		}
 	};
-	deleteDirectory = async (directory: string): Promise<fsResponse<true>> => {
+	deleteDirectory = async (directory: string): Promise<true> => {
 		try {
 			this.#directoryActionCheck(directory, true);
 
@@ -72,54 +63,36 @@ export default class EnvFs {
 				}
 			}
 
-			return {
-				data: true,
-				ok: true
-			};
+			return true;
 		} catch (error: any) {
-			return {
-				data: error,
-				ok: false
-			};
+			error.message = "env.fs.deleteDirectory: " + error.message;
+			throw error;
 		}
 	};
 
-	writeFile = async (
-		directory: string,
-		contents: string
-	): Promise<fsResponse<true>> => {
+	writeFile = async (directory: string, contents: string): Promise<true> => {
 		try {
 			this.#directoryActionCheck(directory, true);
 
 			await this.#ConstellationKernel.fs.writeFile(directory, contents);
-			return {
-				data: true,
-				ok: true
-			};
+			return true;
 		} catch (error: any) {
-			return {
-				data: error,
-				ok: false
-			};
+			error.message = "env.fs.writeFile: " + error.message;
+			throw error;
 		}
 	};
-	deleteFile = async (directory: string): Promise<fsResponse<true>> => {
+	deleteFile = async (directory: string): Promise<true> => {
 		try {
 			this.#directoryActionCheck(directory, true);
 
 			await this.#ConstellationKernel.fs.unlink(directory);
-			return {
-				data: true,
-				ok: true
-			};
+			return true;
 		} catch (error: any) {
-			return {
-				data: error,
-				ok: false
-			};
+			error.message = "env.fs.deleteFile: " + error.message;
+			throw error;
 		}
 	};
-	readFile = async (directory: string): Promise<fsResponse<string>> => {
+	readFile = async (directory: string): Promise<string> => {
 		try {
 			this.#directoryActionCheck(directory, false);
 
@@ -130,41 +103,31 @@ export default class EnvFs {
 				throw new Error(`File at ${directory} does not exist!`);
 			}
 
-			return {
-				data: content,
-				ok: true
-			};
+			return content;
 		} catch (error: any) {
-			return {
-				data: error,
-				ok: false
-			};
+			error.message = "env.fs.readFile: " + error.message;
+			throw error;
 		}
 	};
 	move = async (
 		oldDirectory: string,
 		newDirectory: string
-	): Promise<fsResponse<void>> => {
+	): Promise<void> => {
 		try {
 			this.#directoryActionCheck(oldDirectory, true);
 			this.#directoryActionCheck(newDirectory, true);
 
-			return {
-				data: await this.#ConstellationKernel.fs.rename(
-					oldDirectory,
-					newDirectory
-				),
-				ok: true
-			};
+			await this.#ConstellationKernel.fs.rename(
+				oldDirectory,
+				newDirectory
+			);
 		} catch (error: any) {
-			return {
-				data: error,
-				ok: false
-			};
+			error.message = "env.fs.move: " + error.message;
+			throw error;
 		}
 	};
 
-	stat = async (directory: string): Promise<fsResponse<Stats>> => {
+	stat = async (directory: string): Promise<Stats> => {
 		try {
 			const parentDirectory = getParentDirectory(directory);
 			this.#directoryActionCheck(parentDirectory, false);
@@ -178,36 +141,30 @@ export default class EnvFs {
 				);
 			}
 
-			return {
-				data: stat,
-				ok: true
-			};
+			return stat;
 		} catch (error: any) {
-			return {
-				data: error,
-				ok: false
-			};
+			error.message = "env.fs.stat: " + error.message;
+			throw error;
 		}
 	};
 	typeOfFile = async (directory: string): Promise<directoryPoint | never> => {
 		const parentDirectory = getParentDirectory(directory);
 		this.#directoryActionCheck(parentDirectory, false);
 
-		const stat = await this.stat(directory);
-
-		if (!stat.ok) {
+		let stat: Stats;
+		try {
+			stat = await this.stat(directory);
+		} catch {
 			return "none";
 		}
 
-		const st = stat.data;
-
-		const isBlockDevice = st.isBlockDevice();
-		const isCharacterDevice = st.isCharacterDevice();
-		const isDirectory = st.isDirectory();
-		const isFIFO = st.isFIFO();
-		const isFile = st.isFile();
-		const isSocket = st.isSocket();
-		const isSymbolicLink = st.isSymbolicLink();
+		const isBlockDevice = stat.isBlockDevice();
+		const isCharacterDevice = stat.isCharacterDevice();
+		const isDirectory = stat.isDirectory();
+		const isFIFO = stat.isFIFO();
+		const isFile = stat.isFile();
+		const isSocket = stat.isSocket();
+		const isSymbolicLink = stat.isSymbolicLink();
 
 		if (isBlockDevice) {
 			return "blockDevice";

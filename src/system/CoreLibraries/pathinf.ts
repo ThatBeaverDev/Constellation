@@ -17,13 +17,9 @@ export async function pathIcon(
 ): Promise<string | never> {
 	const stats = await env.fs.stat(directory);
 
-	if (!stats.ok) {
-		throw stats.data;
-	}
-
 	const extension = directory.textAfterAll(".");
 
-	const isDir = await stats.data.isDirectory();
+	const isDir = await stats.isDirectory();
 
 	if (isDir) {
 		const name: string = directory.split("/").pop()!;
@@ -707,11 +703,7 @@ export async function pathMime(
 ) {
 	const stats = await env.fs.stat(directory);
 
-	if (!stats.ok) {
-		return;
-	}
-
-	const isDir = await stats.data.isDirectory();
+	const isDir = await stats.isDirectory();
 
 	if (isDir) {
 		throw new Error("Folders cannot have a MIME type.");
@@ -747,9 +739,8 @@ export async function pathSize(
 	directory: string
 ) {
 	const stat = await env.fs.stat(directory);
-	if (!stat.ok) throw stat.data;
 
-	const original = Number(stat.data.size) / 8;
+	const original = Number(stat.size) / 8;
 	let size = Number(original);
 	let unit = 0;
 

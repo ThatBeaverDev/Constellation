@@ -23,9 +23,8 @@ export default async function find(
 
 	for (const directory of directories) {
 		const list = await parent.env.fs.listDirectory(directory);
-		if (!list.ok) throw list.data;
 
-		const localNames = list.data.map((item: string) =>
+		const localNames = list.map((item: string) =>
 			parent.env.fs.resolve(directory, String(item))
 		);
 		names = [...localNames, ...names];

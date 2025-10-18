@@ -8,15 +8,11 @@ export default async function tcupkg(
 	const targetRel = parent.env.fs.resolve(parent.path, target);
 	const directory = parent.env.fs.resolve(parent.path, output);
 
-	let read = await parent.env.fs.readFile(targetRel);
-	if (!read.ok) throw read.data;
-
-	const content = read.data;
-
-	let json;
+	const content = await parent.env.fs.readFile(targetRel);
 
 	await parent.env.fs.createDirectory(directory);
 
+	let json;
 	try {
 		json = JSON.parse(content);
 	} catch {

@@ -3,13 +3,14 @@ import TerminalAlias from "../../../../system/lib/terminalAlias.js";
 export default async function ls(parent: TerminalAlias, directory = ".") {
 	const dir = parent.env.fs.resolve(parent.path, directory);
 
-	const list = await parent.env.fs.listDirectory(dir);
-
-	if (!list.ok) {
-		return list.data;
+	let list: string[];
+	try {
+		list = await parent.env.fs.listDirectory(dir);
+	} catch (e) {
+		return e;
 	}
 
-	const formatted = list.data.join("   ");
+	const formatted = list.join("   ");
 
 	return formatted;
 }

@@ -7,9 +7,7 @@ export default class CrlRunner extends Application {
 			args[0] ||
 			this.env.fs.resolve(this.directory, "./resources/default.crl");
 
-		const read = await this.env.fs.readFile(targetFile);
-		if (!read.ok) throw read.data;
-		const code = read.data;
+		const code = await this.env.fs.readFile(targetFile);
 
 		const isDebug = args[1] == true;
 
