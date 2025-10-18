@@ -15909,13 +15909,15 @@ export default function () {
 											FileFlag.getFileFlag("w"),
 											420,
 											function (e) {
-												this$1._deleteLogUpdatePending = false;
+												this$1._deleteLogUpdatePending =
+													false;
 												if (e) {
 													this$1._deleteLogError = e;
 												} else if (
 													this$1._deleteLogUpdateNeeded
 												) {
-													this$1._deleteLogUpdateNeeded = false;
+													this$1._deleteLogUpdateNeeded =
+														false;
 													this$1.updateLog("");
 												}
 											}
@@ -16876,7 +16878,8 @@ export default function () {
 																			-1;
 																		message =
 																			{
-																				browserfsMessage: true,
+																				browserfsMessage:
+																					true,
 																				cbId: cbId,
 																				args: [
 																					apiErrorLocal2Remote(
@@ -16923,7 +16926,8 @@ export default function () {
 																				) {
 																					message =
 																						{
-																							browserfsMessage: true,
+																							browserfsMessage:
+																								true,
 																							cbId: cbId,
 																							args: fixedArgs
 																						};
@@ -16945,7 +16949,8 @@ export default function () {
 																	0
 																) {
 																	message = {
-																		browserfsMessage: true,
+																		browserfsMessage:
+																			true,
 																		cbId: cbId,
 																		args: fixedArgs
 																	};
@@ -17007,7 +17012,8 @@ export default function () {
 																	// Send response.
 																	const response =
 																		{
-																			browserfsMessage: true,
+																			browserfsMessage:
+																				true,
 																			cbId: remoteCb.id,
 																			args: err
 																				? [
@@ -17041,7 +17047,8 @@ export default function () {
 																			rootFs.supportsProps()
 																	},
 																response = {
-																	browserfsMessage: true,
+																	browserfsMessage:
+																		true,
 																	cbId: remoteCb.id,
 																	args: [
 																		probeResponse
@@ -17102,7 +17109,8 @@ export default function () {
 											),
 											this._callbackConverter.toRemoteArg(
 												function (probeResponse) {
-													this$1._isInitialized = true;
+													this$1._isInitialized =
+														true;
 													this$1._isReadOnly =
 														probeResponse.isReadOnly;
 													this$1._supportLinks =
@@ -22114,10 +22122,18 @@ export default function () {
 						/**
 						 * @hidden
 						 */
-						function registerFileSystem(name, fs) {
+						function registerFileSystem(name: string, fs) {
 							Backends[name] = fs;
 						}
-						function BFSRequire(module) {
+						function BFSRequire(
+							module:
+								| "fs"
+								| "path"
+								| "buffer"
+								| "process"
+								| "bfs_utils"
+								| string
+						) {
 							switch (module) {
 								case "fs":
 									return _fsMock;
