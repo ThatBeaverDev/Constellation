@@ -21,7 +21,7 @@ build_tsc() {
 
     build_apps_d_ts
 
-    node build/security/hash/secureHash.js
+    node build/system/security/hash/secureHash.js
 }
 
 build_apps_d_ts() {    
@@ -41,7 +41,7 @@ date_file() {
     node -e "console.log(Date.now())" > build/date.txt
 
     # increment build number
-    echo "export const buildNumber =" $(node -e "import { buildNumber } from './build/buildVer.js'; console.log(buildNumber + 1)") ";" > src/buildver.ts
+    echo "export const buildNumber =" $(node -e "import { buildNumber } from './build/system/buildVer.js'; console.log(buildNumber + 1)") ";" > src/system/buildver.ts
 }
 
 clean

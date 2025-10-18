@@ -1,6 +1,6 @@
-import { IPCMessage } from "../../../../runtime/messages.js";
+import { IPCMessage } from "../../../../system/runtime/components/messages.js";
 import { fileInfo } from "../lib/appfind.js";
-import { Fzf } from "fzf";
+import { Fzf } from "../../../../system/CoreLibraries/fzf.js";
 
 export default class KeystoneSearch extends Overlay {
 	results: object[] = [];

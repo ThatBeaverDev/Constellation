@@ -1,4 +1,4 @@
-import applyStringPrototypes from "../stringPrototypes.js";
+import applyStringPrototypes from "../system/stringPrototypes.js";
 
 applyStringPrototypes();
 

@@ -1,10 +1,11 @@
-import ConstellationKernel from "../kernel.js";
+import ConstellationKernel from "../system/kernel.js";
 
 export default function restartKernel(
 	oldKernel: ConstellationKernel,
 	passInstaller: boolean = false
 ) {
 	const rootpoint = String(oldKernel.rootPoint);
+	const fsApi = oldKernel.fs;
 	const isGraphical = Boolean(oldKernel.isGraphical);
 	const startupConfiguration = oldKernel.startupConfiguration;
 	oldKernel.terminate();
@@ -17,6 +18,7 @@ export default function restartKernel(
 		rootpoint,
 		isGraphical,
 		undefined,
+		fsApi,
 		startupConfiguration
 	);
 
