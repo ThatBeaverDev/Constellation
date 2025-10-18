@@ -1,4 +1,4 @@
-import TerminalAlias from "../../../../lib/terminalAlias.js";
+import TerminalAlias from "../../../../system/lib/terminalAlias.js";
 
 export default function rm(parent: TerminalAlias, ...locations: string[]) {
 	const env = parent.env;

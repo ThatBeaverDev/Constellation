@@ -1,4 +1,4 @@
-import { IPCMessage } from "../../../../runtime/messages.js";
+import { IPCMessage } from "../../../../system/runtime/components/messages.js";
 import ServiceManager from "../components/serviceManager.js";
 
 export default class CoreExecutable extends BackgroundProcess {

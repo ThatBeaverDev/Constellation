@@ -1,7 +1,6 @@
-import { UiKitRenderer } from "../../../../gui/uiKit/uiKit.js";
-import { Terminatable } from "../../../../kernel.js";
-import { ProgramManifest } from "../../../../runtime/executables.js";
-import { WindowAlias } from "../../../../security/definitions.js";
+import { Terminatable } from "../../../../system/kernel.js";
+import { ProgramManifest } from "../../../../system/runtime/components/executables.js";
+import { WindowAlias } from "../../../../system/security/definitions.js";
 import dockAndDesktop from "../tcpsys/app.js";
 import { getAppConfig, pathIcon } from "pathinf";
 
@@ -18,7 +17,7 @@ interface Program {
 
 export default class Dock implements Terminatable {
 	readonly parent: dockAndDesktop;
-	readonly renderer: UiKitRenderer;
+	readonly renderer: dockAndDesktop["renderer"];
 	readonly env: dockAndDesktop["env"];
 
 	dockHeight: number = 50;

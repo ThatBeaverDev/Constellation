@@ -1,5 +1,4 @@
-import { UiKitRenderer } from "../../../../gui/uiKit/uiKit.js";
-import { Terminatable } from "../../../../kernel.js";
+import { Terminatable } from "../../../../system/kernel.js";
 import dockAndDesktop from "../tcpsys/app.js";
 
 export interface menubarConfig {}
@@ -17,7 +16,7 @@ declare global {
 
 export default class menubar implements Terminatable {
 	parent: dockAndDesktop;
-	renderer: UiKitRenderer;
+	renderer: dockAndDesktop["renderer"];
 	env: dockAndDesktop["env"];
 
 	battery:

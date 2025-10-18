@@ -1,6 +1,6 @@
-import { defaultConfiguration } from "../constellation.config.js";
-import { isCommandLine } from "../getPlatform.js";
-import { DevToolsColor, performanceLog } from "../lib/debug.js";
+import { defaultConfiguration } from "../system/constellation.config.js";
+import { isCommandLine } from "../system/getPlatform.js";
+import { DevToolsColor, performanceLog } from "../system/lib/debug.js";
 import {
 	ApiError,
 	BrowserFS,
@@ -11,8 +11,10 @@ import {
 	getParentDirectory,
 	normaliseDirectory,
 	resolveDirectory
-} from "./fspath.js";
-import { relative } from "./nodepath.js";
+} from "../system/io/fspath.js";
+import { relative } from "../system/io/nodepath.js";
+
+/* ------------------------------------------------------------- Constants and Timestamp Function ------------------------------------------------------------- */
 
 function filesystemTimestamp(
 	label: string,
@@ -23,13 +25,16 @@ function filesystemTimestamp(
 }
 
 const start = performance.now();
-
 const startDownloadBrowserFS = performance.now();
+
+/* ------------------------------------------------------------- Download BrowserFS ------------------------------------------------------------- */
 
 const BrowserFsExports = await import("./browserfs.js");
 const BrowserFS: BrowserFS = BrowserFsExports.default();
 
 filesystemTimestamp("Download and initalise BrowserFS", startDownloadBrowserFS);
+
+/* ------------------------------------------------------------- Configure BrowserFS ------------------------------------------------------------- */
 
 const configureBrowserFS = performance.now();
 await new Promise((resolve: Function) => {
@@ -46,16 +51,20 @@ await new Promise((resolve: Function) => {
 	});
 });
 
+/* ------------------------------------------------------------- Get Filesytem Interface ------------------------------------------------------------- */
+
 const fs = BrowserFS.BFSRequire("fs");
 if (defaultConfiguration.dynamic.isDevmode) {
 	(window as any).BFS = fs;
 }
 
+/* ------------------------------------------------------------- Write File Function ------------------------------------------------------------- */
+
 const writeFile = async (directory: string, content: string) => {
 	const start = performance.now();
 	let written = false;
 
-	await fs.writeFile(directory, content, () => {
+	fs.writeFile(directory, content, () => {
 		written = true;
 	});
 
@@ -72,6 +81,8 @@ const writeFile = async (directory: string, content: string) => {
 	});
 };
 
+/* ------------------------------------------------------------- Read File Function ------------------------------------------------------------- */
+
 const readFile = async (directory: string): Promise<string | undefined> => {
 	const start = performance.now();
 
@@ -82,6 +93,8 @@ const readFile = async (directory: string): Promise<string | undefined> => {
 		})
 	);
 };
+
+/* ------------------------------------------------------------- Rename File/Folder Function ------------------------------------------------------------- */
 
 const rename = async (oldPath: string, newPath: string): Promise<void> => {
 	const start = performance.now();
@@ -99,6 +112,8 @@ const rename = async (oldPath: string, newPath: string): Promise<void> => {
 	});
 };
 
+/* ------------------------------------------------------------- List Directory Function ------------------------------------------------------------- */
+
 const readdir = async (directory: string): Promise<string[]> => {
 	const start = performance.now();
 
@@ -109,12 +124,16 @@ const readdir = async (directory: string): Promise<string[]> => {
 		})
 	);
 };
+
+/* ------------------------------------------------------------- Create Directory Function ------------------------------------------------------------- */
+
 const mkdir = async (directory: string): Promise<undefined> => {
 	const start = performance.now();
 
 	const parentDirectory = getParentDirectory(directory);
 
 	const parentListing = await readdir(parentDirectory);
+
 	if (parentListing == undefined) {
 		throw new Error(
 			`Parent directory, ${parentDirectory}, doesn't exist! (Creating ${directory})`
@@ -128,7 +147,9 @@ const mkdir = async (directory: string): Promise<undefined> => {
 			start
 		);
 
-		return new Promise((resolve: Function) => resolve);
+		return new Promise((resolve: Function) => {
+			resolve();
+		});
 	}
 
 	const parent = await stat(parentDirectory);
@@ -149,6 +170,8 @@ const mkdir = async (directory: string): Promise<undefined> => {
 	});
 };
 
+/* ------------------------------------------------------------- Stat File / Folder Function ------------------------------------------------------------- */
+
 const stat = async (directory: string): Promise<Stats | undefined> => {
 	const start = performance.now();
 
@@ -159,6 +182,9 @@ const stat = async (directory: string): Promise<Stats | undefined> => {
 		});
 	});
 };
+
+/* ------------------------------------------------------------- Delete Directory Function ------------------------------------------------------------- */
+
 const rmdir = async (directory: string): Promise<any> => {
 	const start = performance.now();
 
@@ -169,6 +195,9 @@ const rmdir = async (directory: string): Promise<any> => {
 		})
 	);
 };
+
+/* ------------------------------------------------------------- Delete File Function ------------------------------------------------------------- */
+
 const unlink = async (directory: string): Promise<any> => {
 	const start = performance.now();
 
@@ -179,6 +208,9 @@ const unlink = async (directory: string): Promise<any> => {
 		});
 	});
 };
+
+/* ------------------------------------------------------------- Copy Folder Function ------------------------------------------------------------- */
+
 /**
  * Recursively copies a file or directory to another location
  * @param oldPath - Path to input
@@ -226,6 +258,8 @@ function copyRecursively(oldPath: string, newPath: string): Promise<void> {
 	});
 }
 
+/* ------------------------------------------------------------- FilesystemAPI Class ------------------------------------------------------------- */
+
 export class FilesystemAPI {
 	rootPoint: string;
 	constructor(rootPoint: string) {
@@ -238,6 +272,8 @@ export class FilesystemAPI {
 	async init() {
 		await fsLoaded();
 	}
+
+	/* ---------------------------- Alias Functions to above ---------------------------- */
 
 	async writeFile(directory: string, content: string) {
 		const realpath = this.#realDir(directory);
@@ -305,6 +341,8 @@ export class FilesystemAPI {
 
 	async terminate() {}
 }
+
+/* ------------------------------------------------------------- Wait for Initialisation Function ------------------------------------------------------------- */
 
 export async function fsLoaded() {
 	await new Promise((resolve: Function) => {

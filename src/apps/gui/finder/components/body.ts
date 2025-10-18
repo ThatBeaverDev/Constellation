@@ -1,4 +1,4 @@
-import { onClickOptions } from "../../../../gui/uiKit/definitions.js";
+import { onClickOptions } from "../../../../system/gui/uiKit/definitions.js";
 import finder, { listing } from "../tcpsys/app.js";
 import finderInteractions from "./interactions.js";
 

@@ -1,14 +1,13 @@
-import { UiKitRenderer } from "../../../../gui/uiKit/uiKit.js";
-import ConstellationKernel from "../../../../kernel.js";
-import { Application } from "../../../../runtime/executables.js";
-import { ProcessInformation } from "../../../../runtime/runtime.js";
+import ConstellationKernel from "../../../../system/kernel.js";
+import { Application } from "../../../../system/runtime/components/executables.js";
+import { ProcessInformation } from "../../../../system/runtime/runtime.js";
 import ConstellationWindowManagerWallpaper from "../components/wallpaper.js";
 
 export default class ConstellationWindowManager
 	extends Process
 	implements Application
 {
-	renderer: UiKitRenderer;
+	renderer: Application["renderer"];
 	wallpaper?: ConstellationWindowManagerWallpaper;
 
 	constructor(

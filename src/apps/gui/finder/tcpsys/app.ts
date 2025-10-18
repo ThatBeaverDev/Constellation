@@ -1,5 +1,5 @@
 import { pathIcon } from "pathinf";
-import { directoryPointType } from "../../../../security/definitions.js";
+import { directoryPointType } from "../../../../system/security/definitions.js";
 import finderBody from "../components/body.js";
 
 const clamp = (n: number, min: number, max: number) => {

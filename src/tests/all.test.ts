@@ -1,7 +1,7 @@
 /// <reference path="../../node_modules/@types/node/index.d.ts" />
 import { exec } from "child_process";
 import path from "path";
-import applyStringPrototypes from "../stringPrototypes.js";
+import applyStringPrototypes from "../system/stringPrototypes.js";
 
 applyStringPrototypes();
 

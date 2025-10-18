@@ -1,4 +1,4 @@
-import { Permission } from "../../../../../../security/permissions.js";
+import { Permission } from "../../../../../../system/security/permissions.js";
 import {
 	RuntimeBoolean,
 	RuntimeCallable,
