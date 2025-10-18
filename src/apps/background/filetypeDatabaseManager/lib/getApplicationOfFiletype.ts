@@ -5,10 +5,11 @@ export default async function getApplicationOfFiletype(
 	parent: TerminalAlias,
 	filetype: string
 ) {
-	const read = await parent.env.fs.readFile("/System/ftypedb.json");
-	if (!read.ok) throw read.data;
+	const databaseContents = await parent.env.fs.readFile(
+		"/System/ftypedb.json"
+	);
 
-	const db: filetypeDatabase = JSON.parse(read.data);
+	const db: filetypeDatabase = JSON.parse(databaseContents);
 
 	return db.assignments[filetype];
 }

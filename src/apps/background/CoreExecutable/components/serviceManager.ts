@@ -45,10 +45,10 @@ export default class ServiceManager {
 		this.indexLock = true;
 
 		// index stuff
-		const list = await this.env.fs.listDirectory(this.serviceDirectory);
-		if (!list.ok) throw list.data;
+		const serviceFiles = await this.env.fs.listDirectory(
+			this.serviceDirectory
+		);
 
-		const serviceFiles = list.data;
 		const db: typeof this.db = [];
 
 		// consider all services

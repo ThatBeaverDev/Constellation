@@ -5,8 +5,7 @@ export default async function cd(parent: TerminalAlias, directory = "~") {
 
 	try {
 		const ls = await parent.env.fs.listDirectory(directory);
-		if (!ls.ok) return;
-		if (ls.data == undefined) return;
+		if (ls == undefined) return;
 
 		parent.path = target;
 	} catch {

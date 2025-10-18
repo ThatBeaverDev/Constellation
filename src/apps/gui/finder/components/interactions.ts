@@ -122,9 +122,10 @@ export default class finderInteractions {
 				const oldPath = obj.path;
 				const newPath = obj.path.textBeforeLast("/") + "/" + newName;
 
-				const rename = await this.env.fs.move(oldPath, newPath);
-				if (!rename.ok) {
-					if (rename.data.name == "PermissionsError") {
+				try {
+					await this.env.fs.move(oldPath, newPath);
+				} catch (e: any) {
+					if (e.name == "PermissionsError") {
 						this.renderer.showUserPrompt(
 							"Access Denied",
 							"You cannot rename this file because you do not have permission to modify files in this directory.",
@@ -157,13 +158,7 @@ export default class finderInteractions {
 				);
 				const fileTargetPath = env.fs.resolve(binpath, filename);
 
-				const moveResult = await this.env.fs.move(
-					obj.path,
-					fileTargetPath
-				);
-				if (!moveResult.ok) {
-					throw moveResult.data;
-				}
+				await this.env.fs.move(obj.path, fileTargetPath);
 
 				this.reloadInterface();
 			};

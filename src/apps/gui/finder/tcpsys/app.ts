@@ -1,6 +1,7 @@
 import { pathIcon } from "pathinf";
 import { directoryPointType } from "../../../../system/security/definitions.js";
 import finderBody from "../components/body.js";
+import { Stats } from "../../../../fs/BrowserFsTypes.js";
 
 const clamp = (n: number, min: number, max: number) => {
 	if (n < min) {
@@ -144,9 +145,11 @@ export default class finder extends Application {
 		this.path = this.env.fs.resolve(this.path, directory);
 		const dir = this.path;
 
-		const directoryContents = await this.env.fs.listDirectory(dir);
-		if (!directoryContents.ok) {
-			if (directoryContents.data.constructor.name == "PermissionsError") {
+		let directoryContents;
+		try {
+			directoryContents = await this.env.fs.listDirectory(dir);
+		} catch (e: any) {
+			if (e.constructor.name == "PermissionsError") {
 				// this is just a no permissions case
 				this.textDisplay = `You don't have permission to view '${this.path}'`;
 				this.ok = true;
@@ -154,20 +157,22 @@ export default class finder extends Application {
 			}
 			this.renderer.prompt(
 				`Directory at ${this.path} doesn't exist.`,
-				String(directoryContents.data)
+				String(e)
 			);
+
 			this.path = oldDir;
 			this.ok = true;
 			return;
 		}
-		if (directoryContents.data == undefined) {
+
+		if (directoryContents == undefined) {
 			this.renderer.prompt(`Directory at ${this.path} doesn't exist.`);
 			this.path = oldDir;
 			this.ok = true;
 			return;
 		}
 
-		let list: string[] = directoryContents.data;
+		let list: string[] = directoryContents;
 
 		// sort the list
 		list.sort();
@@ -232,19 +237,25 @@ export default class finder extends Application {
 					: `, Last Modified ${lastModified}`;
 
 			const getDirectorySubtext = async () => {
-				const list = await this.env.fs.listDirectory(path);
+				let list: string[];
+				try {
+					list = await this.env.fs.listDirectory(path);
+				} catch {
+					return "Insufficient Permissions.";
+				}
 
-				if (!list.ok) return "Insufficient Permissions.";
-
-				return String(list.data.length) + " Items" + lastModifiedText;
+				return String(list.length) + " Items" + lastModifiedText;
 			};
 
 			const getFileSubtext = async () => {
-				const stat = await this.env.fs.stat(path);
+				let stat: Stats;
+				try {
+					stat = await this.env.fs.stat(path);
+				} catch {
+					return "Insufficient Permissions.";
+				}
 
-				if (!stat.ok) return "Insufficient Permissions.";
-
-				const size = Math.round(stat.data.size / 102.4) / 10;
+				const size = Math.round(stat.size / 102.4) / 10;
 
 				return String(size) + " KiB" + lastModifiedText;
 			};

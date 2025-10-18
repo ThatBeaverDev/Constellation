@@ -31,14 +31,9 @@ export default class FilesystemAPI extends DynamicScope {
 				throw new Error("Path must be string");
 			}
 
-			const result = await hostFS.createDirectory(
-				unwrapValue(path, debug)
-			);
+			await hostFS.createDirectory(unwrapValue(path, debug));
 
-			if (!result.ok) throw result.data;
-			const done = result.data;
-
-			return wrapValue(done, debug);
+			return none();
 		};
 		this.newScopeFunction("createDir", createDir);
 
@@ -48,11 +43,10 @@ export default class FilesystemAPI extends DynamicScope {
 			}
 
 			const result = await hostFS.listDirectory(unwrapValue(path, debug));
-			if (!result.ok) throw result.data;
 
 			const wrapped: RuntimeList = {
 				type: "list",
-				value: result.data.map((item) => {
+				value: result.map((item) => {
 					return {
 						type: "string",
 						value: item
@@ -72,14 +66,9 @@ export default class FilesystemAPI extends DynamicScope {
 				throw new Error("Path must be string");
 			}
 
-			const result = await hostFS.deleteDirectory(
-				unwrapValue(path, debug)
-			);
+			await hostFS.deleteDirectory(unwrapValue(path, debug));
 
-			if (!result.ok) throw result.data;
-			const done = result.data;
-
-			return wrapValue(done, debug);
+			return none();
 		};
 		this.newScopeFunction("removeDir", removeDir);
 
@@ -96,15 +85,12 @@ export default class FilesystemAPI extends DynamicScope {
 				throw new Error("Contents must be string");
 			}
 
-			const result = await hostFS.writeFile(
+			await hostFS.writeFile(
 				unwrapValue(path, debug),
 				unwrapValue(contents, debug)
 			);
 
-			if (!result.ok) throw result.data;
-			const done = result.data;
-
-			return wrapValue(done, debug);
+			return none();
 		};
 		this.newScopeFunction("writeFile", writeFile);
 
@@ -116,12 +102,9 @@ export default class FilesystemAPI extends DynamicScope {
 				throw new Error("Path must be string");
 			}
 
-			const result = await hostFS.deleteFile(unwrapValue(path, debug));
+			await hostFS.deleteFile(unwrapValue(path, debug));
 
-			if (!result.ok) throw result.data;
-			const done = result.data;
-
-			return wrapValue(done, debug);
+			return none();
 		};
 		this.newScopeFunction("removeFile", removeFile);
 
@@ -133,10 +116,7 @@ export default class FilesystemAPI extends DynamicScope {
 				throw new Error("Path must be string");
 			}
 
-			const result = await hostFS.readFile(unwrapValue(path, debug));
-
-			if (!result.ok) throw result.data;
-			const contents = result.data;
+			const contents = await hostFS.readFile(unwrapValue(path, debug));
 
 			return wrapValue(contents, debug);
 		};
@@ -171,10 +151,7 @@ export default class FilesystemAPI extends DynamicScope {
 				throw new Error("Path must be string");
 			}
 
-			const result = await hostFS.stat(unwrapValue(path, debug));
-
-			if (!result.ok) throw result.data;
-			const stats = result.data;
+			const stats = await hostFS.stat(unwrapValue(path, debug));
 
 			// TODO: build an object.
 			stats;

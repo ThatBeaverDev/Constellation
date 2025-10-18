@@ -3,13 +3,12 @@ import TerminalAlias from "../../../../system/lib/terminalAlias.js";
 export default async function cat(parent: TerminalAlias, directory: string) {
 	const rel = parent.env.fs.resolve(parent.path, directory);
 
-	const resp = await parent.env.fs.readFile(rel);
-
-	if (!resp.ok) {
+	let contents: string;
+	try {
+		contents = await parent.env.fs.readFile(rel);
+	} catch {
 		return "File does not exist (or a general filesystem error occurred)";
 	}
-
-	const contents = resp.data;
 
 	return contents;
 }

@@ -14,6 +14,8 @@ export default class CoreExecutable extends BackgroundProcess {
 			"/System/CoreExecutables/systemLoginInterface.appl";
 		const finderDirectory = "/Applications/Finder.appl";
 		const guiManagerDirectory = "/System/CoreExecutables/guiManager.appl";
+		const filetypeDatabaseManagerDirectory =
+			"/System/CoreExecutables/filetypeDatabaseManager.backgr";
 
 		// dock permissions
 		this.env.setDirectoryPermission(dockDirectory, "windows", true);
@@ -27,6 +29,13 @@ export default class CoreExecutable extends BackgroundProcess {
 
 		// GUI manager permissions
 		this.env.setDirectoryPermission(guiManagerDirectory, "operator", true);
+
+		// filetype database m anager permissions
+		this.env.setDirectoryPermission(
+			filetypeDatabaseManagerDirectory,
+			"systemFiles",
+			true
+		);
 
 		// this.windows
 		this.registerKeyboardShortcut("Close Window", "KeyW", ["AltLeft"]);
