@@ -302,7 +302,7 @@ export default class ConstellationKernel implements Terminatable {
 		const frame = async () => {
 			return new Promise((resolve: Function) => {
 				this.runtime.frame();
-				setTimeout(resolve, 5);
+				setTimeout(resolve, 10);
 			});
 		};
 
