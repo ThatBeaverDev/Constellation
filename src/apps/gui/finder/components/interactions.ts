@@ -152,11 +152,11 @@ export default class finderInteractions {
 					})
 				);
 
-				const binpath = env.fs.resolve(
+				const binpath = this.env.fs.resolve(
 					userInfo.directory,
 					"./recentlyDeleted"
 				);
-				const fileTargetPath = env.fs.resolve(binpath, filename);
+				const fileTargetPath = this.env.fs.resolve(binpath, filename);
 
 				await this.env.fs.move(obj.path, fileTargetPath);
 

@@ -24,7 +24,6 @@ declare global {
 		runtime: "nodejs" | "browser" | "deno";
 	}
 
-	const env: ApplicationAuthorisationAPI;
 	const Application: typeof executables.Application;
 	const Process: typeof executables.Process;
 	const BackgroundProcess: typeof executables.BackgroundProcess;

@@ -2,7 +2,7 @@ import { Stats } from "../../../../fs/BrowserFsTypes.js";
 import TerminalAlias from "../../../../system/lib/terminalAlias.js";
 
 export default async function tree(parent: TerminalAlias, directory = ".") {
-	const dir = env.fs.resolve(parent.path, directory);
+	const dir = parent.env.fs.resolve(parent.path, directory);
 
 	let result = dir + "\n";
 
