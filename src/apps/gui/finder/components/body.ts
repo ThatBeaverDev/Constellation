@@ -50,12 +50,12 @@ export default class finderBody {
 			this.contentPadding * 2;
 		const height = 34 + this.displayItemPadding * 2;
 
-		if (selected == true) {
-			this.renderer.box(x, y, width, height, {
-				background: "var(--main-accent-tertiary)",
-				borderRadius: 4
-			});
-		}
+		let box = this.renderer.box(x, y, width, height, {
+			background: selected
+				? "var(--main-accent-tertiary)"
+				: "transparent",
+			borderRadius: 4
+		});
 
 		const iconElem = this.renderer.icon(
 			x + this.displayItemPadding,
@@ -77,10 +77,10 @@ export default class finderBody {
 		);
 
 		const onClickConfig: onClickOptions = {
-			scale: 1.1,
-			origin: "left"
+			scale: 1
 		};
 
+		this.renderer.onClick(box, leftClick, rightClick, { scale: 1 });
 		this.renderer.onClick(iconElem, leftClick, rightClick, onClickConfig);
 		this.renderer.onClick(titleElem, leftClick, rightClick, onClickConfig);
 		this.renderer.onClick(
