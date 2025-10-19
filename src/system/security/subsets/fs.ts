@@ -127,6 +127,18 @@ export default class EnvFs {
 		}
 	};
 
+	async copy(oldDirectory: string, newDirectory: string): Promise<void> {
+		try {
+			this.#directoryActionCheck(oldDirectory, true);
+			this.#directoryActionCheck(newDirectory, true);
+
+			await this.#ConstellationKernel.fs.cp(oldDirectory, newDirectory);
+		} catch (error: any) {
+			error.message = "env.fs.copy: " + error.message;
+			throw error;
+		}
+	}
+
 	stat = async (directory: string): Promise<Stats> => {
 		try {
 			const parentDirectory = getParentDirectory(directory);
