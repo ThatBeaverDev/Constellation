@@ -48,6 +48,10 @@ export async function showUserPrompt(
 	if (!(kernel.ui.type == "GraphicalInterface"))
 		throw new Error("User Prompts require the GraphicalInterface");
 
+	const gui = ConstellationKernel.ui;
+	if (gui.type !== "GraphicalInterface")
+		throw new Error("GUI is required to showUserPrompt.");
+
 	const iconSize = 50;
 
 	/**
@@ -59,7 +63,11 @@ export async function showUserPrompt(
 			getTextWidth(config.title, 15),
 			getTextWidth(config.subtext, 11)
 		];
-		return outerPadding + Math.max(...widths) + outerPadding;
+
+		const neededWidth = outerPadding + Math.max(...widths) + outerPadding;
+		console.debug(neededWidth);
+
+		return neededWidth;
 	}
 
 	function calculateNeededHeight() {
@@ -91,13 +99,10 @@ export async function showUserPrompt(
 	const innerPadding = 10;
 
 	// create window
-	const popup = new OverlayWindow(
-		ConstellationKernel,
-		"Popup",
-		undefined,
-		calculateNeededWidth(),
-		calculateNeededHeight()
-	);
+	const popup = new OverlayWindow(ConstellationKernel, "Popup", undefined);
+
+	// resize window
+	popup.resize(calculateNeededWidth(), calculateNeededHeight());
 
 	/**
 	 * This window's UiKit instance
@@ -216,7 +221,12 @@ export async function showUserPrompt(
 			y += doneHeight + innerPadding;
 
 			ui.commit();
-			popup.resize(undefined, y);
+
+			popup.resize(calculateNeededWidth(), y);
+			popup.move(
+				(gui.displayWidth - popup.dimensions.width) / 2,
+				(gui.displayHeight - popup.dimensions.width) / 2
+			);
 		});
 	}
 }

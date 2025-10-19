@@ -501,8 +501,8 @@ export class OverlayWindow extends GraphicalWindow {
 		ConstellationKernel: ConstellationKernel,
 		name: string,
 		Application?: Application,
-		width?: number,
-		height?: number
+		width: number = 500,
+		height: number = 300
 	) {
 		super(ConstellationKernel, name, Application);
 		this.minimumWidth = 200;
@@ -512,8 +512,8 @@ export class OverlayWindow extends GraphicalWindow {
 		this.hideHeader();
 
 		// position windows where requested or at the default location
-		const left = (this.portWidth - (width || 500)) / 2;
-		const top = (this.portHeight - (height || 300)) / 2;
+		const left = (this.portWidth - width) / 2;
+		const top = (this.portHeight - height) / 2;
 
 		this.resize(width, height);
 		this.move(left, top);
