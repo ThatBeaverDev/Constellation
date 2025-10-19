@@ -163,17 +163,17 @@ export default class finderInteractions {
 				this.reloadInterface();
 			};
 			context["Copy"] = async () => {
-				//const oldPath = obj.path;
-				//const newPath = await this.renderer.askUserDirectory(
-				//	"Where do you want to copy this ${} to?",
-				//	"This ${}}'s current location is " + obj.path,
-				//	obj.icon
-				//);
-				//
-				/* TODO: COPY THE FILE! */
-				this.renderer.prompt(
-					"Functionality not implemented: copying files"
+				const type = obj.type.toLowerCase();
+
+				const newPath = await this.renderer.askUserQuestion(
+					`Where do you want to copy this ${type} to?`,
+					`This ${type} is currently located at ${obj.path}`,
+					obj.icon
 				);
+
+				await this.env.fs.copy(obj.path, newPath);
+
+				this.reloadInterface();
 			};
 
 			this.renderer.setContextMenu(x, y, obj.name, context);
