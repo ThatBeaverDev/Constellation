@@ -205,17 +205,10 @@ export default class finder extends Application {
 				}
 			}
 
-			let stat: any = await this.env.fs.stat(path);
+			let stat = await this.env.fs.stat(path);
 
-			if (!stat.ok) {
-				stat = {
-					ok: true,
-					data: { mtime: undefined, atime: undefined }
-				};
-			}
-
-			const lastModifiedDate: Date | undefined = stat.data.mtime;
-			const creationDate: Date | undefined = stat.data.atime;
+			const lastModifiedDate: Date | undefined = stat.mtime;
+			const creationDate: Date | undefined = stat.atime;
 
 			let lastModified;
 			if (lastModifiedDate == undefined || creationDate == undefined) {
