@@ -130,7 +130,7 @@ export default class dockAndDesktop extends Overlay {
 		ctrlKey: boolean,
 		shiftKey: boolean,
 		repeat: boolean
-	): void | undefined | null {
+	) {
 		// dock focus code
 		if (this.dockFocus && code !== "KeyD") {
 			if (this.dock == undefined) return;

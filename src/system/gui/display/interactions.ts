@@ -84,12 +84,16 @@ export default class WindowSystemInteractions {
 		if (parent.snappingWindow !== undefined) {
 			// we need to actually snap the window
 
-			const leftBound = this.#GraphicalInterface.windowSystem.bounds.left;
+			const scale = this.#GraphicalInterface.displayScaling;
+
+			const leftBound =
+				this.#GraphicalInterface.windowSystem.bounds.left / scale;
 			const rightBound =
-				this.#GraphicalInterface.windowSystem.bounds.right;
-			const topBound = this.#GraphicalInterface.windowSystem.bounds.upper;
+				this.#GraphicalInterface.windowSystem.bounds.right / scale;
+			const topBound =
+				this.#GraphicalInterface.windowSystem.bounds.upper / scale;
 			const bottomBound =
-				this.#GraphicalInterface.windowSystem.bounds.lower;
+				this.#GraphicalInterface.windowSystem.bounds.lower / scale;
 
 			let x = 0;
 			let y = 0;

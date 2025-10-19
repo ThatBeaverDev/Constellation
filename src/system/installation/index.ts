@@ -1,6 +1,6 @@
 import { preinstall } from "./fs.js";
 import postinstall from "./postinstall.js";
-import ConstellationKernel from "..//kernel.js";
+import ConstellationKernel from "../kernel.js";
 import { developmentOptions } from "./installation.config.js";
 import { installationTimestamp } from "./installationTimestamp.js";
 

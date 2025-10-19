@@ -1,8 +1,10 @@
 import ConstellationKernel from "..//kernel.js";
+import { UserInterfaceBase } from "../ui/ui.js";
 
 const path = "/System/tui/tui.js";
 
-export class TextInterface {
+export class TextInterface implements UserInterfaceBase {
+	type: "TextInterface" = "TextInterface";
 	#ConstellationKernel: ConstellationKernel;
 	readline?: typeof import("readline");
 
@@ -91,4 +93,14 @@ export class TextInterface {
 			});
 		});
 	}
+
+	setStatus(text: string | Error, state: "working" | "error"): void {
+		// TODO: IMPLEMENT
+	}
+
+	panic(text: string) {
+		// TODO: IMPLEMENT
+	}
+
+	terminate() {}
 }

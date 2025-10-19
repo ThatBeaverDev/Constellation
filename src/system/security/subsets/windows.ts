@@ -20,11 +20,10 @@ export default class EnvWindows {
 		this.#env = parent;
 		this.#checkPermission = permissionCheck;
 
-		if (!ConstellationKernel.GraphicalInterface)
+		if (!(ConstellationKernel.ui.type == "GraphicalInterface"))
 			throw new Error("This requires a graphical kernel.");
 
-		this.#WindowSystem =
-			ConstellationKernel.GraphicalInterface.windowSystem;
+		this.#WindowSystem = ConstellationKernel.ui.windowSystem;
 	}
 
 	get lowerBound() {
@@ -114,8 +113,8 @@ export default class EnvWindows {
 		const start = performance.now();
 
 		this.#checkPermission("windows");
-		const UserInterface = this.#ConstellationKernel.GraphicalInterface;
-		if (UserInterface == undefined) return [];
+		const UserInterface = this.#ConstellationKernel.ui;
+		if (!(UserInterface.type == "GraphicalInterface")) return [];
 
 		const obj: WindowAlias[] = [];
 
@@ -137,8 +136,8 @@ export default class EnvWindows {
 		const start = performance.now();
 
 		this.#checkPermission("windows");
-		const UserInterface = this.#ConstellationKernel.GraphicalInterface;
-		if (UserInterface == undefined) return undefined;
+		const UserInterface = this.#ConstellationKernel.ui;
+		if (!(UserInterface.type == "GraphicalInterface")) return undefined;
 
 		const target = UserInterface.windowSystem.getWindowOfId(
 			UserInterface.windowSystem.focusedWindow
@@ -159,8 +158,8 @@ export default class EnvWindows {
 	 */
 	focusWindow(id: number) {
 		this.#checkPermission("windows");
-		const UserInterface = this.#ConstellationKernel.GraphicalInterface;
-		if (UserInterface == undefined) return undefined;
+		const UserInterface = this.#ConstellationKernel.ui;
+		if (!(UserInterface.type == "GraphicalInterface")) return undefined;
 
 		UserInterface.windowSystem.focusWindow(id);
 	}

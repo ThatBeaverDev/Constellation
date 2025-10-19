@@ -2,12 +2,14 @@ import ConstellationKernel from "../../kernel.js";
 import { Application } from "../../runtime/components/executables.js";
 import WindowSystem from "./windowSystem.js";
 import { windowsTimestamp } from "./timestamp.js";
+import { GraphicalInterface } from "../gui.js";
 
 export const path = "/System/gui/display/windowTypes.js";
 
 export class GraphicalWindow {
 	#WindowSystem: WindowSystem;
 	#ConstellationKernel: ConstellationKernel;
+	#GraphicalInterface: GraphicalInterface;
 
 	// properties that change
 	name: string;
@@ -38,11 +40,12 @@ export class GraphicalWindow {
 	) {
 		this.#ConstellationKernel = ConstellationKernel;
 
-		if (ConstellationKernel.GraphicalInterface == undefined)
+		if (!(ConstellationKernel.ui.type == "GraphicalInterface"))
 			throw new Error("Windows cannot exist on a non-graphical system.");
 
-		const WindowSystem =
-			ConstellationKernel.GraphicalInterface.windowSystem;
+		this.#GraphicalInterface = ConstellationKernel.ui;
+
+		const WindowSystem = ConstellationKernel.ui.windowSystem;
 		this.#WindowSystem = WindowSystem;
 		this.name = name;
 		this.winID = WindowSystem.winID++;
@@ -90,8 +93,8 @@ export class GraphicalWindow {
 
 			const kernel = this.#ConstellationKernel;
 			let icon: HTMLImageElement;
-			if (kernel.GraphicalInterface) {
-				icon = kernel.GraphicalInterface.getIcon(iconpath);
+			if (kernel.ui.type == "GraphicalInterface") {
+				icon = kernel.ui.getIcon(iconpath);
 			} else {
 				// just so typescript doesn't freak out. this will never happen.
 				icon = document.createElement("img");
@@ -151,11 +154,9 @@ export class GraphicalWindow {
 		this.move(left, top);
 		this.resize(width, height);
 
-		const shadowDom = ConstellationKernel.GraphicalInterface.shadowRoot;
+		const shadowDom = ConstellationKernel.ui.shadowRoot;
 
-		ConstellationKernel.GraphicalInterface.container.appendChild(
-			this.container
-		);
+		ConstellationKernel.ui.container.appendChild(this.container);
 
 		this.container = shadowDom.getElementById(this.container.id)!;
 		this.body = shadowDom.getElementById(this.body.id)!;
@@ -181,6 +182,7 @@ export class GraphicalWindow {
 			};
 
 			const rect = this.container.getBoundingClientRect();
+
 			this.#WindowSystem.offsetX = e.clientX - rect.left;
 			this.#WindowSystem.offsetY = e.clientY - rect.top;
 			this.#WindowSystem.startMouseX = e.clientX;
@@ -232,30 +234,24 @@ export class GraphicalWindow {
 		this.resizeObserver.observe(this.container);
 	}
 
-	get gui() {
-		const gui = this.#ConstellationKernel.GraphicalInterface;
-
-		if (gui == undefined) throw new Error("GUI is required.");
-
-		return gui;
-	}
-
 	get portWidth() {
-		return this.gui.displayWidth;
+		return this.#GraphicalInterface.displayWidth;
 	}
 	get portHeight() {
-		return this.gui.displayHeight;
+		return this.#GraphicalInterface.displayHeight;
 	}
 
 	reposition() {
+		const scale = this.#GraphicalInterface.displayScaling;
+
 		const start = performance.now();
 		const c = this.container;
 
 		const width = Number(c.dataset.width) - 4 + "px";
 		const height = Number(c.dataset.height) - 4 + "px";
 
-		const left = c.dataset.left + "px";
-		const top = c.dataset.top + "px";
+		const left = Number(c.dataset.left) / scale + "px";
+		const top = Number(c.dataset.top) / scale + "px";
 
 		if (c.style.width !== width) {
 			c.style.width = width;
@@ -271,8 +267,8 @@ export class GraphicalWindow {
 			c.style.top = top;
 		}
 
-		const gui = this.#ConstellationKernel.GraphicalInterface;
-		if (gui !== undefined) gui.windowSystem.relayer();
+		const gui = this.#ConstellationKernel.ui;
+		if (gui.type == "GraphicalInterface") gui.windowSystem.relayer();
 
 		windowsTimestamp(`Reposition window ${this.winID}`, start);
 	}
@@ -416,8 +412,8 @@ export class GraphicalWindow {
 		this.iconName = loc;
 
 		const kernel = this.#ConstellationKernel;
-		if (kernel.GraphicalInterface) {
-			const icon = kernel.GraphicalInterface.getIcon(loc);
+		if (kernel.ui.type == "GraphicalInterface") {
+			const icon = kernel.ui.getIcon(loc);
 
 			this.#setIcon(icon);
 		}
