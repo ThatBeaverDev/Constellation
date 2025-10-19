@@ -1,13 +1,13 @@
 import TerminalAlias from "../../../../system/lib/terminalAlias.js";
-
-const mime = await env.include("/System/CoreLibraries/mime.js");
+import * as mime from "mime";
 
 export default async function wget(
 	parent: TerminalAlias,
 	url: string,
 	output: string
 ) {
-	const out = output || env.fs.resolve(parent.path, url.textAfterAll("/"));
+	const out =
+		output || parent.env.fs.resolve(parent.path, url.textAfterAll("/"));
 
 	const textCharacters: string[] =
 		"QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890!@£$%^&*()-=_+[]{};'\\:\"|,./<>?`~§±œ∑´®†¥¨^øπåß∂ƒ©˙∆˚¬Ω≈ç√∫~µ`¡€#¢∞§¶•ªº–≠“‘…æ«≤≥÷⁄™‹›ﬁﬂ‡°·‚—±Œ„‰ÂÊÁËÈØ∏”’ÅÍÎÏÌÓÔÒÚÆ»ŸÛÙÇ◊ıˆ˜¯˘¿".split(
