@@ -101,16 +101,18 @@ class UiKitRendererClass {
 	}
 
 	get displayWidth() {
-		const gui = this.#ConstellationKernel.GraphicalInterface;
+		const gui = this.#ConstellationKernel.ui;
 
-		if (gui == undefined) throw new Error("No GUI found");
+		if (!(gui.type == "GraphicalInterface"))
+			throw new Error("No GUI found");
 
 		return gui.displayWidth;
 	}
 	get displayHeight() {
-		const gui = this.#ConstellationKernel.GraphicalInterface;
+		const gui = this.#ConstellationKernel.ui;
 
-		if (gui == undefined) throw new Error("No GUI found");
+		if (!(gui.type == "GraphicalInterface"))
+			throw new Error("No GUI found");
 
 		return gui.displayHeight;
 	}
@@ -164,8 +166,8 @@ class UiKitRendererClass {
 		this.#ConstellationKernel = ConstellationKernel;
 		this.#process = process;
 
-		const UserInterface = ConstellationKernel.GraphicalInterface;
-		if (UserInterface == undefined)
+		const UserInterface = ConstellationKernel.ui;
+		if (!(UserInterface.type == "GraphicalInterface"))
 			throw new Error(
 				"UIkit requires a graphical environment to function."
 			);
@@ -472,13 +474,13 @@ class UiKitRendererClass {
 	 * @param subtext - the description of this statement
 	 */
 	prompt(title: string, subtext = "", icon = this.#window.iconName) {
-		const gui = this.#ConstellationKernel.GraphicalInterface?.windowSystem;
-		if (gui == undefined)
+		const gui = this.#ConstellationKernel.ui;
+		if (!(gui.type == "GraphicalInterface"))
 			throw new Error(
 				"UiKit may not be used in a non-graphical environment"
 			);
 
-		gui.showUserPrompt(icon, {
+		gui.windowSystem.showUserPrompt(icon, {
 			title,
 			subtext,
 			primary: "Cancel"
@@ -492,31 +494,32 @@ class UiKitRendererClass {
 		secondary?: string,
 		icon: string = this.#window.iconName
 	) {
-		const gui = this.#ConstellationKernel.GraphicalInterface?.windowSystem;
-		if (gui == undefined)
+		const gui = this.#ConstellationKernel.ui;
+		if (!(gui.type == "GraphicalInterface"))
 			throw new Error(
 				"UiKit may not be used in a non-graphical environment"
 			);
 
-		return await gui.showUserPrompt(icon, {
+		return await gui.windowSystem.showUserPrompt(icon, {
 			title,
 			subtext,
 			primary,
 			secondary
 		});
 	}
+
 	async askUserQuestion(
 		title: string,
 		subtext: string,
 		icon: string = this.#window.iconName
 	) {
-		const gui = this.#ConstellationKernel.GraphicalInterface?.windowSystem;
-		if (gui == undefined)
+		const gui = this.#ConstellationKernel.ui;
+		if (!(gui.type == "GraphicalInterface"))
 			throw new Error(
 				"UiKit may not be used in a non-graphical environment"
 			);
 
-		return await gui.askUserQuestion(icon, {
+		return await gui.windowSystem.askUserQuestion(icon, {
 			title,
 			subtext
 		});
@@ -580,8 +583,8 @@ class UiKitRendererClass {
 	 * Commits all UI elements since the last `renderer.clear()` call.
 	 */
 	commit() {
-		const UserInterface = this.#ConstellationKernel.GraphicalInterface;
-		if (UserInterface == undefined) return;
+		const UserInterface = this.#ConstellationKernel.ui;
+		if (!(UserInterface.type == "GraphicalInterface")) return;
 
 		const start = performance.now();
 
@@ -774,6 +777,11 @@ class UiKitRendererClass {
 				);
 
 			if (newStep.onClick !== undefined) {
+				const gui = this.#ConstellationKernel.ui;
+				if (!(gui.type == "GraphicalInterface")) return;
+
+				const scale = gui.displayScaling || 0;
+
 				element.classList.add("clickable");
 				element.style.setProperty(
 					"--scale",
@@ -808,8 +816,8 @@ class UiKitRendererClass {
 								) {
 									event.preventDefault();
 									newStep.onClick.right(
-										event.clientX,
-										event.clientY
+										event.clientX / scale,
+										event.clientY / scale
 									);
 								}
 							}, 500);
@@ -841,8 +849,8 @@ class UiKitRendererClass {
 								) {
 									event.preventDefault();
 									newStep.onClick.left(
-										event.clientX,
-										event.clientY
+										event.clientX / scale,
+										event.clientY / scale
 									);
 								}
 								break;
@@ -883,7 +891,10 @@ class UiKitRendererClass {
 
 						if (typeof newStep.onClick.right === "function") {
 							event.preventDefault();
-							newStep.onClick.right(event.clientX, event.clientY);
+							newStep.onClick.right(
+								event.clientX / scale,
+								event.clientY / scale
+							);
 						}
 					},
 					{ signal: this.signal }

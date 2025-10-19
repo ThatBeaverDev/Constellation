@@ -76,7 +76,7 @@ export default class finder extends Application {
 		this.ok = true;
 	}
 
-	keydown(
+	async keydown(
 		code: string,
 		metaKey: boolean,
 		altKey: boolean,
@@ -125,9 +125,14 @@ export default class finder extends Application {
 				this.cd("..");
 				break;
 			case "KeyG":
-				// TODO: GRAPHICAL PROMPT
-				// eslint-disable-next-line
-				this.cd(prompt("Select a directory") || ".");
+				// cd to user-provided directory
+				const target = await this.renderer.askUserQuestion(
+					"Go to Folder",
+					"Enter a directory to view",
+					this.env.fs.resolve(this.directory, "./resources/icon.svg")
+				);
+
+				this.cd(target == "" ? "." : target);
 				break;
 		}
 	}

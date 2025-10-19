@@ -1,6 +1,13 @@
-// just so I can keep references for when I fix this
+import ConstellationKernel from "../kernel.js";
+
 // TODO: panic
-export default async function panic(error: any, source?: string) {}
+export default async function panic(
+	ConstellationKernel: ConstellationKernel,
+	error: any,
+	source?: string
+) {
+	ConstellationKernel.ui.panic("panic :>");
+}
 
 //import { processes } from "../runtime/runtime.js";
 //

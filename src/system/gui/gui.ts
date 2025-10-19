@@ -3,8 +3,10 @@ import { Icons } from "./icons.js";
 import ConstellationKernel, { Terminatable } from "../kernel.js";
 import WindowSystem from "./display/windowSystem.js";
 import UiKitInstanceCreator from "./uiKit/uiKit.js";
+import { UserInterfaceBase } from "../ui/ui.js";
 
-export class GraphicalInterface implements Terminatable {
+export class GraphicalInterface implements UserInterfaceBase {
+	type: "GraphicalInterface" = "GraphicalInterface";
 	icons: Icons & Terminatable;
 	getIcon: Icons["getIcon"];
 	windowSystem: WindowSystem & Terminatable;
@@ -29,6 +31,7 @@ export class GraphicalInterface implements Terminatable {
 
 		// body div
 		this.container.className = "overlay";
+		this.container.style.zoom = "1";
 		this.shadowRoot.appendChild(this.container);
 
 		// styles ID
@@ -54,18 +57,25 @@ export class GraphicalInterface implements Terminatable {
 		document.body.appendChild(this.#containerDiv);
 	}
 
-	get displayWidth() {
+	get displayWidth(): number {
 		return this.container.clientWidth;
 	}
 	set displayWidth(width: number) {
 		this.container.style.width = `${width}px`;
 	}
 
-	get displayHeight() {
+	get displayHeight(): number {
 		return this.container.clientHeight;
 	}
 	set displayHeight(height: number) {
 		this.container.style.height = `${height}px`;
+	}
+
+	get displayScaling(): number {
+		return Number(this.container.style.zoom);
+	}
+	set displayScaling(scale: number) {
+		this.container.style.zoom = String(scale);
 	}
 
 	async init() {
@@ -110,10 +120,25 @@ span.loader::after {
 		if (bootText !== null) bootText.innerText = String(text);
 	}
 
-	async terminate() {
+	async #reduceState() {
 		await this.windowSystem.terminate();
 		await this.keyboardShortcuts.terminate();
 		await this.uiKit.terminate();
+	}
+
+	async panic(text: string) {
+		this.#reduceState();
+
+		this.container.innerHTML = "";
+
+		const displayElem = document.createElement("p");
+		displayElem.innerText = text;
+
+		this.container.appendChild(displayElem);
+	}
+
+	async terminate() {
+		await this.#reduceState();
 
 		this.#containerDiv.remove();
 	}

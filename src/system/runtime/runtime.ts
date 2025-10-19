@@ -8,13 +8,13 @@ import {
 	EnvironmentCreator
 } from "../security/env.js";
 import ConstellationKernel, { Terminatable } from "../kernel.js";
-import { ImportRewriter } from "./components/codeProcessor.js";
 import { dump } from "./components/crashed.js";
 import { defaultConfiguration } from "../constellation.config.js";
 import { UserPromptConfig } from "../gui/display/definitions.js";
 import ApplicationVerifier from "../security/runtimeDefender.js";
 import { appName } from "./components/appName.js";
 import { AppsTimeStamp } from "./components/AppsTimeStamp.js";
+import ImportResolver from "./components/resolver.js";
 
 const path = "/System/runtime.js";
 
@@ -111,16 +111,16 @@ export class ProgramRuntime {
 	) {
 		this.#ConstellationKernel = ConstellationKernel;
 		this.EnvironmentCreator = this.#ConstellationKernel.security.env;
-		this.importsRewriter = new ImportRewriter(
+		this.importsRewriter = new ImportResolver(
 			this.#ConstellationKernel.fs,
-			this
+			this.#ConstellationKernel.lib.blobifier
 		);
 		this.Verifier = new ApplicationVerifier(ConstellationKernel);
 	}
 
 	documentKeyDown(event: KeyboardEvent) {
-		const UserInterface = this.#ConstellationKernel.GraphicalInterface;
-		if (UserInterface == undefined) return;
+		const UserInterface = this.#ConstellationKernel.ui;
+		if (!(UserInterface.type == "GraphicalInterface")) return;
 
 		const keylisteners = new Set([
 			// focused window
@@ -129,12 +129,12 @@ export class ProgramRuntime {
 			)?.Application,
 
 			// key listeners
-			...processes.filter((proc) =>
-				proc.program.env.hasPermission("keylogger")
-			)
+			...processes
+				.filter((info) => info.program.env.hasPermission("keylogger"))
+				.map((info) => info.program)
 		]);
 
-		const procKeydown = (proc?: Process) => {
+		function procKeydown(proc?: Process) {
 			if (proc == undefined) return;
 
 			const fnc = proc.keydown;
@@ -150,20 +150,16 @@ export class ProgramRuntime {
 					event.repeat
 				);
 			}
-		};
+		}
 
 		keylisteners.forEach((item) => {
-			if (item instanceof Process) {
-				procKeydown(item);
-			} else {
-				procKeydown(item?.program);
-			}
+			procKeydown(item);
 		});
 	}
 
 	documentKeyUp(event: KeyboardEvent) {
-		const UserInterface = this.#ConstellationKernel.GraphicalInterface;
-		if (UserInterface == undefined) return;
+		const UserInterface = this.#ConstellationKernel.ui;
+		if (!(UserInterface.type == "GraphicalInterface")) return;
 
 		const keylisteners = [
 			UserInterface.windowSystem.getWindowOfId(
@@ -357,12 +353,11 @@ export class ProgramRuntime {
 		if (executableDirectory == undefined)
 			throw new Error("No Executable found.");
 
-		let data: string = "";
-
-		//const finalProgramArgs: any[] = [...args];
 		const finalProgramArgs: any[] = args;
 		let directory = String(appdir);
 
+		// create a blob of the content
+		let blob: string;
 		switch (type) {
 			case "crl":
 				executableDirectory = this.#ConstellationKernel.fs.resolve(
@@ -391,12 +386,8 @@ export class ProgramRuntime {
 					);
 				}
 
-				const importsResolved = await this.importsRewriter.processCode(
-					content,
-					executableDirectory
-				);
+				blob = await this.importsRewriter.resolve(executableDirectory);
 
-				data = importsResolved;
 				break;
 
 			default:
@@ -404,12 +395,6 @@ export class ProgramRuntime {
 					"Type '" + type + "' is not executable."
 				);
 		}
-
-		// create a blob of the content
-		const blob = this.#ConstellationKernel.lib.blobifier.blobify(
-			data,
-			"text/javascript"
-		);
 
 		// import from the script BLOB
 		const exports = await import(blob);
@@ -419,7 +404,7 @@ export class ProgramRuntime {
 		// get the class executable
 		let Executable: typeof Process;
 		if (
-			this.#ConstellationKernel.GraphicalInterface !== undefined &&
+			this.#ConstellationKernel.ui !== undefined &&
 			typeof gui == "function"
 		) {
 			// Graphical executable
@@ -432,7 +417,7 @@ export class ProgramRuntime {
 			// assign it
 			Executable = gui;
 		} else if (
-			this.#ConstellationKernel.TextInterface !== undefined &&
+			this.#ConstellationKernel.ui !== undefined &&
 			typeof tui == "function"
 		) {
 			// Text based executable
@@ -540,7 +525,7 @@ export class ProgramRuntime {
 		return result;
 	}
 
-	importsRewriter: ImportRewriter & Terminatable;
+	importsRewriter: ImportResolver & Terminatable;
 
 	async showPrompt(
 		type: "error" | "warning" | "log",
@@ -548,9 +533,9 @@ export class ProgramRuntime {
 		description?: string,
 		buttons?: string[]
 	) {
-		const gui = this.#ConstellationKernel.GraphicalInterface;
+		const gui = this.#ConstellationKernel.ui;
 
-		if (gui == undefined) return;
+		if (!(gui.type == "GraphicalInterface")) return;
 
 		let icon: string;
 		switch (type) {

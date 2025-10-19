@@ -13,7 +13,7 @@ export class ContextMenu {
 		headerText: string,
 		items: Record<string, Function>
 	) {
-		if (!ConstellationKernel.GraphicalInterface)
+		if (!(ConstellationKernel.ui.type == "GraphicalInterface"))
 			throw new Error("Graphical system is required!");
 
 		let maxWidth = 0;
@@ -30,7 +30,7 @@ export class ContextMenu {
 		height += 5; // divider
 		height += Object.keys(items).length * (padding * 2 + 5); // items, 2 padding each and 5px.
 
-		if (y + height > ConstellationKernel.GraphicalInterface.displayHeight) {
+		if (y + height > ConstellationKernel.ui.displayHeight) {
 			// need to show ABOVE the mouse
 			y -= height;
 		}
@@ -82,13 +82,10 @@ export class ContextMenu {
 			if (afterIcon !== "") {
 				txt = " ".repeat(Math.ceil(24 / widthOfSpace)) + afterIcon;
 
-				if (ConstellationKernel.GraphicalInterface == undefined) {
+				if (!(ConstellationKernel.ui.type == "GraphicalInterface")) {
 					icon = document.createElement("img");
 				} else {
-					icon =
-						ConstellationKernel.GraphicalInterface.getIcon(
-							iconName
-						);
+					icon = ConstellationKernel.ui.getIcon(iconName);
 				}
 
 				icon.style.top = `${yPos}px`;
@@ -112,25 +109,20 @@ export class ContextMenu {
 			return { text: elem, icon };
 		});
 
-		ConstellationKernel.GraphicalInterface.container.appendChild(
-			this.container
-		);
-		this.container =
-			ConstellationKernel.GraphicalInterface.container.querySelector(
-				"div#" + this.container.id
-			)!;
+		ConstellationKernel.ui.container.appendChild(this.container);
+		this.container = ConstellationKernel.ui.container.querySelector(
+			"div#" + this.container.id
+		)!;
 
 		this.container.appendChild(this.header);
-		this.header =
-			ConstellationKernel.GraphicalInterface.container.querySelector(
-				"p#" + this.header.id
-			)!;
+		this.header = ConstellationKernel.ui.container.querySelector(
+			"p#" + this.header.id
+		)!;
 
 		this.container.appendChild(this.divider);
-		this.divider =
-			ConstellationKernel.GraphicalInterface.container.querySelector(
-				"div#" + this.divider.id
-			)!;
+		this.divider = ConstellationKernel.ui.container.querySelector(
+			"div#" + this.divider.id
+		)!;
 
 		for (const i in this.items) {
 			const elems: { text: HTMLButtonElement; icon?: HTMLImageElement } =

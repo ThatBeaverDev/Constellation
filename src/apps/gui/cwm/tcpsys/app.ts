@@ -28,10 +28,11 @@ export default class ConstellationWindowManager
 		);
 
 		const kernel = this.env.getKernel();
-		const gui = kernel.GraphicalInterface;
+		const gui = kernel.ui;
 
-		if (gui == undefined)
+		if (gui.type !== "GraphicalInterface") {
 			throw new Error("GuiManager requires a GUI to manage.");
+		}
 
 		const windowSystem = gui.windowSystem;
 		const window = new windowSystem.windowTypes.UnderlayWindow(

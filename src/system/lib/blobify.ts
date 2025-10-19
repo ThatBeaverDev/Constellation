@@ -65,4 +65,16 @@ export default class blobifier {
 
 		return this.blobify(array, mime);
 	}
+
+	revokeURL(uri: string, mime = "text/plain") {
+		URL.revokeObjectURL(uri);
+
+		const values = Object.values(blobifyCache);
+		const index = values.indexOf(uri);
+		const keyname = Object.keys(blobifyCache)[index];
+
+		if (blobifyCache[keyname] !== undefined) {
+			delete blobifyCache[keyname];
+		}
+	}
 }

@@ -4,8 +4,8 @@ import { isCommandLine } from "./system/getPlatform.js";
 import applyStringPrototypes from "./system/stringPrototypes.js";
 import { FilesystemAPI } from "./fs/fs.js";
 import ConstellationKernel from "./system/kernel.js";
-import { ImportRewriter } from "./system/runtime/components/codeProcessor.js";
 import Blobifier from "./system/lib/blobify.js";
+import ImportResolver from "./system/runtime/components/resolver.js";
 
 applyStringPrototypes();
 
@@ -46,8 +46,8 @@ const isDevmode = url.searchParams.get("dev") !== null;
 
 function getRequiredLibraries(root: string) {
 	const fsApi = new FilesystemAPI(root);
-	const processor = new ImportRewriter(fsApi);
 	const blobifier = new Blobifier(fsApi);
+	const processor = new ImportResolver(fsApi, blobifier);
 
 	return {
 		fsApi,
@@ -63,7 +63,7 @@ async function startupKernel(root: string, canInstall: boolean = true) {
 	console.debug("Starting kernel at ", root);
 
 	// get the needed libraries
-	const { fsApi, processor, blobifier } = getRequiredLibraries(root);
+	const { fsApi, processor } = getRequiredLibraries(root);
 
 	// wait for the installation index if it's a promise
 	if (installationIndexFile instanceof Promise) {
@@ -115,16 +115,10 @@ async function startupKernel(root: string, canInstall: boolean = true) {
 		}
 
 		// process and resolve imports
-		const processedCode = await processor.processCode(
-			contents,
-			"/System/kernel.js"
-		);
-
-		// make URI
-		const blobURI = blobifier.blobify(processedCode, "text/javascript");
+		const blobURL = await processor.resolve("/System/kernel.js");
 
 		// set the variable
-		Kernel = (await import(blobURI)).default;
+		Kernel = (await import(blobURL)).default;
 	}
 
 	/* -------------------- Devmode features -------------------- */

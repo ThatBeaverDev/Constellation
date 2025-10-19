@@ -204,9 +204,9 @@ export class Process extends Framework {
 			key: string,
 			modifiers: string[]
 		): undefined {
-			if (ConstellationKernel.GraphicalInterface == undefined) return;
+			if (!(ConstellationKernel.ui.type == "GraphicalInterface")) return;
 
-			ConstellationKernel.GraphicalInterface.keyboardShortcuts.registerKeyboardShortcut(
+			ConstellationKernel.ui.keyboardShortcuts.registerKeyboardShortcut(
 				this,
 				name,
 				key,
@@ -266,7 +266,7 @@ export class Process extends Framework {
 		ctrlKey: boolean,
 		shiftKey: boolean,
 		repeat: boolean
-	): void | undefined | null {
+	): void | Promise<void> {
 		code;
 		metaKey;
 		altKey;
@@ -291,7 +291,7 @@ export class Process extends Framework {
 		ctrlKey: boolean,
 		shiftKey: boolean,
 		repeat: boolean
-	): void | undefined | null {
+	): void | Promise<void> {
 		code;
 		metaKey;
 		altKey;
@@ -354,8 +354,8 @@ export class Application extends Process {
 			processInfo
 		);
 
-		const UserInterface = ConstellationKernel.GraphicalInterface;
-		if (UserInterface == undefined) {
+		const UserInterface = ConstellationKernel.ui;
+		if (!(UserInterface.type == "GraphicalInterface")) {
 			throw new Error(
 				"Graphical applications cannot run in non-graphical environments."
 			);
@@ -394,8 +394,8 @@ export class Overlay extends Process implements Application {
 			processInfo
 		);
 
-		const UserInterface = ConstellationKernel.GraphicalInterface;
-		if (UserInterface == undefined) {
+		const UserInterface = ConstellationKernel.ui;
+		if (!(UserInterface.type == "GraphicalInterface")) {
 			throw new Error(
 				"Graphical applications cannot run in non-graphical environments."
 			);

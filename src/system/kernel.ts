@@ -18,26 +18,12 @@ import { ConstellationFileIndex } from "./lib/packaging/definitions.js";
 import { tcpkg } from "./lib/packaging/tcpkg.js";
 import postinstall from "./installation/postinstall.js";
 import IPCMessageSender from "./runtime/components/messages.js";
+import { UserInterface } from "./ui/ui.js";
 
 if (defaultConfiguration.dynamic.isDevmode) {
 	(window as any).kernels = [];
 }
 const path = "/System/kernel.js";
-path;
-
-export interface GraphicalKernel extends Terminatable {
-	isGraphical: true;
-	GraphicalInterface: GraphicalInterface;
-	TextInterface?: never;
-}
-
-export interface CommandLineKernel extends Terminatable {
-	isGraphical: false;
-	GraphicalInterface?: never;
-	TextInterface?: TextInterface;
-}
-
-type Kernel = GraphicalKernel | CommandLineKernel;
 
 interface ConstellationKernelConfiguration {
 	installationIdx?: ConstellationFileIndex;
@@ -49,9 +35,7 @@ export interface Terminatable {
 }
 
 let kernelID = 0;
-export default class ConstellationKernel<KernelType extends Kernel = Kernel>
-	implements Terminatable
-{
+export default class ConstellationKernel implements Terminatable {
 	id: number = kernelID++;
 
 	// subsystems
@@ -78,12 +62,7 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 	install: (ConstellationKernel: ConstellationKernel) => Promise<boolean>;
 
 	// property types
-	GraphicalInterface?: KernelType extends { isGraphical: true }
-		? GraphicalInterface & Terminatable
-		: undefined;
-	TextInterface?: KernelType extends { isGraphical: false }
-		? TextInterface & Terminatable
-		: undefined;
+	ui: UserInterface;
 
 	constructor(
 		public rootPoint: string,
@@ -138,26 +117,25 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 
 		// assign based on runtime flag
 		if (isGraphical) {
-			this.GraphicalInterface = new GraphicalInterface(this) as any;
+			this.ui = new GraphicalInterface(this);
 		} else {
-			this.TextInterface = new TextInterface(this) as any;
+			this.ui = new TextInterface(this);
 		}
 
 		try {
 			this.init();
-		} catch (e) {
-			panic(e, "systemInit");
+		} catch (e: unknown) {
+			panic(this, e, "systemInit");
 		}
 	}
 
 	setBootStatus(
 		text: string | Error,
-		state?: "working" | "error" | "working"
+		state: "working" | "error" = "working"
 	) {
 		this.config.dynamic.status = String(text);
 
-		if (this.GraphicalInterface)
-			this.GraphicalInterface.setStatus(text, state);
+		if (this.ui) this.ui.setStatus(text, state);
 
 		if (state == "error") {
 			this.lib.logging.error(path, text);
@@ -208,19 +186,19 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 
 		await this.security.init();
 
-		if (this.GraphicalInterface) {
-			await this.GraphicalInterface.init();
+		if (this.ui) {
+			await this.ui.init();
 		}
 		await this.runtime.init();
 
 		// remove bootUI now that we're done
-		if (this.GraphicalInterface !== undefined) {
+		if (this.ui.type == "GraphicalInterface") {
 			const bootBackground = document.querySelector("div.bootCover");
 			if (bootBackground) bootBackground.classList.add("fadeOut");
 
 			if (bootBackground) setTimeout(() => bootBackground.remove(), 5000);
-		} else if (this.TextInterface !== undefined) {
-			this.TextInterface.init();
+		} else if (this.ui instanceof TextInterface) {
+			this.ui.init();
 		}
 
 		// start kernel execution loop
@@ -310,7 +288,7 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 				false
 			);
 		} catch (e) {
-			panic(e, "executeCoreExecutableDuringStartup");
+			panic(this, e, "executeCoreExecutableDuringStartup");
 			return;
 		}
 
@@ -338,14 +316,16 @@ export default class ConstellationKernel<KernelType extends Kernel = Kernel>
 		}
 	}
 
+	panic() {}
+
 	async terminate() {
 		this.isTerminated = true;
 
 		await this.runtime.terminate();
 		await this.security.terminate();
 
-		if (this.GraphicalInterface) await this.GraphicalInterface.terminate();
-		if (this.TextInterface) await this.TextInterface.terminate();
+		if (this.ui) await this.ui.terminate();
+		if (this.ui) await this.ui.terminate();
 
 		await this.fs.terminate();
 	}

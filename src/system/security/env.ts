@@ -273,9 +273,12 @@ export class ApplicationAuthorisationAPI {
 
 		switch (type) {
 			case "directory":
-				return await this.#ConstellationKernel.runtime.importsRewriter.include(
-					directory
-				);
+				const blob =
+					await this.#ConstellationKernel.runtime.importsRewriter.resolve(
+						directory
+					);
+
+				return await import(blob);
 			case "URL":
 				const exports = await import(url.toString());
 
@@ -433,8 +436,8 @@ export class ApplicationAuthorisationAPI {
 	processes: EnvProcesses;
 
 	get systemType() {
-		return this.#ConstellationKernel.GraphicalInterface == undefined
-			? "TUI"
-			: "GUI";
+		return this.#ConstellationKernel.ui.type == "GraphicalInterface"
+			? "GUI"
+			: "TUI";
 	}
 }

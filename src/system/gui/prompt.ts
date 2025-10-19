@@ -45,7 +45,7 @@ export async function showUserPrompt(
 	const [type, config] = args;
 
 	const kernel = ConstellationKernel;
-	if (kernel.GraphicalInterface == undefined)
+	if (!(kernel.ui.type == "GraphicalInterface"))
 		throw new Error("User Prompts require the GraphicalInterface");
 
 	const iconSize = 50;
@@ -102,7 +102,7 @@ export async function showUserPrompt(
 	/**
 	 * This window's UiKit instance
 	 */
-	const ui = kernel.GraphicalInterface.uiKit.newRenderer(undefined, popup);
+	const ui = kernel.ui.uiKit.newRenderer(undefined, popup);
 	ui.clear();
 
 	const windowWidth = popup.dimensions.width;
@@ -195,7 +195,10 @@ export async function showUserPrompt(
 				25,
 				"Prompt",
 				{
-					enter: () => {}
+					enter: () => {
+						popup.remove();
+						resolve(ui.getTextboxContent(textbox) || "");
+					}
 				}
 			);
 			y += 25 + innerPadding;
@@ -213,6 +216,7 @@ export async function showUserPrompt(
 			y += doneHeight + innerPadding;
 
 			ui.commit();
+			popup.resize(undefined, y);
 		});
 	}
 }

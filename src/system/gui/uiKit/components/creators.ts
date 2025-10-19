@@ -44,10 +44,10 @@ export default class uiKitCreators {
 		const kernel = this.#ConstellationKernel;
 
 		let icon;
-		if (kernel.GraphicalInterface == undefined) {
+		if (!(kernel.ui.type == "GraphicalInterface")) {
 			icon = document.createElement("img");
 		} else {
-			icon = kernel.GraphicalInterface.getIcon(name);
+			icon = kernel.ui.getIcon(name);
 		}
 
 		icon.style.left = `${x}px`;
@@ -256,11 +256,11 @@ export default class uiKitCreators {
 		if (area == null)
 			throw new UIError("uikit element has disappeared in processing");
 
-		const focusedWindow =
-			this.#ConstellationKernel.GraphicalInterface == undefined
-				? undefined
-				: this.#ConstellationKernel.GraphicalInterface.windowSystem
-						.focusedWindow;
+		const focusedWindow = !(
+			this.#ConstellationKernel.ui.type == "GraphicalInterface"
+		)
+			? undefined
+			: this.#ConstellationKernel.ui.windowSystem.focusedWindow;
 
 		if (focusedWindow == this.#window.winID) area.focus();
 
