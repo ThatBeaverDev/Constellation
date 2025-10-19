@@ -50,45 +50,48 @@ export default class finderBody {
 			this.contentPadding * 2;
 		const height = 34 + this.displayItemPadding * 2;
 
-		let box = this.renderer.box(x, y, width, height, {
-			background: selected
-				? "var(--main-accent-tertiary)"
-				: "transparent",
-			borderRadius: 4
-		});
-
-		const iconElem = this.renderer.icon(
-			x + this.displayItemPadding,
-			y + this.displayItemPadding,
-			icon,
-			iconScale
-		);
-
-		const titleElem = this.renderer.text(
-			x + 39 + this.displayItemPadding,
-			y + 3 + this.displayItemPadding,
-			name
-		);
-		const subtextElem = this.renderer.text(
-			x + 39 + this.displayItemPadding,
-			y + 20 + this.displayItemPadding,
-			subtext,
-			10
-		);
-
 		const onClickConfig: onClickOptions = {
 			scale: 1
 		};
 
-		this.renderer.onClick(box, leftClick, rightClick, { scale: 1 });
-		this.renderer.onClick(iconElem, leftClick, rightClick, onClickConfig);
-		this.renderer.onClick(titleElem, leftClick, rightClick, onClickConfig);
-		this.renderer.onClick(
-			subtextElem,
-			leftClick,
-			rightClick,
-			onClickConfig
-		);
+		// highlight box
+		this.renderer
+			.box(x, y, width, height, {
+				background: selected
+					? "var(--main-accent-tertiary)"
+					: "transparent",
+				borderRadius: 4
+			})
+			.onClick(leftClick, rightClick, onClickConfig);
+
+		// file icon
+		this.renderer
+			.icon(
+				x + this.displayItemPadding,
+				y + this.displayItemPadding,
+				icon,
+				iconScale
+			)
+			.onClick(leftClick, rightClick, onClickConfig);
+
+		// file name
+		this.renderer
+			.text(
+				x + 39 + this.displayItemPadding,
+				y + 3 + this.displayItemPadding,
+				name
+			)
+			.onClick(leftClick, rightClick, onClickConfig);
+
+		// file subtext
+		this.renderer
+			.text(
+				x + 39 + this.displayItemPadding,
+				y + 20 + this.displayItemPadding,
+				subtext,
+				10
+			)
+			.onClick(leftClick, rightClick, onClickConfig);
 
 		return { width, height };
 	}
