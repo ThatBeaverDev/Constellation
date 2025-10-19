@@ -24,6 +24,10 @@ import uikitEventCreators from "./components/eventCreators.js";
 import uiKitTransitioners from "./components/transitioners.js";
 import ConstellationKernel from "../../kernel.js";
 import { GraphicalInterface } from "../gui.js";
+import {
+	UiKitElement,
+	UiKitTextboxElement
+} from "./components/elementReference.js";
 
 const uiKitStart = performance.now();
 
@@ -227,7 +231,7 @@ class UiKitRendererClass {
 			args: [x, y, iconName, iconScale, colour, options]
 		};
 
-		return this.#steps.push(obj);
+		return new UiKitElement(this, this.#steps.push(obj));
 	}
 
 	text(
@@ -241,7 +245,8 @@ class UiKitRendererClass {
 			type: "uikitText",
 			args: [x, y, string, fontSize, colour]
 		};
-		return this.#steps.push(obj);
+
+		return new UiKitElement(this, this.#steps.push(obj));
 	}
 	button(
 		x: number,
@@ -255,7 +260,8 @@ class UiKitRendererClass {
 			type: "uikitButton",
 			args: [x, y, string, leftClickCallback, rightClickCallback, size]
 		};
-		return this.#steps.push(obj);
+
+		return new UiKitElement(this, this.#steps.push(obj));
 	}
 	textbox(
 		x: number,
@@ -277,7 +283,7 @@ class UiKitRendererClass {
 			type: "uikitTextbox",
 			args: [x, y, width, height, backtext, callbacks, opts]
 		};
-		return this.#steps.push(obj);
+		return new UiKitTextboxElement(this, this.#steps.push(obj));
 	}
 
 	verticalLine(x: number, y: number, height: number) {
@@ -285,7 +291,8 @@ class UiKitRendererClass {
 			type: "uikitVerticalLine",
 			args: [x, y, height]
 		};
-		return this.#steps.push(obj);
+
+		return new UiKitElement(this, this.#steps.push(obj));
 	}
 
 	horizontalLine(x: number, y: number, width: number) {
@@ -293,7 +300,8 @@ class UiKitRendererClass {
 			type: "uikitHorizontalLine",
 			args: [x, y, width]
 		};
-		return this.#steps.push(obj);
+
+		return new UiKitElement(this, this.#steps.push(obj));
 	}
 
 	progressBar(
@@ -307,7 +315,8 @@ class UiKitRendererClass {
 			type: "uikitProgressBar",
 			args: [x, y, width, height, progress]
 		};
-		return this.#steps.push(obj);
+
+		return new UiKitElement(this, this.#steps.push(obj));
 	}
 
 	textarea(
@@ -322,7 +331,8 @@ class UiKitRendererClass {
 			type: "uikitTextarea",
 			args: [x, y, width, height, callbacks, options]
 		};
-		return this.#steps.push(obj);
+
+		return new UiKitTextboxElement(this, this.#steps.push(obj));
 	}
 
 	box(
@@ -337,7 +347,7 @@ class UiKitRendererClass {
 			args: [x, y, width, height, config]
 		};
 
-		return this.#steps.push(obj);
+		return new UiKitElement(this, this.#steps.push(obj));
 	}
 
 	canvas2D(x: number, y: number, width: number, height: number) {
@@ -345,15 +355,18 @@ class UiKitRendererClass {
 			type: "uikitCanvas2D",
 			args: [x, y, width, height, []] // last arguement (the []) is the list of drawing commands
 		};
-		return this.#steps.push(obj);
+
+		return new UiKitElement(this, this.#steps.push(obj));
 	}
 
 	onClick(
-		elemID: number,
+		elementID: number | UiKitElement,
 		leftClickCallback?: Function,
 		rightClickCallback?: Function,
 		otherConfig?: onClickOptions
 	) {
+		const elemID = Number(elementID);
+
 		const left =
 			leftClickCallback == undefined
 				? undefined
@@ -375,11 +388,14 @@ class UiKitRendererClass {
 			throw new UIError(`onClick called with invalid elemID: ${elemID}`);
 		}
 	}
+
 	/**
 	 * Makes an element invisible to clicks, allowing elements behind to be clicked.
 	 * @param elemID - the ID of the element. this is returned from the creator (eg: `this.renderer.icon()` is a creator.)
 	 */
-	passthrough(elemID: number) {
+	passthrough(elementID: number | UiKitElement) {
+		const elemID = Number(elementID);
+
 		// insure elemID is valid
 		if (elemID > 0 && elemID <= this.#steps.length) {
 			// assign data
@@ -409,11 +425,13 @@ class UiKitRendererClass {
 	readonly getTextHeight = getTextHeight;
 	readonly insertNewlines = insertNewlines;
 
-	setTextboxContent(id: number, content: string) {
+	setTextboxContent(id: number | UiKitElement, content: string) {
+		const elemID = Number(id);
+
 		// insure there is actually a textbox
 		if (this.#creators.textboxElems !== undefined) {
 			// set the value
-			const elem = this.#creators.textboxElems[id];
+			const elem = this.#creators.textboxElems[elemID];
 
 			if (elem == undefined)
 				throw new UIError(`Textbox by ID ${id} doesn't exist.`);
@@ -422,8 +440,10 @@ class UiKitRendererClass {
 		}
 	}
 
-	getTextboxContent(id: number) {
-		return this.#creators.textboxElems[id]?.value;
+	getTextboxContent(id: number | UiKitElement) {
+		const elemID = Number(id);
+
+		return this.#creators.textboxElems[elemID]?.value;
 	}
 
 	get darkmode() {
