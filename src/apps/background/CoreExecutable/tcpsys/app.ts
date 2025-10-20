@@ -1,4 +1,3 @@
-import { IPCMessage } from "../../../../system/runtime/components/messages.js";
 import ServiceManager from "../components/serviceManager.js";
 
 export default class CoreExecutable extends BackgroundProcess {
@@ -37,9 +36,6 @@ export default class CoreExecutable extends BackgroundProcess {
 			true
 		);
 
-		// this.windows
-		this.registerKeyboardShortcut("Close Window", "KeyW", ["AltLeft"]);
-
 		// start services
 		this.serviceManager = new ServiceManager(this);
 		await this.serviceManager.init();
@@ -67,6 +63,23 @@ export default class CoreExecutable extends BackgroundProcess {
 
 			this.loginComplete(loginUser.username, loginUser.password);
 		}, 5);
+	}
+
+	keydown(
+		code: string,
+		metaKey: boolean,
+		altKey: boolean,
+		ctrlKey: boolean,
+		shiftKey: boolean,
+		repeat: boolean
+	): void | Promise<void> {
+		if (altKey && code == "KeyW") {
+			// close window
+			const win = this.env.windows.getFocus();
+			if (win == undefined) return;
+
+			win.close();
+		}
 	}
 
 	/**
@@ -105,38 +118,6 @@ export default class CoreExecutable extends BackgroundProcess {
 
 		// restart the login flow.
 		this.startLoginProcess();
-	}
-
-	onmessage(msg: IPCMessage) {
-		const intent = msg.intent;
-		const origin = msg.originDirectory;
-		const keyboardAPI = "/System/io/keyboard.js";
-
-		if (this.loginCompleted == false) return;
-
-		switch (origin) {
-			case keyboardAPI:
-				switch (intent) {
-					// windows shortcuts
-					case "keyboardShortcutTrigger-Close Window": {
-						// Close Window!
-
-						const win = this.env.windows.getFocus();
-						if (win == undefined) return;
-
-						win.close();
-						break;
-					}
-
-					default:
-						throw new Error(
-							"Unknown keyboard shortcut name (intent): " + intent
-						);
-				}
-				break;
-			default:
-				this.env.warn("Unknown message sender: " + origin);
-		}
 	}
 
 	frame() {

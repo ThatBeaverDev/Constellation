@@ -1,4 +1,3 @@
-import { keyboardShortcutsAPI } from "../io/keyboardShortcuts.js";
 import { Icons } from "./icons.js";
 import ConstellationKernel, { Terminatable } from "../kernel.js";
 import WindowSystem from "./display/windowSystem.js";
@@ -10,7 +9,6 @@ export class GraphicalInterface implements UserInterfaceBase {
 	icons: Icons & Terminatable;
 	getIcon: Icons["getIcon"];
 	windowSystem: WindowSystem & Terminatable;
-	keyboardShortcuts: keyboardShortcutsAPI & Terminatable;
 	uiKit: UiKitInstanceCreator & Terminatable;
 
 	// GUI
@@ -50,8 +48,6 @@ export class GraphicalInterface implements UserInterfaceBase {
 		this.uiKit = new UiKitInstanceCreator(ConstellationKernel, this);
 		// GUI Windows
 		this.windowSystem = new WindowSystem(ConstellationKernel, this);
-		// keyboard shortcuts
-		this.keyboardShortcuts = new keyboardShortcutsAPI(ConstellationKernel);
 
 		// add shadowDOM to screen
 		document.body.appendChild(this.#containerDiv);
@@ -122,7 +118,6 @@ span.loader::after {
 
 	async #reduceState() {
 		await this.windowSystem.terminate();
-		await this.keyboardShortcuts.terminate();
 		await this.uiKit.terminate();
 	}
 

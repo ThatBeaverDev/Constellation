@@ -46,11 +46,6 @@ export default class dockAndDesktop extends Overlay {
 			return;
 		}
 
-		this.registerKeyboardShortcut("Search", "KeyZ", ["AltLeft"]);
-		this.registerKeyboardShortcut("Library", "KeyX", ["AltLeft"]);
-
-		this.registerKeyboardShortcut("Lock", "KeyQ", ["AltLeft"]);
-
 		await this.loadConfig();
 
 		this.dock = new Dock(this);
@@ -146,6 +141,7 @@ export default class dockAndDesktop extends Overlay {
 			}
 		}
 
+		// shortcuts
 		if (altKey) {
 			switch (code) {
 				case "KeyZ":
