@@ -1,4 +1,3 @@
-import { IPCMessage } from "../../../../system/runtime/components/messages.js";
 import { fileInfo } from "../lib/appfind.js";
 import { Fzf } from "fzf";
 
@@ -16,10 +15,6 @@ export default class KeystoneSearch extends Overlay {
 	async init() {
 		this.renderer.windowName = "Keystone Search";
 		this.renderer.setIcon("search");
-
-		this.registerKeyboardShortcut("ScrollDown", "ArrowDown", []);
-		this.registerKeyboardShortcut("ScrollUp", "ArrowUp", []);
-		this.registerKeyboardShortcut("Open", "Enter", []);
 
 		await this.env.shell.index();
 
@@ -79,34 +74,28 @@ export default class KeystoneSearch extends Overlay {
 		this.exit();
 	}
 
-	async onmessage(msg: IPCMessage) {
-		const origin = msg.originDirectory;
-		const intent = msg.intent;
+	keydown(
+		code: string,
+		metaKey: boolean,
+		altKey: boolean,
+		ctrlKey: boolean,
+		shiftKey: boolean,
+		repeat: boolean
+	): void | Promise<void> {
+		if (metaKey || altKey || ctrlKey || shiftKey) return;
 
-		switch (origin) {
-			case "/System/keyboardShortcuts.js":
-				switch (intent) {
-					case "keyboardShortcutTrigger-ScrollDown":
-						this.selector++;
-						break;
-					case "keyboardShortcutTrigger-ScrollUp":
-						this.selector--;
-						break;
-					case "keyboardShortcutTrigger-Open": {
-						this.selectItem(this.selector);
-						break;
-					}
-					default:
-						throw new Error(
-							"Unknown keyboard shortcut name (intent): " + intent
-						);
-				}
+		switch (code) {
+			case "ArrowDown":
+				this.selector++;
 				break;
-			default:
-				this.env.warn("Unknown message sender: " + origin);
+			case "ArrowUp":
+				this.selector--;
+				break;
+			case "Enter":
+				this.selectItem(this.selector);
+				break;
 		}
 	}
-
 	frame() {
 		if (this.ok !== true) {
 			return;

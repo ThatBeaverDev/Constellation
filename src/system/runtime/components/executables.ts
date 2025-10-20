@@ -198,21 +198,6 @@ export class Process extends Framework {
 				);
 			}
 		};
-
-		this.registerKeyboardShortcut = function (
-			name: string,
-			key: string,
-			modifiers: string[]
-		): undefined {
-			if (!(ConstellationKernel.ui.type == "GraphicalInterface")) return;
-
-			ConstellationKernel.ui.keyboardShortcuts.registerKeyboardShortcut(
-				this,
-				name,
-				key,
-				modifiers
-			);
-		};
 	}
 
 	/**
@@ -299,18 +284,6 @@ export class Process extends Framework {
 		shiftKey;
 		repeat;
 	}
-
-	/**
-	 * Function to commmunicate with the keyboardAPI to register a keyboard shortcut.
-	 * @param name - Name of the shorcut
-	 * @param key - Main key of the shortcut, as declared [here](https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_code_values).
-	 * @param modifiers - Modifiers which must be held to trigger the shortcut, as [here](https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_code_values) again.
-	 */
-	registerKeyboardShortcut = (
-		name: string,
-		key: string,
-		modifiers: string[]
-	): undefined => {};
 
 	/**
 	 * Function to exit the process, and pass a value out through the executor's AppWaitingObject.
