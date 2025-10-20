@@ -259,6 +259,10 @@ export default class WindowSystem {
 	}
 
 	focusWindow(id: number) {
+		const gui = this.#ConstellationKernel.ui;
+		if (gui.type !== "GraphicalInterface")
+			throw new Error("GUI is required.");
+
 		const start = performance.now();
 		const target = this.getWindowOfId(id);
 
@@ -267,7 +271,8 @@ export default class WindowSystem {
 			return undefined;
 		}
 
-		const supposedlyFocusedWindows = document.querySelectorAll(".focused");
+		const supposedlyFocusedWindows =
+			gui.shadowRoot.querySelectorAll(".focused");
 
 		// remove focus from all windows
 		for (const elem of supposedlyFocusedWindows) {
