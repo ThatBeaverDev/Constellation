@@ -37,7 +37,7 @@ export class FilesystemInstaller {
 	async rm_rf() {
 		const fs = this.#ConstellationKernel.fs;
 
-		async function walk(directory: string) {
+		async function rmdir(directory: string) {
 			const list = await fs.readdir(directory);
 
 			for (const item of list) {
@@ -47,7 +47,7 @@ export class FilesystemInstaller {
 				if (stat == undefined) return;
 
 				if (stat.isDirectory()) {
-					await walk(resolved);
+					await rmdir(resolved);
 				} else {
 					await fs.unlink(resolved);
 				}
@@ -56,7 +56,7 @@ export class FilesystemInstaller {
 			await fs.rmdir(directory);
 		}
 
-		await walk("/");
+		await rmdir("/");
 	}
 
 	async folders() {
