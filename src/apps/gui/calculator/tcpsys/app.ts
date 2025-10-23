@@ -1,3 +1,4 @@
+import { clickReference } from "../../../../system/gui/uiKit/definitions.js";
 import { evaluate } from "../components/logic.js";
 
 export default class calc extends Application {
@@ -34,7 +35,7 @@ export default class calc extends Application {
 		let gridWidth;
 		let gridHeight;
 
-		let grid: Record<string, Function>[];
+		let grid: Record<string, clickReference["left"]>[];
 
 		if (isWide) {
 			gridWidth = 11;
@@ -206,10 +207,10 @@ export default class calc extends Application {
 				} else {
 					this.renderer.onClick(
 						box,
-						() => {
+						(x: number, y: number) => {
 							this.text = "";
 							this.mode = "type";
-							grid[i][text]();
+							if (grid[i][text]) grid[i][text](x, y);
 						},
 						undefined,
 						{ scale: 1.05, clickScale: 1.1 }

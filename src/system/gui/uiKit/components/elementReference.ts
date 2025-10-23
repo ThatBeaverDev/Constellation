@@ -1,4 +1,4 @@
-import { onClickOptions } from "../definitions.js";
+import { clickReference, onClickOptions } from "../definitions.js";
 import { UiKitRenderer } from "../uiKit.js";
 
 export class UiKitElement extends Number {
@@ -16,8 +16,8 @@ export class UiKitElement extends Number {
 	}
 
 	onClick(
-		leftClickCallback?: Function,
-		rightClickCallback?: Function,
+		leftClickCallback?: clickReference["left"],
+		rightClickCallback?: clickReference["right"],
 		otherConfig?: onClickOptions
 	) {
 		this.#renderer.onClick(
@@ -32,6 +32,18 @@ export class UiKitElement extends Number {
 
 	passthrough() {
 		this.#renderer.passthrough(this);
+
+		return this;
+	}
+
+	dragResult(type: "file", path: string) {
+		this.#renderer.setElementDragResult(this.#id, type, path);
+
+		return this;
+	}
+
+	onDrop(callback?: Function) {
+		this.#renderer.onElementDrop(this.#id, callback);
 
 		return this;
 	}

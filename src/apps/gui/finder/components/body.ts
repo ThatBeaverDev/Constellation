@@ -1,4 +1,7 @@
-import { onClickOptions } from "../../../../system/gui/uiKit/definitions.js";
+import {
+	clickReference,
+	onClickOptions
+} from "../../../../system/gui/uiKit/definitions.js";
 import finder, { listing } from "../tcpsys/app.js";
 import finderInteractions from "./interactions.js";
 
@@ -35,12 +38,13 @@ export default class finderBody {
 	displayItem(
 		x: number = 100 + this.contentPadding,
 		y: number = this.contentPadding,
+		path: string,
 		icon: string = "/System/CoreAssets/Vectors/files/file.svg",
 		name: string = "File",
 		subtext: string = "Unknown",
 		selected: boolean = false,
-		leftClick: Function = () => {},
-		rightClick: Function = () => {}
+		leftClick: clickReference["left"] = () => {},
+		rightClick: clickReference["left"] = () => {}
 	) {
 		const iconScale = 1.4166666666;
 		//const width = 39 + Math.max( this.renderer.getTextWidth(name), this.renderer.getTextWidth(subtext) ) + padding * 2;
@@ -62,7 +66,8 @@ export default class finderBody {
 					: "transparent",
 				borderRadius: 4
 			})
-			.onClick(leftClick, rightClick, onClickConfig);
+			.onClick(leftClick, rightClick, onClickConfig)
+			.dragResult("file", path);
 
 		// file icon
 		this.renderer
@@ -149,6 +154,7 @@ export default class finderBody {
 		const dims = this.displayItem(
 			undefined,
 			undefined,
+			this.parent.location.path,
 			this.parent.location.icon,
 			this.parent.location.path + " - Current Location",
 			this.parent.location.subtext
@@ -172,6 +178,7 @@ export default class finderBody {
 			this.displayItem(
 				x,
 				y,
+				"..",
 				"/System/CoreAssets/Vectors/files/folder.svg",
 				"..",
 				"Exit this folder",
@@ -207,6 +214,7 @@ export default class finderBody {
 			this.displayItem(
 				x,
 				y,
+				obj.path,
 				obj.icon,
 				obj.name,
 				obj.subtext,

@@ -18,8 +18,16 @@ export interface onClickOptions {
 	origin?: string;
 }
 export interface clickReference extends onClickOptions {
-	left?: Function;
-	right?: Function;
+	left?: (x: number, y: number) => Promise<any> | any;
+	right?: (x: number, y: number) => Promise<any> | any;
+}
+
+export type onDragReference = {
+	type: "file";
+	data: string;
+};
+export interface onDropReference {
+	callback?: Function;
 }
 
 // steps
@@ -27,6 +35,8 @@ export interface step {
 	type: uikitCreatorName;
 	args: any[];
 	onClick?: clickReference;
+	onDrag?: onDragReference;
+	onDrop?: onDropReference;
 	passthrough?: boolean;
 }
 

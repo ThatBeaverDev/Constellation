@@ -9,6 +9,7 @@ import { UIError } from "../../errors.js";
 import { ContextMenu } from "./components/contexts.js";
 import uiKitCreators from "./components/creators.js";
 import {
+	onDragReference,
 	onClickOptions,
 	step,
 	textboxCallbackObject,
@@ -17,7 +18,8 @@ import {
 	uikitCanvasOptions,
 	uikitIconOptions,
 	uikitTextareaConfig,
-	uikitTextboxConfig
+	uikitTextboxConfig,
+	clickReference
 } from "./definitions.js";
 import canvasKit from "./components/canvasKit.js";
 import uikitEventCreators from "./components/eventCreators.js";
@@ -361,8 +363,8 @@ class UiKitRendererClass {
 
 	onClick(
 		elementID: number | UiKitElement,
-		leftClickCallback?: Function,
-		rightClickCallback?: Function,
+		leftClickCallback?: clickReference["left"],
+		rightClickCallback?: clickReference["right"],
 		otherConfig?: onClickOptions
 	) {
 		const elemID = Number(elementID);
@@ -384,6 +386,39 @@ class UiKitRendererClass {
 				left,
 				right
 			};
+		} else {
+			throw new UIError(`onClick called with invalid elemID: ${elemID}`);
+		}
+	}
+
+	setElementDragResult(
+		elementID: number | UiKitElement,
+		type: "file",
+		path: string
+	): void;
+	setElementDragResult(
+		elementID: number | UiKitElement,
+		type: onDragReference["type"],
+		data: string
+	) {
+		const elemID = Number(elementID);
+
+		// insure elemID is valid
+		if (elemID > 0 && elemID <= this.#steps.length) {
+			// assign data
+			this.#steps[elemID - 1].onDrag = { type, data };
+		} else {
+			throw new UIError(`onClick called with invalid elemID: ${elemID}`);
+		}
+	}
+
+	onElementDrop(elementID?: number | UiKitElement, callback?: Function) {
+		const elemID = Number(elementID);
+
+		// insure elemID is valid
+		if (elemID > 0 && elemID <= this.#steps.length) {
+			// assign data
+			this.#steps[elemID - 1].onDrop = { callback };
 		} else {
 			throw new UIError(`onClick called with invalid elemID: ${elemID}`);
 		}
@@ -689,6 +724,11 @@ class UiKitRendererClass {
 		this.controller = new AbortController();
 		this.signal = this.controller.signal;
 
+		const gui = this.#ConstellationKernel.ui;
+		if (!(gui.type == "GraphicalInterface")) return;
+
+		const guiScale = gui.displayScaling || 0;
+
 		const newItems: HTMLElement[] = [];
 		const newDisplayedSteps: step[] = [];
 
@@ -796,12 +836,7 @@ class UiKitRendererClass {
 					...newStep.args
 				);
 
-			if (newStep.onClick !== undefined) {
-				const gui = this.#ConstellationKernel.ui;
-				if (!(gui.type == "GraphicalInterface")) return;
-
-				const scale = gui.displayScaling || 0;
-
+			if (newStep.onClick) {
 				element.classList.add("clickable");
 				element.style.setProperty(
 					"--scale",
@@ -816,109 +851,96 @@ class UiKitRendererClass {
 					newStep.onClick.origin || "center"
 				);
 
-				let pressTimer: ReturnType<typeof setTimeout> | null = null;
-				let longPressTriggered = false;
+				const longPressHoldDuration = 500;
 
 				element.addEventListener(
 					"pointerdown",
 					(event: PointerEvent) => {
-						if (!newStep.onClick) return;
-						longPressTriggered = false;
+						const start = Date.now();
+						event.preventDefault();
 
-						if (
-							event.pointerType === "touch" ||
-							event.pointerType === "pen"
-						) {
-							pressTimer = setTimeout(() => {
-								longPressTriggered = true;
-								if (
-									typeof newStep.onClick?.right === "function"
-								) {
-									event.preventDefault();
-									newStep.onClick.right(
-										event.clientX / scale,
-										event.clientY / scale
-									);
-								}
-							}, 500);
-							return; // Skip mouse clicks on touch/pen
-						}
-					},
-					{ signal: this.signal }
-				);
-
-				element.addEventListener(
-					"pointerup",
-					(event: PointerEvent) => {
-						if (!newStep.onClick) return;
-
-						if (
-							event.pointerType === "touch" ||
-							event.pointerType === "pen"
-						) {
-							if (longPressTriggered) {
-								event.preventDefault();
-								return; // skip click after long press
+						if (event.pointerType == "mouse") {
+							if (newStep?.onClick?.left) {
+								newStep.onClick.left(
+									event.clientX / guiScale,
+									event.clientY / guiScale
+								);
 							}
-						}
-
-						switch (event.button) {
-							case 0:
-								if (
-									typeof newStep.onClick.left === "function"
-								) {
-									event.preventDefault();
-									newStep.onClick.left(
-										event.clientX / scale,
-										event.clientY / scale
-									);
-								}
-								break;
-						}
-					},
-					{ signal: this.signal }
-				);
-
-				// Clear timer on end/cancel/leave
-				const clearLongPress = () => {
-					if (pressTimer) clearTimeout(pressTimer);
-					pressTimer = null;
-				};
-
-				["pointerup", "pointercancel", "pointerleave"].forEach(
-					(eventName) => {
-						element.addEventListener(eventName, clearLongPress, {
-							signal: this.signal
-						});
-					}
-				);
-
-				// Always prevent contextmenu for touch/pen
-				element.addEventListener(
-					"contextmenu",
-					(event: MouseEvent | PointerEvent) => {
-						if (!newStep.onClick) return;
-
-						// prevent contextmenu after long press or on touch entirely
-						if (
-							(event as PointerEvent).pointerType === "touch" ||
-							(event as PointerEvent).pointerType === "pen" ||
-							longPressTriggered
-						) {
-							event.preventDefault();
 							return;
 						}
 
-						if (typeof newStep.onClick.right === "function") {
-							event.preventDefault();
-							newStep.onClick.right(
-								event.clientX / scale,
-								event.clientY / scale
-							);
-						}
+						const hold = () => {
+							// remove event listener
+							element.removeEventListener("pointerup", release);
+
+							// long press
+							if (newStep?.onClick?.right) {
+								newStep.onClick.right(
+									event.clientX / guiScale,
+									event.clientY / guiScale
+								);
+							}
+						};
+						const release = () => {
+							// remove timeout
+							clearTimeout(timeOut);
+
+							// data
+							const now = Date.now();
+							const duration = now - start;
+
+							// trigger
+							if (duration > longPressHoldDuration) {
+								// long press
+								if (newStep?.onClick?.right) {
+									newStep.onClick.right(
+										event.clientX / guiScale,
+										event.clientY / guiScale
+									);
+								}
+							} else {
+								// tap
+								if (newStep?.onClick?.left) {
+									newStep.onClick.left(
+										event.clientX / guiScale,
+										event.clientY / guiScale
+									);
+								}
+							}
+						};
+						const timeOut = setTimeout(hold, longPressHoldDuration);
+
+						element.addEventListener("pointerup", release, {
+							once: true
+						});
 					},
 					{ signal: this.signal }
 				);
+
+				element.addEventListener(
+					"contextmenu",
+					(event: PointerEvent) => {
+						event.preventDefault();
+						if (!newStep?.onClick?.right) return;
+
+						newStep.onClick.right(
+							event.clientX / guiScale,
+							event.clientY / guiScale
+						);
+					},
+					{ signal: this.signal }
+				);
+			}
+
+			if (newStep.onDrag) {
+				// Heya! can you finish implementing the drag stuff?
+
+				element.addEventListener("dragstart", (event) => {}, {
+					signal: this.signal
+				});
+				element.addEventListener("dragend", (event) => {}, {
+					signal: this.signal
+				});
 			}
 
 			// prevent layering issues from lower elements being recreated.
