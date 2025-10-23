@@ -337,13 +337,17 @@ export default class Dock implements Terminatable {
 					}
 				} else {
 					// just focus the one window we have.
-					if (win.minimised) {
-						win.unminimise();
-					} else {
-						win.minimise();
-					}
+					console.debug(win.isFocused);
 
-					this.env.windows.focusWindow(win.winID);
+					if (win.isFocused) {
+						win.minimise();
+					} else {
+						setTimeout(() => {
+							// wait so that the click on the dock doesn't interrupt
+							this.env.windows.focusWindow(win.winID);
+						});
+						win.unminimise();
+					}
 				}
 
 				this.refresh();

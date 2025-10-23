@@ -35,6 +35,7 @@ export interface ProcessInformation {
 	// state
 	program: Process;
 	children: ProcessInformation[];
+	parent: ProcessInformation | null;
 }
 
 const processes: ProcessInformation[] = [];
@@ -472,7 +473,8 @@ export class ProgramRuntime {
 			args: finalProgramArgs,
 			// @ts-expect-error
 			program: undefined,
-			children: []
+			children: [],
+			parent: parent == undefined ? null : parent
 		};
 
 		// create the process
