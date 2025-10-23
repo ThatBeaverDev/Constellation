@@ -15,6 +15,7 @@ export type User = {
 	directory: string;
 	password: string;
 	profilePicture: string;
+	wallpaperPath?: string;
 	id: string; // really it's this: `${number}-${string}-${string}-${string}-${string}-${string}` but typescript doesn't understand. (Date.now() plus a UUID.)
 	lastLogin: string; // UNIX timestamp as number
 	operator: string; // boolean
