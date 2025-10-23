@@ -500,6 +500,9 @@ export class UnderlayWindow extends GraphicalWindow {
 }
 export class OverlayWindow extends GraphicalWindow {
 	layer: number = 200;
+	#GraphicalInterface: GraphicalInterface;
+	#WindowSystem: WindowSystem;
+
 	constructor(
 		ConstellationKernel: ConstellationKernel,
 		name: string,
@@ -509,6 +512,15 @@ export class OverlayWindow extends GraphicalWindow {
 	) {
 		super(ConstellationKernel, name, Application);
 		this.minimumWidth = 200;
+
+		if (!(ConstellationKernel.ui.type == "GraphicalInterface"))
+			throw new Error("Windows cannot exist on a non-graphical system.");
+
+		this.#GraphicalInterface = ConstellationKernel.ui;
+
+		const WindowSystem = this.#GraphicalInterface.windowSystem;
+		this.#WindowSystem = WindowSystem;
+		this.#WindowSystem.focusWindow(this.winID);
 
 		this.container.classList.add("frosted");
 
