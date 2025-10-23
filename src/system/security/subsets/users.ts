@@ -31,7 +31,10 @@ export default class EnvUsers {
 		const obj: UserAlias = {
 			name: user.name,
 			fullName: user.fullName,
-			pictures: { profile: user.profilePicture },
+			pictures: {
+				profile: user.profilePicture,
+				wallpaper: user.wallpaperPath
+			},
 			directory: user.directory,
 			id: user.id,
 			lastLogin: Number(user.lastLogin),

@@ -1,7 +1,7 @@
 import ConstellationKernel from "../../../../system/kernel.js";
 import { Application } from "../../../../system/runtime/components/executables.js";
 import { ProcessInformation } from "../../../../system/runtime/runtime.js";
-import ConstellationWindowManagerWallpaper from "../components/wallpaper.js";
+import { ConstellationWindowManagerWallpaper } from "../components/wallpaper.js";
 
 export default class ConstellationWindowManager
 	extends Process
@@ -51,6 +51,8 @@ export default class ConstellationWindowManager
 
 	async init() {
 		this.wallpaper = new ConstellationWindowManagerWallpaper(this);
+
+		await this.wallpaper.init();
 	}
 
 	frame() {

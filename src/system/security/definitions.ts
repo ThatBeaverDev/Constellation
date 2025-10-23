@@ -37,6 +37,8 @@ export type WindowAlias = {
 	showHeader: Function;
 	hideHeader: Function;
 
+	isFocused: boolean;
+
 	name: string;
 	shortName?: string;
 	iconName: string;
@@ -58,6 +60,7 @@ export interface UserAlias {
 	fullName: string;
 	pictures: {
 		profile: string;
+		wallpaper?: string;
 	};
 	id: string;
 	directory: string;
