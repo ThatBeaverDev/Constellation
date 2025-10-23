@@ -651,7 +651,11 @@ export class ProgramRuntime {
 		}
 
 		(proc as any).terminationCode = randomTerminationCode;
-		console.debug("Terminating process", proc);
+		this.#ConstellationKernel.lib.logging.debug(
+			path,
+			"Terminating process",
+			proc
+		);
 
 		// run termination code
 		try {

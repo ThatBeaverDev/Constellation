@@ -65,7 +65,6 @@ export async function showUserPrompt(
 		];
 
 		const neededWidth = outerPadding + Math.max(...widths) + outerPadding;
-		console.debug(neededWidth);
 
 		return neededWidth;
 	}

@@ -337,8 +337,6 @@ export default class Dock implements Terminatable {
 					}
 				} else {
 					// just focus the one window we have.
-					console.debug(win.isFocused);
-
 					if (win.isFocused) {
 						win.minimise();
 					} else {
