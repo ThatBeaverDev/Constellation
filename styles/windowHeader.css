@@ -40,17 +40,57 @@
 	line-height: var(--window-header-height);
 }
 
+.windowIcon {
+	--size: calc(var(--window-header-height) - 15px);
+
+	width: var(--size);
+	height: var(--size);
+
+	margin-top: calc((var(--window-header-height) - var(--size)) / 2);
+}
+
+.windowButtonContainer {
+	position: absolute;
+	right: 0px;
+
+	display: flex;
+	justify-content: right;
+
+	width: 50%;
+	height: var(--window-header-height);
+}
+
 .windowButton {
+	--buttonSize: calc(var(--window-header-height) - 15px);
+	--padding: calc((var(--window-header-height) - var(--buttonSize)) / 2);
+
 	cursor: pointer;
+	margin: var(--padding);
+	margin-right: var(--padding);
+	margin-left: 0;
+
+	background: #CCCCCC;
+	border-radius: 7px;
+
+	width: var(--buttonSize);
+	height: var(--buttonSize);
+
+	right: var(--window-header-height);
+	top: var(--padding);
 }
 
 .windowButtonIcon {
-	width: 100%;
-	height: 100%;
+	--padding: 5px;
+	--size: calc(var(--buttonSize) - (var(--padding) * 2));
+
+	width: var(--size);
+	height: var(--size);
+
+	filter: drop-shadow(0px, 4px, 4px, rgba(0, 0, 0, 0.25));
 
 	position: relative;
-	left: 0px;
-	top: 0px;
+	left: var(--padding);
+	top: var(--padding);
 }
 
 .windowContainer.square > .windowHeader {

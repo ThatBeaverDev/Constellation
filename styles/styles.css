@@ -3,7 +3,7 @@
 	box-sizing: border-box;
 	pointer-events: auto;
 
-	--window-header-height: 26px;
+	--window-header-height: 40px;
 	--window-buttons-padding: 3.75px;
 	--window-border-radius: 5px;
 

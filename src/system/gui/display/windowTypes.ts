@@ -21,6 +21,7 @@ export class GraphicalWindow {
 	container: HTMLElement;
 	body: HTMLElement;
 	header: HTMLElement;
+	buttonsDiv: HTMLElement;
 	closeButton: HTMLElement;
 	maximiseButton: HTMLElement;
 	minimiseButton: HTMLElement;
@@ -70,26 +71,14 @@ export class GraphicalWindow {
 		// window icon
 		this.iconDiv = document.createElement("div");
 		this.iconDiv.id = String(window.renderID++);
-		this.iconDiv.style.position = "static";
-		this.iconDiv.style.width = "20px";
-		this.iconDiv.style.height = "20px";
-		this.iconDiv.style.top = "3px";
+		this.iconDiv.classList.add("windowIcon");
 
 		let right = 3;
 		const windowButton = (iconpath: string) => {
 			const button = document.createElement("div");
 			button.id = String(window.renderID++);
 			button.classList.add("windowButton");
-
-			button.style.background = "#CCCCCC";
-			button.style.borderRadius = "7px";
-
-			button.style.position = "absolute";
-			button.style.top = "3px";
-			button.style.right = `${right}px`;
-
-			button.style.width = "20px";
-			button.style.height = "20px";
+			//button.style.right = `${right}px`;
 
 			const kernel = this.#ConstellationKernel;
 			let icon: HTMLImageElement;
@@ -99,20 +88,17 @@ export class GraphicalWindow {
 				// just so typescript doesn't freak out. this will never happen.
 				icon = document.createElement("img");
 			}
-			icon.style.width = "16px";
-			icon.style.height = "16px";
-			icon.style.filter =
-				"drop-shadow(0px, 4px, 4px, rgba(0, 0, 0, 0.25))";
 			icon.classList.add("windowButtonIcon");
 
-			icon.style.left = "2px";
-			icon.style.top = "2px";
 			button.appendChild(icon);
 
 			right += 23;
 
 			return button;
 		};
+
+		this.buttonsDiv = document.createElement("div");
+		this.buttonsDiv.classList.add("windowButtonContainer");
 
 		this.closeButton = windowButton(
 			"/System/CoreAssets/Vectors/windows/close.svg"
@@ -124,16 +110,19 @@ export class GraphicalWindow {
 			"/System/CoreAssets/Vectors/windows/fullscreen.svg"
 		);
 
+		this.buttonsDiv.appendChild(this.closeButton);
+		this.buttonsDiv.appendChild(this.minimiseButton);
+		this.buttonsDiv.appendChild(this.maximiseButton);
+
 		this.header = document.createElement("div");
 		const h = this.header;
 		h.className = "windowHeader";
 		h.id = String(window.renderID++);
-		h.innerHTML =
-			this.iconDiv.outerHTML +
-			this.title.outerHTML +
-			this.maximiseButton.outerHTML +
-			this.minimiseButton.outerHTML +
-			this.closeButton.outerHTML;
+
+		// children
+		h.appendChild(this.iconDiv);
+		h.appendChild(this.title);
+		h.appendChild(this.buttonsDiv);
 
 		this.body = document.createElement("div");
 		const b = this.body;
@@ -149,7 +138,8 @@ export class GraphicalWindow {
 		c.dataset.height = String(height);
 		c.dataset.left = String(left);
 		c.dataset.top = String(top);
-		this.container.innerHTML = this.header.outerHTML + this.body.outerHTML;
+		this.container.appendChild(this.header);
+		this.container.appendChild(this.body);
 
 		this.move(left, top);
 		this.resize(width, height);
@@ -366,19 +356,31 @@ export class GraphicalWindow {
 
 	fullscreen() {
 		this.unminimise();
-		this.container.classList.add("fullscreenedWindow");
-	}
-	unfullscreen() {
-		this.container.classList.remove("fullscreenedWindow");
 
-		// this is very broken.
-		//this.container.classList.add("unfullscreeningWindow");
-		//setTimeout(() => {
-		//	this.container.classList.remove("unfullscreeningWindow");
-		//}, 250);
+		this.#unsnappedPosition = structuredClone(this.position);
+
+		// snap it
+		this.#WindowSystem.snappingWindow = {
+			window: this,
+			side: "fullscreen"
+		};
+	}
+
+	#unsnappedPosition?: typeof this.position;
+
+	unfullscreen() {
+		if (!this.#unsnappedPosition) return;
+
+		this.move(
+			this.#unsnappedPosition.left,
+			this.#unsnappedPosition.top,
+			true
+		);
+
+		this.#unsnappedPosition = undefined;
 	}
 	get fullscreened() {
-		return this.container.classList.contains("fullscreenedWindow");
+		return this.#unsnappedPosition !== undefined;
 	}
 	set fullscreened(value: boolean) {
 		if (value == true) {
@@ -420,8 +422,9 @@ export class GraphicalWindow {
 	}
 
 	async #setIcon(element: HTMLElement) {
-		element.style.width = "20px";
-		element.style.height = "20px";
+		// css handles it
+		element.style.width = "";
+		element.style.height = "";
 
 		element.style.left = "";
 		element.style.top = "";
