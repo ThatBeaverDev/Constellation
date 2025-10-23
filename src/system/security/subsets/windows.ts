@@ -86,6 +86,8 @@ export default class EnvWindows {
 			unfullscreen: win.unfullscreen.bind(win),
 			fullscreened: win.fullscreened,
 
+			isFocused: win.container.classList.contains("focused"),
+
 			show: win.show.bind(win),
 			hide: win.hide.bind(win),
 

@@ -2,7 +2,7 @@ import { FilesystemAPI } from "../../fs/fs.js";
 import { executionResult, ProcessInformation } from "../runtime/runtime.js";
 import { appName } from "../runtime/components/appName.js";
 import { PermissionsError } from "../errors.js";
-import { Framework } from "../runtime/components/executables.js";
+import { Framework, Process } from "../runtime/components/executables.js";
 import Shell from "../lib/shell.js";
 import { securityTimestamp } from "./definitions.js";
 import Users from "./users.js";
@@ -294,12 +294,12 @@ export class ApplicationAuthorisationAPI {
 	 * @param password - Password of the selected user. Defaults to the parent process' user's password
 	 * @returns an Object containing a promise with the Process Waiting object - this promise will resolve when the process exits, and return the value the process exited with.
 	 */
-	exec = async (
+	async exec(
 		directory: string,
 		args: any[] = [],
 		user: string = String(this.#user),
 		password: string = String(this.#password)
-	): Promise<executionResult> => {
+	): Promise<executionResult> {
 		if (this.#isGlobal)
 			throw new Error(
 				"Global env cannot be used to start applications to insure applications are properly parented."
@@ -319,7 +319,43 @@ export class ApplicationAuthorisationAPI {
 		}
 
 		throw new Error("Framework may not execute processes.");
-	};
+	}
+
+	async terminate(process: Process) {
+		const getInfo = (process: Process) => {
+			const processes = this.#ConstellationKernel.runtime.processes;
+
+			for (const child of processes) {
+				if (child.kernel !== this.#ConstellationKernel) return;
+
+				if (child.program == process) {
+					return child;
+				}
+			}
+		};
+
+		const info = getInfo(process);
+		if (info == undefined) throw new Error("This process doesn't exist!");
+
+		const kill = async () => {
+			await this.#ConstellationKernel.runtime.terminateProcess(process);
+		};
+
+		try {
+			this.#checkPermission("systemControl");
+
+			await kill();
+		} catch {
+			if (info.parent?.program == process) {
+				await kill();
+			} else {
+				throw new Error(
+					"This process must be a child to terminate it."
+				);
+			}
+		}
+	}
+
 	getPIDOfName(name: string): number | undefined {
 		return this.#environmentCreator.associations[name];
 	}
