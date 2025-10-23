@@ -1,9 +1,9 @@
 import { FilesystemAPI } from "../../fs/fs.js";
+import { Terminatable } from "../kernel.js";
 
-const blobifyCache: Record<string, string> = {};
-
-export default class blobifier {
-	index: any = {};
+export default class blobifier implements Terminatable {
+	index: Record<string, string> = {};
+	cache: Record<string, { uri: string; mime: string }> = {};
 
 	constructor(public fs: FilesystemAPI) {}
 
@@ -14,8 +14,8 @@ export default class blobifier {
 		const keyname = JSON.stringify({ content: value, mimeType: mime });
 
 		// return from cache if we have it
-		if (blobifyCache[keyname] !== undefined) {
-			return blobifyCache[keyname];
+		if (this.cache[keyname] !== undefined) {
+			return this.cache[keyname].uri;
 		}
 
 		const blob = new Blob([value], {
@@ -23,13 +23,14 @@ export default class blobifier {
 		});
 		const location = URL.createObjectURL(blob);
 
-		blobifyCache[keyname] = location;
+		this.cache[keyname] = { uri: location, mime };
 
 		return location;
 	}
 
 	async blobifyDirectory(location: string, mime = "text/plain") {
 		const text = await this.fs.readFile(location);
+
 		if (text == undefined)
 			throw new Error(`${location} is empty and cannot be 'blobified'`);
 
@@ -69,12 +70,20 @@ export default class blobifier {
 	revokeURL(uri: string, mime = "text/plain") {
 		URL.revokeObjectURL(uri);
 
-		const values = Object.values(blobifyCache);
-		const index = values.indexOf(uri);
-		const keyname = Object.keys(blobifyCache)[index];
+		const values = Object.values(this.cache);
+		const index = values.map((item) => item.uri).indexOf(uri);
+		const keyname = Object.keys(this.cache)[index];
 
-		if (blobifyCache[keyname] !== undefined) {
-			delete blobifyCache[keyname];
+		if (this.cache[keyname] !== undefined) {
+			delete this.cache[keyname];
+		}
+	}
+
+	terminate(): Promise<void> | void {
+		for (const key in this.cache) {
+			const value = this.cache[key];
+
+			this.revokeURL(value.uri, value.mime);
 		}
 	}
 }

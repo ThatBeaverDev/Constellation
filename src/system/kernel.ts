@@ -324,9 +324,9 @@ export default class ConstellationKernel implements Terminatable {
 		await this.runtime.terminate();
 		await this.security.terminate();
 
-		if (this.ui) await this.ui.terminate();
-		if (this.ui) await this.ui.terminate();
+		this.lib.blobifier.terminate();
 
+		await this.ui.terminate();
 		await this.fs.terminate();
 	}
 }

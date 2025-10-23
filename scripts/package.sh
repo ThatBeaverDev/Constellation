@@ -4,6 +4,7 @@
 
 compile() {
     mkdir -p build/apps
+    rm build/indexes/*
     mkdir -p build/indexes
 
     # system files
