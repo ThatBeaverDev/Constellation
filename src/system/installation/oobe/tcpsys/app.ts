@@ -155,7 +155,7 @@ export default class outOfBoxInstaller extends Application {
 				const buttonLeft = this.findCenterOfWidth(buttonWidth);
 
 				this.renderer.box(left, yPos, 150, 25, {
-					background: "var(--main-theme-secondary)"
+					background: "var(--bg-light)"
 				});
 				const text = this.renderer.text(
 					buttonLeft,
