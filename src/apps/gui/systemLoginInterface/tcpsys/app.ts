@@ -11,6 +11,12 @@ export default class systemLoginInterface extends Application {
 		this.renderer.makeWindowInvisible();
 		this.renderer.maximiseWindow();
 
+		this.renderer.moveWindow(0, 0);
+		this.renderer.resizeWindow(
+			this.renderer.displayWidth,
+			this.renderer.displayHeight
+		);
+
 		this.users = this.env.users.all();
 
 		let lastUser: UserAlias = this.users.admin;
