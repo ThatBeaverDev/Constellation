@@ -5,7 +5,8 @@ const manifest: ApplicationManifest = {
 	category: "Developer",
 	version: 0,
 	icon: "component",
-	filetypes: [".crl", ".crlib"]
+	filetypes: [".crl", ".crlib"],
+	userspace: false
 };
 
 export default manifest;

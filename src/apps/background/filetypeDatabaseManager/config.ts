@@ -5,7 +5,8 @@ const manifest: ApplicationManifest = {
 	author: "ThatBeaverDev",
 	category: "Developer",
 	version: 0,
-	icon: "file-scan"
+	icon: "file-scan",
+	userspace: false
 };
 
 export default manifest;
