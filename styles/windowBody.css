@@ -1,11 +1,11 @@
 .windowContainer {
-	--headerColour: var(--main-theme-tertiary);
-	--backgroundColour: var(--main-theme-primary);
+	--headerColour: var(--bg-light);
+	--backgroundColour: var(--bg-dark);
 
 	background-color: var(--backgroundColour);
 
 	/* Outline */
-	border: var(--main-theme-quinary) solid 2px;
+	border: var(--border-muted) solid 2px;
 
 	position: absolute;
 
@@ -38,11 +38,11 @@
 }
 
 .windowContainer.focused {
-	border: var(--main-accent-primary) solid 2px;
+	border: var(--border) solid 2px;
 }
 
 .windowContainer:not(.focused) {
-	--headerColour: var(--main-theme-secondary);
+	--headerColour: var(--bg);
 }
 
 .windowContainer.invisible {

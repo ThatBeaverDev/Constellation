@@ -296,7 +296,7 @@ export default class uiKitCreators {
 		if (config?.background == "sidebar") {
 			box.style.background = `var(--headerColour)`;
 		} else {
-			box.style.background = `${config?.background || "var(--main-theme-tertiary)"}`;
+			box.style.background = `${config?.background || "var(--bg-light)"}`;
 		}
 		box.style.borderRadius = `${config?.borderRadius}px`;
 

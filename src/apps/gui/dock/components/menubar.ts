@@ -61,7 +61,7 @@ export default class menubar implements Terminatable {
 		this.counter++;
 
 		this.renderer.box(0, 0, this.renderer.windowWidth, this.barHeight, {
-			background: "rgb(from var(--backgroundColour) r g b / 0.5)",
+			background: "rgb(from var(--bg-dark) r g b / 0.5)",
 			borderRadius: "0px 0px 10px 10",
 			isFrosted: true
 		});

@@ -1,7 +1,7 @@
 .windowSnappingIndicator {
 	position: absolute;
 
-	background-color: var(--main-theme-secondary);
+	background-color: var(--bg-light);
 	backdrop-filter: blur(10px);
 	fill-opacity: 0.5;
 
@@ -37,6 +37,7 @@
 		width: 0px;
 		height: 0px;
 	}
+
 	to {
 		left: 0px;
 		top: 0px;
@@ -54,6 +55,7 @@
 		width: 0px;
 		height: 0px;
 	}
+
 	to {
 		left: 50%;
 		top: 0px;
@@ -71,6 +73,7 @@
 		width: 0px;
 		height: 0px;
 	}
+
 	to {
 		left: 0px;
 		top: 0px;

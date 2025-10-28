@@ -69,7 +69,7 @@
 	margin-right: var(--padding);
 	margin-left: 0;
 
-	background: #CCCCCC;
+	background: var(--highlight);
 	border-radius: 7px;
 
 	width: var(--buttonSize);
@@ -80,11 +80,13 @@
 }
 
 .windowButtonIcon {
-	--padding: 5px;
+	--padding: 2.5px;
 	--size: calc(var(--buttonSize) - (var(--padding) * 2));
 
 	width: var(--size);
 	height: var(--size);
+
+	color: black;
 
 	filter: drop-shadow(0px, 4px, 4px, rgba(0, 0, 0, 0.25));
 

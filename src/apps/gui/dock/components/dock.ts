@@ -260,8 +260,7 @@ export default class Dock implements Terminatable {
 			this.width * scale,
 			this.dockHeight * scale,
 			{
-				background:
-					"rgba(var(--main-theme-primary-val), var(--main-theme-primary-val), var(--main-theme-primary-val), 0.25)",
+				background: "rgb(from var(--bg-dark) r g b / 0.5)",
 				isFrosted: true,
 				borderRadius: "10"
 			}

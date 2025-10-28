@@ -100,19 +100,13 @@ export class GraphicalWindow {
 		this.buttonsDiv = document.createElement("div");
 		this.buttonsDiv.classList.add("windowButtonContainer");
 
-		this.closeButton = windowButton(
-			"/System/CoreAssets/Vectors/windows/close.svg"
-		);
-		this.minimiseButton = windowButton(
-			"/System/CoreAssets/Vectors/windows/minimise.svg"
-		);
-		this.maximiseButton = windowButton(
-			"/System/CoreAssets/Vectors/windows/fullscreen.svg"
-		);
+		this.closeButton = windowButton("x");
+		this.minimiseButton = windowButton("minus");
+		this.maximiseButton = windowButton("maximize");
 
-		this.buttonsDiv.appendChild(this.closeButton);
 		this.buttonsDiv.appendChild(this.minimiseButton);
 		this.buttonsDiv.appendChild(this.maximiseButton);
+		this.buttonsDiv.appendChild(this.closeButton);
 
 		this.header = document.createElement("div");
 		const h = this.header;

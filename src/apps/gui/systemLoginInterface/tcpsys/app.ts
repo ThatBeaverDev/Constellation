@@ -151,86 +151,120 @@ export default class systemLoginInterface extends Application {
 	frame() {
 		this.renderer.clear();
 
-		const timeFontSize = 45;
-		const timeHeight = timeFontSize * 1.2; /* 1.2 is the line height */
+		const renderTime = () => {
+			const timeFontSize = 45;
 
-		const {
-			hours,
-			minutes,
-			seconds,
-			weekdayName,
-			dayOfMonth,
-			afterDate,
-			monthName
-		} = this.timeInfo();
+			const {
+				hours,
+				minutes,
+				seconds,
+				weekdayName,
+				dayOfMonth,
+				afterDate,
+				monthName
+			} = this.timeInfo();
 
-		this.renderer.text(9, 9, `${hours}:${minutes}:${seconds}`, 45);
-		this.renderer.text(
-			9,
-			9 + timeHeight,
-			`${weekdayName}, ${dayOfMonth}${afterDate} of ${monthName}`
-		);
+			// time
+			const time = `${hours}:${minutes}:${seconds}`;
+			const timeWidth = this.renderer.getTextWidth(time, timeFontSize);
+			const timeHeight = this.renderer.getTextHeight(time, timeFontSize);
+			const timeLeft = (200 - timeWidth) / 2;
 
-		const textboxWidth = this.renderer.windowWidth / 4;
-		const textboxHeight = 25;
-		const textboxLeft = (this.renderer.windowWidth - textboxWidth) / 2;
+			this.renderer.text(timeLeft, 9, time, timeFontSize);
 
-		const userInfo = this.users[this.user];
+			// date
+			const date = `${weekdayName}, ${dayOfMonth}${afterDate} of ${monthName}`;
+			const dateWidth = this.renderer.getTextWidth(date);
+			const dateLeft = (200 - dateWidth) / 2;
 
-		const nameFontsize = 15;
-		const nameWidth = this.renderer.getTextWidth(userInfo.fullName);
-		const nameLeft = (this.renderer.windowWidth - nameWidth) / 2;
-		const nameHeight = nameFontsize * 1.2;
+			this.renderer.text(dateLeft, 9 + timeHeight, date);
+		};
 
-		const gap = 10;
+		// render left frosted box
+		this.renderer.box(0, 0, 200, this.renderer.windowHeight, {
+			background: "rgb(from var(--bg-dark) r g b / 0.5)",
+			isFrosted: true
+		});
 
-		const iconScale = 5;
-		const iconSize = 24 * iconScale;
-		const iconLeft = (this.renderer.windowWidth - iconSize) / 2;
-		const iconTop =
-			(this.renderer.windowHeight - iconSize - (textboxHeight + gap)) / 2;
+		renderTime();
 
-		// render the middle
-		this.renderer.icon(
-			iconLeft,
-			iconTop,
-			userInfo.pictures.profile,
-			iconScale
-		);
-		this.renderer.text(
-			nameLeft,
-			iconTop + iconSize + gap,
-			userInfo.fullName
-		);
+		const drawLoginDialogue = () => {
+			const dimensions = 300;
+			const glassLeft = (this.renderer.windowWidth - dimensions) / 2;
+			const glassTop = (this.renderer.windowHeight - dimensions) / 2;
+			this.renderer.box(glassLeft, glassTop, dimensions, dimensions, {
+				background: "rgb(from var(--bg-dark) r g b / 0.5)",
+				isFrosted: true,
+				borderRadius: 25
+			});
 
-		const textbox = this.renderer.textbox(
-			textboxLeft,
-			iconTop + iconSize + gap + nameHeight + gap,
-			textboxWidth,
-			25,
-			"Enter your password...",
-			{
-				enter: async () => {
-					const value = this.renderer.getTextboxContent(textbox);
+			const textboxWidth = 200;
+			const textboxHeight = 25;
+			const textboxLeft = (this.renderer.windowWidth - textboxWidth) / 2;
 
-					if (value == null) {
-						return;
+			const userInfo = this.users[this.user];
+
+			const nameFontsize = 15;
+			const nameWidth = this.renderer.getTextWidth(userInfo.fullName);
+			const nameLeft = (this.renderer.windowWidth - nameWidth) / 2;
+			const nameHeight = nameFontsize * 1.2;
+
+			const gap = 10;
+
+			const iconScale = 5;
+			const iconSize = 24 * iconScale;
+			const iconLeft = (this.renderer.windowWidth - iconSize) / 2;
+			const iconTop =
+				(this.renderer.windowHeight -
+					iconSize -
+					(textboxHeight + gap)) /
+				2;
+
+			// render the middle
+			this.renderer.icon(
+				iconLeft,
+				iconTop,
+				userInfo.pictures.profile,
+				iconScale
+			);
+			this.renderer.text(
+				nameLeft,
+				iconTop + iconSize + gap,
+				userInfo.fullName
+			);
+
+			const textbox = this.renderer.textbox(
+				textboxLeft,
+				iconTop + iconSize + gap + nameHeight + gap,
+				textboxWidth,
+				25,
+				"Enter your password...",
+				{
+					enter: async () => {
+						const value = this.renderer.getTextboxContent(textbox);
+
+						if (value == null) {
+							return;
+						}
+
+						await this.attemptUserPassword(this.user, value);
 					}
-
-					await this.attemptUserPassword(this.user, value);
 				}
-			}
-		);
+			);
 
-		const errorTextWidth = this.renderer.getTextWidth(this.errorText);
-		const errorTextLeft = (this.renderer.windowWidth - errorTextWidth) / 2;
-		this.renderer.text(
-			errorTextLeft,
-			iconTop + iconSize + gap + nameHeight + gap + textboxHeight,
-			this.errorText,
-			undefined,
-			"red"
-		);
+			const errorTextWidth = this.renderer.getTextWidth(this.errorText);
+			const errorTextLeft =
+				(this.renderer.windowWidth - errorTextWidth) / 2;
+			this.renderer.text(
+				errorTextLeft,
+				iconTop + iconSize + gap + nameHeight + gap + textboxHeight,
+				this.errorText,
+				undefined,
+				"red"
+			);
+		};
+
+		drawLoginDialogue();
 
 		// render other users on the side
 		this.drawSideUsers();

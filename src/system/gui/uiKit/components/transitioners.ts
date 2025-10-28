@@ -133,7 +133,7 @@ export default class uiKitTransitioners {
 						setElementStyle(
 							element,
 							"background",
-							`${newArg?.background || "var(--main-theme-tertiary)"}`
+							`${newArg?.background || "var(--bg-light)"}`
 						);
 					}
 					break;
