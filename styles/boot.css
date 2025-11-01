@@ -43,7 +43,7 @@ canvas {
 		--info: oklch(0.7 0.09 260);
 
 		/* Accent colour */
-		--accent: #dba2fa;
+		--accent: #9a55bf;
 	}
 }
 
@@ -74,7 +74,7 @@ canvas {
 		--info: oklch(0.7 0.09 260);
 
 		/* Accent colour */
-		--accent: #dba2fa;
+		--accent: #9a55bf;
 	}
 
 	.bootImage {
