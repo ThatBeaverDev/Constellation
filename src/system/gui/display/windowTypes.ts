@@ -3,6 +3,7 @@ import { Application } from "../../runtime/components/executables.js";
 import WindowSystem from "./windowSystem.js";
 import { windowsTimestamp } from "./timestamp.js";
 import { GraphicalInterface } from "../gui.js";
+import uiKitCreators from "../uiKit/components/creators.js";
 
 export const path = "/System/gui/display/windowTypes.js";
 
@@ -73,6 +74,8 @@ export class GraphicalWindow {
 		this.iconDiv.id = String(window.renderID++);
 		this.iconDiv.classList.add("windowIcon");
 
+		const UiKitCreators = new uiKitCreators(ConstellationKernel, undefined);
+
 		let right = 3;
 		const windowButton = (iconpath: string) => {
 			const button = document.createElement("div");
@@ -80,14 +83,15 @@ export class GraphicalWindow {
 			button.classList.add("windowButton");
 			//button.style.right = `${right}px`;
 
-			const kernel = this.#ConstellationKernel;
-			let icon: HTMLImageElement;
-			if (kernel.ui.type == "GraphicalInterface") {
-				icon = kernel.ui.getIcon(iconpath);
-			} else {
-				// just so typescript doesn't freak out. this will never happen.
-				icon = document.createElement("img");
-			}
+			let icon: HTMLImageElement = UiKitCreators.uikitIcon(
+				0,
+				undefined,
+				undefined,
+				iconpath,
+				1,
+				"white",
+				{}
+			);
 			icon.classList.add("windowButtonIcon");
 
 			button.appendChild(icon);

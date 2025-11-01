@@ -1,4 +1,5 @@
 import { UiKitRenderer } from "../uiKit.js";
+import { defaultConfig } from "./defaultConfig.js";
 
 export default class UIKitEventListeners {
 	#parent: UiKitRenderer;
@@ -54,7 +55,7 @@ export default class UIKitEventListeners {
 			update: (key: string, value: string) => {},
 			enter: (value: string) => {}
 		},
-		options = this.#parent.defaultConfig.uikitTextbox
+		options = defaultConfig.uikitTextbox
 	) {
 		element.addEventListener(
 			"keydown",
@@ -81,7 +82,7 @@ export default class UIKitEventListeners {
 		width: number = 100,
 		height: number = 50,
 		callbacks: any,
-		options = this.#parent.defaultConfig.uikitTextarea
+		options = defaultConfig.uikitTextarea
 	) {
 		element.addEventListener(
 			"keydown",
