@@ -30,6 +30,7 @@ import {
 	UiKitElement,
 	UiKitTextboxElement
 } from "./components/elementReference.js";
+import { isArrow } from "../../security/isArrow.js";
 
 const uiKitStart = performance.now();
 
@@ -258,6 +259,9 @@ class UiKitRendererClass {
 		rightClickCallback: Function = () => {},
 		size: number = 15
 	) {
+		if (leftClickCallback) isArrow(leftClickCallback, true);
+		if (rightClickCallback) isArrow(rightClickCallback, true);
+
 		const obj: step = {
 			type: "uikitButton",
 			args: [x, y, string, leftClickCallback, rightClickCallback, size]
@@ -274,6 +278,9 @@ class UiKitRendererClass {
 		callbacks: textboxCallbackObject,
 		options: uikitTextboxConfig = this.defaultConfig.uikitTextbox
 	) {
+		if (callbacks.update) isArrow(callbacks.update, true);
+		if (callbacks.enter) isArrow(callbacks.enter, true);
+
 		// insure all values are met. if not, apply the default
 		const opts = {};
 		for (const i in this.defaultConfig.uikitTextbox) {
@@ -329,6 +336,9 @@ class UiKitRendererClass {
 		callbacks: textboxCallbackObject,
 		options: uikitTextareaConfig = this.defaultConfig.uikitTextarea
 	) {
+		if (callbacks.enter) isArrow(callbacks.enter, true);
+		if (callbacks.update) isArrow(callbacks.update, true);
+
 		const obj: step = {
 			type: "uikitTextarea",
 			args: [x, y, width, height, callbacks, options]
@@ -367,6 +377,9 @@ class UiKitRendererClass {
 		rightClickCallback?: clickReference["right"],
 		otherConfig?: onClickOptions
 	) {
+		if (leftClickCallback) isArrow(leftClickCallback, true);
+		if (rightClickCallback) isArrow(rightClickCallback, true);
+
 		const elemID = Number(elementID);
 
 		const left =
@@ -413,6 +426,8 @@ class UiKitRendererClass {
 	}
 
 	onElementDrop(elementID?: number | UiKitElement, callback?: Function) {
+		if (callback) isArrow(callback, true);
+
 		const elemID = Number(elementID);
 
 		// insure elemID is valid
@@ -442,6 +457,8 @@ class UiKitRendererClass {
 
 	async awaitClick(callback: () => void | Promise<void>) {
 		const init = Date.now();
+
+		if (callback) isArrow(callback, true);
 
 		await new Promise((resolve: Function) => {
 			let interval = setInterval(() => {
@@ -505,6 +522,12 @@ class UiKitRendererClass {
 		header: string,
 		buttons: Record<string, Function>
 	) {
+		for (const key in buttons) {
+			const value = buttons[key];
+
+			if (value) isArrow(value, true);
+		}
+
 		this.removeContextMenu();
 
 		this.#context = new ContextMenu(
@@ -860,12 +883,7 @@ class UiKitRendererClass {
 						event.preventDefault();
 
 						if (event.pointerType == "mouse") {
-							if (newStep?.onClick?.left) {
-								newStep.onClick.left(
-									event.clientX / guiScale,
-									event.clientY / guiScale
-								);
-							}
+							// this is handled on mouse UP
 							return;
 						}
 
@@ -915,6 +933,27 @@ class UiKitRendererClass {
 						});
 					},
 					{ signal: this.signal }
+				);
+
+				element.addEventListener(
+					"pointerup",
+					(event) => {
+						if (event.pointerType == "mouse") {
+							// only accept right click
+							if (event.button !== 0) return;
+
+							if (newStep?.onClick?.left) {
+								newStep.onClick.left(
+									event.clientX / guiScale,
+									event.clientY / guiScale
+								);
+							}
+							return;
+						}
+					},
+					{
+						signal: this.signal
+					}
 				);
 
 				element.addEventListener(
