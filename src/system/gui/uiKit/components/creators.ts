@@ -9,11 +9,10 @@ import {
 	uikitCanvasOptions,
 	uikitIconOptions
 } from "../definitions.js";
-import { UiKitRenderer } from "../uiKit.js";
+import { defaultConfig } from "./defaultConfig.js";
 
 export default class uiKitCreators {
-	#parent: UiKitRenderer;
-	#window: GraphicalWindow;
+	#window?: GraphicalWindow;
 	textboxElems: Partial<
 		Record<number, HTMLInputElement | HTMLTextAreaElement>
 	> = {};
@@ -22,11 +21,8 @@ export default class uiKitCreators {
 
 	constructor(
 		ConstellationKernel: ConstellationKernel,
-		parent: UiKitRenderer,
-		window: GraphicalWindow
+		window?: GraphicalWindow
 	) {
-		this.#parent = parent;
-
 		this.#window = window;
 
 		this.#ConstellationKernel = ConstellationKernel;
@@ -60,7 +56,7 @@ export default class uiKitCreators {
 			icon.classList.add("darkmode");
 		}
 
-		this.#window.body.appendChild(icon);
+		if (this.#window) this.#window.body.appendChild(icon);
 
 		if (icon == null)
 			throw new UIError("uikit element has disappeared in processing");
@@ -86,7 +82,7 @@ export default class uiKitCreators {
 		text.style.fontSize = `${fontSize}px`;
 		text.style.color = colour;
 
-		this.#window.body.appendChild(text);
+		if (this.#window) this.#window.body.appendChild(text);
 
 		if (text == null)
 			throw new UIError("uikit element has disappeared in processing");
@@ -110,7 +106,7 @@ export default class uiKitCreators {
 		button.innerText = string;
 		button.style.cssText = `left: ${x}px; top: ${y}px; font-size: ${size}px;`;
 
-		this.#window.body.appendChild(button);
+		if (this.#window) this.#window.body.appendChild(button);
 
 		if (button == null)
 			throw new UIError("uikit element has disappeared in processing");
@@ -129,7 +125,7 @@ export default class uiKitCreators {
 			update: (key: string, value: string) => {},
 			enter: (value: string) => {}
 		},
-		options = this.#parent.defaultConfig.uikitTextbox
+		options = defaultConfig.uikitTextbox
 	) => {
 		const textbox = document.createElement("input");
 		textbox.type = "text";
@@ -151,7 +147,7 @@ export default class uiKitCreators {
 			textbox.style.cssText += `font-size: ${options.fontSize}px;`;
 		}
 
-		this.#window.body.appendChild(textbox);
+		if (this.#window) this.#window.body.appendChild(textbox);
 
 		if (textbox == null)
 			throw new UIError("uikit element has disappeared in processing");
@@ -176,7 +172,7 @@ export default class uiKitCreators {
 		line.id = String(window.renderID++);
 		line.style.cssText = `left: ${x}px; top: ${y}px; height: ${height}px;`;
 
-		this.#window.body.appendChild(line);
+		if (this.#window) this.#window.body.appendChild(line);
 
 		if (line == null)
 			throw new UIError("uikit element has disappeared in processing");
@@ -191,7 +187,7 @@ export default class uiKitCreators {
 		line.id = String(window.renderID++);
 		line.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px;`;
 
-		this.#window.body.appendChild(line);
+		if (this.#window) this.#window.body.appendChild(line);
 
 		if (line == null)
 			throw new UIError("uikit element has disappeared in processing");
@@ -221,7 +217,7 @@ export default class uiKitCreators {
 
 		bar.innerHTML = progressor.outerHTML;
 
-		this.#window.body.appendChild(bar);
+		if (this.#window) this.#window.body.appendChild(bar);
 
 		if (bar == null)
 			throw new UIError("uikit element has disappeared in processing");
@@ -236,7 +232,7 @@ export default class uiKitCreators {
 		width: number = 100,
 		height: number = 50,
 		callbacks: any,
-		options = this.#parent.defaultConfig.uikitTextarea
+		options = defaultConfig.uikitTextarea
 	) => {
 		const area = document.createElement("textarea");
 		area.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;`;
@@ -251,7 +247,7 @@ export default class uiKitCreators {
 			area.spellcheck = false;
 		}
 
-		this.#window.body.appendChild(area);
+		if (this.#window) this.#window.body.appendChild(area);
 
 		if (area == null)
 			throw new UIError("uikit element has disappeared in processing");
@@ -262,7 +258,7 @@ export default class uiKitCreators {
 			? undefined
 			: this.#ConstellationKernel.ui.windowSystem.focusedWindow;
 
-		if (focusedWindow == this.#window.winID) area.focus();
+		if (focusedWindow == this.#window?.winID) area.focus();
 
 		area.value = String(this.textboxElems[id]?.value || ""); // make the value stay
 		this.textboxElems[id] = area;
@@ -302,7 +298,7 @@ export default class uiKitCreators {
 
 		if (config?.isFrosted == true) box.classList.add("frosted");
 
-		this.#window.body.appendChild(box);
+		if (this.#window) this.#window.body.appendChild(box);
 
 		if (box == null)
 			throw new UIError("uikit element has disappeared in processing");
@@ -325,7 +321,7 @@ export default class uiKitCreators {
 		canvas.id = String(window.renderID++);
 		canvas.className = "uikitCanvas";
 
-		this.#window.body.append(canvas);
+		if (this.#window) this.#window.body.appendChild(canvas);
 
 		const ctx = canvas.getContext("2d");
 

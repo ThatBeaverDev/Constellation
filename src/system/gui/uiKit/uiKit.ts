@@ -15,7 +15,6 @@ import {
 	textboxCallbackObject,
 	uiKitTimestamp,
 	uikitBoxConfig,
-	uikitCanvasOptions,
 	uikitIconOptions,
 	uikitTextareaConfig,
 	uikitTextboxConfig,
@@ -31,6 +30,7 @@ import {
 	UiKitTextboxElement
 } from "./components/elementReference.js";
 import { isArrow } from "../../security/isArrow.js";
+import { defaultConfig } from "./components/defaultConfig.js";
 
 const uiKitStart = performance.now();
 
@@ -38,33 +38,7 @@ const uiKitStart = performance.now();
 export type UiKitRenderer = UiKitRendererClass;
 
 // class
-class UiKitRendererClass {
-	defaultConfig: {
-		uikitTextbox: uikitTextboxConfig;
-		uikitTextarea: uikitTextareaConfig;
-		uikitBox: uikitBoxConfig;
-		uikitCanvasStep: uikitCanvasOptions;
-	} = {
-		uikitTextbox: {
-			isInvisible: false,
-			isEmpty: false,
-			fontSize: undefined,
-			disableMobileAutocorrect: false
-		},
-		uikitTextarea: {
-			isInvisible: false,
-			isEmpty: false,
-			disableMobileAutocorrect: false
-		},
-		uikitBox: {
-			borderRadius: 5,
-			isFrosted: false,
-			background: "rgb(155, 155, 155)"
-		},
-		uikitCanvasStep: {
-			colour: "rgb(155, 155, 155)"
-		}
-	};
+export class UiKitRendererClass {
 	#process?: Process;
 	#window: GraphicalWindow;
 	readonly #steps: step[] = [];
@@ -193,11 +167,7 @@ class UiKitRendererClass {
 			this.#window = window;
 		}
 
-		this.#creators = new uiKitCreators(
-			ConstellationKernel,
-			this,
-			this.#window
-		);
+		this.#creators = new uiKitCreators(ConstellationKernel, this.#window);
 		this.#eventCreators = new uikitEventCreators(this);
 
 		this.#transitioners = new uiKitTransitioners();
@@ -276,16 +246,18 @@ class UiKitRendererClass {
 		height: number = 20,
 		backtext: string,
 		callbacks: textboxCallbackObject,
-		options: uikitTextboxConfig = this.defaultConfig.uikitTextbox
+		options: uikitTextboxConfig = defaultConfig.uikitTextbox
 	) {
 		if (callbacks.update) isArrow(callbacks.update, true);
 		if (callbacks.enter) isArrow(callbacks.enter, true);
 
 		// insure all values are met. if not, apply the default
 		const opts = {};
-		for (const i in this.defaultConfig.uikitTextbox) {
+		for (const i in defaultConfig.uikitTextbox) {
 			// @ts-ignore
-			opts[i] = options[i] ?? this.defaultConfig.uikitTextbox[i];
+			opts[i] =
+				// @ts-ignore
+				options[i] ?? defaultConfig.uikitTextbox[i];
 		}
 
 		const obj: step = {
@@ -334,7 +306,7 @@ class UiKitRendererClass {
 		width: number,
 		height: number,
 		callbacks: textboxCallbackObject,
-		options: uikitTextareaConfig = this.defaultConfig.uikitTextarea
+		options: uikitTextareaConfig = defaultConfig.uikitTextarea
 	) {
 		if (callbacks.enter) isArrow(callbacks.enter, true);
 		if (callbacks.update) isArrow(callbacks.update, true);
