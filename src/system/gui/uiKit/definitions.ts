@@ -89,4 +89,4 @@ export interface uikitIconOptions {
 	noProcess?: boolean;
 }
 
-export const font = "Arial";
+export const font = "system-ui, Arial, monospace";
