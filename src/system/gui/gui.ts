@@ -3,6 +3,7 @@ import ConstellationKernel, { Terminatable } from "../kernel.js";
 import WindowSystem from "./display/windowSystem.js";
 import UiKitInstanceCreator from "./uiKit/uiKit.js";
 import { UserInterfaceBase } from "../ui/ui.js";
+import { font } from "./uiKit/definitions.js";
 
 export class GraphicalInterface implements UserInterfaceBase {
 	type: "GraphicalInterface" = "GraphicalInterface";
@@ -75,9 +76,9 @@ export class GraphicalInterface implements UserInterfaceBase {
 	}
 
 	async init() {
-		this.mainStyles.textContent = await (
-			await fetch("/styles/styles.css")
-		).text();
+		this.mainStyles.textContent =
+			(await (await fetch("/styles/styles.css")).text()) +
+			`\n\n* {\n\tfont-family: ${font} !important;\n}`;
 
 		this.bootStyles.textContent = await (
 			await fetch("/styles/boot.css")

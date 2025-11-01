@@ -14,7 +14,12 @@ function init() {
 	}
 }
 
-export function getTextWidth(text: string, size = 15, fontFamily = font) {
+export function getTextWidth(
+	text: string,
+	size = 15,
+	fontFamily = font,
+	round = true
+) {
 	init();
 
 	if (ctx == null) throw new uiKitInitialisationError("ctx is null.");
@@ -30,11 +35,26 @@ export function getTextWidth(text: string, size = 15, fontFamily = font) {
 		}
 	}
 
-	return maxWidth;
+	if (round) {
+		return Math.round(maxWidth);
+	} else {
+		return maxWidth;
+	}
 }
 
-export function getTextHeight(text: string, size = 15, fontFamily = font) {
-	return text.split("\n").length * size * 1.2;
+export function getTextHeight(
+	text: string,
+	size = 15,
+	fontFamily = font,
+	round = true
+) {
+	const height = text.split("\n").length * size * 1.2;
+
+	if (round) {
+		return Math.round(height);
+	} else {
+		return height;
+	}
 }
 
 export function insertNewlines(
