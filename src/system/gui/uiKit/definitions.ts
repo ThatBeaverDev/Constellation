@@ -41,8 +41,8 @@ export interface step {
 }
 
 export interface textboxCallbackObject {
-	update?: Function;
-	enter?: Function;
+	update?: (key: string, value: string) => void;
+	enter?: (value: string) => void;
 }
 export interface canvasRenderingStep {
 	type: "line" | "rectangle" | "text" | "image";
