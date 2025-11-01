@@ -61,9 +61,7 @@ export default class finderBody {
 		// highlight box
 		this.renderer
 			.box(x, y, width, height, {
-				background: selected
-					? "var(--main-accent-tertiary)"
-					: "transparent",
+				background: selected ? "var(--accent)" : "transparent",
 				borderRadius: 4
 			})
 			.onClick(leftClick, rightClick, onClickConfig)
@@ -106,6 +104,7 @@ export default class finderBody {
 
 		const iconScale = 0.5;
 
+		// render sidebar
 		this.renderer.box(0, 0, 100, this.renderer.windowHeight + 100, {
 			background: "sidebar"
 		});
