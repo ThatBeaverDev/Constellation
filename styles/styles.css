@@ -60,7 +60,7 @@
 		--info: oklch(0.5 0.05 260);
 
 		/* Accent colour */
-		--accent: #dba2fa;
+		--accent: #9a55bf;
 	}
 }
 
@@ -92,7 +92,7 @@
 		--info: oklch(0.7 0.05 260);
 
 		/* Accent colour */
-		--accent: #dba2fa;
+		--accent: #9a55bf;
 	}
 
 	.bootImage {
