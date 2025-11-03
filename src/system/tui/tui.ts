@@ -74,9 +74,8 @@ export class TextInterface implements UserInterfaceBase {
 			}
 			this.#ConstellationKernel.lib.logging.warn(
 				path,
-				"Shutting down system..."
+				"This system should be powered off."
 			);
-			this.#ConstellationKernel.terminate();
 		}
 	}
 
