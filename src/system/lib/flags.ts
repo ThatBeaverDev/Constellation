@@ -1,7 +1,7 @@
 /// <reference types="node" />
 
 export function getFlagValue(name: string): string {
-	if (globalThis.Location) {
+	if (globalThis.location) {
 		// use URL parameters (eg: example.com/system?dev)
 
 		const url = new URL(globalThis.location.href);

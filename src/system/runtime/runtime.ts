@@ -40,7 +40,7 @@ export interface ProcessInformation {
 
 const processes: ProcessInformation[] = [];
 if (defaultConfiguration.dynamic.isDevmode) {
-	(window as any).processes = processes;
+	(globalThis as any).processes = processes;
 }
 
 window.renderID = 0;
@@ -79,7 +79,7 @@ function generateTerminationCode(length: number) {
 
 const randomTerminationCode = generateTerminationCode(10000);
 if (defaultConfiguration.dynamic.isDevmode) {
-	(window as any).randomTerminationCode = randomTerminationCode;
+	(globalThis as any).randomTerminationCode = randomTerminationCode;
 }
 
 declare global {

@@ -19,9 +19,10 @@ import { tcpkg } from "./lib/packaging/tcpkg.js";
 import postinstall from "./installation/postinstall.js";
 import IPCMessageSender from "./runtime/components/messages.js";
 import { UserInterface } from "./ui/ui.js";
+import { getFlagValue } from "./lib/flags.js";
 
 if (defaultConfiguration.dynamic.isDevmode) {
-	(window as any).kernels = [];
+	(globalThis as any).kernels = [];
 }
 const path = "/System/kernel.js";
 
@@ -72,7 +73,14 @@ export default class ConstellationKernel implements Terminatable {
 		public startupConfiguration?: ConstellationKernelConfiguration
 	) {
 		if (defaultConfiguration.dynamic.isDevmode) {
-			(window as any).kernels.push(this);
+			(globalThis as any).kernels.push(this);
+		}
+
+		if (!isGraphical && window.document) {
+			// remove boot page if we're booting TUI
+			const bootBackground = document.querySelector("div.bootCover");
+
+			if (bootBackground) bootBackground.remove();
 		}
 
 		this.logs = logs;
@@ -147,9 +155,7 @@ export default class ConstellationKernel implements Terminatable {
 	async init() {
 		await this.fs.init();
 
-		const forceInstaller =
-			new URL(window.location.href).searchParams.get("forceInstall") !==
-			null;
+		const forceInstaller = Boolean(getFlagValue("forceInstall"));
 
 		// work out whether we need to install
 		const configFileExists =

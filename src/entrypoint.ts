@@ -1,13 +1,22 @@
 #! /usr/bin/env node
 
-import { isCommandLine } from "./system/getPlatform.js";
+import { isCommandLine, isNode } from "./system/getPlatform.js";
 import applyStringPrototypes from "./system/stringPrototypes.js";
-import { FilesystemAPI } from "./fs/fs.js";
 import ConstellationKernel from "./system/kernel.js";
 import Blobifier from "./system/lib/blobify.js";
 import ImportResolver from "./system/runtime/components/resolver.js";
+import { getFlagValue } from "./system/lib/flags.js";
 
 applyStringPrototypes();
+
+const { FilesystemAPI } = await import("./fs/fs.js");
+
+if (isNode) {
+	console.log(
+		"NodeJS is not supported at this time since it doesn't implement dynamic import from BLOB URIs,\nsomething constellation heavily depends on. We'd recommend using Deno. Sorry!"
+	);
+	process.exit();
+}
 
 // allow `declare global`.
 export {};
@@ -17,7 +26,7 @@ if (isCommandLine) {
 	// @ts-expect-error
 	global.window = global;
 
-	(window as any).location = {
+	(globalThis as any).location = {
 		hash: "",
 		host: "localhost:5174",
 		hostname: "localhost",
@@ -41,8 +50,7 @@ if (isCommandLine) {
 	process.chdir(projectRoot);
 }
 
-const url = new URL(window.location.href);
-const isDevmode = url.searchParams.get("dev") !== null;
+const isDevmode = Boolean(getFlagValue("dev"));
 
 function getRequiredLibraries(root: string) {
 	const fsApi = new FilesystemAPI(root);
@@ -83,7 +91,7 @@ async function startupKernel(root: string, canInstall: boolean = true) {
 	async function checkWhetherInstallIsRequired(): Promise<boolean> {
 		if (canInstall == false) return false;
 
-		if (url.searchParams.get("forceInstall") !== null) {
+		if (Boolean(getFlagValue("forceInstall"))) {
 			return true;
 		}
 
@@ -125,7 +133,7 @@ async function startupKernel(root: string, canInstall: boolean = true) {
 
 	if (isDevmode) {
 		// add constructor to window if devmode
-		(window as any).Kernel = Kernel;
+		(globalThis as any).Kernel = Kernel;
 	}
 
 	/* -------------------- Check for GUI environment -------------------- */
@@ -178,7 +186,11 @@ let appliedBootKey: bootkey | undefined = undefined;
 let installationIndexFile: any = undefined;
 
 if (!isCommandLine) {
-	document.addEventListener("keydown", detectKeyPresses);
+	if (getFlagValue("noGui")) {
+		appliedBootKey = "tuiMode";
+	} else {
+		document.addEventListener("keydown", detectKeyPresses);
+	}
 }
 
 function detectKeyPresses(event: KeyboardEvent) {

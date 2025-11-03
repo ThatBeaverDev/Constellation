@@ -209,7 +209,7 @@ export class Process extends Framework {
 	/**
 	 * Child processes from `this.env.exec()`.
 	 */
-	children: Process[] = [];
+	readonly children: Process[] = [];
 
 	// program flow
 	/**
@@ -230,9 +230,8 @@ export class Process extends Framework {
 	 * Registers this process to a name for other programs to lookup and then send messages to.
 	 * @param name - Name to register the program to.
 	 */
-	shout(name: string) {
-		// Code for this is found in constructor since I don't want programs getting their hands on the kernel.
-	}
+	// Code for this is found in constructor since I don't want programs getting their hands on the kernel.
+	readonly shout: (name: string) => void;
 
 	// events
 	/**
@@ -327,14 +326,19 @@ export class Application extends Process {
 			processInfo
 		);
 
-		const UserInterface = ConstellationKernel.ui;
-		if (!(UserInterface.type == "GraphicalInterface")) {
+		const GraphicalInterface = ConstellationKernel.ui;
+		if (!(GraphicalInterface.type == "GraphicalInterface")) {
 			throw new Error(
 				"Graphical applications cannot run in non-graphical environments."
 			);
 		}
 
-		this.renderer = UserInterface.uiKit.newRenderer(this);
+		const window = GraphicalInterface.windowSystem.newWindow(
+			"Application",
+			this
+		).data;
+
+		this.renderer = GraphicalInterface.uiKit.newRenderer(this, window);
 	}
 
 	exit(value?: any) {
