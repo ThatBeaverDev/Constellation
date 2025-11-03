@@ -50,7 +50,7 @@ export const files: Record<
 	// init system
 	"/build/indexes/com.constellation.CoreExecutable.idx": {
 		type: "application",
-		directory: "/System/CoreExecutables/CoreExecutable.backgr"
+		directory: "/System/CoreExecutables/CoreExecutable.srvc"
 	},
 
 	// terminal
@@ -118,7 +118,7 @@ export const files: Record<
 	// Filetype database manager
 	"/build/indexes/com.constellation.fTypeDbMgr.idx": {
 		type: "application",
-		directory: "/System/CoreExecutables/filetypeDatabaseManager.backgr"
+		directory: "/System/CoreExecutables/filetypeDatabaseManager.srvc"
 	},
 
 	"/build/indexes/services.idx": {

@@ -266,8 +266,7 @@ export default class ConstellationKernel implements Terminatable {
 			await runGuiInstaller();
 		}
 
-		const coreExecDirectory =
-			"/System/CoreExecutables/CoreExecutable.backgr";
+		const coreExecDirectory = "/System/CoreExecutables/CoreExecutable.srvc";
 
 		this.security.permissions.setDirectoryPermission(
 			coreExecDirectory,

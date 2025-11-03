@@ -14,7 +14,7 @@ export default class CoreExecutable extends BackgroundProcess {
 		const finderDirectory = "/Applications/Finder.appl";
 		const guiManagerDirectory = "/System/CoreExecutables/guiManager.appl";
 		const filetypeDatabaseManagerDirectory =
-			"/System/CoreExecutables/filetypeDatabaseManager.backgr";
+			"/System/CoreExecutables/filetypeDatabaseManager.srvc";
 
 		// dock permissions
 		this.env.setDirectoryPermission(dockDirectory, "windows", true);
