@@ -112,11 +112,15 @@ export class ApplicationAuthorisationAPI {
 			ConstellationKernel,
 			this.#checkPermission.bind(this)
 		);
-		this.windows = new EnvWindows(
-			ConstellationKernel,
-			this,
-			this.#checkPermission.bind(this)
-		);
+
+		if (ConstellationKernel.isGraphical) {
+			this.windows = new EnvWindows(
+				ConstellationKernel,
+				this,
+				this.#checkPermission.bind(this)
+			);
+		}
+
 		this.users = new EnvUsers(
 			this,
 			environmentCreator,
@@ -462,7 +466,7 @@ export class ApplicationAuthorisationAPI {
 	/**
 	 * Functions related to the graphical window system.
 	 */
-	windows: EnvWindows;
+	windows?: EnvWindows;
 
 	/**
 	 * Functions related to system users

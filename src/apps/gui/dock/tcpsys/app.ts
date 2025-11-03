@@ -155,6 +155,8 @@ export default class dockAndDesktop extends Overlay {
 					break;
 				case "Enter":
 					if (this == undefined) return;
+					if (!this.env.windows) return;
+
 					const focusedWindow = this.env.windows.getFocus();
 
 					if (focusedWindow == undefined) return;

@@ -47,6 +47,8 @@ export default class CoreExecutable extends BackgroundProcess {
 	 * Login process, including starting the login UI and handling recieving the target user from it.
 	 */
 	async startLoginProcess() {
+		if (this.env.systemType == "TUI") return;
+
 		const login = await this.env.exec(this.loginDirectory, undefined);
 
 		setTimeout(async () => {
@@ -74,6 +76,8 @@ export default class CoreExecutable extends BackgroundProcess {
 		repeat: boolean
 	): void | Promise<void> {
 		if (altKey && code == "KeyW") {
+			if (!this.env.windows) return;
+
 			// close window
 			const win = this.env.windows.getFocus();
 			if (win == undefined) return;
