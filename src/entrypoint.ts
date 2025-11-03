@@ -186,7 +186,7 @@ let appliedBootKey: bootkey | undefined = undefined;
 let installationIndexFile: any = undefined;
 
 if (!isCommandLine) {
-	if (getFlagValue("noGui")) {
+	if (getFlagValue("tuiMode")) {
 		appliedBootKey = "tuiMode";
 	} else {
 		document.addEventListener("keydown", detectKeyPresses);
