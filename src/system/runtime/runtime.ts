@@ -49,6 +49,7 @@ window.renderID = 0;
 
 // allow processes to access this
 window.GuiApplication = executables.GuiApplication;
+window.CommandLineApplication = executables.CommandLineApplication;
 window.Process = executables.Process;
 window.BackgroundProcess = executables.BackgroundProcess;
 window.Overlay = executables.Overlay;

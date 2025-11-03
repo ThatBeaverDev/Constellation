@@ -16,6 +16,7 @@ declare global {
 	interface Window {
 		renderID: number;
 		GuiApplication: typeof executables.GuiApplication;
+		CommandLineApplication: typeof executables.CommandLineApplication;
 		Process: typeof executables.Process;
 		BackgroundProcess: typeof executables.BackgroundProcess;
 		Overlay: typeof executables.Overlay;
@@ -25,6 +26,7 @@ declare global {
 	}
 
 	const GuiApplication: typeof executables.GuiApplication;
+	const CommandLineApplication: typeof executables.CommandLineApplication;
 	const Process: typeof executables.Process;
 	const BackgroundProcess: typeof executables.BackgroundProcess;
 	const Overlay: typeof executables.Overlay;
