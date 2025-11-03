@@ -348,6 +348,8 @@ export class GuiApplication extends Process {
 	}
 }
 
+export class CommandLineApplication extends Process {}
+
 /**
  * An application made for acting on a higher level of the layering. Not to be used in general applications.
  */
