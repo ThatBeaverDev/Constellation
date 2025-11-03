@@ -37,8 +37,16 @@ export class FilesystemInstaller {
 	async rm_rf() {
 		const fs = this.#ConstellationKernel.fs;
 
-		async function rmdir(directory: string) {
+		const rmdir = async (directory: string) => {
 			const list = await fs.readdir(directory);
+
+			if (list == undefined) {
+				this.#ConstellationKernel.lib.logging.warn(
+					path,
+					`Directory ${directory} is being skipped because it supposedly has no contents (it does exist though)`
+				);
+				return;
+			}
 
 			for (const item of list) {
 				const resolved = fs.resolve(directory, item);
@@ -54,7 +62,7 @@ export class FilesystemInstaller {
 			}
 
 			await fs.rmdir(directory);
-		}
+		};
 
 		await rmdir("/");
 	}

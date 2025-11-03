@@ -4,6 +4,7 @@ import WindowSystem from "./display/windowSystem.js";
 import UiKitInstanceCreator from "./uiKit/uiKit.js";
 import { UserInterfaceBase } from "../ui/ui.js";
 import { font } from "./uiKit/definitions.js";
+import { constructDOMInterface } from "../io/getShadowDom.js";
 
 export class GraphicalInterface implements UserInterfaceBase {
 	type: "GraphicalInterface" = "GraphicalInterface";
@@ -13,7 +14,7 @@ export class GraphicalInterface implements UserInterfaceBase {
 	uiKit: UiKitInstanceCreator & Terminatable;
 
 	// GUI
-	#containerDiv: HTMLDivElement;
+	#shadowDomHost: HTMLDivElement;
 	shadowRoot: ShadowRoot;
 	container: HTMLDivElement = document.createElement("div");
 
@@ -21,17 +22,11 @@ export class GraphicalInterface implements UserInterfaceBase {
 	bootStyles: HTMLStyleElement = document.createElement("style");
 
 	constructor(ConstellationKernel: ConstellationKernel) {
-		this.#containerDiv = document.createElement("div");
-		const d = this.#containerDiv;
-		d.className = "graphicalOutput";
+		const { shadowDOM, container, host } = constructDOMInterface();
 
-		const shadowDOM = this.#containerDiv.attachShadow({ mode: "open" });
 		this.shadowRoot = shadowDOM;
-
-		// body div
-		this.container.className = "overlay";
-		this.container.style.zoom = "1";
-		this.shadowRoot.appendChild(this.container);
+		this.#shadowDomHost = host;
+		this.container = container;
 
 		// styles ID
 		this.mainStyles.id = "/styles/styles.css";
@@ -51,7 +46,7 @@ export class GraphicalInterface implements UserInterfaceBase {
 		this.windowSystem = new WindowSystem(ConstellationKernel, this);
 
 		// add shadowDOM to screen
-		document.body.appendChild(this.#containerDiv);
+		document.body.appendChild(this.#shadowDomHost);
 	}
 
 	get displayWidth(): number {
@@ -136,6 +131,6 @@ span.loader::after {
 	async terminate() {
 		await this.#reduceState();
 
-		this.#containerDiv.remove();
+		this.#shadowDomHost.remove();
 	}
 }

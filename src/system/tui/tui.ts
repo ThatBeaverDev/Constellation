@@ -1,97 +1,83 @@
 import ConstellationKernel from "..//kernel.js";
 import { UserInterfaceBase } from "../ui/ui.js";
+import currentHandler, { Handler } from "./display.js";
 
 const path = "/System/tui/tui.js";
 
 export class TextInterface implements UserInterfaceBase {
 	type: "TextInterface" = "TextInterface";
 	#ConstellationKernel: ConstellationKernel;
-	readline?: typeof import("readline");
+	displayInterface: Handler;
 
 	constructor(ConstellationKernel: ConstellationKernel) {
 		this.#ConstellationKernel = ConstellationKernel;
-		this.#ConstellationKernel;
+		this.displayInterface = new currentHandler(ConstellationKernel);
 	}
 
 	async init() {
-		this.readline = await import("readline");
-		const post = this.#ConstellationKernel.lib.logging.post;
-		post("Please login to Constellation:");
+		await this.displayInterface.init();
+		const post = this.displayInterface.post;
 
-		const getUsername = async () => {
-			const username = await this.ask("Username: ");
+		try {
+			post("Please login to Constellation:");
 
-			const selectedUser =
-				this.#ConstellationKernel.security.users.getUser(username);
-			if (selectedUser == undefined) {
-				post(
-					`Couldn't find user by name '${username}'. Please try again.`
-				);
+			/* ---------- Login flow ---------- */
 
-				return await getUsername();
-			} else {
-				return username;
-			}
-		};
+			const getUsername = async () => {
+				const username =
+					await this.displayInterface.getInput("Username: ");
 
-		const getPassword = async () => {
-			const password = await this.ask("Password: ");
+				// get the user
+				const selectedUser =
+					this.#ConstellationKernel.security.users.getUser(username);
 
-			return password;
-		};
+				if (selectedUser == undefined) {
+					post(
+						`Couldn't find user by name '${username}'. Please try again.`
+					);
 
-		const username = await getUsername();
-		const password = await getPassword();
+					return await getUsername();
+				} else {
+					return username;
+				}
+			};
 
-		const isAuthenticated =
+			const getPassword = async () => {
+				const password =
+					await this.displayInterface.getInput("Password: ");
+
+				return password;
+			};
+
+			const username = await getUsername();
+			const password = await getPassword();
+
+			// check the credentials
 			await this.#ConstellationKernel.security.users.validatePassword(
 				username,
 				password
 			);
 
-		this.#ConstellationKernel.lib.logging.warn(path, isAuthenticated);
+			/* ---------- Open User Shell ---------- */
 
-		const cache = new Set();
-
-		console.log(
-			JSON.stringify(
-				this.#ConstellationKernel,
-				(key, value) => {
-					if (typeof value === "object" && value !== null) {
-						// If the object has already been seen, return undefined
-						// to avoid circular reference
-						if (cache.has(value)) {
-							return; // Remove circular reference
-						}
-						// Store the object in the cache
-						cache.add(value);
-					}
-					return value;
-				},
-				4
-			)
-		);
-
-		cache.clear(); // Clear the cache after serialization
-	}
-
-	async ask(question: string): Promise<string> {
-		return new Promise((resolve: (result: string) => void) => {
-			if (this.readline == undefined) {
-				resolve("");
-				return;
+			const shell = await this.#ConstellationKernel.runtime.execute(
+				"/System/CoreExecutables/Shell.appl",
+				[],
+				username,
+				password
+			);
+		} catch (e: unknown) {
+			if (e instanceof Error) {
+				post(String(e.stack));
+			} else {
+				post(String(e));
 			}
-
-			const rl = this.readline.createInterface({
-				input: process.stdin,
-				output: process.stdout
-			});
-
-			rl.question(question, (response: string) => {
-				resolve(response);
-				rl.close();
-			});
-		});
+			this.#ConstellationKernel.lib.logging.warn(
+				path,
+				"Shutting down system..."
+			);
+			this.#ConstellationKernel.terminate();
+		}
 	}
 
 	setStatus(text: string | Error, state: "working" | "error"): void {
@@ -102,5 +88,7 @@ export class TextInterface implements UserInterfaceBase {
 		// TODO: IMPLEMENT
 	}
 
-	terminate() {}
+	terminate() {
+		this.displayInterface.terminate();
+	}
 }

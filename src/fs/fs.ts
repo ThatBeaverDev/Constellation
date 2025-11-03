@@ -5,6 +5,7 @@ import {
 	ApiError,
 	BrowserFS,
 	FileSystemConfiguration,
+	FSModule,
 	Stats
 } from "./BrowserFsTypes.js";
 import {
@@ -16,6 +17,12 @@ import { relative } from "../system/io/nodepath.js";
 
 /* ------------------------------------------------------------- Constants and Timestamp Function ------------------------------------------------------------- */
 
+let commandLineBase = "";
+
+if (isCommandLine) {
+	commandLineBase = process.cwd() + "/.fs";
+}
+
 function filesystemTimestamp(
 	label: string,
 	start: DOMHighResTimeStamp,
@@ -25,37 +32,44 @@ function filesystemTimestamp(
 }
 
 const start = performance.now();
-const startDownloadBrowserFS = performance.now();
 
-/* ------------------------------------------------------------- Download BrowserFS ------------------------------------------------------------- */
+let fs: FSModule;
+if (!isCommandLine) {
+	const startDownloadBrowserFS = performance.now();
 
-const BrowserFsExports = await import("./browserfs.js");
-const BrowserFS: BrowserFS = BrowserFsExports.default();
+	/* ------------------------------------------------------------- Download BrowserFS ------------------------------------------------------------- */
 
-filesystemTimestamp("Download and initalise BrowserFS", startDownloadBrowserFS);
+	const BrowserFsExports = await import("./browserfs.js");
+	const BrowserFS: BrowserFS = BrowserFsExports.default();
 
-/* ------------------------------------------------------------- Configure BrowserFS ------------------------------------------------------------- */
+	filesystemTimestamp(
+		"Download and initalise BrowserFS",
+		startDownloadBrowserFS
+	);
 
-const configureBrowserFS = performance.now();
-await new Promise((resolve: Function) => {
-	let fs: FileSystemConfiguration["fs"] = "IndexedDB";
-	if (isCommandLine) fs = "InMemory";
+	/* ------------------------------------------------------------- Configure BrowserFS ------------------------------------------------------------- */
 
-	BrowserFS.configure({ fs, options: {} }, (e?: ApiError | null) => {
-		if (e) {
-			console.error("PREBOOT:LOADFS", e);
-		}
-		console.log("Initialised Browser Filesystem.");
-		filesystemTimestamp("Configure BrowserFS", configureBrowserFS);
-		resolve();
+	const configureBrowserFS = performance.now();
+	await new Promise((resolve: Function) => {
+		let fs: FileSystemConfiguration["fs"] = "IndexedDB";
+		if (isCommandLine) fs = "InMemory";
+
+		BrowserFS.configure({ fs, options: {} }, (e?: ApiError | null) => {
+			if (e) {
+				console.error("PREBOOT:LOADFS", e);
+			}
+			console.log("Initialised Browser Filesystem.");
+			filesystemTimestamp("Configure BrowserFS", configureBrowserFS);
+			resolve();
+		});
 	});
-});
 
-/* ------------------------------------------------------------- Get Filesytem Interface ------------------------------------------------------------- */
+	/* ------------------------------------------------------------- Get Filesytem Interface ------------------------------------------------------------- */
 
-const fs = BrowserFS.BFSRequire("fs");
-if (defaultConfiguration.dynamic.isDevmode) {
-	(window as any).BFS = fs;
+	fs = BrowserFS.BFSRequire("fs");
+} else {
+	// @ts-expect-error // it's fine
+	fs = await import("node:fs");
 }
 
 /* ------------------------------------------------------------- Write File Function ------------------------------------------------------------- */
@@ -258,6 +272,15 @@ function copyRecursively(oldPath: string, newPath: string): Promise<void> {
 	});
 }
 
+if (isCommandLine) {
+	// create the .fs folder
+	await mkdir("/");
+}
+
+if (defaultConfiguration.dynamic.isDevmode) {
+	(globalThis as any).BFS = fs;
+}
+
 /* ------------------------------------------------------------- FilesystemAPI Class ------------------------------------------------------------- */
 
 export class FilesystemAPI {
@@ -287,6 +310,7 @@ export class FilesystemAPI {
 
 	async readdir(directory: string) {
 		const realpath = this.#realDir(directory);
+
 		return await readdir(realpath);
 	}
 
@@ -316,7 +340,15 @@ export class FilesystemAPI {
 		return normaliseDirectory(path);
 	}
 	#realDir(path: string) {
-		return this.rootPoint + path;
+		let dir = commandLineBase + this.rootPoint + path;
+
+		if (dir.at(-1) == "/") {
+			if (dir == "/") return "/";
+
+			return dir.substring(0, dir.length - 1);
+		} else {
+			return dir;
+		}
 	}
 
 	async stat(directory: string): ReturnType<typeof stat> {
@@ -347,7 +379,7 @@ export class FilesystemAPI {
 export async function fsLoaded() {
 	await new Promise((resolve: Function) => {
 		let interval = setInterval(() => {
-			if (typeof BrowserFS !== "undefined") {
+			if (typeof fs !== "undefined") {
 				clearInterval(interval);
 				resolve();
 				return;

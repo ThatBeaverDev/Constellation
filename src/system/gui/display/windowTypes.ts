@@ -19,10 +19,10 @@ export class GraphicalWindow {
 	iconName: string = "app-window-mac";
 
 	// HTML
-	container: HTMLElement;
-	body: HTMLElement;
-	header: HTMLElement;
-	buttonsDiv: HTMLElement;
+	container: HTMLDivElement;
+	body: HTMLDivElement;
+	header: HTMLDivElement;
+	buttonsDiv: HTMLDivElement;
 	closeButton: HTMLElement;
 	maximiseButton: HTMLElement;
 	minimiseButton: HTMLElement;
@@ -145,12 +145,6 @@ export class GraphicalWindow {
 		const shadowDom = ConstellationKernel.ui.shadowRoot;
 
 		ConstellationKernel.ui.container.appendChild(this.container);
-
-		this.container = shadowDom.getElementById(this.container.id)!;
-		this.body = shadowDom.getElementById(this.body.id)!;
-		this.header = shadowDom.getElementById(this.header.id)!;
-		this.title = shadowDom.getElementById(this.title.id)!;
-		this.iconDiv = shadowDom.getElementById(this.iconDiv.id)!;
 
 		this.closeButton = shadowDom.getElementById(this.closeButton.id)!;
 		this.maximiseButton = shadowDom.getElementById(this.maximiseButton.id)!;

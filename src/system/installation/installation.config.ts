@@ -6,6 +6,8 @@ const params = url.searchParams;
 const isAppdev = params.get("appdev") !== null;
 
 export const folders: string[] = [
+	"/",
+
 	"/System",
 	"/System/CoreExecutables",
 	"/System/CoreComponents",
@@ -140,6 +142,12 @@ export const files: Record<
 	"/build/indexes/com.constellation.guiManager.idx": {
 		type: "application",
 		directory: "/System/CoreExecutables/guiManager.appl"
+	},
+
+	// User shell
+	"/build/indexes/com.constellation.usershell.idx": {
+		type: "application",
+		directory: "/System/CoreExecutables/Shell.appl"
 	}
 };
 

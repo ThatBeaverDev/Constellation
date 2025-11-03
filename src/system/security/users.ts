@@ -73,7 +73,7 @@ export default class Users {
 		const targetUser = this.usersStorage[username];
 
 		if (targetUser == undefined) {
-			throw new Error("User by name " + username + " does not exist.");
+			throw new Error(`User by name '${username}' does not exist.`);
 		}
 
 		const targetPassword = targetUser.password;
@@ -110,7 +110,7 @@ export default class Users {
 
 	getUser(username: string): User {
 		if (this.usersStorage[username] == undefined) {
-			throw new Error("User by name " + username + " does not exist.");
+			throw new Error(`User by name '${username}' does not exist.`);
 		}
 		return this.usersStorage[username];
 	}

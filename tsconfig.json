@@ -36,7 +36,7 @@
 			],
 			"fzf": [
 				"./src/system/CoreLibraries/fzf.ts"
-			]
+			],
 		},
 		"noUnusedLocals": true,
 		// types

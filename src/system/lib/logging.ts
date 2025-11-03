@@ -10,23 +10,23 @@ export default class LoggingAPI {
 		this.#ConstellationKernel = ConstellationKernel;
 	}
 
-	post(mainLog: any, ...content: any[]) {
+	post = (mainLog: any, ...content: any[]) => {
 		this.coreLogging("post", "", mainLog, ...content);
-	}
-	debug(initiator: string, mainLog: any, ...content: any[]): undefined {
+	};
+	debug = (initiator: string, mainLog: any, ...content: any[]): undefined => {
 		this.coreLogging("debug", initiator, mainLog, ...content);
-	}
-	log(initiator: string, mainLog: any, ...content: any[]): undefined {
+	};
+	log = (initiator: string, mainLog: any, ...content: any[]): undefined => {
 		this.coreLogging("log", initiator, mainLog, ...content);
-	}
-	warn(initiator: string, mainLog: any, ...content: any[]): undefined {
+	};
+	warn = (initiator: string, mainLog: any, ...content: any[]): undefined => {
 		this.coreLogging("warn", initiator, mainLog, ...content);
-	}
-	error(initiator: string, mainLog: any, ...content: any[]): undefined {
+	};
+	error = (initiator: string, mainLog: any, ...content: any[]): undefined => {
 		this.coreLogging("error", initiator, mainLog, ...content);
-	}
+	};
 
-	coreLogging(type: LogLevel, origin: string, ...content: any[]) {
+	coreLogging = (type: LogLevel, origin: string, ...content: any[]) => {
 		this.#ConstellationKernel.logs.push([
 			type.toUpperCase() as CapitalisedLogLevel,
 			origin,
@@ -97,5 +97,5 @@ export default class LoggingAPI {
 					break;
 			}
 		}
-	}
+	};
 }

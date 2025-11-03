@@ -22,7 +22,7 @@ export default class Security {
 	}
 
 	async init() {
-		this.users.init();
+		await this.users.init();
 	}
 
 	async terminate() {

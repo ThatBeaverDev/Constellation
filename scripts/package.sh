@@ -76,6 +76,9 @@ compile() {
 
     # Build ConstellationGuiManager
     ./scripts/tcpkg build/apps/gui/cwm build/indexes/com.constellation.guiManager.idx -override=true
+
+    # Build usershell
+    ./scripts/tcpkg build/apps/tui/usershell build/indexes/com.constellation.usershell.idx -override=true
 }
 
 # first param is directory, second param is name
