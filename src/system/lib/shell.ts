@@ -39,7 +39,7 @@ export default class Shell {
 			for (const item of list) {
 				const rel = await this.#env.fs.resolve(dir, item);
 
-				if (rel.endsWith(".appl") || rel.endsWith(".backgr")) {
+				if (rel.endsWith(".appl") || rel.endsWith(".srvc")) {
 					allApps.push(rel);
 				}
 			}

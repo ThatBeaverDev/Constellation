@@ -53,7 +53,7 @@ export async function pathIcon(
 					return "app-window-mac";
 				}
 
-				if (name.endsWith(".backgr")) {
+				if (name.endsWith(".srvc")) {
 					return "/System/CoreAssets/Vectors/files/file-code.svg";
 				}
 

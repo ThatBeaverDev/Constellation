@@ -60,7 +60,7 @@ export default class finderInteractions {
 					case "directory":
 						if (
 							obj.path.endsWith(".appl") ||
-							obj.path.endsWith(".backgr")
+							obj.path.endsWith(".srvc")
 						) {
 							this.env.exec(obj.path);
 							return;
@@ -99,7 +99,7 @@ export default class finderInteractions {
 				case "directory":
 					if (
 						obj.path.endsWith(".appl") ||
-						obj.path.endsWith(".backgr")
+						obj.path.endsWith(".srvc")
 					) {
 						context["Show Contents"] = () => {
 							this.openDirectory(obj.path);

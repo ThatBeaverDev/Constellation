@@ -43,7 +43,7 @@ export default async function find(
 			};
 
 			if (
-				obj.directory.endsWith(".backgr") ||
+				obj.directory.endsWith(".srvc") ||
 				obj.directory.endsWith(".appl")
 			) {
 				if (obj.name.startsWith("/")) {

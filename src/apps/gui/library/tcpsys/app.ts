@@ -43,7 +43,7 @@ export default class library extends GuiApplication {
 		y += padding;
 		for (const app of this.index.files) {
 			if (app.directory == this.directory) continue; // don't show the library
-			if (app.directory.endsWith(".backgr")) continue; // don't show background apps
+			if (app.directory.endsWith(".srvc")) continue; // don't show background apps
 
 			const icon = this.renderer.icon(x, y, app.icon, 1.5);
 
