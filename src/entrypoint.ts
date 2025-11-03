@@ -177,6 +177,8 @@ async function startupKernel(root: string, canInstall: boolean = true) {
 const bootKeys = {
 	tuiMode:
 		"Boots the system into TUI mode, which is the default for command line programs.",
+	guiMode:
+		"Boots the system into GUI mode, which is the default for browsers. will crash on CLI.",
 	safeMode:
 		"Boots the system into safe mode, wherein only authorised programs can run."
 };
@@ -205,6 +207,9 @@ function detectKeyPresses(event: KeyboardEvent) {
 			break;
 		case "KeyT":
 			appliedBootKey = "tuiMode";
+			break;
+		case "KeyG":
+			appliedBootKey = "guiMode";
 			break;
 		case "KeyF":
 			installationIndexFile = new Promise((resolve: Function) => {
