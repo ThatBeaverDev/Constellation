@@ -16,7 +16,7 @@ compile() {
     ./scripts/tcpkg build/apps/gui/finder build/indexes/com.constellation.finder.idx -override=true
 
     # Build the CoreExecutable
-    ./scripts/tcpkg build/apps/background/CoreExecutable build/indexes/com.constellation.CoreExecutable.idx -override=true
+    ./scripts/tcpkg build/apps/services/CoreExecutable build/indexes/com.constellation.CoreExecutable.idx -override=true
 
     # Build Terminal
     mkdir -p build/apps/gui/terminal/resources
@@ -63,7 +63,7 @@ compile() {
     ./scripts/tcpkg build/system/installation/oobe build/indexes/com.constellation.oobe.idx -override=true
 
     # Build FiletypeDatabaseManager
-    ./scripts/tcpkg build/apps/background/filetypeDatabaseManager build/indexes/com.constellation.fTypeDbMgr.idx -override=true
+    ./scripts/tcpkg build/apps/services/filetypeDatabaseManager build/indexes/com.constellation.fTypeDbMgr.idx -override=true
 
     # Package CoreServices directory
     ./scripts/tcpkg build/services build/indexes/services.idx -override=true
