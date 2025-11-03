@@ -1,50 +1,50 @@
 .overlay {
-    --line-height: 15px;
+	--line-height: 15px;
 
-    position: absolute;
+	position: absolute;
 
-    inset: 0;
-    overflow: hidden;
+	inset: 0;
+	overflow: hidden;
 
-    display: flex;
-    flex-direction: column;
+	display: flex;
+	flex-direction: column;
 }
 
 .logline {
-    width: 100%;
-    height: var(--line-height);
+	width: 100%;
+	height: var(--line-height);
 }
 
 * {
-    color: white;
-    margin: 0;
-    padding: 0;
+	color: white;
+	margin: 0;
+	padding: 0;
 
-    font-family: monospace;
-    font-size: 16px;
+	font-family: monospace;
+	font-size: 16px;
 }
 
 .prompt {
-    width: 100%;
-    height: var(--line-height);
+	width: 100%;
+	height: var(--line-height);
 
-    display: flex;
-    flex-direction: row;
-    vertical-align: middle;
+	display: flex;
+	flex-direction: row;
+	vertical-align: middle;
 
-    margin: 2px;
+	margin: 2px;
 }
 
 .prompt>p {
-    height: var(--line-height);
-    line-height: var(--line-height);
-    vertical-align: middle;
+	height: var(--line-height);
+	line-height: var(--line-height);
+	vertical-align: middle;
 }
 
 .prompt>input {
-    height: var(--line-height);
+	height: var(--line-height);
 
-    border: none;
-    outline: none;
-    background-color: transparent;
+	border: none;
+	outline: none;
+	background-color: transparent;
 }
