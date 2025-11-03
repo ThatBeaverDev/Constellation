@@ -46,7 +46,7 @@ if (defaultConfiguration.dynamic.isDevmode) {
 window.renderID = 0;
 
 // allow processes to access this
-window.Application = executables.Application;
+window.GuiApplication = executables.GuiApplication;
 window.Process = executables.Process;
 window.BackgroundProcess = executables.BackgroundProcess;
 window.Overlay = executables.Overlay;
@@ -663,7 +663,7 @@ export class ProgramRuntime {
 		} catch {}
 
 		// if it's a GUI app, remove the UiKit instance and therefore the GUI window.
-		if (proc instanceof Application) {
+		if (proc instanceof GuiApplication) {
 			try {
 				proc?.renderer?.terminate();
 			} catch {}

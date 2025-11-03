@@ -15,7 +15,7 @@ declare global {
 
 	interface Window {
 		renderID: number;
-		Application: typeof executables.Application;
+		GuiApplication: typeof executables.GuiApplication;
 		Process: typeof executables.Process;
 		BackgroundProcess: typeof executables.BackgroundProcess;
 		Overlay: typeof executables.Overlay;
@@ -24,13 +24,11 @@ declare global {
 		runtime: "nodejs" | "browser" | "deno";
 	}
 
-	const Application: typeof executables.Application;
+	const GuiApplication: typeof executables.GuiApplication;
 	const Process: typeof executables.Process;
 	const BackgroundProcess: typeof executables.BackgroundProcess;
 	const Overlay: typeof executables.Overlay;
 	const Module: typeof executables.Module;
 
 	type ApplicationManifest = executables.ProgramManifest;
-
-	const runtime: "node" | "browser";
 }

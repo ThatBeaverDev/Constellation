@@ -1,5 +1,5 @@
 import ConstellationKernel from "../../kernel.js";
-import { Application } from "../../runtime/components/executables.js";
+import { GuiApplication } from "../../runtime/components/executables.js";
 import WindowSystem from "./windowSystem.js";
 import { windowsTimestamp } from "./timestamp.js";
 import { GraphicalInterface } from "../gui.js";
@@ -31,14 +31,14 @@ export class GraphicalWindow {
 	// properties that don't change often
 	layer: number = 100;
 	readonly winID: number;
-	Application?: Application;
+	Application?: GuiApplication;
 	resizeObserver: ResizeObserver;
 	isRemoved: boolean = false;
 
 	constructor(
 		ConstellationKernel: ConstellationKernel,
 		name: string,
-		Application?: Application
+		Application?: GuiApplication
 	) {
 		this.#ConstellationKernel = ConstellationKernel;
 
@@ -498,7 +498,7 @@ export class OverlayWindow extends GraphicalWindow {
 	constructor(
 		ConstellationKernel: ConstellationKernel,
 		name: string,
-		Application?: Application,
+		Application?: GuiApplication,
 		width: number = 500,
 		height: number = 300
 	) {

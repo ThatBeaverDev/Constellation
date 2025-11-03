@@ -14,7 +14,7 @@ interface OOBEScreen {
 	extraRequiredHeight?: number;
 }
 
-export default class outOfBoxInstaller extends Application {
+export default class outOfBoxInstaller extends GuiApplication {
 	screen: OOBEScreenName = "welcome";
 	returnValue: PostInstallOptions = {
 		user: {

@@ -1,7 +1,7 @@
 import { clickReference } from "../../../../system/gui/uiKit/definitions.js";
 import { evaluate } from "../components/logic.js";
 
-export default class calc extends Application {
+export default class calc extends GuiApplication {
 	text: string = "";
 	mode: "type" | "answer" = "type";
 	result: number = 0;

@@ -1,9 +1,9 @@
 import body from "../resources/panels/body.js";
 import sidebar from "../resources/panels/sidebar.js";
 
-export default class systemSettings extends Application {
 	sidebar?: sidebar;
 	body?: body;
+export default class systemSettings extends GuiApplication {
 
 	async init() {
 		// import sidebar

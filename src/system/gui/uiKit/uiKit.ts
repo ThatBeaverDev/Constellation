@@ -4,7 +4,10 @@ import {
 	getTextWidth,
 	insertNewlines
 } from "./components/textUtils.js";
-import { Application, Process } from "../../runtime/components/executables.js";
+import {
+	GuiApplication,
+	Process
+} from "../../runtime/components/executables.js";
 import { UIError } from "../../errors.js";
 import { ContextMenu } from "./components/contexts.js";
 import uiKitCreators from "./components/creators.js";
@@ -141,7 +144,7 @@ export class UiKitRendererClass {
 
 	constructor(
 		ConstellationKernel: ConstellationKernel,
-		process?: Application,
+		process?: GuiApplication,
 		window?: GraphicalWindow
 	) {
 		this.#ConstellationKernel = ConstellationKernel;
@@ -1004,7 +1007,7 @@ export default class UiKitInstanceCreator {
 		).text();
 		this.style.textContent = styles;
 	}
-	newRenderer(process?: Application, window?: GraphicalWindow) {
+	newRenderer(process?: GuiApplication, window?: GraphicalWindow) {
 		return new UiKitRendererClass(
 			this.#ConstellationKernel,
 			process,
