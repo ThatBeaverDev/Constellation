@@ -203,8 +203,6 @@ export default class ConstellationKernel implements Terminatable {
 			if (bootBackground) bootBackground.classList.add("fadeOut");
 
 			if (bootBackground) setTimeout(() => bootBackground.remove(), 5000);
-		} else if (this.ui instanceof TextInterface) {
-			this.ui.init();
 		}
 
 		// start kernel execution loop

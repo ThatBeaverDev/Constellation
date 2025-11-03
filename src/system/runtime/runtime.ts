@@ -15,6 +15,8 @@ import ApplicationVerifier from "../security/runtimeDefender.js";
 import { appName } from "./components/appName.js";
 import { AppsTimeStamp } from "./components/AppsTimeStamp.js";
 import ImportResolver from "./components/resolver.js";
+import { TextInterface } from "../tui/tui.js";
+import { GraphicalInterface } from "../gui/gui.js";
 
 const path = "/System/runtime.js";
 
@@ -405,7 +407,7 @@ export class ProgramRuntime {
 		// get the class executable
 		let Executable: typeof Process;
 		if (
-			this.#ConstellationKernel.ui !== undefined &&
+			this.#ConstellationKernel.ui instanceof GraphicalInterface &&
 			typeof gui == "function"
 		) {
 			// Graphical executable
@@ -418,7 +420,7 @@ export class ProgramRuntime {
 			// assign it
 			Executable = gui;
 		} else if (
-			this.#ConstellationKernel.ui !== undefined &&
+			this.#ConstellationKernel.ui instanceof TextInterface &&
 			typeof tui == "function"
 		) {
 			// Text based executable

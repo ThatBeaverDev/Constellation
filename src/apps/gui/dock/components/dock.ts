@@ -51,7 +51,7 @@ export default class Dock implements Terminatable {
 
 		if (getPerms !== true) return;
 
-		this.env.windows.lowerBound += this.dockHeight;
+		if (this.env.windows) this.env.windows.lowerBound += this.dockHeight;
 
 		await this.refresh();
 
@@ -59,6 +59,8 @@ export default class Dock implements Terminatable {
 	}
 
 	async refresh() {
+		if (!this.parent.env.windows) return;
+
 		this.wins = this.parent.env.windows.all();
 
 		this.pinsInfo = [];
@@ -323,7 +325,8 @@ export default class Dock implements Terminatable {
 									win.minimise();
 								}
 
-								this.env.windows.focusWindow(win.winID);
+								if (this.env.windows)
+									this.env.windows.focusWindow(win.winID);
 							};
 						}
 
@@ -341,7 +344,8 @@ export default class Dock implements Terminatable {
 					} else {
 						setTimeout(() => {
 							// wait so that the click on the dock doesn't interrupt
-							this.env.windows.focusWindow(win.winID);
+							if (this.env.windows)
+								this.env.windows.focusWindow(win.winID);
 						});
 						win.unminimise();
 					}
@@ -457,6 +461,6 @@ export default class Dock implements Terminatable {
 	}
 
 	terminate() {
-		this.env.windows.lowerBound -= this.dockHeight;
+		if (this.env.windows) this.env.windows.lowerBound -= this.dockHeight;
 	}
 }

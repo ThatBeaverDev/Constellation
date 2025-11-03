@@ -32,7 +32,7 @@ export default class menubar implements Terminatable {
 		this.renderer = parent.renderer;
 		this.env = parent.env;
 
-		this.env.windows.upperBound += this.barHeight;
+		if (this.env.windows) this.env.windows.upperBound += this.barHeight;
 	}
 
 	async refreshBattery() {
@@ -55,6 +55,8 @@ export default class menubar implements Terminatable {
 	}
 
 	render() {
+		if (!this.env.windows) return;
+
 		if (this.counter % 500 == 0) {
 			this.refreshBattery();
 		}
@@ -120,6 +122,6 @@ export default class menubar implements Terminatable {
 	}
 
 	terminate() {
-		this.env.windows.upperBound -= this.barHeight;
+		if (this.env.windows) this.env.windows.upperBound -= this.barHeight;
 	}
 }
