@@ -1,6 +1,6 @@
 import CrlInstance from "../components/crl.js";
 
-export default class CrlRunner extends Application {
+export default class CrlRunner extends GuiApplication {
 	#runtime?: CrlInstance;
 	async init(args: any[]) {
 		const targetFile =

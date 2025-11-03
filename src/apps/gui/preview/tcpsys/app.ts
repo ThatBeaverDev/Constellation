@@ -1,4 +1,4 @@
-export default class FilePreview extends Application {
+export default class FilePreview extends GuiApplication {
 	targetFile: string = "./resources/default.jpg";
 
 	async init(args: (string | undefined)[]) {

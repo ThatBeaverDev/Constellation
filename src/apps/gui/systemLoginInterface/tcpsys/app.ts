@@ -1,6 +1,6 @@
 import { UserAlias } from "../../../../system/security/definitions.js";
 
-export default class systemLoginInterface extends Application {
+export default class systemLoginInterface extends GuiApplication {
 	users: Record<UserAlias["name"], UserAlias> = {};
 	user: UserAlias["name"] = "guest";
 	errorText: string = "";

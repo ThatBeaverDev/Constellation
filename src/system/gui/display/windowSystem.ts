@@ -1,4 +1,4 @@
-import { Application } from "../../runtime/components/executables.js";
+import { GuiApplication } from "../../runtime/components/executables.js";
 import ConstellationKernel, { Terminatable } from "../../kernel.js";
 import cssVariables from "./css.js";
 import { showUserPrompt } from "../prompt.js";
@@ -315,7 +315,7 @@ export default class WindowSystem {
 		windowsTimestamp("Update Windows", start);
 	}
 
-	newWindow(title: string, ApplicationObject?: Application) {
+	newWindow(title: string, ApplicationObject?: GuiApplication) {
 		const start = performance.now();
 
 		const win = new GraphicalWindow(

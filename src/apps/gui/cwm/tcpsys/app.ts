@@ -1,13 +1,13 @@
 import ConstellationKernel from "../../../../system/kernel.js";
-import { Application } from "../../../../system/runtime/components/executables.js";
+import { GuiApplication } from "../../../../system/runtime/components/executables.js";
 import { ProcessInformation } from "../../../../system/runtime/runtime.js";
 import { ConstellationWindowManagerWallpaper } from "../components/wallpaper.js";
 
 export default class ConstellationWindowManager
 	extends Process
-	implements Application
+	implements GuiApplication
 {
-	renderer: Application["renderer"];
+	renderer: GuiApplication["renderer"];
 	wallpaper?: ConstellationWindowManagerWallpaper;
 
 	constructor(

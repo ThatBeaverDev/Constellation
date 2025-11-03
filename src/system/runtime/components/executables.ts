@@ -307,7 +307,7 @@ export class Module extends Framework {}
 /**
  * A Process but with builtin APIs for graphical output, like a pre-created window and uiKit instance.
  */
-export class Application extends Process {
+export class GuiApplication extends Process {
 	renderer: UiKitRenderer;
 	constructor(
 		ConstellationKernel: ConstellationKernel,
@@ -351,7 +351,7 @@ export class Application extends Process {
 /**
  * An application made for acting on a higher level of the layering. Not to be used in general applications.
  */
-export class Overlay extends Process implements Application {
+export class Overlay extends Process implements GuiApplication {
 	renderer: UiKitRenderer;
 	#window: OverlayWindow;
 	constructor(

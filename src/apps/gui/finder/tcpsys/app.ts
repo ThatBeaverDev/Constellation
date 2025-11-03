@@ -29,7 +29,7 @@ export interface listing {
 	};
 }
 
-export default class finder extends Application {
+export default class finder extends GuiApplication {
 	name: string = "Finder";
 	type: "picker" | "app" = "app";
 	pipes!: {
