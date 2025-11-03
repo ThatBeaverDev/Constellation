@@ -73,6 +73,24 @@ export default class ServiceManager {
 				this.env.log("Starting service in " + item.directory, item);
 				item.isStarted = true;
 
+				/* ---------- Graphical Check ---------- */
+				if (item.graphicalOnly && this.env.systemType == "TUI") {
+					// exit since we shouldn't run this
+
+					this.env.log(
+						"Service",
+						item.directory,
+						"will not run since this system is not graphical."
+					);
+
+					// don't try again.
+					item.waitingObject = {
+						promise: new Promise(() => {}),
+						hasExited: false
+					};
+					return;
+				}
+
 				// start the program
 				const waiting = await this.env.exec(item.directory);
 
