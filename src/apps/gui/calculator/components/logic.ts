@@ -1,4 +1,4 @@
-import calc from "../tcpsys/app.js";
+import calc from "../bin/app.js";
 
 type characterType = "operator" | "bracket" | "number" | "variable" | "";
 

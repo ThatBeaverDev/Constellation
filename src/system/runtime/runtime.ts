@@ -337,16 +337,16 @@ export class ProgramRuntime {
 
 		let executableDirectory: string | undefined;
 		let type: executionFiletype | undefined;
-		const tcpsys = await this.#ConstellationKernel.fs.readdir(
-			this.#ConstellationKernel.fs.resolve(appdir, "tcpsys")
+		const bin = await this.#ConstellationKernel.fs.readdir(
+			this.#ConstellationKernel.fs.resolve(appdir, "bin")
 		);
 
 		// get the script
 		for (const ext of allowedExtensions) {
-			if (tcpsys.includes("app." + ext)) {
+			if (bin.includes("app." + ext)) {
 				executableDirectory = this.#ConstellationKernel.fs.resolve(
 					appdir,
-					"tcpsys/app." + ext
+					"bin/app." + ext
 				);
 				type = ext;
 				break;
@@ -365,7 +365,7 @@ export class ProgramRuntime {
 			case "crl":
 				executableDirectory = this.#ConstellationKernel.fs.resolve(
 					String(crlDirectory),
-					"tcpsys/app.js"
+					"bin/app.js"
 				);
 
 				finalProgramArgs.splice(
@@ -373,7 +373,7 @@ export class ProgramRuntime {
 					0,
 					this.#ConstellationKernel.fs.resolve(
 						directory,
-						"tcpsys/app.crl"
+						"bin/app.crl"
 					)
 				);
 

@@ -1,5 +1,5 @@
 import { Terminatable } from "../../../../system/kernel.js";
-import dockAndDesktop from "../tcpsys/app.js";
+import dockAndDesktop from "../bin/app.js";
 
 export interface menubarConfig {}
 

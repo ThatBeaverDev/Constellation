@@ -5,6 +5,7 @@ import sidebar from "../resources/panels/sidebar.js";
 	body?: body;
 export default class systemSettings extends GuiApplication {
 
+
 	async init() {
 		// import sidebar
 		const sidebar = await this.env.include(

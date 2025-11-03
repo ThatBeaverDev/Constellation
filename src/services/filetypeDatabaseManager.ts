@@ -1,4 +1,4 @@
-import { ServiceManifest } from "../apps/background/CoreExecutable/components/serviceManager.js";
+import { ServiceManifest } from "../apps/services/CoreExecutable/components/serviceManager.js";
 
 const manifest: ServiceManifest = {
 	directory: "/System/CoreExecutables/filetypeDatabaseManager.srvc",

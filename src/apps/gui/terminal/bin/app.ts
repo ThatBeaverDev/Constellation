@@ -31,7 +31,7 @@ const clamp = (n: number, min: number, max: number) => {
 	return n;
 };
 
-export default class terminalUI extends Application {
+export default class terminalUI extends GuiApplication {
 	cmdreg: any;
 	logs: string[] = [];
 	terminalPath: string = "/";
