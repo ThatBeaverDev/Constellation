@@ -1,4 +1,4 @@
-import { filetypeDatabase } from "../../apps/background/filetypeDatabaseManager/tcpsys/app.js";
+import { filetypeDatabase } from "../../apps/services/filetypeDatabaseManager/bin/app.js";
 import { ApplicationAuthorisationAPI } from "../security/env.js";
 
 async function typeOfPath(env: ApplicationAuthorisationAPI, directory: string) {

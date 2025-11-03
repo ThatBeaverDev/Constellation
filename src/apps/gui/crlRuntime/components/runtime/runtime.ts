@@ -1,4 +1,4 @@
-import CrlRunner from "../../tcpsys/app.js";
+import CrlRunner from "../../bin/app.js";
 import CrlInstance from "../crl.js";
 import {
 	RuntimeBlock,

@@ -184,6 +184,7 @@ export default class systemLoginInterface extends GuiApplication {
 			const dateLeft = (200 - dateWidth) / 2;
 
 			this.renderer.text(dateLeft, 9 + timeHeight, date);
+
 		};
 
 		// render left frosted box

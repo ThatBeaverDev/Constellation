@@ -1,4 +1,4 @@
-import CrlRunner from "../tcpsys/app.js";
+import CrlRunner from "../bin/app.js";
 import AstGenerator from "./ast/ast.js";
 import { AstNode } from "./definitions.js";
 import { CrlRuntime } from "./runtime/runtime.js";

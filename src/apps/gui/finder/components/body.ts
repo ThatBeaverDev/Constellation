@@ -2,7 +2,7 @@ import {
 	clickReference,
 	onClickOptions
 } from "../../../../system/gui/uiKit/definitions.js";
-import finder, { listing } from "../tcpsys/app.js";
+import finder, { listing } from "../bin/app.js";
 import finderInteractions from "./interactions.js";
 
 export default class finderBody {

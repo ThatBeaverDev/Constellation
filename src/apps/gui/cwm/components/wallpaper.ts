@@ -1,4 +1,4 @@
-import ConstellationWindowManager from "../tcpsys/app.js";
+import ConstellationWindowManager from "../bin/app.js";
 
 export class ConstellationWindowManagerWallpaper {
 	env: ConstellationWindowManager["env"];

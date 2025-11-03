@@ -1,4 +1,4 @@
-import finder, { listing } from "../tcpsys/app.js";
+import finder, { listing } from "../bin/app.js";
 import { openFile } from "gui";
 
 export default class finderInteractions {
