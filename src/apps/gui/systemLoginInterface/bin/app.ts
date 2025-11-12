@@ -77,11 +77,11 @@ export default class systemLoginInterface extends GuiApplication {
 		}
 		const dayOfMonth = String(date.getDate());
 		let afterDate = "th";
-		if (dayOfMonth.endsWith("1")) {
+		if (dayOfMonth.endsWith("1") && dayOfMonth !== "11") {
 			afterDate = "st";
-		} else if (dayOfMonth.endsWith("2")) {
+		} else if (dayOfMonth.endsWith("2") && dayOfMonth !== "12") {
 			afterDate = "nd";
-		} else if (dayOfMonth.endsWith("3")) {
+		} else if (dayOfMonth.endsWith("3") && dayOfMonth !== "13") {
 			afterDate = "rd";
 		}
 
