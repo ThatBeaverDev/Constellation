@@ -1,12 +1,96 @@
 import ConstellationKernel from "../kernel.js";
+import { ProcessInformation } from "../runtime/runtime.js";
+import { getFlagValue } from "./flags.js";
 
-// TODO: panic
+interface PanicDiagnostics {
+	processes: ProcessInformation[];
+}
+
+const asciiName = `
+	 _____                     _          _  _         _    _
+	/  __ \\                   | |        | || |       | |  (_)
+	| /  \\/  ___   _ __   ___ | |_   ___ | || |  __ _ | |_  _   ___   _ __
+	| |     / _ \\ | '_ \\ / __|| __| / _ \\| || | / _\` || __|| | / _ \\ | '_ \\
+	| \\__/\\| (_) || | | |\\__ \\| |_ |  __/| || || (_| || |_ | || (_) || | | |
+	 \\____/ \\___/ |_| |_||___/ \\__| \\___||_||_| \\__,_| \\__||_| \\___/ |_| |_|
+	`;
+
+const snappyMessages = [
+	"oops",
+	"my bad",
+	"forgot doing that caused an error",
+	":(",
+	"ouch",
+	"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+	"noooo",
+	"uhm.",
+	"not my fault!",
+	"!%@%^&@^%^#**&!!$&#$**$$$&^^!$*&#$@#@^&$!#%&%#*&###^%%**!@^$!!%&!***$@^^!$!&^*!@%&%#%%%&&##@@%^!*!$%@!%#^&&$$%&!$^!&&!$*^$$%&*$*",
+	"uh oh",
+	"yikes",
+	"pain",
+	"this was avoidable",
+	"how did we get here?",
+	"welp.",
+	"it broke itself",
+	"not again...",
+	"well, that's unfortunate",
+	"error vibes",
+	"whoopsie",
+	"this is fine",
+	"I didn’t see that coming",
+	"nope",
+	"just walk it off",
+	"guess we’re done here",
+	"404: brain not found",
+	"blame the compiler",
+	"turn it off and on again?",
+	"voided warranty",
+	"broke faster than I loaded",
+	"nothing to see here",
+	"let's pretend this didn’t happen",
+	"this will be reported"
+];
+
+const noPanic = getFlagValue("noPanic");
+
 export default async function panic(
 	ConstellationKernel: ConstellationKernel,
 	error: any,
-	source?: string
+	source: string
 ) {
-	ConstellationKernel.ui.panic("panic :>");
+	if (noPanic) return;
+
+	const infostructure: PanicDiagnostics = {
+		processes: ConstellationKernel.runtime.processes.filter(
+			(item) => item.kernel == ConstellationKernel
+		)
+	};
+
+	infostructure.processes.forEach((proc) => proc.program.exit());
+
+	let txt = "";
+	function text(line: string) {
+		txt += line + "\n";
+	}
+
+	const ascii =
+		"\n" + asciiName + "[" + ConstellationKernel.config.keyword + "]\n\n";
+	const randomSnappyMessageId = Math.floor(
+		Math.random() * snappyMessages.length
+	);
+	const randomSnappyMessage = snappyMessages[randomSnappyMessageId];
+
+	text(ascii);
+	text(
+		`Constellation has Crashed - an Error within Constellation itself was hit. ${randomSnappyMessage}`
+	);
+	text(String(error) + "\n");
+	text("Time:\n  " + new Date().toISOString());
+	text("Origin:\n  " + String(source ?? "unknown"));
+	text("Error Trace:\n  " + (error?.stack ?? String(error)));
+
+	ConstellationKernel.ui.panic(txt);
 }
 
 //import { processes } from "../runtime/runtime.js";
