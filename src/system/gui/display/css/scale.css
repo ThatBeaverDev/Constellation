@@ -1,0 +1,30 @@
+@keyframes flyAway {
+	from {
+	}
+
+	to {
+		top: 100%;
+		left: 50%;
+
+		width: 0px;
+		height: 0px;
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.windowContainer.gone {
+		animation-name: flyAway;
+		animation-duration: 0.15s;
+		animation-timing-function: ease-in;
+		animation-fill-mode: forwards;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.windowContainer.gone {
+		top: -10%;
+		height: 0px;
+
+		transform: scale(0.1);
+	}
+}

@@ -1,0 +1,12 @@
+import TerminalAlias from "../../../../system/lib/terminalAlias.js";
+
+export const requiredAllocations: { application: string; filetype: string }[] =
+	[];
+
+export default function allocateFileTypeToApplication(
+	parent: TerminalAlias,
+	filetype: string,
+	application: string
+) {
+	requiredAllocations.push({ application, filetype });
+}

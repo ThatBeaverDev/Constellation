@@ -1,27 +1,64 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="icon" type="image/svg+xml" href="/logos/Web.svg" />
 
-<head>
-  <title>Constellation</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Constellation</title>
 
-  <link id="pg_favicon" rel="icon" href="./System/icons/.favicon.svg" type="image/svg" sizes="32x32">
+		<!-- https://realfavicongenerator.net/ useful site-->
+		<link
+			rel="icon"
+			type="image/png"
+			href="/favicons/favicon-96x96.png"
+			sizes="96x96"
+		/>
+		<link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
+		<link rel="shortcut icon" href="/favicons/favicon.ico" />
+		<link
+			rel="apple-touch-icon"
+			sizes="180x180"
+			href="/favicons/apple-touch-icon.png"
+		/>
+		<meta name="apple-mobile-web-app-title" content="Constellation" />
+		<link rel="manifest" href="/manifest.webmanifest" />
 
-  <link href="./styles.css" rel="stylesheet">
-</head>
-<div id="mainHeader"></div>
+		<!-- boot.css -->
+		<link rel="stylesheet" href="/styles/boot.css" />
+	</head>
 
-<body>
-  <div id="display">
-    <div id="logoBox" style="display: flex; justify-content: space-around"></div>
-    <div id="logsBox" style="display: flex; justify-content: space-around"></div>
-    <div style="display: flex; justify-content: space-around">
-      <p id="preInput">system is loading. if this text persists with no logs for an extended period, the system may have
-        crashed.</p>
-      <!--<input type="text" id="input" onkeypress="search(event)">-->
-    </div>
-  </div>
-</body>
-<script src="./bios.js"></script>
-<!--bios-->
+	<body>
+		<div class="hidden" style="display: none">
+			<canvas id="hiddenCanvas"></canvas>
+		</div>
 
+		<div class="bootCover">
+			<img class="bootImage" src="/logos/Constellation.svg" />
+			<span class="loader"></span>
+			<p class="bootText">Initialising...</p>
+		</div>
+
+		<!-- Vercel general -->
+		<script>
+			window.si =
+				window.si ||
+				function () {
+					(window.siq = window.siq || []).push(arguments);
+				};
+			window.va =
+				window.va ||
+				function () {
+					(window.vaq = window.vaq || []).push(arguments);
+				};
+		</script>
+
+		<!-- Vercel speed analytics -->
+		<script defer src="/_vercel/speed-insights/script.js"></script>
+
+		<!-- Vercel Analytics -->
+		<script defer src="/_vercel/insights/script.js"></script>
+
+		<script defer type="module" src="src/buildCheck.js"></script>
+	</body>
 </html>

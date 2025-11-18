@@ -1,0 +1,182 @@
+import finder, { listing } from "../bin/app.js";
+import { openFile } from "gui";
+
+export default class finderInteractions {
+	renderer: finder["renderer"];
+	env: finder["env"];
+	parent: finder;
+
+	constructor(parent: finder) {
+		this.parent = parent;
+		this.env = parent.env;
+		this.renderer = parent.renderer;
+	}
+
+	async reloadInterface() {
+		await this.parent.cd(this.parent.path);
+	}
+
+	showBodyContextMenu() {
+		const parentPath = this.parent.path;
+		return (clickX: number, clickY: number) => {
+			const context: Record<string, Function> = {};
+
+			context["New Folder"] = async () => {
+				let name = "New Folder";
+				let path = this.env.fs.resolve(parentPath, name);
+
+				await this.env.fs.createDirectory(path);
+
+				this.reloadInterface();
+			};
+
+			this.renderer.setContextMenu(
+				clickX,
+				clickY,
+				"Folder Actions",
+				context
+			);
+		};
+	}
+
+	openFile(directory: string) {
+		if (this.parent.type == "picker") {
+			// select and submit the file
+			this.parent.pickerSubmit();
+		} else {
+			// just open it with the gui utilities
+			openFile(this.env, directory);
+		}
+	}
+	async openDirectory(directory: string) {
+		await this.parent.cd(directory);
+	}
+
+	displayItemLeftClick(obj: listing, index: string) {
+		return async () => {
+			// left click
+			if (this.parent.selector == Number(index)) {
+				switch (obj.type) {
+					case "directory":
+						if (
+							obj.path.endsWith(".appl") ||
+							obj.path.endsWith(".srvc")
+						) {
+							this.env.exec(obj.path);
+							return;
+						} else {
+							await this.openDirectory(obj.path);
+						}
+						break;
+					case "file":
+						this.openFile(obj.path);
+
+						break;
+					default:
+						throw new Error(
+							"Unknown filetype cannot be handled for action: " +
+								obj.type
+						);
+				}
+			} else {
+				this.parent.selector = Number(index);
+			}
+		};
+	}
+
+	displayItemRightClick(obj: listing) {
+		return async (x: number, y: number) => {
+			// right click
+
+			const context: Record<string, Function> = {};
+
+			switch (obj.type) {
+				case "file":
+					context["Open File"] = () => {
+						this.openFile(obj.path);
+					};
+					break;
+				case "directory":
+					if (
+						obj.path.endsWith(".appl") ||
+						obj.path.endsWith(".srvc")
+					) {
+						context["Show Contents"] = () => {
+							this.openDirectory(obj.path);
+						};
+					} else {
+						context["Open Directory"] = () => {
+							this.openDirectory(obj.path);
+						};
+					}
+					break;
+			}
+
+			context["Rename"] = async () => {
+				const newName = await this.renderer.askUserQuestion(
+					"What should this file be called?",
+					"This file's current name is " + obj.name,
+					obj.icon
+				);
+
+				const oldPath = obj.path;
+				const newPath = obj.path.textBeforeLast("/") + "/" + newName;
+
+				try {
+					await this.env.fs.move(oldPath, newPath);
+				} catch (e: any) {
+					if (e.name == "PermissionsError") {
+						this.renderer.showUserPrompt(
+							"Access Denied",
+							"You cannot rename this file because you do not have permission to modify files in this directory.",
+							"OK",
+							undefined,
+							obj.icon
+						);
+					}
+				}
+			};
+			context["Move to Bin"] = async () => {
+				const userInfo = this.env.users.userInfo(this.env.user);
+
+				if (userInfo == undefined)
+					throw new Error(
+						"User that finder is running as supposedly doesn't exist."
+					);
+
+				const filename = btoa(
+					JSON.stringify({
+						originalPath: obj.path,
+						deletionTime: Date(),
+						deletionTimestamp: Date.now()
+					})
+				);
+
+				const binpath = this.env.fs.resolve(
+					userInfo.directory,
+					"./recentlyDeleted"
+				);
+				const fileTargetPath = this.env.fs.resolve(binpath, filename);
+
+				await this.env.fs.move(obj.path, fileTargetPath);
+
+				this.reloadInterface();
+			};
+			context["Copy"] = async () => {
+				const type = obj.type.toLowerCase();
+
+				const newPath = await this.renderer.askUserQuestion(
+					`Where do you want to copy this ${type} to?`,
+					`This ${type} is currently located at ${obj.path}`,
+					obj.icon
+				);
+
+				await this.env.fs.copy(obj.path, newPath);
+
+				this.reloadInterface();
+			};
+
+			this.renderer.setContextMenu(x, y, obj.name, context);
+		};
+	}
+}

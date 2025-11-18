@@ -2,9 +2,17 @@
 	"folders": [
 		{
 			"path": "."
-		},
-		{
-			"path": "../aurora"
 		}
-	]
+	],
+	"settings": {
+		"files.associations": {
+			"*.idx": "json"
+		},
+		"[javascript]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode"
+		}
+	},
+	"extensions": {
+		"recommendations": ["esbenp.prettier-vscode"]
+	}
 }

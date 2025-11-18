@@ -1,0 +1,154 @@
+#!/usr/bin/env node
+
+import fs from "node:fs/promises";
+import path from "node:path";
+
+// mime
+import { Mime } from "mime/lite";
+import standardTypes from "mime/types/standard.js";
+import otherTypes from "mime/types/other.js";
+const mime = new Mime(standardTypes, otherTypes);
+
+// custom types
+mime.define(
+	{
+		"text/x-typescript": ["ts", "tsx"]
+	},
+	true
+);
+mime.define(
+	{
+		"text/x-constellation-runner-language": ["crl"]
+	},
+	true
+);
+
+const params = {};
+const args = process.argv
+	.splice(2, Infinity)
+	.map((item) => {
+		if (item[0] == "-") {
+			// it's a parameter
+			const name = item.substring(1, Infinity).split("=")[0];
+			const value = item.substring(item.indexOf("=") + 1, Infinity);
+
+			params[name] = value;
+
+			return undefined;
+		}
+
+		return item;
+	})
+	.filter((item) => item !== undefined);
+
+if (args.length == 0) {
+	console.log("\x1b[31mYou need to provide a directory to package!\x1b[0m");
+	process.exit();
+}
+
+const input = path.resolve(process.cwd(), args[0]);
+const output = path.resolve(process.cwd(), args[1] || "./app.idx");
+
+async function checkOutput() {
+	let content;
+	try {
+		content = await fs.readFile(output, { encoding: "utf8" });
+	} catch (e) {}
+
+	if (content !== undefined) {
+		console.error(
+			`\x1b[31mOutput directory isn't empty! (Packaging ${output})\x1b[0m`
+		);
+		process.exit();
+	}
+}
+
+if (Boolean(params.override) !== true) {
+	// insure we don't override a pre-existing file
+	await checkOutput();
+}
+
+// package info
+const pkg = {
+	files: {},
+	directories: []
+};
+
+// walk the folder
+async function walk(directory) {
+	const ls = await fs.readdir(directory);
+
+	for (const item of ls) {
+		const dir = path.resolve(directory, item);
+
+		const stat = await fs.stat(dir);
+		const isDir = stat.isDirectory();
+
+		const relative = path.relative(input, dir);
+
+		if (isDir) {
+			// folder
+			pkg.directories.push(relative);
+			await walk(dir);
+		} else {
+			// file
+
+			// don't package .map.js files, they are unnecessary
+			if (dir.endsWith(".js.map")) {
+				continue;
+			}
+
+			try {
+				const type = mime.getType(dir);
+
+				if (type == null) {
+					throw new Error(
+						"Mime type for file at '" + dir + "' has returned null."
+					);
+				}
+
+				const isText =
+					type.startsWith("text/") ||
+					type.includes("xml") ||
+					type.includes("javascript") ||
+					type.includes("typescript") ||
+					type.includes("json");
+
+				if (isText) {
+					// text
+					const content = await fs.readFile(dir, {
+						encoding: "utf8"
+					});
+
+					pkg.files[relative] = content;
+				} else {
+					// encode to dataURI
+					const content = await fs.readFile(dir);
+					const b64 = content.toString("base64");
+					const uri = `data:${type};base64,${b64}`;
+
+					pkg.files[relative] = {
+						type: "binary",
+						data: uri
+					};
+				}
+			} catch (e) {
+				console.error(
+					"Error",
+					e,
+					"occurred when packaging " +
+						dir +
+						". it has not been included in the index."
+				);
+			}
+		}
+	}
+}
+
+await walk(input);
+
+// stringify it
+const result = JSON.stringify(pkg, null, 8);
+
+await fs.writeFile(output, result);
+console.log("App packaged to '\x1b[32m" + output + "\x1b[0m' successfully!");

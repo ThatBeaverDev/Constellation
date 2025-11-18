@@ -1,0 +1,76 @@
+{
+	"compilerOptions": {
+		"allowJs": true,
+		"checkJs": false,
+		"esModuleInterop": true,
+		// modules
+		"target": "esnext",
+		"module": "esnext",
+		"moduleResolution": "node",
+		"rewriteRelativeImportExtensions": true,
+		// input and output
+		"rootDir": "./src",
+		"outDir": "./build",
+		"strict": true,
+		// libraries
+		"lib": [
+			"esnext",
+			"ES2022",
+			"DOM",
+			"DOM.Iterable",
+			"ES5",
+			"ES6"
+		],
+		"paths": {
+			"pathinf": [
+				"./src/system/CoreLibraries/pathinf.ts"
+			],
+			"blob": [
+				"./src/system/CoreLibraries/blob.ts"
+			],
+			"mime": [
+				"./src/system/CoreLibraries/mime.ts"
+			],
+			"gui": [
+				"./src/system/CoreLibraries/gui.ts"
+			],
+			"fzf": [
+				"./src/system/CoreLibraries/fzf.ts"
+			],
+		},
+		"noUnusedLocals": true,
+		// types
+		"sourceMap": true,
+		"declaration": true,
+		"declarationDir": "types",
+		"emitDeclarationOnly": false,
+		"types": [],
+		// incremental
+		"incremental": true,
+		"tsBuildInfoFile": "build/.tsbuildinfo",
+		"composite": true,
+		"noEmit": false
+	},
+	"include": [
+		"./src",
+		"./src/global.d.ts"
+	],
+	"exclude": [
+		"./build",
+		"./src/apps/app-template",
+		"./src/apps/types",
+		"./node_modules"
+	],
+	"watchOptions": {
+		"watchFile": "useFsEvents",
+		"watchDirectory": "useFsEvents",
+		"fallbackPolling": "dynamicPriority",
+		"synchronousWatchDirectory": true,
+		"excludeDirectories": [
+			"**/node_modules",
+			"./build",
+			"./src/apps/app-template/constellation.d.ts",
+			"./src/apps/types/constellation.d.ts"
+		]
+	}
+}

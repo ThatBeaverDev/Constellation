@@ -1,0 +1,137 @@
+import TerminalAlias from "./terminalAlias.js";
+import { ApplicationAuthorisationAPI } from "../security/env.js";
+
+type shellResult = {
+	result: any;
+	ref: TerminalAlias;
+};
+
+export default class Shell {
+	readonly #directory: string;
+	readonly #env: ApplicationAuthorisationAPI;
+	#index: string[] = [];
+
+	#terminalReference: TerminalAlias;
+
+	constructor(directory: string, env: ApplicationAuthorisationAPI) {
+		this.#directory = directory;
+		this.#directory;
+		this.#env = env;
+
+		this.#terminalReference = {
+			path: "/",
+			env: this.#env,
+			clearLogs: () => {},
+			origin: "/"
+		};
+
+		this.index();
+	}
+
+	index = async (
+		directories: string[] = ["/System/CoreExecutables", "/Applications"]
+	) => {
+		const allApps: string[] = [];
+
+		for (const dir of directories) {
+			let list: string[];
+			try {
+				list = await this.#env.fs.listDirectory(dir);
+			} catch {
+				continue;
+			}
+
+			if (!(list instanceof Array)) continue;
+
+			for (const item of list) {
+				const rel = await this.#env.fs.resolve(dir, item);
+
+				if (rel.endsWith(".appl") || rel.endsWith(".srvc")) {
+					allApps.push(rel);
+				}
+			}
+		}
+
+		const commands: string[] = [];
+
+		for (const app of allApps) {
+			const lib = this.#env.fs.resolve(app, "lib");
+
+			const libListing = await this.#env.fs.listDirectory(lib);
+			if (libListing == undefined) continue;
+
+			for (const sub of libListing) {
+				commands.push(this.#env.fs.resolve(lib, sub));
+			}
+		}
+
+		this.#index = commands;
+	};
+
+	setRef(
+		ref: TerminalAlias = {
+			path: "/",
+			env: this.#env,
+			clearLogs: () => {},
+			origin: "/"
+		}
+	) {
+		this.#terminalReference = ref;
+	}
+
+	getRef() {
+		return { ...this.#terminalReference };
+	}
+
+	async #getUtility(
+		name: string
+	): Promise<(parent: TerminalAlias, ...args: any[]) => any> {
+		if (name == "help") {
+			return () => {
+				const commandNames = this.#index.map((item) =>
+					item.textAfterAll("/").textBeforeLast(".")
+				);
+				commandNames.sort();
+
+				return `List of commands on this system are as follows:\n${commandNames.join("\n")}`;
+			};
+		}
+
+		for (const item of this.#index) {
+			const filename = item.textAfterAll("/").textBeforeLast(".");
+
+			if (filename == name) {
+				// this is the one
+				const include = await this.#env.include(item);
+
+				if (include == undefined)
+					throw new Error("File at include does not exist");
+
+				const fnc = include.default;
+
+				if (typeof fnc !== "function")
+					throw new Error(
+						"The default export of the library file is not a function and is therefore invalid."
+					);
+
+				return fnc;
+			}
+		}
+
+		throw new Error("No such utility found.");
+	}
+
+	async exec(name: string, ...args: any[]): Promise<shellResult | undefined> {
+		if (this.#terminalReference == undefined)
+			throw new Error("Terminal reference must be defined!");
+
+		const util = await this.#getUtility(name);
+
+		const result = await util(this.#terminalReference, ...args);
+
+		return {
+			ref: this.#terminalReference,
+			result: result
+		};
+	}
+}

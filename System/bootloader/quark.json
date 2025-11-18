@@ -1,7 +1,0 @@
-{
-    "cmd": "castoreaKernel.js",
-    "params": {
-        "root": "/",
-        "pos": "/System/kernel"
-    }
-}

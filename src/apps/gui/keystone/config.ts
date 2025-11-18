@@ -1,0 +1,12 @@
+const manifest = {
+	name: "Keystone Search",
+	description: "Application Search UI",
+	category: "Productivity",
+	author: "ThatBeaverDev",
+	version: 1,
+	//icon: "search",
+	icon: "./resources/icon.svg",
+	userspace: false
+};
+
+export default manifest;

@@ -1,0 +1,38 @@
+{
+	"name": "constellation",
+	"license": "MIT",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"bin": "./build/entrypoint.js",
+	"scripts": {
+		"dev": "python3 -m http.server 5173",
+		"dev-https": "npx http-server . -S -C certs/cert.pem -K certs/key.pem -p 5174",
+		"build": "./scripts/runtime-info.sh && ./scripts/build.sh",
+		"build-nofix": "./scripts/runtime-info.sh && ./scripts/build.sh --no-fix",
+		"newenv": "npm install && git submodule update && npm run build && echo \"Open http://localhost:5173 to use Constellation!\" && npm run dev",
+		"reclone-test": "./scripts/reclone.sh",
+		"test": "npx tsc && node build/tests/all.test.js",
+		"showUnused": "npx ts-prune -p tsconfig.json --ignore src/apps | grep -v 'used in module'"
+	},
+	"devDependencies": {
+		"@types/jsdom": "^21.1.7",
+		"@types/node": "^24.3.1",
+		"canvas": "^3.2.0",
+		"jsdom": "^27.0.0",
+		"mime": "4.0.7",
+		"prettier": "3.5.3",
+		"remove-empty-directories": "^0.0.1",
+		"rollup": "4.45.1",
+		"rollup-plugin-dts": "6.2.1",
+		"ts-prune": "^0.10.3",
+		"typescript": "^5.9.2"
+	},
+	"os": [
+		"darwin",
+		"linux"
+	],
+	"engines": {
+		"node": "22.x"
+	}
+}

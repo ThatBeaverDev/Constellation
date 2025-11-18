@@ -1,0 +1,52 @@
+.overlay {
+	--line-height: 15px;
+
+	position: absolute;
+
+	inset: 0;
+	overflow: hidden;
+
+	display: flex;
+	flex-direction: column;
+}
+
+.logline {
+	width: 100%;
+	vertical-align: middle;
+	text-wrap: wrap;
+	word-wrap: break-word;
+}
+
+* {
+	color: white;
+	margin: 0;
+	padding: 0;
+
+	font-family: monospace;
+	font-size: 16px;
+}
+
+.prompt {
+	width: 100%;
+	height: var(--line-height);
+
+	display: flex;
+	flex-direction: row;
+	vertical-align: middle;
+
+	margin: 0;
+}
+
+.prompt>p {
+	height: var(--line-height);
+	line-height: var(--line-height);
+	vertical-align: middle;
+}
+
+.prompt>input {
+	height: var(--line-height);
+
+	border: none;
+	outline: none;
+	background-color: transparent;
+}

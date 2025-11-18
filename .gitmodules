@@ -1,0 +1,11 @@
+[submodule "icons"]
+	path = assets/icons
+	url = https://github.com/ThatBeaverDev/ConstellationIcons
+
+[submodule "app-template"]
+	path = src/apps/app-template
+	url = https://github.com/constellation-os/constellation-app-template
+
+[submodule "types"]
+	path = src/apps/types
+	url = https://github.com/constellation-os/constellation-types

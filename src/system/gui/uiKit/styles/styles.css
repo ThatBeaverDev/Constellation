@@ -1,0 +1,164 @@
+/* uiKit styling */
+
+:host {
+	--uikitClickableExpandDuration: 0.15s;
+}
+
+* {
+	font-size: 15px;
+}
+
+body {
+	-webkit-touch-callout: none !important;
+}
+
+.clickable {
+	--origin: center;
+
+	transform-origin: var(--origin);
+	transition: transform var(--uikitClickableExpandDuration) ease-in-out;
+}
+
+.clickable:hover {
+	--hover-glow: 110%;
+
+	filter: brightness(var(--hover-glow));
+}
+
+.clickable:active {
+	--click-glow: 120%;
+
+	filter: brightness(var(--click-grow));
+}
+
+.uiKit {
+	pointer-events: auto;
+}
+
+.uikitIcon {
+	position: absolute;
+	user-select: none;
+	-webkit-user-drag: none;
+	-webkit-user-select: none;
+}
+
+.uikitIcon.clickable {
+	user-select: all !important;
+	-webkit-user-drag: all !important;
+	-webkit-user-select: all !important;
+}
+
+.uikitText,
+.uikitButton {
+	padding: 0px;
+	margin: 0px;
+
+	position: absolute;
+}
+
+.uikitButton:hover {
+	background-color: var(--bg-light);
+}
+
+.uikitVerticalLine {
+	border-left: var(--border) 3px solid;
+	width: 0px;
+
+	position: absolute;
+}
+
+.uikitHorizontalLine {
+	border-top: var(--border) 3px solid;
+	height: 0px;
+
+	position: absolute;
+}
+
+/* brick elements */
+.uikitButton,
+.uikitTextbox,
+.uikitTextarea {
+	padding: 1px;
+	padding-left: 3px;
+	padding-right: 3px;
+
+	border: 0;
+	border-radius: 3px;
+	outline: none;
+
+	position: absolute;
+
+	color: var(--text);
+}
+
+.uikitButton:not(.noBackground),
+.uikitTextbox,
+.uikitTextarea {
+	background-color: var(--bg);
+}
+
+.uikitButton.noBackground {
+	background-color: transparent;
+}
+
+.uikitButton.noBackground:hover {
+	background-color: var(--bg);
+}
+
+.uikitTextbox {
+	width: 150px;
+	height: 25px;
+}
+
+.uikitTextbox:active {
+	border: none;
+	outline: none;
+}
+
+.uikitTextboxInvisible {
+	background-color: transparent;
+}
+
+.uikitProgressBar {
+	background-color: var(--bg);
+
+	overflow: hidden;
+
+	border-radius: var(--window-border-radius);
+}
+
+.uikitProgressBarInner {
+	background-color: var(--bg-light);
+
+	position: relative;
+	left: 0px;
+	top: 0px;
+
+	height: 100%;
+}
+
+.uikitBox {
+	position: absolute;
+	padding: 0;
+	outline: 0;
+	border: 0;
+}
+
+.uikitBox.noBorderRadius {
+	border-radius: 0px !important;
+}
+
+.uikitContextContainer {
+	position: absolute;
+	padding: 10px;
+	outline: 0;
+	border: var(--border) solid 1px;
+	border-radius: var(--window-border-radius);
+	z-index: 1000000;
+
+	background-color: var(--bg-light);
+}
+
+.uikitContextContainer > .uiKitButton {
+	position: absolute;
+}

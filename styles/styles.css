@@ -1,0 +1,162 @@
+:host {
+	display: block;
+	box-sizing: border-box;
+	pointer-events: auto;
+
+	--window-header-height: 40px;
+	--window-buttons-padding: 3.75px;
+	--window-border-radius: 5px;
+
+	--window-transition-duration: 0.15s;
+}
+
+.overlay {
+	position: absolute;
+
+	inset: 0;
+	pointer-events: none;
+	overflow: hidden;
+}
+
+.overlay > * {
+	pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	* {
+		animation-name: none !important;
+		animation-duration: 0s !important;
+
+		transition: none !important;
+		transition-duration: 0s !important;
+	}
+}
+
+@media (prefers-color-scheme: light) {
+	:root {
+		--bg-dark: oklch(0.88 0.025 264);
+		--bg: oklch(0.92 0.025 264);
+		--bg-light: oklch(0.96 0.025 264);
+		--bg-lighter: oklch(1 0.025 264);
+
+		--bg-dark-glass: oklch(0.88 0.025 264 / 0.5);
+		--bg-glass: oklch(0.92 0.025 264 / 0.5);
+		--bg-light-glass: oklch(0.96 0.025 264 / 0.5);
+		--bg-lighter-glass: oklch(1 0.025 264 / 0.5);
+
+		--text: oklch(0.15 0.05 264);
+		--text-muted: oklch(0.4 0.05 264);
+
+		--highlight: oklch(1 0.05 264);
+		--border: oklch(0.6 0.05 264);
+		--border-muted: oklch(0.7 0.05 264);
+
+		--primary: oklch(0.4 0.1 264);
+		--secondary: oklch(0.4 0.1 84);
+
+		--danger: oklch(0.5 0.05 30);
+		--warning: oklch(0.5 0.05 100);
+		--success: oklch(0.5 0.05 160);
+		--info: oklch(0.5 0.05 260);
+
+		/* Accent colour */
+		--accent: #9a55bf;
+	}
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg-dark: oklch(0.1 0.025 264);
+		--bg: oklch(0.2 0.025 264);
+		--bg-light: oklch(0.3 0.025 264);
+		--bg-lighter: oklch(0.4 0.025 264);
+
+		--bg-dark-glass: oklch(0.1 0.025 264 / 0.5);
+		--bg-glass: oklch(0.15 0.025 264 / 0.5);
+		--bg-light-glass: oklch(0.2 0.025 264 / 0.5);
+		--bg-lighter-glass: oklch(0.25 0.025 264 / 0.5);
+
+		--text: oklch(0.96 0.05 264);
+		--text-muted: oklch(0.76 0.05 264);
+
+		--highlight: oklch(0.5 0.05 264);
+		--border: oklch(0.4 0.05 264);
+		--border-muted: oklch(0.3 0.05 264);
+
+		--primary: oklch(0.76 0.1 264);
+		--secondary: oklch(0.76 0.1 84);
+
+		--danger: oklch(0.7 0.05 30);
+		--warning: oklch(0.7 0.05 100);
+		--success: oklch(0.7 0.05 160);
+		--info: oklch(0.7 0.05 260);
+
+		/* Accent colour */
+		--accent: #9a55bf;
+	}
+
+	.bootImage {
+		filter: invert(100%) brightness(10000%) !important;
+	}
+}
+
+:host {
+	color: var(--text);
+	background-color: rgb(22, 18, 34);
+	background-color: var(--bg);
+
+	overflow: hidden;
+}
+
+/* Disable text selection everywhere */
+* {
+	user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	touch-action: manipulation;
+	/* block double tab zoom */
+	-webkit-tap-highlight-color: transparent;
+	/* remove highlight for selection */
+}
+
+p,
+h1,
+h2,
+h3 {
+	user-select: auto;
+}
+
+body {
+	width: 100%;
+	height: 100%;
+
+	position: absolute;
+	left: 0px;
+	top: 0px;
+
+	padding: 0px;
+	margin: 0px;
+	overflow: hidden;
+	position: fixed;
+}
+
+* {
+	font-family: monospace;
+	font-optical-sizing: auto;
+	white-space: pre;
+	line-height: 1.2;
+}
+
+.wallpaper {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	z-index: -250000;
+
+	background-image: var(--wallpaper-url);
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: var(--wallpaper-position);
+}
