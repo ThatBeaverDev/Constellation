@@ -72,6 +72,11 @@
 	border-radius: 0px !important;
 }
 
+.windowContainer * {
+	/* Fixes fractional scaling issues */
+	transform: translateX(1) !important;
+}
+
 .windowBody {
 	position: relative;
 	top: 0px;
@@ -83,6 +88,7 @@
 
 	overflow-x: clip;
 	overflow-y: scroll;
+	padding: 1px;
 
 	scrollbar-width: none;
 }
