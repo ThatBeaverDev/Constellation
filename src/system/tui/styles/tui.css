@@ -12,7 +12,9 @@
 
 .logline {
 	width: 100%;
-	height: var(--line-height);
+	vertical-align: middle;
+	text-wrap: wrap;
+	word-wrap: break-word;
 }
 
 * {
@@ -32,7 +34,7 @@
 	flex-direction: row;
 	vertical-align: middle;
 
-	margin: 2px;
+	margin: 0;
 }
 
 .prompt>p {

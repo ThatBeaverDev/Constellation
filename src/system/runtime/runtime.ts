@@ -15,8 +15,7 @@ import ApplicationVerifier from "../security/runtimeDefender.js";
 import { appName } from "./components/appName.js";
 import { AppsTimeStamp } from "./components/AppsTimeStamp.js";
 import ImportResolver from "./components/resolver.js";
-import { TextInterface } from "../tui/tui.js";
-import { GraphicalInterface } from "../gui/gui.js";
+import { isArrow } from "../security/isArrow.js";
 
 const path = "/System/runtime.js";
 
@@ -51,7 +50,7 @@ window.renderID = 0;
 window.GuiApplication = executables.GuiApplication;
 window.CommandLineApplication = executables.CommandLineApplication;
 window.Process = executables.Process;
-window.BackgroundProcess = executables.BackgroundProcess;
+window.Service = executables.Service;
 window.Overlay = executables.Overlay;
 window.Module = executables.Module;
 
@@ -246,7 +245,7 @@ export class ProgramRuntime {
 	}
 
 	/**
-	 * Starts a program from a given directory to a `.appl` or `.backgr` package
+	 * Starts a program from a given directory to a `.appl` or `.srvc` package
 	 * @param directory - Directory of the root of the application to execute from
 	 * @param args - Arguements to be passed to the process
 	 * @param user - Username to start this process with
@@ -257,30 +256,18 @@ export class ProgramRuntime {
 	 */
 	async execute(
 		appdir: string,
-		args: any[],
-		user: string,
-		password: string,
-		parent?: ProcessInformation,
-		waitForInit?: boolean,
-		includeProcess?: false
-	): Promise<executionResult>;
-	async execute(
-		appdir: string,
-		args: any[],
-		user: string,
-		password: string,
-		parent?: ProcessInformation,
-		waitForInit?: boolean,
-		includeProcess?: true
-	): Promise<executionProcessResult>;
-	async execute(
-		appdir: string,
 		args: any[] = [],
 		user: string,
 		password: string,
 		parent?: ProcessInformation,
 		waitForInit: boolean = true,
-		includeProcess: boolean = false
+		includeProcess: boolean = false,
+		cliHooks?: {
+			print: (text: string) => void;
+			getInput: (query: string) => Promise<string>;
+			clearView: () => void;
+		},
+		forceTextEntrypoint: boolean = false
 	): Promise<executionResult | executionProcessResult> {
 		if (this.isTerminating)
 			throw new Error("Execution blocked: this kernel is terminating.");
@@ -298,43 +285,16 @@ export class ProgramRuntime {
 				`Application at ${appdir} is damaged and can't be ran.`
 			);
 
-		/**
-		 * Reads a file from an application package
-		 * @param dir - Relative directory of the file from the app's base
-		 * @param throwIfEmpty - Whether to throw an error if the file is empty.
-		 * @returns Contents of the file OR an error if the file isn't present and throwIfEmpty is true (default)
-		 */
-		const get = async (
-			dir: string,
-			throwIfEmpty: Boolean = true
-		): Promise<string> => {
-			const rel = this.#ConstellationKernel.fs.resolve(appdir, dir);
-
-			const content = await this.#ConstellationKernel.fs.readFile(rel);
-
-			if (content == undefined) {
-				if (throwIfEmpty) {
-					throw new Error(rel + " is empty!");
-				} else {
-					return "";
-				}
-			}
-
-			return content;
-		};
-
-		// get the app config
-		const configSrc = await get("config.js");
-		const configBlob =
-			await this.#ConstellationKernel.lib.blobifier.blobify(
-				configSrc,
-				"text/javascript"
-			);
-		const config = (await import(configBlob))
-			.default as executables.ProgramManifest;
-		config;
+		/* ---------- Work out directory to import from ---------- */
 
 		const allowedExtensions: executionFiletype[] = ["js", "crl"];
+		const entrypointName = appdir.endsWith(".srvc")
+			? "service"
+			: forceTextEntrypoint
+				? "cli"
+				: this.#ConstellationKernel.isGraphical
+					? "app"
+					: "cli";
 
 		let executableDirectory: string | undefined;
 		let type: executionFiletype | undefined;
@@ -344,10 +304,10 @@ export class ProgramRuntime {
 
 		// get the script
 		for (const ext of allowedExtensions) {
-			if (bin.includes("app." + ext)) {
+			if (bin.includes(`${entrypointName}.${ext}`)) {
 				executableDirectory = this.#ConstellationKernel.fs.resolve(
 					appdir,
-					"bin/app." + ext
+					`bin/${entrypointName}.${ext}`
 				);
 				type = ext;
 				break;
@@ -355,18 +315,21 @@ export class ProgramRuntime {
 		}
 
 		if (executableDirectory == undefined)
-			throw new Error("No Executable found.");
+			throw new Error(
+				`No valid entrypoint for ${appdir} found. (looking for ./bin/${entrypointName}.**)`
+			);
 
 		const finalProgramArgs: any[] = args;
 		let directory = String(appdir);
 
-		// create a blob of the content
+		/* ---------- Create a blob to import from ---------- */
+
 		let blob: string;
 		switch (type) {
 			case "crl":
 				executableDirectory = this.#ConstellationKernel.fs.resolve(
 					String(crlDirectory),
-					"bin/app.js"
+					`bin/${entrypointName}.js`
 				);
 
 				finalProgramArgs.splice(
@@ -374,7 +337,7 @@ export class ProgramRuntime {
 					0,
 					this.#ConstellationKernel.fs.resolve(
 						directory,
-						"bin/app.crl"
+						`bin/${entrypointName}.crl`
 					)
 				);
 
@@ -400,70 +363,15 @@ export class ProgramRuntime {
 				);
 		}
 
+		/* ---------- Retrieve the constructor ---------- */
+
 		// import from the script BLOB
 		const exports = await import(blob);
 
-		const { gui, tui, backgr } = exports;
-
 		// get the class executable
-		let Executable: typeof Process;
-		if (
-			this.#ConstellationKernel.ui instanceof GraphicalInterface &&
-			typeof gui == "function"
-		) {
-			// Graphical executable
-			// log it
-			this.#ConstellationKernel.lib.logging.debug(
-				path,
-				`Executable at ${directory} in initialisation is using Graphical entrypoint.`
-			);
+		let Executable: typeof Process = exports.default;
 
-			// assign it
-			Executable = gui;
-		} else if (
-			this.#ConstellationKernel.ui instanceof TextInterface &&
-			typeof tui == "function"
-		) {
-			// Text based executable
-			// log it
-			this.#ConstellationKernel.lib.logging.debug(
-				path,
-				`Executable at ${directory} in initialisation is using Text-based entrypoint.`
-			);
-
-			// assign it
-			Executable = tui;
-		} else if (typeof backgr == "function") {
-			// Background executable
-			// log it
-			this.#ConstellationKernel.lib.logging.debug(
-				path,
-				`Executable at ${directory} in initialisation is using Text-based entrypoint.`
-			);
-
-			// assign it
-			Executable = backgr;
-		} else if (typeof exports.default == "function") {
-			// any old executable
-			// log it
-			this.#ConstellationKernel.lib.logging.debug(
-				path,
-				`Executable at ${directory} in initialisation is using Text-based entrypoint.`
-			);
-
-			// assign it
-			Executable = exports.default;
-		} else {
-			// nothing found.
-
-			this.#ConstellationKernel.lib.logging.error(
-				path,
-				`Executable at ${directory} in initialisation has no supported entrypont.`
-			);
-			throw new Error(
-				`Executable at ${directory} in initialisation has no supported entrypont.`
-			);
-		}
+		/* ---------- Execute the program ---------- */
 
 		const info: ProcessInformation = {
 			id: Number(executables.nextPID),
@@ -513,6 +421,17 @@ export class ProgramRuntime {
 
 		// add to the processes list
 		processes.push(info);
+
+		// allow the CLI to hook into the program so it can provide input and output
+		if (cliHooks && live instanceof CommandLineApplication) {
+			isArrow(cliHooks.print, true);
+			isArrow(cliHooks.getInput, true);
+			isArrow(cliHooks.clearView, true);
+
+			live.println = cliHooks.print;
+			live.getInput = cliHooks.getInput;
+			live.clearView = cliHooks.clearView;
+		}
 
 		if (waitForInit) {
 			await this.procExec(info, "init");

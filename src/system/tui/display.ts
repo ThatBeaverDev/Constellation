@@ -7,26 +7,26 @@ export interface Handler extends Terminatable {
 
 	post(text: string): void;
 
-	getInput(query: string): string | Promise<string>;
+	getInput(query: string): Promise<string>;
+	clearView(): void;
 }
 
-class CommandLineHandler implements Handler {
+export class CommandLineHandler implements Handler {
 	#readline?: typeof import("node:readline");
-	#ConstellationKernel: ConstellationKernel;
-
-	constructor(ConstellationKernel: ConstellationKernel) {
-		this.#ConstellationKernel = ConstellationKernel;
-	}
 
 	post = (text: string) => {
-		this.#ConstellationKernel.lib.logging.post(text);
+		console.log(text);
+	};
+
+	clearView = (): void => {
+		console.clear();
 	};
 
 	async init() {
 		this.#readline = await import("node:readline");
 	}
 
-	getInput(query: string): Promise<string> {
+	getInput = (query: string): Promise<string> => {
 		return new Promise((resolve: (result: string) => void) => {
 			if (this.#readline == undefined) {
 				resolve("");
@@ -43,21 +43,23 @@ class CommandLineHandler implements Handler {
 				rl.close();
 			});
 		});
-	}
+	};
 
 	terminate() {}
 }
-class DOMHandler implements Handler {
+export class DOMHandler implements Handler {
 	#ConstellationKernel: ConstellationKernel;
 
-	#shadowDomHost: HTMLDivElement;
-	shadowRoot: ShadowRoot;
+	#shadowDomHost?: HTMLDivElement;
+	shadowRoot?: ShadowRoot;
 	container: HTMLDivElement = document.createElement("div");
+	#logElements: HTMLElement[] = [];
 
 	css: HTMLStyleElement = document.createElement("style");
 
 	#newLine(string: string) {
 		const line = document.createElement("div");
+		line.className = "logdiv";
 
 		const text = document.createElement("p");
 		text.innerText = string;
@@ -65,22 +67,30 @@ class DOMHandler implements Handler {
 
 		line.appendChild(text);
 
+		this.#logElements.push(line);
 		this.container.appendChild(line);
 	}
 
-	constructor(ConstellationKernel: ConstellationKernel) {
+	constructor(
+		ConstellationKernel: ConstellationKernel,
+		tuiContainer?: HTMLDivElement
+	) {
 		this.#ConstellationKernel = ConstellationKernel;
 
-		this.container = document.createElement("div");
-		document.body.appendChild(this.container);
+		if (tuiContainer) {
+			this.container = tuiContainer;
+		} else {
+			this.container = document.createElement("div");
+			document.body.appendChild(this.container);
 
-		const { shadowDOM, container, host } = constructDOMInterface();
-		this.shadowRoot = shadowDOM;
-		this.#shadowDomHost = host;
-		this.container = container;
+			const { shadowDOM, container, host } = constructDOMInterface();
+			this.shadowRoot = shadowDOM;
+			this.#shadowDomHost = host;
+			this.container = container;
 
-		// add shadowDOM to screen
-		document.body.appendChild(this.#shadowDomHost);
+			// add shadowDOM to screen
+			document.body.appendChild(this.#shadowDomHost);
+		}
 	}
 
 	async init() {
@@ -93,10 +103,20 @@ class DOMHandler implements Handler {
 	}
 
 	post = (text: string) => {
-		this.#newLine(text);
+		const lines = text.split("\n").filter((item) => item !== "");
+
+		for (const line of lines) {
+			this.#newLine(line);
+		}
 	};
 
-	getInput(query: string) {
+	clearView = () => {
+		this.#logElements.forEach((element) => element.remove());
+
+		this.#logElements = [];
+	};
+
+	getInput = (query: string) => {
 		const container = document.createElement("div");
 		container.className = "prompt";
 
@@ -125,10 +145,11 @@ class DOMHandler implements Handler {
 				}
 			});
 		});
-	}
+	};
 
 	terminate() {
-		this.#shadowDomHost.remove();
+		this.container.remove();
+		if (this.#shadowDomHost) this.#shadowDomHost.remove();
 	}
 }
 

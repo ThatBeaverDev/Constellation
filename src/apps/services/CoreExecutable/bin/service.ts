@@ -1,6 +1,6 @@
 import ServiceManager from "../components/serviceManager.js";
 
-export default class CoreExecutable extends BackgroundProcess {
+export default class CoreExecutable extends Service {
 	loginCompleted: boolean = false;
 	loginDirectory: string =
 		"/System/CoreExecutables/systemLoginInterface.appl";

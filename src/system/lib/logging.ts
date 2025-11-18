@@ -1,5 +1,7 @@
 import { isCommandLine } from "../getPlatform.js";
 import ConstellationKernel from "..//kernel.js";
+import { TextInterface } from "../tui/tui.js";
+import { CommandLineHandler } from "../tui/display.js";
 
 export type LogLevel = "post" | "debug" | "log" | "warn" | "error";
 export type CapitalisedLogLevel = "POST" | "DEBUG" | "LOG" | "WARN" | "ERROR";
@@ -34,6 +36,15 @@ export default class LoggingAPI {
 		]);
 
 		if (isCommandLine) {
+			// don't distrupt the TUI
+			if (this.#ConstellationKernel.ui instanceof TextInterface) {
+				if (
+					this.#ConstellationKernel.ui.displayInterface instanceof
+					CommandLineHandler
+				)
+					return;
+			}
+
 			// ANSI colors for Node/CLI
 			switch (type) {
 				case "post":

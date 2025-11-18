@@ -142,13 +142,17 @@ export class GraphicalWindow {
 		this.move(left, top);
 		this.resize(width, height);
 
-		const shadowDom = ConstellationKernel.ui.shadowRoot;
+		const shadowRoot = ConstellationKernel.ui.shadowRoot;
 
 		ConstellationKernel.ui.container.appendChild(this.container);
 
-		this.closeButton = shadowDom.getElementById(this.closeButton.id)!;
-		this.maximiseButton = shadowDom.getElementById(this.maximiseButton.id)!;
-		this.minimiseButton = shadowDom.getElementById(this.minimiseButton.id)!;
+		this.closeButton = shadowRoot.getElementById(this.closeButton.id)!;
+		this.maximiseButton = shadowRoot.getElementById(
+			this.maximiseButton.id
+		)!;
+		this.minimiseButton = shadowRoot.getElementById(
+			this.minimiseButton.id
+		)!;
 
 		const headerPointerDown = (e: PointerEvent) => {
 			this.#WindowSystem.target = {

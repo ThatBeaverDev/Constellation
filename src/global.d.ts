@@ -18,7 +18,7 @@ declare global {
 		GuiApplication: typeof executables.GuiApplication;
 		CommandLineApplication: typeof executables.CommandLineApplication;
 		Process: typeof executables.Process;
-		BackgroundProcess: typeof executables.BackgroundProcess;
+		Service: typeof executables.Service;
 		Overlay: typeof executables.Overlay;
 		Module: typeof executables.Module;
 		env: ApplicationAuthorisationAPI;
@@ -28,7 +28,7 @@ declare global {
 	const GuiApplication: typeof executables.GuiApplication;
 	const CommandLineApplication: typeof executables.CommandLineApplication;
 	const Process: typeof executables.Process;
-	const BackgroundProcess: typeof executables.BackgroundProcess;
+	const Service: typeof executables.Service;
 	const Overlay: typeof executables.Overlay;
 	const Module: typeof executables.Module;
 

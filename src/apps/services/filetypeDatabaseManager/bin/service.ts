@@ -11,7 +11,7 @@ export interface filetypeDatabase {
 
 let running: boolean = false;
 let extraAssignments: typeof requiredAllocations = [];
-export default class filetypeDatabaseManager extends BackgroundProcess {
+export default class filetypeDatabaseManager extends Service {
 	databaseDirectory = "/System/ftypedb.json";
 	database?: filetypeDatabase;
 	lastIndex: number = 0;

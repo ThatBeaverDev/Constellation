@@ -33,7 +33,7 @@ export default class ApplicationVerifier implements Terminatable {
 		if (!listing.includes("bin") || !listing.includes("config.js")) {
 			this.#ConstellationKernel.lib.logging.warn(
 				path,
-				`Application at ${directory} has failed bin testing.`
+				`Application at ${directory} has failed needed files testing.`
 			);
 
 			return false;
@@ -41,7 +41,7 @@ export default class ApplicationVerifier implements Terminatable {
 
 		this.#ConstellationKernel.lib.logging.debug(
 			path,
-			`Application at ${directory} has passed bin testing.`
+			`Application at ${directory} has passed needed files testing.`
 		);
 
 		listing.forEach((item) => {
@@ -65,22 +65,34 @@ export default class ApplicationVerifier implements Terminatable {
 			this.#ConstellationKernel.fs.resolve(directory, "bin")
 		);
 		for (const item of binListing) {
-			if (item.startsWith("app.")) {
-				return true;
-			} else {
-				this.#ConstellationKernel.lib.logging.warn(
-					path,
-					`Application at ${directory} has failed bin/app.* testing. (there is an unknown file in the bin directory, ${item})`
-				);
-				throw new Error(
-					`Application at ${directory} has failed the security check: it has an invalid file within bin/${item}`
-				);
+			const allowedFileNames = ["app", "cli", "service"];
+
+			for (const name of allowedFileNames) {
+				if (item.startsWith(name + ".")) {
+					// it passes
+
+					this.#ConstellationKernel.lib.logging.debug(
+						path,
+						`Application at ${directory} has passed entrypoint testing.`
+					);
+
+					return true;
+				}
 			}
+
+			// throw an error
+			this.#ConstellationKernel.lib.logging.warn(
+				path,
+				`Application at ${directory} has failed entrypoint testing. (there is an unknown file in the bin directory, ${item})`
+			);
+			throw new Error(
+				`Application at ${directory} has failed the security check: it has an invalid file within bin/${item}`
+			);
 		}
 
 		this.#ConstellationKernel.lib.logging.warn(
 			path,
-			`Application at ${directory} has failed bin/app.* testing.`
+			`Application at ${directory} has failed entrypoint testing.`
 		);
 
 		return false;

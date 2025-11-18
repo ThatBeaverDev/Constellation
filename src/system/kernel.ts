@@ -225,7 +225,14 @@ export default class ConstellationKernel implements Terminatable {
 				this.config.systemPassword,
 				undefined,
 				true,
-				true
+				true,
+				this.ui instanceof TextInterface
+					? {
+							print: this.ui.displayInterface.post,
+							getInput: this.ui.displayInterface.getInput,
+							clearView: this.ui.displayInterface.clearView
+						}
+					: undefined
 			);
 
 			debug("Attaching background check for GUI installer completion");
@@ -235,7 +242,8 @@ export default class ConstellationKernel implements Terminatable {
 					postinstall(this, pipe[0]);
 
 					debug("Terminating GUI installer.");
-					this.runtime.terminateProcess(exec.process);
+					if ("process" in exec)
+						this.runtime.terminateProcess(exec.process);
 
 					clearInterval(interval);
 					return;
@@ -265,6 +273,8 @@ export default class ConstellationKernel implements Terminatable {
 		if (guiInstallerRequired) {
 			await runGuiInstaller();
 		}
+
+		await this.ui.postinstall();
 
 		const coreExecDirectory = "/System/CoreExecutables/CoreExecutable.srvc";
 
@@ -304,7 +314,11 @@ export default class ConstellationKernel implements Terminatable {
 	async executionLoop() {
 		const frame = async () => {
 			return new Promise((resolve: Function) => {
-				this.runtime.frame();
+				try {
+					this.runtime.frame();
+				} catch (e) {
+					panic(this, e, "processExecutionFrame");
+				}
 				setTimeout(resolve, 10);
 			});
 		};
@@ -318,8 +332,6 @@ export default class ConstellationKernel implements Terminatable {
 			await frame();
 		}
 	}
-
-	panic() {}
 
 	async terminate() {
 		this.isTerminated = true;

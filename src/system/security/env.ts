@@ -166,7 +166,7 @@ export class ApplicationAuthorisationAPI {
 	shell: Shell;
 
 	// logging
-	debug(...content: any): undefined {
+	debug = (...content: any): undefined => {
 		const initiator = this.directory;
 		if (initiator == globalPermissionsHost) {
 			throw new Error(
@@ -179,8 +179,8 @@ export class ApplicationAuthorisationAPI {
 			content[0],
 			...content.splice(1, Infinity)
 		);
-	}
-	log(...content: any): undefined {
+	};
+	log = (...content: any): undefined => {
 		const initiator = this.directory;
 		if (initiator == globalPermissionsHost) {
 			throw new Error(
@@ -193,8 +193,8 @@ export class ApplicationAuthorisationAPI {
 			content[0],
 			...content.splice(1, Infinity)
 		);
-	}
-	warn(...content: any): undefined {
+	};
+	warn = (...content: any): undefined => {
 		const initiator = this.directory;
 		if (initiator == globalPermissionsHost) {
 			throw new Error(
@@ -207,8 +207,8 @@ export class ApplicationAuthorisationAPI {
 			content[0],
 			...content.splice(1, Infinity)
 		);
-	}
-	error(...content: any): undefined {
+	};
+	error = (...content: any): undefined => {
 		const initiator = this.directory;
 		if (initiator == globalPermissionsHost) {
 			throw new Error(
@@ -221,7 +221,7 @@ export class ApplicationAuthorisationAPI {
 			content[0],
 			...content.splice(1, Infinity)
 		);
-	}
+	};
 
 	#directoryActionCheck(
 		directory: string,
@@ -291,7 +291,7 @@ export class ApplicationAuthorisationAPI {
 	}
 
 	/**
-	 * Starts a program from a given directory to a `.appl` or `.backgr` package
+	 * Starts a program from a given directory to a `.appl` or `.srvc` package
 	 * @param directory - Directory of the root of the application to execute from
 	 * @param args - Arguements to be passed to the process
 	 * @param user - Username to start this process with. Defaults to the parent process' user

@@ -346,6 +346,15 @@ export class UiKitRendererClass {
 		return new UiKitElement(this, this.#steps.push(obj));
 	}
 
+	embeddedTui(x: number, y: number, width: number, height: number) {
+		const obj: step = {
+			type: "uikitEmbeddedTui",
+			args: [x, y, width, height]
+		};
+
+		return new UiKitElement(this, this.#steps.push(obj));
+	}
+
 	onClick(
 		elementID: number | UiKitElement,
 		leftClickCallback?: clickReference["left"],
@@ -613,6 +622,11 @@ export class UiKitRendererClass {
 
 		if (c.focusedTextbox == element) {
 			c.focusedTextbox = undefined;
+		}
+
+		if (c.embeddedTui?.container == element) {
+			c.embeddedTui.tui.terminate();
+			c.embeddedTui = undefined;
 		}
 
 		if (
