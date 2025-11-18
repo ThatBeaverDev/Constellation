@@ -1,5 +1,5 @@
 import TerminalAlias from "../../../../system/lib/terminalAlias.js";
-import { filetypeDatabase } from "../bin/app.js";
+import { filetypeDatabase } from "../bin/service.js";
 
 export default async function getApplicationOfFiletype(
 	parent: TerminalAlias,

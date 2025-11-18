@@ -6,6 +6,7 @@ export interface UserInterfaceBase extends Terminatable {
 	type: "GraphicalInterface" | "TextInterface";
 
 	init(): Promise<void> | void;
+	postinstall(): Promise<void> | void;
 
 	/**
 	 * Sets the status during boot

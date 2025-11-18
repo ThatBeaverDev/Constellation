@@ -1,5 +1,7 @@
 import { UIError } from "../../../errors.js";
 import ConstellationKernel from "../../../kernel.js";
+import { DOMHandler } from "../../../tui/display.js";
+import { TextInterface } from "../../../tui/tui.js";
 import { type GraphicalWindow } from "../../display/windowTypes.js";
 import {
 	canvasPosition,
@@ -17,6 +19,7 @@ export default class uiKitCreators {
 		Record<number, HTMLInputElement | HTMLTextAreaElement>
 	> = {};
 	focusedTextbox?: HTMLInputElement | HTMLTextAreaElement;
+	embeddedTui?: { container: HTMLDivElement; tui: TextInterface };
 	#ConstellationKernel: ConstellationKernel;
 
 	constructor(
@@ -405,6 +408,45 @@ export default class uiKitCreators {
 		}
 
 		return canvas;
+	};
+
+	uikitEmbeddedTui = (
+		id: number,
+		x: number,
+		y: number,
+		width: number,
+		height: number
+	) => {
+		if (this.embeddedTui) {
+			throw new Error("Each window may only have one embedded TUI.");
+		}
+
+		const container = document.createElement("div");
+		container.id = String(window.renderID++);
+		container.classList.add("uikitBox", "uiKitEmbeddedTui");
+
+		container.style.left = `${x}px`;
+		container.style.top = `${y}px`;
+		container.style.width = `${width}px`;
+		container.style.height = `${height}px`;
+		container.style.fontFamily = "monospace";
+
+		const displayDriver = new DOMHandler(
+			this.#ConstellationKernel,
+			container
+		);
+		const tui = new TextInterface(this.#ConstellationKernel, displayDriver);
+		tui.init();
+		tui.postinstall();
+
+		if (this.#window) this.#window.body.appendChild(container);
+
+		this.embeddedTui = {
+			container,
+			tui
+		};
+
+		return container;
 	};
 }
 

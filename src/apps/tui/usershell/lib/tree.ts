@@ -1,5 +1,5 @@
-import { Stats } from "../../../../fs/BrowserFsTypes.js";
-import TerminalAlias from "../../../../system/lib/terminalAlias.js";
+import { Stats } from "../../../../fs/BrowserFsTypes";
+import TerminalAlias from "../../../../system/lib/terminalAlias";
 
 export default async function tree(parent: TerminalAlias, directory = ".") {
 	const dir = parent.env.fs.resolve(parent.path, directory);
@@ -32,7 +32,12 @@ async function treeWalk(
 
 	let result = "";
 
-	const contents = await parent.env.fs.listDirectory(directory);
+	let contents: string[];
+	try {
+		contents = await parent.env.fs.listDirectory(directory);
+	} catch (e) {
+		return prefix + "└── " + String(e) + "\n";
+	}
 
 	contents.sort();
 

@@ -81,6 +81,7 @@ export class GraphicalInterface implements UserInterfaceBase {
 
 		await this.uiKit.init();
 	}
+	postinstall() {}
 
 	setStatus(text: string | Error, state: "working" | "error" = "working") {
 		if (text instanceof Error) {

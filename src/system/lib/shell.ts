@@ -11,13 +11,20 @@ export default class Shell {
 	readonly #env: ApplicationAuthorisationAPI;
 	#index: string[] = [];
 
-	#terminalReference?: TerminalAlias;
+	#terminalReference: TerminalAlias;
 
 	constructor(directory: string, env: ApplicationAuthorisationAPI) {
 		this.#directory = directory;
 		this.#directory;
 		this.#env = env;
-		this.setRef();
+
+		this.#terminalReference = {
+			path: "/",
+			env: this.#env,
+			clearLogs: () => {},
+			origin: "/"
+		};
+
 		this.index();
 	}
 
@@ -64,7 +71,6 @@ export default class Shell {
 	setRef(
 		ref: TerminalAlias = {
 			path: "/",
-			logs: [],
 			env: this.#env,
 			clearLogs: () => {},
 			origin: "/"
@@ -73,9 +79,24 @@ export default class Shell {
 		this.#terminalReference = ref;
 	}
 
+	getRef() {
+		return { ...this.#terminalReference };
+	}
+
 	async #getUtility(
 		name: string
 	): Promise<(parent: TerminalAlias, ...args: any[]) => any> {
+		if (name == "help") {
+			return () => {
+				const commandNames = this.#index.map((item) =>
+					item.textAfterAll("/").textBeforeLast(".")
+				);
+				commandNames.sort();
+
+				return `List of commands on this system are as follows:\n${commandNames.join("\n")}`;
+			};
+		}
+
 		for (const item of this.#index) {
 			const filename = item.textAfterAll("/").textBeforeLast(".");
 
@@ -97,7 +118,7 @@ export default class Shell {
 			}
 		}
 
-		throw new Error("No such command found.");
+		throw new Error("No such utility found.");
 	}
 
 	async exec(name: string, ...args: any[]): Promise<shellResult | undefined> {

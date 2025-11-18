@@ -1,5 +1,5 @@
 import { executionResult } from "../../../../system/runtime/runtime.js";
-import CoreExecutable from "../bin/app.js";
+import CoreExecutable from "../bin/service.js";
 
 export interface ServiceManifest {
 	directory: string;

@@ -9,13 +9,21 @@ export class TextInterface implements UserInterfaceBase {
 	#ConstellationKernel: ConstellationKernel;
 	displayInterface: Handler;
 
-	constructor(ConstellationKernel: ConstellationKernel) {
+	constructor(ConstellationKernel: ConstellationKernel, handler?: Handler) {
 		this.#ConstellationKernel = ConstellationKernel;
-		this.displayInterface = new currentHandler(ConstellationKernel);
+
+		if (handler) {
+			this.displayInterface = handler;
+		} else {
+			this.displayInterface = new currentHandler(ConstellationKernel);
+		}
 	}
 
 	async init() {
 		await this.displayInterface.init();
+	}
+
+	async postinstall() {
 		const post = this.displayInterface.post;
 
 		try {
@@ -60,11 +68,30 @@ export class TextInterface implements UserInterfaceBase {
 
 			/* ---------- Open User Shell ---------- */
 
-			const shell = await this.#ConstellationKernel.runtime.execute(
+			const shellPrintLn = (data: string) => {
+				post(data);
+			};
+			const shellGetInput = async (query: string) => {
+				return this.displayInterface.getInput(query);
+			};
+			const shellClearView = () => {
+				this.displayInterface.clearView();
+			};
+
+			await this.#ConstellationKernel.runtime.execute(
 				"/System/CoreExecutables/Shell.appl",
 				[],
 				username,
-				password
+				password,
+				undefined,
+				false,
+				undefined,
+				{
+					print: shellPrintLn,
+					getInput: shellGetInput,
+					clearView: shellClearView
+				},
+				true
 			);
 		} catch (e: unknown) {
 			if (e instanceof Error) {
@@ -74,17 +101,18 @@ export class TextInterface implements UserInterfaceBase {
 			}
 			this.#ConstellationKernel.lib.logging.warn(
 				path,
-				"This system should be powered off."
+				"This system should be shut down."
 			);
 		}
 	}
 
 	setStatus(text: string | Error, state: "working" | "error"): void {
-		// TODO: IMPLEMENT
+		this.displayInterface.post(String(text));
 	}
 
 	panic(text: string) {
-		// TODO: IMPLEMENT
+		this.displayInterface.clearView();
+		this.displayInterface.post(text);
 	}
 
 	terminate() {

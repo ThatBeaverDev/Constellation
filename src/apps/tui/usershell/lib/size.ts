@@ -1,4 +1,4 @@
-import TerminalAlias from "../../../../system/lib/terminalAlias.js";
+import TerminalAlias from "../../../../system/lib/terminalAlias";
 import { pathSize } from "pathinf";
 
 export default async function size(parent: TerminalAlias, directory: string) {

@@ -301,7 +301,7 @@ export class Process extends Framework {
 	}
 }
 
-export class BackgroundProcess extends Process {}
+export class Service extends Process {}
 export class Module extends Framework {}
 
 /**
@@ -348,7 +348,30 @@ export class GuiApplication extends Process {
 	}
 }
 
-export class CommandLineApplication extends Process {}
+export class CommandLineApplication extends Process {
+	/**
+	 * Allows the program to display an output
+	 * @param content What to log
+	 */
+	// replaced by execute function during execution, before `init`.
+	println(content: string) {}
+
+	/**
+	 * Allows the program to request text input from the user
+	 */
+	// replaced by execute function during execution, before `init`.
+	getInput(query: string): Promise<string> {
+		return new Promise((resolve: Function) => {
+			resolve("");
+		});
+	}
+
+	/**
+	 * Clears the CLI contents
+	 */
+	// replaced by execute function during execution, before `init`.
+	clearView() {}
+}
 
 /**
  * An application made for acting on a higher level of the layering. Not to be used in general applications.

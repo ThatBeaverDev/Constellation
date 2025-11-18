@@ -1,4 +1,4 @@
-import TerminalAlias from "../../../../system/lib/terminalAlias.js";
+import TerminalAlias from "../../../../system/lib/terminalAlias";
 import * as mime from "mime";
 
 export default async function wget(
