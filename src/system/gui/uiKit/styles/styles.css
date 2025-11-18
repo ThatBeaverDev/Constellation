@@ -21,16 +21,15 @@ body {
 }
 
 .clickable:hover {
-	--scale: 1.3;
+	--hover-glow: 110%;
 
-	transform: scale(var(--scale));
+	filter: brightness(var(--hover-glow));
 }
 
 .clickable:active {
-	--click-scale: 1.5;
+	--click-glow: 120%;
 
-	filter: brightness(110%);
-	transform: scale(var(--click-scale));
+	filter: brightness(var(--click-grow));
 }
 
 .uiKit {
