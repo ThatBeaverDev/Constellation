@@ -20,6 +20,7 @@ import postinstall from "./installation/postinstall.js";
 import IPCMessageSender from "./runtime/components/messages.js";
 import { UserInterface } from "./ui/ui.js";
 import { getFlagValue } from "./lib/flags.js";
+import restartKernel from "./state/restart.js";
 
 if (defaultConfiguration.dynamic.isDevmode) {
 	(globalThis as any).kernels = [];
@@ -60,7 +61,16 @@ export default class ConstellationKernel implements Terminatable {
 	};
 	logs: [CapitalisedLogLevel, string, ...any[]][];
 	isTerminated: boolean = false;
-	install: (ConstellationKernel: ConstellationKernel) => Promise<boolean>;
+	#install: (
+		ConstellationKernel: ConstellationKernel,
+		isSoftwareUpdate: boolean
+	) => Promise<boolean>;
+	async triggerUpdate() {
+		await this.fs.writeFile("/System/message.txt", "updateSystem");
+
+		// new kernel handles it :>
+		const newKernel = this.restart();
+	}
 
 	// property types
 	ui: UserInterface;
@@ -87,7 +97,7 @@ export default class ConstellationKernel implements Terminatable {
 
 		try {
 			if (startupConfiguration?.installationIdx) {
-				this.install = async () => {
+				this.#install = async () => {
 					if (startupConfiguration?.installationIdx == undefined)
 						return false;
 
@@ -100,7 +110,12 @@ export default class ConstellationKernel implements Terminatable {
 					return false;
 				};
 			} else {
-				this.install = installer.install;
+				this.#install = async (
+					kernel: ConstellationKernel,
+					isUpdate: boolean
+				) => {
+					return await installer.install(kernel, isUpdate);
+				};
 			}
 		} catch (e) {
 			// TODO: PANIC
@@ -160,21 +175,32 @@ export default class ConstellationKernel implements Terminatable {
 		// work out whether we need to install
 		const configFileExists =
 			(await this.fs.readFile("/System/config.json")) !== undefined;
+		const isSoftwareUpdate =
+			(await this.fs.readFile("/System/message.txt")) == "updateSystem";
+
+		if (isSoftwareUpdate) {
+			await this.fs.unlink("/System/message.txt");
+		}
 
 		const canInstallFlag = this.startupConfiguration?.install;
 		const canInstallFlagAbsolute =
 			canInstallFlag == undefined ? true : canInstallFlag;
 
-		let installerRequired =
-			(!configFileExists || forceInstaller) && canInstallFlagAbsolute;
+		const installerRequired =
+			((!configFileExists || forceInstaller) && canInstallFlagAbsolute) ||
+			isSoftwareUpdate;
 
 		// install if needed
 		let guiInstallerRequired = false;
 		if (installerRequired) {
 			// install and terminate so the kernel we wrote to disk can boot
-			await this.install(this);
-			this.terminate();
-			return;
+			await this.#install(this, isSoftwareUpdate);
+
+			// terminate if it's not a software update
+			if (!isSoftwareUpdate) {
+				this.terminate();
+				return;
+			}
 		} else if (this.config.dynamic.isDevmode) {
 			guiInstallerRequired = false;
 		} else {
@@ -251,28 +277,28 @@ export default class ConstellationKernel implements Terminatable {
 			});
 
 			await exec.promise;
-
-			// write to config
-			const config = await this.fs.readFile("/System/config.json");
-
-			if (config == undefined)
-				throw new Error(
-					"Config file became undefined between check and installation execution"
-				);
-
-			const configJson: ConstellationConfiguration = JSON.parse(config);
-			configJson.guiInstallerRan = true;
-
-			// write back to disc
-			await this.fs.writeFile(
-				"/System/config.json",
-				JSON.stringify(configJson)
-			);
 		};
 
 		if (guiInstallerRequired) {
 			await runGuiInstaller();
 		}
+
+		// write to config
+		const config = await this.fs.readFile("/System/config.json");
+
+		if (config == undefined)
+			throw new Error(
+				"Config file became undefined between check and installation execution"
+			);
+
+		const configJson: ConstellationConfiguration = JSON.parse(config);
+		configJson.guiInstallerRan = true;
+
+		// write back to disc
+		await this.fs.writeFile(
+			"/System/config.json",
+			JSON.stringify(configJson)
+		);
 
 		await this.ui.postinstall();
 
@@ -333,7 +359,12 @@ export default class ConstellationKernel implements Terminatable {
 		}
 	}
 
+	restart(passInstaller?: boolean) {
+		return restartKernel(this, passInstaller);
+	}
+
 	async terminate() {
+		this.lib.logging.debug(path, "Kernel", this, "terminating.");
 		this.isTerminated = true;
 
 		await this.runtime.terminate();
@@ -343,5 +374,12 @@ export default class ConstellationKernel implements Terminatable {
 
 		await this.ui.terminate();
 		await this.fs.terminate();
+
+		// remove from list
+		if (defaultConfiguration.dynamic.isDevmode) {
+			(globalThis as any).kernels = (globalThis as any).kernels.filter(
+				(kernel: any) => kernel !== this
+			);
+		}
 	}
 }

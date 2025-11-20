@@ -36,6 +36,13 @@ export default class CoreExecutable extends Service {
 			true
 		);
 
+		// software update installer
+		this.env.setDirectoryPermission(
+			"/System/CoreExecutables/SoftwareUpdateInstaller.srvc",
+			"operator",
+			true
+		);
+
 		// start services
 		this.serviceManager = new ServiceManager(this);
 		await this.serviceManager.init();

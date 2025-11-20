@@ -1,6 +1,10 @@
 import { installationTimestamp } from "./installationTimestamp.js";
 import { InstallationError } from "../errors.js";
-import { files, folders } from "./installation.config.js";
+import {
+	files,
+	folders,
+	installerFileEntryType
+} from "./installation.config.js";
 import ConstellationKernel from "..//kernel.js";
 import { FilesystemAPI } from "../../fs/fs.js";
 import { isCommandLine } from "../getPlatform.js";
@@ -17,8 +21,8 @@ export class FilesystemInstaller {
 		this.fs = ConstellationKernel.fs;
 	}
 
-	async install() {
-		await this.rm_rf();
+	async install(isSoftwareUpdate: boolean) {
+		await this.rm_rf(isSoftwareUpdate);
 		await this.folders();
 		await this.files();
 
@@ -34,7 +38,7 @@ export class FilesystemInstaller {
 		await this.fs.writeFile("/System/config.json", configString);
 	}
 
-	async rm_rf() {
+	async rm_rf(isUpdate: boolean = false) {
 		const fs = this.#ConstellationKernel.fs;
 
 		const rmdir = async (directory: string) => {
@@ -45,26 +49,45 @@ export class FilesystemInstaller {
 					path,
 					`Directory ${directory} is being skipped because it supposedly has no contents (it does exist though)`
 				);
-				return;
+				return false;
 			}
+
+			let hasFoundJSONFile = false;
 
 			for (const item of list) {
 				const resolved = fs.resolve(directory, item);
 
 				const stat = await fs.stat(resolved);
-				if (stat == undefined) return;
+				if (stat == undefined) continue;
 
 				if (stat.isDirectory()) {
-					await rmdir(resolved);
+					const hasJson = await rmdir(resolved);
+
+					if (hasJson) {
+						hasFoundJSONFile = true;
+					}
 				} else {
+					if (item.endsWith(".json")) {
+						hasFoundJSONFile = true;
+						continue;
+					}
+
 					await fs.unlink(resolved);
 				}
 			}
 
-			await fs.rmdir(directory);
+			if (!hasFoundJSONFile || !isUpdate) {
+				await fs.rmdir(directory);
+			}
+
+			return hasFoundJSONFile;
 		};
 
-		await rmdir("/");
+		if (isUpdate) {
+			await rmdir("/System");
+		} else {
+			await rmdir("/");
+		}
 	}
 
 	async folders() {
@@ -166,16 +189,14 @@ export class FilesystemInstaller {
 
 		for (const location in files) {
 			const obj = files[location];
-			let directory;
-			let type;
+			let directory: string;
+			let type: installerFileEntryType;
 			if (typeof obj == "string") {
-				directory = obj;
 				type = "text";
-			} else if (typeof obj == "object") {
-				directory = obj.directory;
-				type = obj.type;
+				directory = obj;
 			} else {
-				throw new InstallationError("Unknown typeof item: " + location);
+				type = obj.type;
+				directory = obj.directory;
 			}
 
 			let content;
@@ -199,14 +220,7 @@ export class FilesystemInstaller {
 
 					break;
 				}
-				case "application": {
-					if (directory.startsWith("/System/"))
-						await this.#ConstellationKernel.security.permissions.setDirectoryPermission(
-							directory,
-							"systemFiles",
-							true
-						);
-				}
+				case "application":
 				case "jsonFilesIndex": {
 					const start = performance.now();
 
@@ -271,6 +285,29 @@ export class FilesystemInstaller {
 		installationTimestamp({
 			label: "Write Files",
 			start,
+			colour: "secondary"
+		});
+
+		const startPermissions = performance.now();
+
+		for (const location in files) {
+			const obj = files[location];
+			if (typeof obj == "string") continue;
+			const { type, directory } = obj;
+
+			if (type == "application") {
+				if (directory.startsWith("/System/"))
+					await this.#ConstellationKernel.security.permissions.setDirectoryPermission(
+						directory,
+						"systemFiles",
+						true
+					);
+			}
+		}
+
+		installationTimestamp({
+			label: "Allocate Permissions",
+			start: startPermissions,
 			colour: "secondary"
 		});
 	}

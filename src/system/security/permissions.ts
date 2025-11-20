@@ -39,8 +39,10 @@ export class Permissions {
 	constructor(public fs: FilesystemAPI) {}
 	async init() {
 		// check if there's already a permissions file
+
 		const permissionsFileExists =
 			(await this.fs.stat(permissionsDirectory)) !== undefined;
+
 		// if the permissions file exists, use it, else use {}
 		const fileData = permissionsFileExists
 			? JSON.parse((await this.fs.readFile(permissionsDirectory)) || "{}")
@@ -51,7 +53,7 @@ export class Permissions {
 	}
 
 	createDefaultPermissions(): DirectoryPermissionStats {
-		return {
+		return structuredClone({
 			user: defaultUser,
 			windows: false,
 			systemControl: false,
@@ -67,11 +69,11 @@ export class Permissions {
 			managePermissions: false,
 			keylogger: false,
 			operator: false
-		};
+		});
 	}
 
 	getDirectoryPermissions(directory: string): DirectoryPermissionStats {
-		const dir = directory.toString();
+		const dir = String(directory);
 
 		if (!this.permissionsData[dir]) {
 			this.permissionsData[dir] = this.createDefaultPermissions();
@@ -81,9 +83,9 @@ export class Permissions {
 	}
 
 	getDirectoryPermission(directory: string, permission: Permission) {
-		{
-			return this.permissionsData[directory.toString()][permission];
-		}
+		const perms = this.getDirectoryPermissions(directory);
+
+		return perms[permission];
 	}
 
 	async onPermissionsUpdate() {
@@ -100,20 +102,21 @@ export class Permissions {
 	 * @param value - Value to set the permission to
 	 */
 	async setDirectoryPermission(
-		directory: string,
+		dir: string,
 		permission: Permission,
 		value: boolean
 	) {
-		let perm = this.permissionsData[directory.toString()];
+		const directory = String(dir);
+		let perm = this.permissionsData[directory];
 
 		if (perm == undefined) {
 			perm = this.createDefaultPermissions();
 		}
 
 		perm[permission] = value;
-		this.permissionsData[directory.toString()] = perm;
+		this.permissionsData[directory] = perm;
 
-		void (await this.onPermissionsUpdate());
+		await this.onPermissionsUpdate();
 	}
 
 	/**
@@ -125,9 +128,12 @@ export class Permissions {
 		const val = this.getDirectoryPermission(directory, permission);
 
 		if (val !== true) {
-			const val = this.getDirectoryPermission(directory, "operator");
+			const isOperator = this.getDirectoryPermission(
+				directory,
+				"operator"
+			);
 
-			if (val !== true) {
+			if (isOperator !== true) {
 				throw new PermissionsError(
 					`Application at '${directory}' does not have permission '${permission}'`
 				);
