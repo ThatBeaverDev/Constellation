@@ -4,18 +4,13 @@ export default class systemLoginInterface extends GuiApplication {
 	users: Record<UserAlias["name"], UserAlias> = {};
 	user: UserAlias["name"] = "guest";
 	errorText: string = "";
+	sideglassSize: number = 200;
 
 	async init() {
 		this.renderer.hideWindowHeader();
 		this.renderer.hideWindowCorners();
 		this.renderer.makeWindowInvisible();
 		this.renderer.maximiseWindow();
-
-		this.renderer.moveWindow(0, 0);
-		this.renderer.resizeWindow(
-			this.renderer.displayWidth,
-			this.renderer.displayHeight
-		);
 
 		this.users = this.env.users.all();
 
@@ -157,6 +152,12 @@ export default class systemLoginInterface extends GuiApplication {
 	frame() {
 		this.renderer.clear();
 
+		this.renderer.moveWindow(0, 0);
+		this.renderer.resizeWindow(
+			this.renderer.displayWidth,
+			this.renderer.displayHeight
+		);
+
 		const renderTime = () => {
 			const timeFontSize = 45;
 
@@ -174,26 +175,33 @@ export default class systemLoginInterface extends GuiApplication {
 			const time = `${hours}:${minutes}:${seconds}`;
 			const timeWidth = this.renderer.getTextWidth(time, timeFontSize);
 			const timeHeight = this.renderer.getTextHeight(time, timeFontSize);
-			const timeLeft = (200 - timeWidth) / 2;
+			const timeLeft = (this.sideglassSize - timeWidth) / 2;
 
 			this.renderer.text(timeLeft, 9, time, timeFontSize);
 
 			// date
 			const date = `${weekdayName}, ${dayOfMonth}${afterDate} of ${monthName}`;
 			const dateWidth = this.renderer.getTextWidth(date);
-			const dateLeft = (200 - dateWidth) / 2;
+			const dateLeft = (this.sideglassSize - dateWidth) / 2;
 
 			this.renderer.text(dateLeft, 9 + timeHeight, date);
 
+			return Math.max(timeWidth, dateWidth);
 		};
 
 		// render left frosted box
-		this.renderer.box(0, 0, 200, this.renderer.windowHeight, {
-			background: "rgb(from var(--bg-dark) r g b / 0.5)",
-			isFrosted: true
-		});
+		this.renderer.box(
+			0,
+			0,
+			this.sideglassSize,
+			this.renderer.windowHeight,
+			{
+				background: "rgb(from var(--bg-dark) r g b / 0.5)",
+				isFrosted: true
+			}
+		);
 
-		renderTime();
+		this.sideglassSize = renderTime() + 25;
 
 		const drawLoginDialogue = () => {
 			const dimensions = 300;
