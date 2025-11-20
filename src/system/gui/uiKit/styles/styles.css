@@ -78,9 +78,7 @@ body {
 .uikitButton,
 .uikitTextbox,
 .uikitTextarea {
-	padding: 1px;
-	padding-left: 3px;
-	padding-right: 3px;
+	padding: 0px;
 
 	border: 0;
 	border-radius: 3px;
