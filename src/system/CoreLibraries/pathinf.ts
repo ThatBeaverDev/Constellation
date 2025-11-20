@@ -1,6 +1,6 @@
 import { ApplicationAuthorisationAPI } from "../security/env.js";
 
-const applicationExtensions = ["appl", "backgr"];
+const applicationExtensions = ["appl", "srvc"];
 
 export async function getAppConfig(
 	env: ApplicationAuthorisationAPI,
