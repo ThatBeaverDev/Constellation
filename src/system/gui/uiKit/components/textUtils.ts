@@ -63,30 +63,27 @@ export function insertNewlines(
 	size = 15,
 	fontFamily = font
 ): string {
-	const width = getTextWidth(text, size, fontFamily);
-
-	// make sure it's not already short enough
-	if (width < maxWidth) {
-		return text;
-	}
+	const spaceWidth = getTextWidth(" ", size, fontFamily);
 
 	const words = text.split(" ");
-	let result: string = "";
+	let result = "";
+	let runningWidth = 0;
 
-	let runningWidth: number = 0;
 	for (let i = 0; i < words.length; i++) {
-		let idx = Number(i);
-		const word = words[idx];
+		const word = words[i];
+		const wordWidth = getTextWidth(word, size, fontFamily);
 
-		const width = getTextWidth(word, size, fontFamily);
-		runningWidth += width;
-
-		if (runningWidth > maxWidth) {
-			result = result.trim() + "\n";
+		if (
+			runningWidth > 0 &&
+			runningWidth + spaceWidth + wordWidth > maxWidth
+		) {
+			result = result.trimEnd() + "\n";
 			runningWidth = 0;
 		}
 
+		// add the word
 		result += word + " ";
+		runningWidth += runningWidth === 0 ? wordWidth : spaceWidth + wordWidth;
 	}
 
 	return result.trim();
