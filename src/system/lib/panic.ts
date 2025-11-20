@@ -74,8 +74,7 @@ export default async function panic(
 		txt += line + "\n";
 	}
 
-	const ascii =
-		"\n" + asciiName + "[" + ConstellationKernel.config.keyword + "]\n\n";
+	const ascii = "\n" + asciiName + "\n\n";
 	const randomSnappyMessageId = Math.floor(
 		Math.random() * snappyMessages.length
 	);
