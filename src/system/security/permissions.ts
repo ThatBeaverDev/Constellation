@@ -2,6 +2,7 @@ import { PermissionsError } from "../errors.js";
 import { FilesystemAPI } from "../../fs/fs.js";
 import { securityTimestamp } from "./definitions.js";
 import { defaultUser } from "./users.js";
+import ConstellationKernel from "../kernel.js";
 
 const start = performance.now();
 
@@ -35,8 +36,15 @@ export type DirectoryPermissionStats = Record<Permission, boolean> & {
 
 export class Permissions {
 	permissionsData: PermissionsStore = {};
+	#ConstellationKernel: ConstellationKernel;
 
-	constructor(public fs: FilesystemAPI) {}
+	constructor(
+		public fs: FilesystemAPI,
+		ConstellationKernel: ConstellationKernel
+	) {
+		this.#ConstellationKernel = ConstellationKernel;
+	}
+
 	async init() {
 		// check if there's already a permissions file
 
@@ -124,18 +132,32 @@ export class Permissions {
 	 * @param directory - Directory to check permission on
 	 * @param permission - the specific permission
 	 */
-	checkDirectoryPermission(directory: string, permission: Permission) {
+	checkDirectoryPermission(
+		directory: string,
+		permission: Permission,
+		user: string
+	) {
 		const val = this.getDirectoryPermission(directory, permission);
 
-		if (val !== true) {
-			const isOperator = this.getDirectoryPermission(
+		if (val !== true || permission == "operator") {
+			const userPermissions =
+				this.#ConstellationKernel.security.users.getUser(user);
+
+			const applicationIsOperator = this.getDirectoryPermission(
 				directory,
 				"operator"
 			);
+			const userIsOperator = userPermissions.operator == "true";
 
-			if (isOperator !== true) {
+			if (!applicationIsOperator) {
 				throw new PermissionsError(
 					`Application at '${directory}' does not have permission '${permission}'`
+				);
+			}
+
+			if (!userIsOperator) {
+				throw new PermissionsError(
+					`User ${user} does not have operator permissions.`
 				);
 			}
 		}
