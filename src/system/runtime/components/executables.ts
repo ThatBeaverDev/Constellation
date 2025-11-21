@@ -407,8 +407,8 @@ export class Overlay extends Process implements GuiApplication {
 			ConstellationKernel,
 			directory,
 			this,
-			500,
-			300
+			1000,
+			600
 		);
 		this.renderer = UserInterface.uiKit.newRenderer(this, this.#window);
 	}

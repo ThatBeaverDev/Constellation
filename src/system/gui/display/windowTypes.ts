@@ -57,8 +57,8 @@ export class GraphicalWindow {
 		WindowSystem.windows.push(this);
 
 		// position windows where requested or at the default location
-		const width: number = 500;
-		const height: number = 300;
+		const width: number = 1000;
+		const height: number = 600;
 
 		const left = (this.portWidth - width) / 2;
 		const top = (this.portHeight - height) / 2;
@@ -503,8 +503,8 @@ export class OverlayWindow extends GraphicalWindow {
 		ConstellationKernel: ConstellationKernel,
 		name: string,
 		Application?: GuiApplication,
-		width: number = 500,
-		height: number = 300
+		width: number = 1000,
+		height: number = 600
 	) {
 		super(ConstellationKernel, name, Application);
 		this.minimumWidth = 200;
