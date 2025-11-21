@@ -1,7 +1,7 @@
 import { securityTimestamp, UserAlias } from "../definitions.js";
 import { ApplicationAuthorisationAPI, EnvironmentCreator } from "../env.js";
 import { Permission } from "../permissions.js";
-import { User } from "../users.js";
+import { User } from "../definitions.js";
 
 export default class EnvUsers {
 	#env: ApplicationAuthorisationAPI;
@@ -38,7 +38,22 @@ export default class EnvUsers {
 			directory: user.directory,
 			id: user.id,
 			lastLogin: Number(user.lastLogin),
-			allowGraphicalLogin: user.allowGraphicalLogin == "true"
+
+			allowGraphicalLogin: user.allowGraphicalLogin == "true",
+			isOperator: user.operator == "true",
+
+			changePassword: async (oldPassword, newPassword) => {
+				await this.#environmentCreator.users.validatePassword(
+					user.name,
+					oldPassword
+				);
+
+				this.#environmentCreator.users.setUserKey(
+					user.name,
+					"password",
+					newPassword
+				);
+			}
 		};
 
 		return obj;
@@ -68,6 +83,10 @@ export default class EnvUsers {
 
 	userInfo(name: UserAlias["name"] = this.#env.user) {
 		const start = performance.now();
+
+		if (name !== this.#env.user) {
+			this.#checkPermission("users");
+		}
 
 		const userData = this.#environmentCreator.users.usersStorage[name];
 		if (userData == undefined) return;

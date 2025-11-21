@@ -69,7 +69,7 @@ export default class ConstellationKernel implements Terminatable {
 		await this.fs.writeFile("/System/message.txt", "updateSystem");
 
 		// new kernel handles it :>
-		const newKernel = this.restart();
+		this.restart();
 	}
 
 	// property types
