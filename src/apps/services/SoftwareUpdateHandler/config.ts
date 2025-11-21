@@ -4,7 +4,8 @@ const manifest: ApplicationManifest = {
 	category: "Developer",
 	author: "ThatBeaverDev",
 	version: 1,
-	icon: "rotate-ccw"
+	icon: "rotate-ccw",
+	userspace: false
 };
 
 export default manifest;
