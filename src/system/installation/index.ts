@@ -42,7 +42,8 @@ export async function install(
 	await ConstellationKernel.security.users.newUser("admin", "administrator", {
 		profilePicture: "shield-user",
 		fullName: "Admin",
-		allowGraphicalLogin: "true"
+		allowGraphicalLogin: "true",
+		operator: "true"
 	});
 	await ConstellationKernel.security.users.newUser(
 		"system",
