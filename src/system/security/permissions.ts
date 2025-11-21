@@ -2,6 +2,7 @@ import { PermissionsError } from "../errors.js";
 import { FilesystemAPI } from "../../fs/fs.js";
 import { securityTimestamp } from "./definitions.js";
 import { defaultUser } from "./users.js";
+import ConstellationKernel from "../kernel.js";
 
 const start = performance.now();
 
@@ -35,12 +36,21 @@ export type DirectoryPermissionStats = Record<Permission, boolean> & {
 
 export class Permissions {
 	permissionsData: PermissionsStore = {};
+	#ConstellationKernel: ConstellationKernel;
 
-	constructor(public fs: FilesystemAPI) {}
+	constructor(
+		public fs: FilesystemAPI,
+		ConstellationKernel: ConstellationKernel
+	) {
+		this.#ConstellationKernel = ConstellationKernel;
+	}
+
 	async init() {
 		// check if there's already a permissions file
+
 		const permissionsFileExists =
 			(await this.fs.stat(permissionsDirectory)) !== undefined;
+
 		// if the permissions file exists, use it, else use {}
 		const fileData = permissionsFileExists
 			? JSON.parse((await this.fs.readFile(permissionsDirectory)) || "{}")
@@ -51,7 +61,7 @@ export class Permissions {
 	}
 
 	createDefaultPermissions(): DirectoryPermissionStats {
-		return {
+		return structuredClone({
 			user: defaultUser,
 			windows: false,
 			systemControl: false,
@@ -67,11 +77,11 @@ export class Permissions {
 			managePermissions: false,
 			keylogger: false,
 			operator: false
-		};
+		});
 	}
 
 	getDirectoryPermissions(directory: string): DirectoryPermissionStats {
-		const dir = directory.toString();
+		const dir = String(directory);
 
 		if (!this.permissionsData[dir]) {
 			this.permissionsData[dir] = this.createDefaultPermissions();
@@ -81,9 +91,9 @@ export class Permissions {
 	}
 
 	getDirectoryPermission(directory: string, permission: Permission) {
-		{
-			return this.permissionsData[directory.toString()][permission];
-		}
+		const perms = this.getDirectoryPermissions(directory);
+
+		return perms[permission];
 	}
 
 	async onPermissionsUpdate() {
@@ -100,20 +110,21 @@ export class Permissions {
 	 * @param value - Value to set the permission to
 	 */
 	async setDirectoryPermission(
-		directory: string,
+		dir: string,
 		permission: Permission,
 		value: boolean
 	) {
-		let perm = this.permissionsData[directory.toString()];
+		const directory = String(dir);
+		let perm = this.permissionsData[directory];
 
 		if (perm == undefined) {
 			perm = this.createDefaultPermissions();
 		}
 
 		perm[permission] = value;
-		this.permissionsData[directory.toString()] = perm;
+		this.permissionsData[directory] = perm;
 
-		void (await this.onPermissionsUpdate());
+		await this.onPermissionsUpdate();
 	}
 
 	/**
@@ -121,15 +132,32 @@ export class Permissions {
 	 * @param directory - Directory to check permission on
 	 * @param permission - the specific permission
 	 */
-	checkDirectoryPermission(directory: string, permission: Permission) {
+	checkDirectoryPermission(
+		directory: string,
+		permission: Permission,
+		user: string
+	) {
 		const val = this.getDirectoryPermission(directory, permission);
 
-		if (val !== true) {
-			const val = this.getDirectoryPermission(directory, "operator");
+		if (val !== true || permission == "operator") {
+			const userPermissions =
+				this.#ConstellationKernel.security.users.getUser(user);
 
-			if (val !== true) {
+			const applicationIsOperator = this.getDirectoryPermission(
+				directory,
+				"operator"
+			);
+			const userIsOperator = userPermissions.operator == "true";
+
+			if (!applicationIsOperator) {
 				throw new PermissionsError(
 					`Application at '${directory}' does not have permission '${permission}'`
+				);
+			}
+
+			if (!userIsOperator) {
+				throw new PermissionsError(
+					`User ${user} does not have operator permissions.`
 				);
 			}
 		}

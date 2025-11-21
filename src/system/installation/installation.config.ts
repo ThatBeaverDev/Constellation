@@ -1,5 +1,3 @@
-// /Users, /System, /Applications and /Temporary are premounted and don't need to be created.
-
 const url = new URL(window.location.href);
 const params = url.searchParams;
 
@@ -25,10 +23,19 @@ export const folders: string[] = [
 	"/.Cores"
 ];
 
+export type installerFileEntryType =
+	| "text"
+	| "jsonFilesIndex"
+	| "binary"
+	| "application";
+
 export const files: Record<
 	string,
 	| string
-	| { type: "jsonFilesIndex" | "binary" | "application"; directory: string }
+	| {
+			type: installerFileEntryType;
+			directory: string;
+	  }
 > = {
 	// system IDX
 	"/build/indexes/system.idx": {
@@ -148,6 +155,12 @@ export const files: Record<
 	"/build/indexes/com.constellation.usershell.idx": {
 		type: "application",
 		directory: "/System/CoreExecutables/Shell.appl"
+	},
+
+	// updater
+	"/build/indexes/com.constellation.updateinstaller.idx": {
+		type: "application",
+		directory: "/System/CoreExecutables/SoftwareUpdateInstaller.srvc"
 	}
 };
 

@@ -158,7 +158,8 @@ export class ApplicationAuthorisationAPI {
 	#checkPermission(permission: Permission) {
 		this.#environmentCreator.permissions.checkDirectoryPermission(
 			this.directory,
-			permission
+			permission,
+			this.#user
 		);
 	}
 

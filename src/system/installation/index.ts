@@ -4,20 +4,33 @@ import ConstellationKernel from "../kernel.js";
 import { developmentOptions } from "./installation.config.js";
 import { installationTimestamp } from "./installationTimestamp.js";
 
+const path = "/System/installation/index.js";
+
 /**
  * Runs the non-graphical installer
  * @param ConstellationKernel - The kernel to install within.
  * @returns Whether the graphical postinstaller is required
  */
-export async function install(ConstellationKernel: ConstellationKernel) {
+export async function install(
+	ConstellationKernel: ConstellationKernel,
+	isSoftwareUpdate: boolean = false
+) {
 	const start = performance.now();
 	ConstellationKernel.setBootStatus(`Initialising`);
 
 	try {
-		await preinstall(ConstellationKernel);
+		await preinstall(ConstellationKernel, isSoftwareUpdate);
 	} catch (e: any) {
 		ConstellationKernel.setBootStatus(e, "error");
 		throw e; // escalate again to make sure main knows something went wrong
+	}
+
+	if (isSoftwareUpdate) {
+		ConstellationKernel.lib.logging.debug(
+			path,
+			"Software Update: exiting installer before user creation step."
+		);
+		return false;
 	}
 
 	const initialisationStart = performance.now();
@@ -29,7 +42,8 @@ export async function install(ConstellationKernel: ConstellationKernel) {
 	await ConstellationKernel.security.users.newUser("admin", "administrator", {
 		profilePicture: "shield-user",
 		fullName: "Admin",
-		allowGraphicalLogin: "true"
+		allowGraphicalLogin: "true",
+		operator: "true"
 	});
 	await ConstellationKernel.security.users.newUser(
 		"system",

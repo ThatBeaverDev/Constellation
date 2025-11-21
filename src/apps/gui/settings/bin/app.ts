@@ -1,33 +1,29 @@
-import body from "../resources/panels/body.js";
-import sidebar from "../resources/panels/sidebar.js";
+import { SettingsBody } from "../components/body.js";
+import { SettingsPages } from "../components/pages.js";
+import { SettingsSidebar } from "../components/sidebar.js";
 
-	sidebar?: sidebar;
-	body?: body;
 export default class systemSettings extends GuiApplication {
+	sidebar?: SettingsSidebar;
 
+	body?: SettingsBody;
+	page: keyof SettingsPages = "Home";
 
 	async init() {
-		// import sidebar
-		const sidebar = await this.env.include(
-			this.env.fs.resolve(this.directory, "resources/panels/sidebar.js")
-		);
-		this.sidebar = new sidebar.default(this);
+		// body
+		this.body = new SettingsBody(this);
 
-		// import body
-		const body = await this.env.include(
-			this.env.fs.resolve(this.directory, "resources/panels/body.js")
-		);
-		this.body = new body.default(this);
+		// sidebar
+		this.sidebar = new SettingsSidebar(this, this.body, 150);
 
 		this.renderer.windowName = "System Settings";
 		this.renderer.setIcon("cog");
 	}
 
-	frame() {
+	async frame() {
 		this.renderer.clear();
 
 		if (this.sidebar !== undefined) this.sidebar.render();
-		if (this.body !== undefined) this.body.render();
+		if (this.body !== undefined) await this.body.render();
 
 		this.renderer.commit();
 	}
