@@ -12,7 +12,7 @@ export default class Security {
 		const filesystem = ConstellationKernel.fs;
 
 		this.users = new Users(ConstellationKernel);
-		this.permissions = new Permissions(filesystem);
+		this.permissions = new Permissions(filesystem, ConstellationKernel);
 		this.env = new EnvironmentCreator(
 			filesystem,
 			this.users,
