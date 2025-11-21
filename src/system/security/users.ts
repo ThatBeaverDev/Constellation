@@ -2,25 +2,12 @@ import { FilesystemAPI } from "../../fs/fs.js";
 import { resolveDirectory } from "../io/fspath.js";
 import ConstellationKernel from "..//kernel.js";
 import { sha512 } from "../lib/crypto.js";
-import { securityTimestamp } from "./definitions.js";
+import { securityTimestamp, User } from "./definitions.js";
 
 const start = performance.now();
 const path = "/System/users.js";
 
 export const usersDirectory = "/System/users.json";
-
-export type User = {
-	name: string;
-	fullName: string;
-	directory: string;
-	password: string;
-	profilePicture: string;
-	wallpaperPath?: string;
-	id: string; // really it's this: `${number}-${string}-${string}-${string}-${string}-${string}` but typescript doesn't understand. (Date.now() plus a UUID.)
-	lastLogin: string; // UNIX timestamp as number
-	operator: string; // boolean
-	allowGraphicalLogin: string; // boolean
-};
 
 export const defaultUser = "guest";
 
@@ -115,14 +102,19 @@ export default class Users {
 		return this.usersStorage[username];
 	}
 
-	setUserKey(username: string, key: keyof User, value: string) {
+	async setUserKey(username: string, key: keyof User, value: string) {
 		const usr = this.usersStorage[username];
 
 		if (usr == undefined) {
 			throw new Error(`User ${username} does not exist.`);
 		}
 
-		usr[key] = value;
+		if (key == "password") {
+			usr.password = await sha512(value);
+		} else {
+			usr[key] = value;
+		}
+
 		void this.onUsersUpdate();
 	}
 
