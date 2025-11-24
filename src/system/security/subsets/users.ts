@@ -1,4 +1,4 @@
-import { securityTimestamp, UserAlias } from "../definitions.js";
+import { UserAlias } from "../definitions.js";
 import { ApplicationAuthorisationAPI, EnvironmentCreator } from "../env.js";
 import { Permission } from "../permissions.js";
 import { User } from "../definitions.js";
@@ -63,8 +63,6 @@ export default class EnvUsers {
 	 * @returns an array for every users's UserAlias
 	 */
 	all(): Record<UserAlias["name"], UserAlias> {
-		const start = performance.now();
-
 		this.#checkPermission("users");
 
 		const obj: Record<UserAlias["name"], UserAlias> = {};
@@ -76,14 +74,10 @@ export default class EnvUsers {
 			obj[user] = this.#userToAlias(userData);
 		}
 
-		securityTimestamp(`Env ${this.#env.directory} get all users`, start);
-
 		return obj;
 	}
 
 	userInfo(name: UserAlias["name"] = this.#env.user) {
-		const start = performance.now();
-
 		if (name !== this.#env.user) {
 			this.#checkPermission("users");
 		}
@@ -92,14 +86,11 @@ export default class EnvUsers {
 		if (userData == undefined) return;
 
 		const obj = this.#userToAlias(userData);
-		securityTimestamp(`Env ${this.#env.directory} get user info.`, start);
 
 		return obj;
 	}
 
 	async switch(user: string, password: string) {
-		const start = performance.now();
-
 		let ok;
 		try {
 			ok = await this.#environmentCreator.users.validatePassword(
@@ -107,11 +98,6 @@ export default class EnvUsers {
 				password
 			);
 		} catch (e) {
-			securityTimestamp(
-				`Env ${this.#env.directory} switch user.`,
-				start,
-				"error"
-			);
 			return {
 				ok: false,
 				data: e
@@ -121,8 +107,6 @@ export default class EnvUsers {
 		if (ok) {
 			this.#setUser(String(user));
 		}
-
-		securityTimestamp(`Env ${this.#env.directory} switch user.`, start);
 
 		return {
 			ok: true,

@@ -1,4 +1,3 @@
-import { installationTimestamp } from "./installationTimestamp.js";
 import { FilesystemInstaller } from "./fsinstall.js";
 import ConstellationKernel from "../kernel.js";
 
@@ -6,7 +5,6 @@ export async function preinstall(
 	ConstellationKernel: ConstellationKernel,
 	isSoftwareUpdate: boolean
 ) {
-	const start = performance.now();
 	ConstellationKernel.setBootStatus(`Initialising Preinstall`);
 
 	try {
@@ -22,10 +20,4 @@ export async function preinstall(
 	}
 
 	ConstellationKernel.setBootStatus("Preinstall Complete");
-
-	installationTimestamp({
-		label: "Erase, Download, and Write System",
-		start,
-		colour: "primary"
-	});
 }

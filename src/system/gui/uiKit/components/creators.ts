@@ -5,7 +5,6 @@ import { type GraphicalWindow } from "../../display/windowTypes.js";
 import {
 	canvasPosition,
 	canvasRenderingStep,
-	uiKitTimestamp,
 	uikitBoxConfig,
 	uikitCanvasOptions,
 	uikitIconOptions
@@ -305,8 +304,6 @@ export default class uiKitCreators {
 		for (const st of renderingSteps) {
 			const d = st.data;
 
-			const start = performance.now();
-
 			switch (st.type) {
 				case "line":
 					const start = d.start;
@@ -375,8 +372,6 @@ export default class uiKitCreators {
 					break;
 				}
 			}
-
-			uiKitTimestamp(`uikitCanvas2D ${st.type} update`, start);
 		}
 
 		return canvas;

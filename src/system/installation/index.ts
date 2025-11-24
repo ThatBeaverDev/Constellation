@@ -2,7 +2,6 @@ import { preinstall } from "./fs.js";
 import postinstall from "./postinstall.js";
 import ConstellationKernel from "../kernel.js";
 import { developmentOptions } from "./installation.config.js";
-import { installationTimestamp } from "./installationTimestamp.js";
 
 const path = "/System/installation/index.js";
 
@@ -15,7 +14,6 @@ export async function install(
 	ConstellationKernel: ConstellationKernel,
 	isSoftwareUpdate: boolean = false
 ) {
-	const start = performance.now();
 	ConstellationKernel.setBootStatus(`Initialising`);
 
 	try {
@@ -32,8 +30,6 @@ export async function install(
 		);
 		return false;
 	}
-
-	const initialisationStart = performance.now();
 
 	await ConstellationKernel.security.users.newUser("guest", "", {
 		fullName: "Guest",
@@ -55,19 +51,7 @@ export async function install(
 		}
 	);
 
-	installationTimestamp({
-		label: "Initialise System",
-		start: initialisationStart,
-		colour: "primary"
-	});
-
 	ConstellationKernel.setBootStatus("Complete");
-
-	installationTimestamp({
-		label: "Install System",
-		start,
-		colour: "primary"
-	});
 
 	if (
 		ConstellationKernel.config.dynamic.isDevmode &&

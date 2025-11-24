@@ -1,23 +1,19 @@
 import WindowSystem from "../../gui/display/windowSystem.js";
 import { GraphicalWindow } from "../../gui/display/windowTypes.js";
 import ConstellationKernel from "../..//kernel.js";
-import { securityTimestamp, WindowAlias } from "../definitions.js";
-import { ApplicationAuthorisationAPI } from "../env.js";
+import { WindowAlias } from "../definitions.js";
 import { Permission } from "../permissions.js";
 
 export default class EnvWindows {
 	#ConstellationKernel: ConstellationKernel;
 	#WindowSystem: WindowSystem;
-	#env: ApplicationAuthorisationAPI;
 	#checkPermission: (permission: Permission) => void;
 
 	constructor(
 		ConstellationKernel: ConstellationKernel,
-		parent: ApplicationAuthorisationAPI,
 		permissionCheck: (permission: Permission) => void
 	) {
 		this.#ConstellationKernel = ConstellationKernel;
-		this.#env = parent;
 		this.#checkPermission = permissionCheck;
 
 		if (!(ConstellationKernel.ui.type == "GraphicalInterface"))
@@ -112,8 +108,6 @@ export default class EnvWindows {
 	 * @returns an array for every window's WindowAlias
 	 */
 	all(): WindowAlias[] {
-		const start = performance.now();
-
 		this.#checkPermission("windows");
 		const UserInterface = this.#ConstellationKernel.ui;
 		if (!(UserInterface.type == "GraphicalInterface")) return [];
@@ -126,8 +120,6 @@ export default class EnvWindows {
 			obj.push(wn);
 		}
 
-		securityTimestamp(`Env ${this.#env.directory} get all windows`, start);
-
 		return obj;
 	}
 
@@ -135,8 +127,6 @@ export default class EnvWindows {
 	 * @returns WindowAlias of the focused window
 	 */
 	getFocus(): WindowAlias | undefined {
-		const start = performance.now();
-
 		this.#checkPermission("windows");
 		const UserInterface = this.#ConstellationKernel.ui;
 		if (!(UserInterface.type == "GraphicalInterface")) return undefined;
@@ -148,8 +138,6 @@ export default class EnvWindows {
 		if (target == undefined) return undefined; // no window is focused
 
 		const obj = this.#windowToAlias(target);
-
-		securityTimestamp(`Env ${this.#env.directory} get window focus`, start);
 
 		return obj;
 	}

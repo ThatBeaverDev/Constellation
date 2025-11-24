@@ -1,4 +1,3 @@
-import { installationTimestamp } from "./installationTimestamp.js";
 import { InstallationError } from "../errors.js";
 import {
 	files,
@@ -91,25 +90,14 @@ export class FilesystemInstaller {
 	}
 
 	async folders() {
-		const start = performance.now();
 		this.#ConstellationKernel.setBootStatus(`Creating Folders...`);
 
 		for (const directory of folders) {
-			const start = performance.now();
 			await this.fs.mkdir(directory);
-			installationTimestamp({ label: `Create ${directory}`, start });
 		}
-
-		installationTimestamp({
-			label: "Create Directories",
-			start,
-			colour: "secondary"
-		});
 	}
 
 	async downloadAndConvert(URL: string) {
-		const start = performance.now();
-
 		try {
 			const response = await fetch(URL);
 			if (!response.ok) {
@@ -123,24 +111,13 @@ export class FilesystemInstaller {
 				reader.onabort = () => reject(new Error("Read aborted"));
 				reader.readAsDataURL(blob);
 			});
-			installationTimestamp({
-				label: `Download and Convert ${URL}`,
-				start
-			});
 			return dataURL;
 		} catch (error) {
 			this.#ConstellationKernel.lib.logging.warn(path, error);
-			installationTimestamp({
-				label: `Download and Convert ${URL} [failed]`,
-				start,
-				colour: "error"
-			});
 			return null;
 		}
 	}
 	async files() {
-		const start = performance.now();
-
 		const source = isCommandLine
 			? async (location: string): Promise<string> => {
 					const fs = await import("node:fs/promises");
@@ -172,17 +149,9 @@ export class FilesystemInstaller {
 		const downloadedContents: Record<string, string> = {};
 
 		for (const location in files) {
-			const start = performance.now();
-
 			const response = await downloadingContents[location];
 
 			downloadedContents[location] = response;
-
-			installationTimestamp({
-				label: `Retrieve File (${location})`,
-				start,
-				colour: "tertiary-dark"
-			});
 		}
 
 		const writingWaitlist: Promise<any>[] = [];
@@ -202,8 +171,6 @@ export class FilesystemInstaller {
 			let content;
 			switch (type) {
 				case "text": {
-					const start = performance.now();
-
 					this.#ConstellationKernel.setBootStatus(
 						`Cloning ${location}`
 					);
@@ -212,18 +179,10 @@ export class FilesystemInstaller {
 
 					writingWaitlist.push(this.fs.writeFile(directory, content));
 
-					installationTimestamp({
-						label: `Copy text file to ${directory}`,
-						start,
-						colour: "secondary-light"
-					});
-
 					break;
 				}
 				case "application":
 				case "jsonFilesIndex": {
-					const start = performance.now();
-
 					this.#ConstellationKernel.setBootStatus(
 						`Unpackaging ${location}`
 					);
@@ -244,17 +203,9 @@ export class FilesystemInstaller {
 					await tcupkg(this.#ConstellationKernel, content, directory);
 					//);
 
-					installationTimestamp({
-						label: `Unpackage idx for ${directory}`,
-						start,
-						colour: "secondary-light"
-					});
-
 					break;
 				}
 				case "binary": {
-					const start = performance.now();
-
 					this.#ConstellationKernel.setBootStatus(
 						`Cloning and Encoding ${location}`
 					);
@@ -264,12 +215,6 @@ export class FilesystemInstaller {
 					)) as string;
 
 					writingWaitlist.push(this.fs.writeFile(directory, content));
-
-					installationTimestamp({
-						label: `Copy binary file to ${directory}`,
-						start,
-						colour: "secondary-light"
-					});
 
 					break;
 				}
@@ -281,14 +226,6 @@ export class FilesystemInstaller {
 		for (const i in writingWaitlist) {
 			await writingWaitlist[i];
 		}
-
-		installationTimestamp({
-			label: "Write Files",
-			start,
-			colour: "secondary"
-		});
-
-		const startPermissions = performance.now();
 
 		for (const location in files) {
 			const obj = files[location];
@@ -304,11 +241,5 @@ export class FilesystemInstaller {
 					);
 			}
 		}
-
-		installationTimestamp({
-			label: "Allocate Permissions",
-			start: startPermissions,
-			colour: "secondary"
-		});
 	}
 }

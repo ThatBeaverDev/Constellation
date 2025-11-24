@@ -8,9 +8,7 @@ import { GraphicalWindow } from "./windowTypes.js";
 import { snappingWindowInfo, UserPromptConfig } from "./definitions.js";
 import { OverlayWindow } from "./windowTypes.js";
 import { UnderlayWindow } from "./windowTypes.js";
-import { windowsTimestamp } from "./timestamp.js";
 
-const start = performance.now();
 const path = "/System/gui/display/windowSystem.js";
 
 export default class WindowSystem {
@@ -263,7 +261,6 @@ export default class WindowSystem {
 		if (gui.type !== "GraphicalInterface")
 			throw new Error("GUI is required.");
 
-		const start = performance.now();
 		const target = this.getWindowOfId(id);
 
 		if (target == undefined) {
@@ -287,8 +284,6 @@ export default class WindowSystem {
 		const targetIndex = this.windows.indexOf(target);
 		this.windows.splice(targetIndex, 1);
 		this.windows.push(target);
-
-		windowsTimestamp(`Focus window ${id}`, start);
 	}
 
 	setMinimiseEffect(effect: string) {
@@ -296,8 +291,6 @@ export default class WindowSystem {
 	}
 
 	updateWindows() {
-		const start = performance.now();
-
 		// get amount of windows which are visible.
 		let totalWindows = 0;
 		for (const win of this.windows) {
@@ -311,13 +304,9 @@ export default class WindowSystem {
 
 			win.reposition();
 		});
-
-		windowsTimestamp("Update Windows", start);
 	}
 
 	newWindow(title: string, ApplicationObject?: GuiApplication) {
-		const start = performance.now();
-
 		const win = new GraphicalWindow(
 			this.#ConstellationKernel,
 			title,
@@ -327,8 +316,6 @@ export default class WindowSystem {
 		this.focusWindow(win.winID);
 
 		this.updateWindows();
-
-		windowsTimestamp("Create new Window", start);
 
 		return {
 			id: win.winID,
@@ -345,8 +332,6 @@ export default class WindowSystem {
 	styleElem: HTMLStyleElement;
 
 	async updateLiveStyling() {
-		const start = performance.now();
-
 		this.#ConstellationKernel.lib.logging.debug(
 			path,
 			"Loading windowing CSS for minimise animation: " +
@@ -368,8 +353,6 @@ export default class WindowSystem {
 		);
 
 		this.styleElem.textContent = css;
-
-		windowsTimestamp("Update CSS Styling", start);
 	}
 
 	/**
@@ -402,4 +385,3 @@ export default class WindowSystem {
 		);
 	}
 }
-windowsTimestamp("Startup of src/windows/windows.ts", start, "primary");

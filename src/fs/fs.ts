@@ -1,6 +1,5 @@
 import { defaultConfiguration } from "../system/constellation.config.js";
 import { isCommandLine } from "../system/getPlatform.js";
-import { DevToolsColor, performanceLog } from "../system/lib/debug.js";
 import {
 	ApiError,
 	BrowserFS,
@@ -23,33 +22,15 @@ if (isCommandLine) {
 	commandLineBase = process.cwd() + "/.fs";
 }
 
-function filesystemTimestamp(
-	label: string,
-	start: DOMHighResTimeStamp,
-	colour: DevToolsColor = "secondary"
-) {
-	performanceLog(label, start, "FileSystemManager", colour);
-}
-
-const start = performance.now();
-
 let fs: FSModule;
 if (!isCommandLine) {
-	const startDownloadBrowserFS = performance.now();
-
 	/* ------------------------------------------------------------- Download BrowserFS ------------------------------------------------------------- */
 
 	const BrowserFsExports = await import("./browserfs.js");
 	const BrowserFS: BrowserFS = BrowserFsExports.default();
 
-	filesystemTimestamp(
-		"Download and initalise BrowserFS",
-		startDownloadBrowserFS
-	);
-
 	/* ------------------------------------------------------------- Configure BrowserFS ------------------------------------------------------------- */
 
-	const configureBrowserFS = performance.now();
 	await new Promise((resolve: Function) => {
 		let fs: FileSystemConfiguration["fs"] = "IndexedDB";
 		if (isCommandLine) fs = "InMemory";
@@ -59,7 +40,6 @@ if (!isCommandLine) {
 				console.error("PREBOOT:LOADFS", e);
 			}
 			console.log("Initialised Browser Filesystem.");
-			filesystemTimestamp("Configure BrowserFS", configureBrowserFS);
 			resolve();
 		});
 	});
@@ -75,7 +55,6 @@ if (!isCommandLine) {
 /* ------------------------------------------------------------- Write File Function ------------------------------------------------------------- */
 
 const writeFile = async (directory: string, content: string) => {
-	const start = performance.now();
 	let written = false;
 
 	fs.writeFile(directory, content, () => {
@@ -85,8 +64,6 @@ const writeFile = async (directory: string, content: string) => {
 	return new Promise((resolve) => {
 		const interval = setInterval(() => {
 			if (written == true) {
-				filesystemTimestamp(`writeFile ${directory}`, start);
-
 				clearInterval(interval);
 				resolve(undefined);
 				return;
@@ -98,11 +75,8 @@ const writeFile = async (directory: string, content: string) => {
 /* ------------------------------------------------------------- Read File Function ------------------------------------------------------------- */
 
 const readFile = async (directory: string): Promise<string | undefined> => {
-	const start = performance.now();
-
 	return new Promise((resolve: Function) =>
 		fs.readFile(directory, "utf8", (e: any, rv?: string) => {
-			filesystemTimestamp(`readFile ${directory}`, start);
 			resolve(rv);
 		})
 	);
@@ -111,11 +85,8 @@ const readFile = async (directory: string): Promise<string | undefined> => {
 /* ------------------------------------------------------------- Rename File/Folder Function ------------------------------------------------------------- */
 
 const rename = async (oldPath: string, newPath: string): Promise<void> => {
-	const start = performance.now();
-
 	return new Promise((resolve, reject) => {
 		fs.rename(oldPath, newPath, (err: any) => {
-			filesystemTimestamp(`rename ${oldPath} → ${newPath}`, start);
 			if (err) {
 				console.warn(`rename failed: ${oldPath} → ${newPath}`, err);
 				reject(err);
@@ -129,11 +100,8 @@ const rename = async (oldPath: string, newPath: string): Promise<void> => {
 /* ------------------------------------------------------------- List Directory Function ------------------------------------------------------------- */
 
 const readdir = async (directory: string): Promise<string[]> => {
-	const start = performance.now();
-
 	return new Promise((resolve: Function) =>
 		fs.readdir(directory, (e: any, rv?: string[]) => {
-			filesystemTimestamp(`readdir ${directory}`, start);
 			resolve(rv);
 		})
 	);
@@ -142,8 +110,6 @@ const readdir = async (directory: string): Promise<string[]> => {
 /* ------------------------------------------------------------- Create Directory Function ------------------------------------------------------------- */
 
 const mkdir = async (directory: string): Promise<undefined> => {
-	const start = performance.now();
-
 	const parentDirectory = getParentDirectory(directory);
 
 	const parentListing = await readdir(parentDirectory);
@@ -155,11 +121,6 @@ const mkdir = async (directory: string): Promise<undefined> => {
 	}
 	if (parentListing.includes(directory.textAfter(parentDirectory))) {
 		// already exists
-
-		filesystemTimestamp(
-			`mkdir ${directory} - failed (already exists)`,
-			start
-		);
 
 		return new Promise((resolve: Function) => {
 			resolve();
@@ -178,7 +139,6 @@ const mkdir = async (directory: string): Promise<undefined> => {
 
 	return new Promise((resolve: Function) => {
 		fs.mkdir(directory, (e: any) => {
-			filesystemTimestamp(`mkdir ${directory}`, start);
 			resolve();
 		});
 	});
@@ -187,11 +147,8 @@ const mkdir = async (directory: string): Promise<undefined> => {
 /* ------------------------------------------------------------- Stat File / Folder Function ------------------------------------------------------------- */
 
 const stat = async (directory: string): Promise<Stats | undefined> => {
-	const start = performance.now();
-
 	return new Promise((resolve) => {
 		fs.stat(directory, (_: any, data?: Stats) => {
-			filesystemTimestamp(`stat ${directory}`, start);
 			resolve(data);
 		});
 	});
@@ -200,11 +157,8 @@ const stat = async (directory: string): Promise<Stats | undefined> => {
 /* ------------------------------------------------------------- Delete Directory Function ------------------------------------------------------------- */
 
 const rmdir = async (directory: string): Promise<any> => {
-	const start = performance.now();
-
 	return new Promise((resolve: Function) =>
 		fs.rmdir(directory, () => {
-			filesystemTimestamp(`rmdir ${directory}`, start);
 			resolve();
 		})
 	);
@@ -213,11 +167,8 @@ const rmdir = async (directory: string): Promise<any> => {
 /* ------------------------------------------------------------- Delete File Function ------------------------------------------------------------- */
 
 const unlink = async (directory: string): Promise<any> => {
-	const start = performance.now();
-
 	return new Promise((resolve: Function) => {
 		fs.unlink(directory, () => {
-			filesystemTimestamp(`unlink ${directory}`, start);
 			resolve();
 		});
 	});
@@ -387,5 +338,3 @@ export async function fsLoaded() {
 		});
 	});
 }
-
-filesystemTimestamp("Startup of src/io/fs.ts", start, "primary");
