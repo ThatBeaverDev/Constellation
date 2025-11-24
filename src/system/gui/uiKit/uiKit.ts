@@ -142,6 +142,15 @@ export class UiKitRendererClass {
 
 	#ConstellationKernel: ConstellationKernel;
 
+	/**
+	 * How much the user has scrolled. Adjusted so that adding it to an element's Y-position makes it scroll naturally.
+	 */
+	scroll: number = 0;
+	/**
+	 * The max allowed scroll.
+	 */
+	furthestScroll: number = Infinity;
+
 	constructor(
 		ConstellationKernel: ConstellationKernel,
 		process?: GuiApplication,
@@ -665,7 +674,7 @@ export class UiKitRendererClass {
 	/**
 	 * Commits all UI elements since the last `renderer.clear()` call.
 	 */
-	commit() {
+	commit = () => {
 		const UserInterface = this.#ConstellationKernel.ui;
 		if (!(UserInterface.type == "GraphicalInterface")) return;
 
@@ -751,6 +760,23 @@ export class UiKitRendererClass {
 		this.controller.abort();
 		this.controller = new AbortController();
 		this.signal = this.controller.signal;
+
+		this.#window.body.addEventListener(
+			"wheel",
+			(e) => {
+				function clampMin(n: number, min: number) {
+					if (n > min) return min;
+
+					return n;
+				}
+
+				this.scroll = clampMin(
+					this.scroll - e.deltaY,
+					this.furthestScroll
+				);
+			},
+			{ signal: this.signal, passive: false }
+		);
 
 		const gui = this.#ConstellationKernel.ui;
 		if (!(gui.type == "GraphicalInterface")) return;
@@ -1006,7 +1032,7 @@ export class UiKitRendererClass {
 		this.#displayedSteps = newDisplayedSteps;
 
 		uiKitTimestamp("Commit to Window", start);
-	}
+	};
 
 	terminate() {
 		this.#deleteElements();
