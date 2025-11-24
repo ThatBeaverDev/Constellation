@@ -1,4 +1,3 @@
-import { UIError } from "../../../errors.js";
 import ConstellationKernel from "../../../kernel.js";
 import { DOMHandler } from "../../../tui/display.js";
 import { TextInterface } from "../../../tui/tui.js";
@@ -61,9 +60,6 @@ export default class uiKitCreators {
 
 		if (this.#window) this.#window.body.appendChild(icon);
 
-		if (icon == null)
-			throw new UIError("uikit element has disappeared in processing");
-
 		return icon;
 	};
 
@@ -87,9 +83,6 @@ export default class uiKitCreators {
 
 		if (this.#window) this.#window.body.appendChild(text);
 
-		if (text == null)
-			throw new UIError("uikit element has disappeared in processing");
-
 		return text;
 	};
 
@@ -110,9 +103,6 @@ export default class uiKitCreators {
 		button.style.cssText = `left: ${x}px; top: ${y}px; font-size: ${size}px;`;
 
 		if (this.#window) this.#window.body.appendChild(button);
-
-		if (button == null)
-			throw new UIError("uikit element has disappeared in processing");
 
 		return button;
 	};
@@ -152,9 +142,6 @@ export default class uiKitCreators {
 
 		if (this.#window) this.#window.body.appendChild(textbox);
 
-		if (textbox == null)
-			throw new UIError("uikit element has disappeared in processing");
-
 		if (options.isEmpty == false)
 			textbox.value = String(this.textboxElems[id]?.value || ""); // make the value stay
 
@@ -177,9 +164,6 @@ export default class uiKitCreators {
 
 		if (this.#window) this.#window.body.appendChild(line);
 
-		if (line == null)
-			throw new UIError("uikit element has disappeared in processing");
-
 		return line;
 	};
 
@@ -191,9 +175,6 @@ export default class uiKitCreators {
 		line.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px;`;
 
 		if (this.#window) this.#window.body.appendChild(line);
-
-		if (line == null)
-			throw new UIError("uikit element has disappeared in processing");
 
 		return line;
 	};
@@ -222,9 +203,6 @@ export default class uiKitCreators {
 
 		if (this.#window) this.#window.body.appendChild(bar);
 
-		if (bar == null)
-			throw new UIError("uikit element has disappeared in processing");
-
 		return bar;
 	};
 
@@ -251,9 +229,6 @@ export default class uiKitCreators {
 		}
 
 		if (this.#window) this.#window.body.appendChild(area);
-
-		if (area == null)
-			throw new UIError("uikit element has disappeared in processing");
 
 		const focusedWindow = !(
 			this.#ConstellationKernel.ui.type == "GraphicalInterface"
@@ -302,9 +277,6 @@ export default class uiKitCreators {
 		if (config?.isFrosted == true) box.classList.add("frosted");
 
 		if (this.#window) this.#window.body.appendChild(box);
-
-		if (box == null)
-			throw new UIError("uikit element has disappeared in processing");
 
 		return box;
 	};
@@ -447,6 +419,31 @@ export default class uiKitCreators {
 		};
 
 		return container;
+	};
+
+	uikitIframe = (
+		id: number,
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		url: string,
+		onMessage: (data: any) => Promise<void> | void
+	) => {
+		const iframe = document.createElement("iframe");
+		iframe.id = String(window.renderID++);
+		iframe.classList.add("uikitIframe");
+
+		iframe.style.left = `${x}px`;
+		iframe.style.top = `${y}px`;
+		iframe.style.width = `${width}px`;
+		iframe.style.height = `${height}px`;
+
+		iframe.src = url;
+
+		if (this.#window) this.#window.body.appendChild(iframe);
+
+		return iframe;
 	};
 }
 

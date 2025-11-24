@@ -170,7 +170,49 @@ export default class uiKitTransitioners {
 					setElementStyle(element, "width", `${newArg}px`);
 				case 3:
 					// height
+					setElementStyle(element, "height", `${newArg}px`);
+					break;
+				default:
+					throw new Error("Unknown key: " + i);
+			}
+		}
+
+		return true;
+	}
+
+	uikitIframe(
+		element: HTMLIFrameElement,
+		oldStep: step,
+		newStep: step
+	): boolean {
+		for (const i in newStep.args) {
+			const oldArg = oldStep.args[i];
+			const newArg = newStep.args[i];
+
+			if (oldArg == newArg) continue;
+
+			switch (Number(i)) {
+				case 0:
+					// X position
+					setElementStyle(element, "left", `${newArg}px`);
+					break;
+				case 1:
+					// Y position
+					setElementStyle(element, "top", `${newArg}px`);
+					break;
+				case 2:
+					// width
 					setElementStyle(element, "width", `${newArg}px`);
+				case 3:
+					// height
+					setElementStyle(element, "height", `${newArg}px`);
+					break;
+				case 4:
+					// URL
+					element.src = newArg;
+					break;
+				case 5:
+					// onMessage
 					break;
 				default:
 					throw new Error("Unknown key: " + i);
