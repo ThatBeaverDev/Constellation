@@ -526,11 +526,14 @@ export class UiKitRendererClass {
 		x: number,
 		y: number,
 		header: string,
-		buttons: Record<string, Function>
+		buttons: Record<string, Function | undefined>
 	) {
 		for (const key in buttons) {
 			const value = buttons[key];
 
+			if (value == undefined) {
+				delete buttons[key];
+			}
 			if (value) isArrow(value, true);
 		}
 
@@ -541,7 +544,7 @@ export class UiKitRendererClass {
 			x,
 			y,
 			header,
-			buttons
+			buttons as Record<string, Function>
 		);
 	}
 	removeContextMenu() {

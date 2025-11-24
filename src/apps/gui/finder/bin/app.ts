@@ -1,7 +1,9 @@
 import { pathIcon } from "pathinf";
-import { directoryPointType } from "../../../../system/security/definitions.js";
-import finderBody from "../components/body.js";
 import { Stats } from "../../../../fs/BrowserFsTypes.js";
+import PanelKit from "panelkit";
+import { openFile } from "gui";
+import { directoryPointType } from "../../../../system/security/definitions.js";
+import { bytesToSize } from "../components/utils.js";
 
 const clamp = (n: number, min: number, max: number) => {
 	if (n < min) {
@@ -21,21 +23,11 @@ export interface listing {
 	type: directoryPointType;
 	subtext: string;
 	hasAccess?: boolean;
-
-	trashMetadata?: {
-		originalPath: string;
-		deletionTime: string;
-		deletionTimestamp: number;
-	};
 }
 
 export default class finder extends GuiApplication {
 	name: string = "Finder";
-	type: "picker" | "app" = "app";
-	pipes!: {
-		recieve: { intent: string; data: any }[];
-		send: { intent: string; data: any }[];
-	};
+
 	path: string = "/";
 	selector: number = 0;
 	listing: listing[] = [];
@@ -44,36 +36,22 @@ export default class finder extends GuiApplication {
 	icon: string = "folder";
 	ok: boolean = false;
 	sidebarWidth: number = 100;
-	cdInterval: ReturnType<typeof setInterval> = setInterval(() => {
-		this.cd(this.path);
-	}, 500);
+	counter = 0;
 
 	// submodules
-	body?: finderBody;
+	panelkit = new PanelKit(this.renderer);
 
 	async init() {
-		const [
-			initialDirectory = "/",
-			mode = "app",
-			recievingPipe,
-			sendingPipe
-		] = this.args;
-
-		this.body = new finderBody(this);
+		const [initialDirectory = "/"] = this.args;
 
 		await this.cd(initialDirectory);
-		this.type = mode;
-		this.pipes = {
-			recieve: recievingPipe,
-			send: sendingPipe
-		};
 
-		this.renderer.setIcon("folder");
 		this.renderer.setIcon(
 			this.env.fs.resolve(this.directory, "./resources/icon.svg")
 		);
 
-		this.ok = true;
+		this.renderer.windowName = "Finder";
+		this.renderer.windowShortName = "Finder";
 	}
 
 	async keydown(
@@ -253,9 +231,7 @@ export default class finder extends GuiApplication {
 					return "Insufficient Permissions.";
 				}
 
-				const size = Math.round(stat.size / 102.4) / 10;
-
-				return String(size) + " KiB" + lastModifiedText;
+				return bytesToSize(stat.size) + lastModifiedText;
 			};
 
 			const obj: listing = {
@@ -292,80 +268,223 @@ export default class finder extends GuiApplication {
 		const newIcon = await pathIcon(this.env, this.path);
 		if (newIcon !== this.icon) {
 			this.icon = newIcon;
-			this.renderer.setIcon(this.icon);
 		}
 
 		this.ok = true;
 	}
 
+	isApplication(directory: string) {
+		return directory.endsWith(".appl") || directory.endsWith(".srvc");
+	}
+
 	frame() {
-		// pipe messages (for picker)
-		if (this.pipes !== undefined) {
-			// only check this if we have a pipes value
-			if (this.pipes.recieve !== undefined) {
-				// loop through messages
-				for (const i in this.pipes.recieve) {
-					i;
-
-					const item = this.pipes.recieve[0];
-					if (typeof item !== "object") continue;
-
-					this.pipes.recieve.splice(0, 1);
-				}
-			}
-		}
-
 		if (this.location == undefined) return;
-
-		// if we're a picker, name ourselves so
-		if (this.type == "picker") {
-			this.renderer.windowName = "File Picker";
-			this.renderer.windowShortName = "File Picker";
-		} else {
-			this.renderer.windowName = "Finder";
-			this.renderer.windowShortName = "Finder";
-		}
-
-		// insure this.selector is defined
-		if (this.selector == undefined) {
-			this.selector = 0;
-		}
+		if (this.counter++ % 250 == 0) this.cd(this.path);
 
 		// insure we are ready to render
 		if (!this.ok) return;
 
 		this.renderer.clear();
 
-		// prevent execution when the listing is blank
+		// prevent drawing when the listing is blank
 		if (this.listing == undefined) {
 			return;
 		}
 
-		if (this.body == undefined) return;
+		const panels = this.panelkit;
 
-		this.body.render();
+		// sidebar
+		panels.sidebar(
+			{ type: "title", text: "Important" },
+			{
+				type: "item",
+				text: "Documents",
+				icon: "file-stack",
+				callback: () => {
+					const userinf = this.env.users.userInfo(this.env.user);
+
+					this.cd(
+						this.env.fs.resolve(
+							userinf?.directory || "/",
+							"./Documents"
+						)
+					);
+				}
+			},
+			{
+				type: "item",
+				text: "Desktop",
+				icon: "dock",
+				callback: () => {
+					const userinf = this.env.users.userInfo(this.env.user);
+
+					this.cd(
+						this.env.fs.resolve(
+							userinf?.directory || "/",
+							"./Desktop"
+						)
+					);
+				}
+			},
+			{
+				type: "item",
+				text: "Notes",
+				icon: "notebook",
+				callback: () => {
+					const userinf = this.env.users.userInfo(this.env.user);
+
+					this.cd(
+						this.env.fs.resolve(
+							userinf?.directory || "/",
+							"./Notes"
+						)
+					);
+				}
+			},
+			{
+				type: "item",
+				text: "Home",
+				icon: "house",
+				callback: () => {
+					const userinf = this.env.users.userInfo(this.env.user);
+
+					this.cd(userinf?.directory || "/");
+				}
+			}
+		);
+
+		// body
+		panels.reset();
+
+		const showPropertiesOfPath = (path: string) => {
+			this.env.exec(
+				this.env.fs.resolve("./components/fileproperties.appl"),
+				[path]
+			);
+		};
+
+		const RightClick = (directory: string) => {
+			return (x: number, y: number) => {
+				this.renderer.setContextMenu(x, y, "Options", {
+					"Show Contents": this.isApplication(directory)
+						? async () => {
+								await this.cd(directory);
+							}
+						: undefined,
+					Properties: () => showPropertiesOfPath(directory),
+					Duplicate: async () => {
+						await this.env.fs.copy(directory, `${directory} copy`);
+						this.cd(this.path);
+					},
+					Rename: async () => {
+						const newName = await this.renderer.askUserQuestion(
+							"Rename Item",
+							"What should this item by named?",
+							"folder"
+						);
+
+						let parentFolder = directory.textBeforeLast("/");
+						if (parentFolder == "") parentFolder = "/";
+
+						const newDirectory = this.env.fs.resolve(
+							parentFolder,
+							newName
+						);
+
+						await this.env.fs.move(directory, newDirectory);
+						this.cd(this.path);
+					},
+					Delete: async () => {
+						const stats = await this.env.fs.stat(directory);
+
+						if (stats.isDirectory()) {
+							const walk = async (directory: string) => {
+								const items =
+									await this.env.fs.listDirectory(directory);
+
+								for (const item of items) {
+									const path = this.env.fs.resolve(
+										directory,
+										item
+									);
+
+									const stats = await this.env.fs.stat(path);
+
+									if (stats.isDirectory()) {
+										await walk(path);
+									} else {
+										await this.env.fs.deleteFile(path);
+									}
+								}
+
+								await this.env.fs.deleteDirectory(directory);
+							};
+
+							await walk(directory);
+						} else {
+							await this.env.fs.deleteFile(directory);
+						}
+
+						this.cd(this.path);
+					}
+				});
+			};
+		};
+
+		panels.mediumCard(
+			`${this.location.path} - Current Location`,
+			this.location.subtext,
+			this.location.icon,
+			undefined,
+			RightClick(this.location.path),
+			{
+				type: "button",
+				text: "Properties",
+				onClick: () => {
+					if (!this.location?.path) return;
+
+					showPropertiesOfPath(this.location.path);
+				}
+			}
+		);
+
+		panels.title("Directory contents");
+
+		this.listing.forEach((item) => {
+			panels.mediumCard(
+				item.name,
+				item.subtext,
+				item.icon,
+				() => {
+					this.openFile(item.path);
+				},
+				RightClick(item.path),
+				{
+					type: "button",
+					text: "Properties",
+					onClick: () => {
+						showPropertiesOfPath(item.path);
+					}
+				}
+			);
+		});
 
 		this.renderer.commit();
 	}
 
-	pickerSubmit() {
-		const itemName = this.listing[this.selector].name;
-		const path =
-			itemName == ".."
-				? this.path
-				: this.env.fs.resolve(this.path, itemName);
+	async openFile(path: string) {
+		const stats = await this.env.fs.stat(path);
 
-		this.env.debug(
-			this.name,
-			"Submitting '" + path + "' for file picker result."
-		);
+		const isDirectory = stats.isDirectory();
 
-		// send it to the caller and exit
-		this.pipes.send.push({ intent: "selectionComplete", data: path });
-		this.exit();
-	}
-
-	async terminate(): Promise<void> {
-		clearInterval(this.cdInterval);
+		if (isDirectory) {
+			if (this.isApplication(path)) {
+				this.env.exec(path);
+			} else {
+				await this.cd(path);
+			}
+		} else {
+			openFile(this.env, path);
+		}
 	}
 }
