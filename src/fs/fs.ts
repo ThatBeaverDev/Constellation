@@ -7,7 +7,7 @@ import {
 	FileSystemConfiguration,
 	FSModule,
 	Stats
-} from "./BrowserFsTypes.js";
+} from "./BrowserFsTypes";
 import {
 	getParentDirectory,
 	normaliseDirectory,

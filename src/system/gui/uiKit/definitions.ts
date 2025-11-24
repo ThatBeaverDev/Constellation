@@ -59,7 +59,7 @@ export type uikitTextboxConfig = {
 export type uikitTextareaConfig = {
 	isInvisible?: boolean;
 	isEmpty?: boolean;
-	disableMobileAutocorrect: boolean;
+	disableMobileAutocorrect?: boolean;
 };
 export type uikitBoxConfig = {
 	borderRadius?: number | string;

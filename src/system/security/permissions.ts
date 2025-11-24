@@ -34,7 +34,7 @@ export type DirectoryPermissionStats = Record<Permission, boolean> & {
 	user: string;
 };
 
-export class Permissions {
+export class ConstellationPermissionsManager {
 	permissionsData: PermissionsStore = {};
 	#ConstellationKernel: ConstellationKernel;
 
