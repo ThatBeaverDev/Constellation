@@ -37,6 +37,9 @@
 			"fzf": [
 				"./src/system/CoreLibraries/fzf.ts"
 			],
+			"panelkit": [
+				"./src/system/CoreLibraries/panelkit.ts"
+			]
 		},
 		"noUnusedLocals": true,
 		// types
