@@ -15,12 +15,16 @@ export default class EnvFs {
 		directoryActionCheck: (
 			directory: string,
 			isWriteOperation: boolean
-		) => void
+		) => void,
+		directory: string
 	) {
 		this.#ConstellationKernel = ConstellationKernel;
 		this.#directoryActionCheck = directoryActionCheck;
 
-		this.resolve = ConstellationKernel.fs.resolve;
+		this.resolve = ConstellationKernel.fs.resolve.bind(
+			ConstellationKernel.fs,
+			directory
+		);
 		this.relative = ConstellationKernel.fs.relative;
 	}
 
