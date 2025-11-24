@@ -8,7 +8,7 @@ export async function getAppConfig(
 ) {
 	const appConf = await env.include(env.fs.resolve(directory, "config.js"));
 	// get the real data
-	return appConf?.default as ApplicationManifest;
+	return appConf?.default as ApplicationManifest | undefined;
 }
 
 export async function pathIcon(
