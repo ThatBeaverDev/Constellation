@@ -355,6 +355,22 @@ export class UiKitRendererClass {
 		return new UiKitElement(this, this.#steps.push(obj));
 	}
 
+	iframe(
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		URL: string,
+		onMessage: (data: any) => Promise<void> | void
+	) {
+		const obj: step = {
+			type: "uikitIframe",
+			args: [x, y, width, height, URL, onMessage]
+		};
+
+		return new UiKitElement(this, this.#steps.push(obj));
+	}
+
 	onClick(
 		elementID: number | UiKitElement,
 		leftClickCallback?: clickReference["left"],

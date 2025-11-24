@@ -77,7 +77,8 @@ body {
 /* brick elements */
 .uikitButton,
 .uikitTextbox,
-.uikitTextarea {
+.uikitTextarea,
+.uiKitIframe {
 	padding: 0px;
 
 	border: 0;
@@ -91,7 +92,8 @@ body {
 
 .uikitButton:not(.noBackground),
 .uikitTextbox,
-.uikitTextarea {
+.uikitTextarea,
+.uiKitIframe {
 	background-color: var(--bg);
 }
 
@@ -157,6 +159,6 @@ body {
 	background-color: var(--bg-light);
 }
 
-.uikitContextContainer > .uiKitButton {
+.uikitContextContainer>.uiKitButton {
 	position: absolute;
 }

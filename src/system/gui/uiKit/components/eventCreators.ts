@@ -102,4 +102,26 @@ export default class UIKitEventListeners {
 			{ signal: this.#signal }
 		);
 	}
+
+	uikitIframe(
+		element: HTMLIFrameElement,
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		url: string,
+		onMessage: (data: any) => Promise<void> | void
+	) {
+		window.addEventListener(
+			"message",
+			(event) => {
+				if (event.source == element.contentWindow) {
+					onMessage(event.data);
+				}
+			},
+			{
+				signal: this.#signal
+			}
+		);
+	}
 }
