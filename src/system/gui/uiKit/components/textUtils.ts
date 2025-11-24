@@ -26,7 +26,7 @@ export function getTextWidth(
 	ctx.font = `${size}px ${fontFamily}`;
 
 	let maxWidth: number = 0;
-	const lines = text.split("\n");
+	const lines = String(text).split("\n");
 	for (const line of lines) {
 		const width = ctx.measureText(line).width;
 
@@ -48,7 +48,7 @@ export function getTextHeight(
 	fontFamily = font,
 	round = true
 ) {
-	const height = text.split("\n").length * size * 1.2;
+	const height = String(text).split("\n").length * size * 1.2;
 
 	if (round) {
 		return Math.round(height);
@@ -57,7 +57,19 @@ export function getTextHeight(
 	}
 }
 
+const newLinesMap = new Map<[string, number, number, string], string>();
 export function insertNewlines(
+	text: string,
+	maxWidth: number,
+	size = 15,
+	fontFamily = font
+): string {
+	return (
+		newLinesMap.get([text, maxWidth, size, fontFamily]) ??
+		_insertNewlines(text, maxWidth, size, fontFamily)
+	);
+}
+function _insertNewlines(
 	text: string,
 	maxWidth: number,
 	size = 15,
