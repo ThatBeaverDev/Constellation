@@ -9,7 +9,7 @@ import Users from "./users.js";
 import {
 	DirectoryPermissionStats,
 	Permission,
-	Permissions
+	ConstellationPermissionsManager
 } from "./permissions.js";
 import ConstellationKernel from "..//kernel.js";
 import EnvWindows from "./subsets/windows.js";
@@ -28,12 +28,12 @@ export class EnvironmentCreator {
 	associations: any = {};
 	filesystem: FilesystemAPI;
 	users: Users;
-	permissions: Permissions;
+	permissions: ConstellationPermissionsManager;
 	#ConstellationKernel: ConstellationKernel;
 	constructor(
 		filesystem: FilesystemAPI,
 		users: Users,
-		permissions: Permissions,
+		permissions: ConstellationPermissionsManager,
 		ConstellationKernel: ConstellationKernel
 	) {
 		this.filesystem = filesystem;

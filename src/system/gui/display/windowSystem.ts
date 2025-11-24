@@ -241,7 +241,7 @@ export default class WindowSystem {
 		clearInterval(this.update);
 	}
 
-	setCSSVariable: typeof this.cssVariables.setCSSVariable;
+	setCSSVariable: (key: string, value: string) => void;
 
 	maxWinID = 0;
 

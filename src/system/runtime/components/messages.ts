@@ -51,12 +51,27 @@ export default class IPCMessageSender {
 }
 
 export class IPCMessage {
+	/**
+	 * The originating process as directory:id
+	 */
 	origin: `${string}:${number}`;
+	/**
+	 * The originating process's ID
+	 */
 	originDirectory: string;
 	target: Process;
-	data: any;
+	/**
+	 * The payload
+	 */
+	data: Partial<any>;
+	/**
+	 * The intent - what the message is for
+	 */
 	intent: string;
 	#replyCallback?: replyCallback;
+	/**
+	 * Whether you can reply to this message or not
+	 */
 	hasReplyCallback: boolean = false;
 
 	constructor(
