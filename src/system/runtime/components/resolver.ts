@@ -91,6 +91,9 @@ export default class ImportResolver {
 		const importRegex = /^import\s+(.*?)\s+from\s+["'](.+?)["']/gm;
 
 		const code = (await this.#fs.readFile(directory)) || "";
+		if (code == "") {
+			throw new Error("Empty file imported: " + directory);
+		}
 
 		// get matches
 		const matches = [...code.matchAll(importRegex)];
