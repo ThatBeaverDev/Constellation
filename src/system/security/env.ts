@@ -4,7 +4,6 @@ import { appName } from "../runtime/components/appName.js";
 import { PermissionsError } from "../errors.js";
 import { Framework, Process } from "../runtime/components/executables.js";
 import Shell from "../lib/shell.js";
-import { securityTimestamp } from "./definitions.js";
 import Users from "./users.js";
 import {
 	DirectoryPermissionStats,
@@ -18,12 +17,9 @@ import EnvFs from "./subsets/fs.js";
 import EnvProcesses from "./subsets/processes.js";
 import { replyCallback } from "../runtime/components/messages.js";
 
-const start = performance.now();
 const name = "/System/security/env.js";
 
 const globalPermissionsHost = "/System/globalPermissionsHost.js";
-
-securityTimestamp("Startup /src/security/env.ts", start);
 
 export class EnvironmentCreator {
 	filesystem: FilesystemAPI;
@@ -79,8 +75,6 @@ export class ApplicationAuthorisationAPI {
 		processInfo?: ProcessInformation,
 		isGlobal: boolean = false
 	) {
-		const start = performance.now();
-
 		this.#environmentCreator = environmentCreator;
 		this.#ConstellationKernel = ConstellationKernel;
 		this.#isGlobal = isGlobal;
@@ -117,7 +111,6 @@ export class ApplicationAuthorisationAPI {
 		if (ConstellationKernel.isGraphical) {
 			this.windows = new EnvWindows(
 				ConstellationKernel,
-				this,
 				this.#checkPermission.bind(this)
 			);
 		}
@@ -141,7 +134,6 @@ export class ApplicationAuthorisationAPI {
 			name,
 			`ApplicationAuthorisationAPI created as ${user} for ${directory}`
 		);
-		securityTimestamp(`Create env for ${directory}`, start);
 	}
 
 	readonly directory: string;
@@ -435,8 +427,6 @@ export class ApplicationAuthorisationAPI {
 	 * @returns Nothing - throws an error if the request is denied.
 	 */
 	async requestUserPermission(permission: Permission) {
-		const start = performance.now();
-
 		if (
 			this.#environmentCreator.permissions.permissionsMetadata[permission]
 				.requestable == false
@@ -484,11 +474,6 @@ export class ApplicationAuthorisationAPI {
 					`Permission request for permission ${permission} denied.`
 				);
 		}
-
-		securityTimestamp(
-			`${this.directory} request permission ${permission} from user (${ok})`,
-			start
-		);
 	}
 
 	/**

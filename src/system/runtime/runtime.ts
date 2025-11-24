@@ -13,13 +13,10 @@ import { defaultConfiguration } from "../constellation.config.js";
 import { UserPromptConfig } from "../gui/display/definitions.js";
 import ApplicationVerifier from "../security/runtimeDefender.js";
 import { appName } from "./components/appName.js";
-import { AppsTimeStamp } from "./components/AppsTimeStamp.js";
 import ImportResolver from "./components/resolver.js";
 import { isArrow } from "../security/isArrow.js";
 
 const path = "/System/runtime.js";
-
-const appsStart = performance.now();
 
 export interface ProcessInformation {
 	// attachment info
@@ -201,7 +198,6 @@ export class ProgramRuntime {
 	}
 
 	async init() {
-		const startEnvInit = performance.now();
 		this.#ConstellationKernel.lib.logging.debug(path, "Apps initialising.");
 
 		const env = new ApplicationAuthorisationAPI(
@@ -225,12 +221,9 @@ export class ProgramRuntime {
 		}
 
 		this.#ConstellationKernel.lib.logging.debug(path, "Apps initialised.");
-		AppsTimeStamp("Creation of global env", startEnvInit);
 	}
 
 	frame() {
-		const start = performance.now();
-
 		for (const pid in processes) {
 			const process = processes[pid];
 
@@ -240,8 +233,6 @@ export class ProgramRuntime {
 				// this isn't our process - that's another kernel's problem.
 			}
 		}
-
-		AppsTimeStamp("Processes frame", start);
 	}
 
 	/**
@@ -271,8 +262,6 @@ export class ProgramRuntime {
 	): Promise<executionResult | executionProcessResult> {
 		if (this.isTerminating)
 			throw new Error("Execution blocked: this kernel is terminating.");
-
-		const start = performance.now();
 
 		this.#ConstellationKernel.lib.logging.debug(
 			path,
@@ -440,8 +429,6 @@ export class ProgramRuntime {
 			this.procExec(info, "init");
 		}
 
-		AppsTimeStamp(`Open program from ${directory}`, start);
-
 		const result = ProcessWaitingObject(live);
 
 		if (includeProcess) return { ...result, process: live };
@@ -554,9 +541,6 @@ export class ProgramRuntime {
 	 * @param isDueToCrash - whether this is from a crash - true means the process' terminate function is not called.
 	 */
 	async terminateProcess(proc: Process) {
-		const start = performance.now();
-
-		const procDir = String(proc?.directory);
 		const idx = processes.map((item) => item.program).indexOf(proc);
 		if (idx < 0) return;
 
@@ -605,8 +589,6 @@ export class ProgramRuntime {
 		}
 
 		processes.splice(idx, 1);
-
-		AppsTimeStamp(`Terminate process ${procDir}`, start);
 	}
 
 	async terminate() {
@@ -630,5 +612,3 @@ export class ProgramRuntime {
 		await this.importsRewriter.terminate();
 	}
 }
-
-AppsTimeStamp("Startup of src/runtime/runtime.js", appsStart, "primary");

@@ -1,6 +1,5 @@
 import ConstellationKernel from "../../kernel.js";
 import { GraphicalInterface } from "../gui.js";
-import { windowsTimestamp } from "./timestamp.js";
 
 export default class cssVariables {
 	live: HTMLElement;
@@ -33,8 +32,6 @@ export default class cssVariables {
 	}
 
 	refreshCSS() {
-		const start = performance.now();
-
 		// construct css
 		let css = ":host {\n";
 		for (const [key, value] of Object.entries(this.vars)) {
@@ -43,8 +40,6 @@ export default class cssVariables {
 		}
 		css += "}";
 		this.live.textContent = css;
-
-		windowsTimestamp("Refresh Variable CSS", start);
 	}
 
 	#elements: HTMLStyleElement[] = [];

@@ -1,4 +1,3 @@
-import { DevToolsColor, performanceLog } from "../../lib/debug.js";
 import uiKitCreators from "./components/creators.js";
 
 export class uiKitInitialisationError extends Error {
@@ -77,13 +76,6 @@ export type canvasPosition = {
 export type canvasLineOptions = {
 	colour?: string;
 };
-export function uiKitTimestamp(
-	label: string,
-	start: DOMHighResTimeStamp,
-	colour: DevToolsColor = "secondary"
-) {
-	performanceLog(label, start, "uiKit", colour);
-}
 
 export interface uikitIconOptions {
 	noProcess?: boolean;

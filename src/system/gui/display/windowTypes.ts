@@ -1,7 +1,6 @@
 import ConstellationKernel from "../../kernel.js";
 import { GuiApplication } from "../../runtime/components/executables.js";
 import WindowSystem from "./windowSystem.js";
-import { windowsTimestamp } from "./timestamp.js";
 import { GraphicalInterface } from "../gui.js";
 import uiKitCreators from "../uiKit/components/creators.js";
 
@@ -230,7 +229,6 @@ export class GraphicalWindow {
 	reposition() {
 		const scale = this.#GraphicalInterface.displayScaling;
 
-		const start = performance.now();
 		const c = this.container;
 
 		const width = Number(c.dataset.width) - 4 + "px";
@@ -255,8 +253,6 @@ export class GraphicalWindow {
 
 		const gui = this.#ConstellationKernel.ui;
 		if (gui.type == "GraphicalInterface") gui.windowSystem.relayer();
-
-		windowsTimestamp(`Reposition window ${this.winID}`, start);
 	}
 
 	/**
@@ -431,8 +427,6 @@ export class GraphicalWindow {
 		if (this.isRemoved == true) return;
 		this.isRemoved = true;
 
-		const start = performance.now();
-
 		this.#ConstellationKernel.lib.logging.debug(
 			path,
 			"Closing window",
@@ -470,8 +464,6 @@ export class GraphicalWindow {
 			this.#WindowSystem.windows.splice(idx, 1);
 
 			this.#WindowSystem.updateWindows();
-
-			windowsTimestamp(`Close Window ${this.winID}`, start);
 		};
 
 		if (this.winID == this.#WindowSystem.focusedWindow) {

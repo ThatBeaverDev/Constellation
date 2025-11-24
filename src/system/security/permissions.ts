@@ -1,10 +1,7 @@
 import { PermissionsError } from "../errors.js";
 import { FilesystemAPI } from "../../fs/fs.js";
-import { securityTimestamp } from "./definitions.js";
 import { defaultUser } from "./users.js";
 import ConstellationKernel from "../kernel.js";
-
-const start = performance.now();
 
 export const permissionsDirectory = "/System/applicationPermissions.json";
 
@@ -279,5 +276,3 @@ export class ConstellationPermissionsManager {
 type PermissionsStore = Record<string, DirectoryPermissionStats>;
 
 type DirectoryDomain = "system" | "user" | "global" | "local" | "private";
-
-securityTimestamp("Startup /src/security/permissions.ts", start);

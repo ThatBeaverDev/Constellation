@@ -2,9 +2,8 @@ import { FilesystemAPI } from "../../fs/fs.js";
 import { resolveDirectory } from "../io/fspath.js";
 import ConstellationKernel from "..//kernel.js";
 import { sha512 } from "../lib/crypto.js";
-import { securityTimestamp, User } from "./definitions.js";
+import { User } from "./definitions.js";
 
-const start = performance.now();
 const path = "/System/users.js";
 
 export const usersDirectory = "/System/users.json";
@@ -164,5 +163,3 @@ export default class Users {
 
 	async terminate() {}
 }
-
-securityTimestamp("Startup /src/security/users.ts", start);

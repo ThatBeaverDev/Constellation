@@ -16,7 +16,6 @@ import {
 	onClickOptions,
 	step,
 	textboxCallbackObject,
-	uiKitTimestamp,
 	uikitBoxConfig,
 	uikitIconOptions,
 	uikitTextareaConfig,
@@ -34,8 +33,6 @@ import {
 } from "./components/elementReference.js";
 import { isArrow } from "../../security/isArrow.js";
 import { defaultConfig } from "./components/defaultConfig.js";
-
-const uiKitStart = performance.now();
 
 // type
 export type UiKitRenderer = UiKitRendererClass;
@@ -678,8 +675,6 @@ export class UiKitRendererClass {
 		const UserInterface = this.#ConstellationKernel.ui;
 		if (!(UserInterface.type == "GraphicalInterface")) return;
 
-		const start = performance.now();
-
 		this.windowWidth = this.#window.body.clientWidth;
 		this.windowHeight = this.#window.body.clientHeight;
 
@@ -791,8 +786,6 @@ export class UiKitRendererClass {
 			i < Math.max(this.#steps.length, this.#displayedSteps.length);
 			i++
 		) {
-			const start = performance.now();
-
 			const newStep = this.#steps[i];
 			const oldStep = this.#displayedSteps[i];
 			const oldElement = this.#items[i];
@@ -1018,8 +1011,6 @@ export class UiKitRendererClass {
 
 			newItems.push(element);
 			newDisplayedSteps.push(newStep);
-
-			uiKitTimestamp(`Commit Step ${newStep.type}`, start);
 		}
 
 		//// remove missed old elements
@@ -1030,8 +1021,6 @@ export class UiKitRendererClass {
 
 		this.#items = newItems;
 		this.#displayedSteps = newDisplayedSteps;
-
-		uiKitTimestamp("Commit to Window", start);
 	};
 
 	terminate() {
@@ -1075,5 +1064,3 @@ export default class UiKitInstanceCreator {
 		this.style.remove();
 	}
 }
-
-uiKitTimestamp("Startup of src/gui/uiKit/uiKit.ts", uiKitStart, "primary");
