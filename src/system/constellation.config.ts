@@ -5,7 +5,6 @@ export const defaultConfiguration: ConstellationConfiguration = {
 	wallpaperPosition: "center",
 	userfile: "/System/users.json",
 	userDirectories: [
-		"recentlyDeleted",
 		"Desktop",
 		"Documents",
 		"Applications",
