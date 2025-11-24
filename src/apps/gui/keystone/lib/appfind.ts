@@ -39,7 +39,7 @@ export default async function find(
 				name: await pathName(parent.env, dir),
 				icon: await pathIcon(parent.env, dir),
 				visible: await pathVisible(parent.env, dir),
-				filetypes: config.filetypes || []
+				filetypes: config?.filetypes || []
 			};
 
 			if (

@@ -72,19 +72,26 @@ export default class Dock implements Terminatable {
 		for (const i in this.config.pins) {
 			const pin = this.config.pins[i];
 
+			const manifest = await getAppConfig(this.env, pin);
+			if (!manifest) continue;
+
 			pins[i] = {
 				directory: pin,
-				manifest: await getAppConfig(this.env, pin)
+				manifest
 			};
 		}
 		this.pinsInfo = pins.filter((item) => item !== undefined);
 
 		const programs: Record<string, Program | undefined> = {};
 
+		const manifest = await getAppConfig(this.env, this.parent.directory);
+		if (!manifest)
+			throw new Error("dockAndDesktop executable was deleted?");
+
 		programs[this.parent.directory] = {
 			windows: [],
 			isPinned: true,
-			manifest: await getAppConfig(this.env, this.parent.directory),
+			manifest,
 			icon: await pathIcon(this.env, this.parent.directory)
 		};
 
@@ -93,10 +100,13 @@ export default class Dock implements Terminatable {
 				const progDir = prog.directory;
 
 				if (programs[progDir] == undefined) {
+					const manifest = await getAppConfig(this.env, progDir);
+					if (!manifest) continue;
+
 					programs[progDir] = {
 						windows: [],
 						isPinned: true,
-						manifest: await getAppConfig(this.env, progDir),
+						manifest,
 						icon: await pathIcon(this.env, progDir)
 					};
 				}
@@ -108,10 +118,13 @@ export default class Dock implements Terminatable {
 			if (winDir == undefined) continue;
 
 			if (programs[winDir] == undefined) {
+				const manifest = await getAppConfig(this.env, winDir);
+				if (!manifest) continue;
+
 				programs[winDir] = {
 					windows: [],
 					isPinned: this.config.pins.includes(winDir),
-					manifest: await getAppConfig(this.env, winDir),
+					manifest,
 					icon: await pathIcon(this.env, winDir)
 				};
 
