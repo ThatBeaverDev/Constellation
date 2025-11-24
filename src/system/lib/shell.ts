@@ -121,7 +121,10 @@ export default class Shell {
 		throw new Error("No such utility found.");
 	}
 
-	async exec(name: string, ...args: any[]): Promise<shellResult | undefined> {
+	exec = async (
+		name: string,
+		...args: any[]
+	): Promise<shellResult | undefined> => {
 		if (this.#terminalReference == undefined)
 			throw new Error("Terminal reference must be defined!");
 
@@ -133,5 +136,5 @@ export default class Shell {
 			ref: this.#terminalReference,
 			result: result
 		};
-	}
+	};
 }
