@@ -16,6 +16,7 @@ import EnvWindows from "./subsets/windows.js";
 import EnvUsers from "./subsets/users.js";
 import EnvFs from "./subsets/fs.js";
 import EnvProcesses from "./subsets/processes.js";
+import { replyCallback } from "../runtime/components/messages.js";
 
 const start = performance.now();
 const name = "/System/security/env.js";
@@ -25,7 +26,6 @@ const globalPermissionsHost = "/System/globalPermissionsHost.js";
 securityTimestamp("Startup /src/security/env.ts", start);
 
 export class EnvironmentCreator {
-	associations: any = {};
 	filesystem: FilesystemAPI;
 	users: Users;
 	permissions: ConstellationPermissionsManager;
@@ -166,6 +166,32 @@ export class ApplicationAuthorisationAPI {
 
 	// shell
 	shell: Shell;
+
+	/**
+	 * Sends an IPCMessage to another process as addressed by the Process ID.
+	 * @param targetID - Process ID of the target process.
+	 * @param intent - Reason of message, for example `login`.
+	 * @param data - Data to send, such as a password.
+	 * @param replyCallback - a Function to be called if the other process replies.
+	 */
+	sendmessage = (
+		targetID: number,
+		intent: string,
+		data: any,
+		replyCallback?: replyCallback
+	) => {
+		if (!this.#process) return;
+
+		this.#ConstellationKernel.lib.messageAPI.sendMessage(
+			this.#ConstellationKernel,
+			this.directory,
+			this.#process.id,
+			targetID,
+			intent,
+			data,
+			replyCallback
+		);
+	};
 
 	// logging
 	debug = (...content: any): undefined => {
@@ -363,7 +389,7 @@ export class ApplicationAuthorisationAPI {
 	}
 
 	getPIDOfName(name: string): number | undefined {
-		return this.#environmentCreator.associations[name];
+		return this.#ConstellationKernel.runtime.associations[name];
 	}
 
 	getKernel() {
