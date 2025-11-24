@@ -87,7 +87,8 @@ export class ApplicationAuthorisationAPI {
 
 		this.fs = new EnvFs(
 			ConstellationKernel,
-			this.#directoryActionCheck.bind(this)
+			this.#directoryActionCheck.bind(this),
+			directory
 		);
 
 		this.#permissions =
