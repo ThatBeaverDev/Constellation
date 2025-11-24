@@ -123,7 +123,7 @@ export class UiKitRendererClass {
 		this.#window.showHeader();
 	}
 	minimiseWindow() {
-		this.#window.minimise;
+		this.#window.minimise();
 	}
 	restoreWindow() {
 		this.#window.unminimise();
