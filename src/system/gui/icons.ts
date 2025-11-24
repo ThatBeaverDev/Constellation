@@ -114,6 +114,22 @@ export class Icons {
 	async applySourceAndCache(icon: HTMLImageElement, directory: string) {
 		const clone = icon.cloneNode(true) as HTMLImageElement;
 
+		if (
+			directory.startsWith("http://") ||
+			directory.startsWith("https://")
+		) {
+			icon.src = directory;
+			clone.src = directory;
+
+			// cache a clone once loaded.
+			clone.addEventListener("load", () => {
+				this.cache[directory] = clone.cloneNode(
+					true
+				) as HTMLImageElement;
+			});
+			return;
+		}
+
 		const content = await this.fs.readFile(directory);
 		if (content == undefined) {
 			this.#ConstellationKernel.lib.logging.warn(
@@ -131,15 +147,6 @@ export class Icons {
 				) as HTMLImageElement;
 			});
 
-			return;
-		}
-
-		if (
-			directory.startsWith("http://") ||
-			directory.startsWith("https://")
-		) {
-			icon.src = directory;
-			clone.src = directory;
 			return;
 		}
 
