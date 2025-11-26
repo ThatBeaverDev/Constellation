@@ -22,10 +22,12 @@ async function recursiveInfo(
 
 		if (isDir) {
 			// folder
-			const info = await recursiveInfo(env, dir);
+			try {
+				const info = await recursiveInfo(env, dir);
 
-			size += info.size;
-			childFiles += info.childFiles;
+				size += info.size;
+				childFiles += info.childFiles;
+			} catch (e) {}
 		} else {
 			// file
 			const stats = await env.fs.stat(dir);
