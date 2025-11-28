@@ -365,7 +365,7 @@ export default class finder extends GuiApplication {
 
 		const RightClick = (directory: string) => {
 			return (x: number, y: number) => {
-				this.renderer.setContextMenu(x, y, "Options", {
+				this.renderer.setContextMenu(x, y, undefined, {
 					"Show Contents": this.isApplication(directory)
 						? async () => {
 								await this.cd(directory);

@@ -525,8 +525,8 @@ export class UiKitRendererClass {
 	setContextMenu(
 		x: number,
 		y: number,
-		header: string,
-		buttons: Record<string, Function | undefined>
+		header?: string,
+		buttons?: Record<string, Function | undefined>
 	) {
 		for (const key in buttons) {
 			const value = buttons[key];
@@ -537,14 +537,17 @@ export class UiKitRendererClass {
 			if (value) isArrow(value, true);
 		}
 
+		// @ts-expect-error
+		const noUndefinedButtons: Record<string, Function> = buttons;
+
 		this.removeContextMenu();
 
 		this.#context = new ContextMenu(
 			this.#ConstellationKernel,
 			x,
 			y,
-			header,
-			buttons as Record<string, Function>
+			noUndefinedButtons,
+			header
 		);
 	}
 	removeContextMenu() {

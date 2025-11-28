@@ -10,14 +10,18 @@ export class ContextMenu {
 		ConstellationKernel: ConstellationKernel,
 		x: number,
 		y: number,
-		headerText: string,
-		items: Record<string, Function>
+		items: Record<string, Function>,
+		headerText?: string
 	) {
 		if (!(ConstellationKernel.ui.type == "GraphicalInterface"))
 			throw new Error("Graphical system is required!");
 
 		let maxWidth = 0;
-		for (const i of [headerText, ...Object.keys(items)]) {
+		let lines = headerText
+			? [headerText, ...Object.keys(items)]
+			: Object.keys(items);
+
+		for (const i of lines) {
 			const width = getTextWidth(i);
 
 			if (width > maxWidth) {
@@ -43,10 +47,12 @@ export class ContextMenu {
 		this.container.style.width = `${maxWidth}px`;
 		this.container.style.height = `${height}px`;
 
-		this.header = document.createElement("p");
-		this.header.id = "context" + String(window.renderID++);
-		this.header.className = "uikitText";
-		this.header.innerText = headerText;
+		if (headerText) {
+			this.header = document.createElement("p");
+			this.header.id = "context" + String(window.renderID++);
+			this.header.className = "uikitText";
+			this.header.innerText = headerText;
+		}
 
 		let yPos = padding * 2 + 5;
 
@@ -110,19 +116,8 @@ export class ContextMenu {
 		});
 
 		ConstellationKernel.ui.container.appendChild(this.container);
-		this.container = ConstellationKernel.ui.container.querySelector(
-			"div#" + this.container.id
-		)!;
-
-		this.container.appendChild(this.header);
-		this.header = ConstellationKernel.ui.container.querySelector(
-			"p#" + this.header.id
-		)!;
-
+		if (this.header) this.container.appendChild(this.header);
 		this.container.appendChild(this.divider);
-		this.divider = ConstellationKernel.ui.container.querySelector(
-			"div#" + this.divider.id
-		)!;
 
 		for (const i in this.items) {
 			const elems: { text: HTMLButtonElement; icon?: HTMLImageElement } =
@@ -167,7 +162,7 @@ export class ContextMenu {
 
 	container: HTMLDivElement;
 	divider: HTMLDivElement;
-	header: HTMLParagraphElement;
+	header?: HTMLParagraphElement;
 	items: { text: HTMLButtonElement; icon?: HTMLImageElement }[];
 
 	// add abort controller to remove event listeners
@@ -177,7 +172,8 @@ export class ContextMenu {
 	readonly remove = () => {
 		this.#controller.abort();
 
-		this.header.remove();
+		if (this.header) this.header.remove();
+
 		for (const i in this.items) {
 			this.items[i].text.remove();
 			if (this.items[i].icon !== undefined) this.items[i].icon.remove();
