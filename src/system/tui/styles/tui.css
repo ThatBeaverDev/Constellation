@@ -37,13 +37,13 @@
 	margin: 0;
 }
 
-.prompt>p {
+.prompt > p {
 	height: var(--line-height);
 	line-height: var(--line-height);
 	vertical-align: middle;
 }
 
-.prompt>input {
+.prompt > input {
 	height: var(--line-height);
 
 	border: none;
