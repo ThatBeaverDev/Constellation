@@ -6,9 +6,16 @@ export async function getAppConfig(
 	env: ApplicationAuthorisationAPI,
 	directory: string
 ) {
-	const appConf = await env.include(env.fs.resolve(directory, "config.js"));
-	// get the real data
-	return appConf?.default as ApplicationManifest | undefined;
+	try {
+		const appConf = await env.include(
+			env.fs.resolve(directory, "config.js")
+		);
+
+		// get the real data
+		return appConf?.default as ApplicationManifest | undefined;
+	} catch (e) {
+		// nothing
+	}
 }
 
 export async function pathIcon(
