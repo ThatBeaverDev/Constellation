@@ -10,7 +10,8 @@ const allowedSubdirectories = [
 	"data", // application data, generally per-user
 	"resources", // resource media like images
 	"lib", // terminal files
-	"tests" // tests, duh
+	"tests", // tests, duh
+	"cache" // cached data. safe to delete?
 ];
 
 export default class ApplicationVerifier implements Terminatable {
@@ -30,10 +31,21 @@ export default class ApplicationVerifier implements Terminatable {
 		if (listing == undefined)
 			throw new Error(`Application at ${directory} doesn't exist.`);
 
-		if (!listing.includes("bin") || !listing.includes("config.js")) {
+		if (!listing.includes("config.js")) {
 			this.#ConstellationKernel.lib.logging.warn(
 				path,
-				`Application at ${directory} has failed needed files testing.`
+				`Application at ${directory} has failed needed files testing. It lacks a config file.`
+			);
+
+			return false;
+		} else {
+			// check the config has something inside
+		}
+
+		if (!listing.includes("bin")) {
+			this.#ConstellationKernel.lib.logging.warn(
+				path,
+				`Application at ${directory} has failed needed files testing. It lacks a bin folder.`
 			);
 
 			return false;

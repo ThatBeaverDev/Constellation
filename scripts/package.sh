@@ -80,8 +80,11 @@ compile() {
     # Build usershell
     ./scripts/tcpkg build/apps/tui/usershell build/indexes/com.constellation.usershell.idx -override=true
 
-    # Build installer
+    # Build update installer
     ./scripts/tcpkg build/apps/services/SoftwareUpdateHandler build/indexes/com.constellation.updateinstaller.idx -overide=true
+
+    # Build application installer
+    ./scripts/tcpkg build/apps/gui/system/applicationInstaller build/indexes/com.constellation.applicationInstaller.idx -overide=true
 }
 
 # first param is directory, second param is name
