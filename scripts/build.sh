@@ -28,6 +28,7 @@ build_apps_d_ts() {
     # copy global.d.ts to types (entrypoint for rollup)
     mkdir -p types
     cp src/global.d.ts types/global.d.ts
+    cp src/fs/BrowserFsTypes.d.ts types/fs/BrowserFsTypes.d.ts
 
     npx rollup -c
 }
