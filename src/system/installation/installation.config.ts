@@ -15,6 +15,9 @@ export const folders: string[] = [
 	"/System/dumps",
 	"/System/CoreServices",
 
+	"/System/Caches",
+	"/System/Caches/glyphs",
+
 	"/System/CoreLibraries/mimes",
 
 	"/Users",
@@ -161,6 +164,12 @@ export const files: Record<
 	"/build/indexes/com.constellation.updateinstaller.idx": {
 		type: "application",
 		directory: "/System/CoreExecutables/SoftwareUpdateInstaller.srvc"
+	},
+
+	// application installer
+	"/build/indexes/com.constellation.applicationInstaller.idx": {
+		type: "application",
+		directory: "/System/CoreExecutables/applicationInstaller.appl"
 	}
 };
 
