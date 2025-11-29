@@ -61,14 +61,8 @@ export async function tcpkg(
 
 				try {
 					// guess the mime type from the file extension
-					const type = getMimeType(dir.textAfterAll("."));
-
-					// sometimes it returns null
-					if (type == null) {
-						throw new Error(
-							`Mime type for file at '${dir}' has returned null.`
-						);
-					}
+					const type =
+						getMimeType(dir.textAfterAll(".")) ?? "text/plain";
 
 					const isText =
 						type.startsWith("text/") ||

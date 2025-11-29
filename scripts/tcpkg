@@ -99,13 +99,7 @@ async function walk(directory) {
 			}
 
 			try {
-				const type = mime.getType(dir);
-
-				if (type == null) {
-					throw new Error(
-						"Mime type for file at '" + dir + "' has returned null."
-					);
-				}
+				const type = mime.getType(dir) ?? "text/plain";
 
 				const isText =
 					type.startsWith("text/") ||
