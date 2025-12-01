@@ -4,31 +4,59 @@ import { ProcessInformation } from "../runtime.js";
 function trueStringifier(value: any, space?: number): string {
 	const seen = new WeakSet();
 
-	return JSON.stringify(
-		value,
-		(key, val) => {
-			// Handle functions explicitly
+	function safeSerialize(val: any): any {
+		// Primitive safe pass-through
+		if (val === null || typeof val !== "object") {
+			if (typeof val === "bigint") {
+				return `${val}n`; // safe fallback
+			}
 			if (typeof val === "function") {
 				return val.toString();
 			}
-
-			// Handle symbols
 			if (typeof val === "symbol") {
 				return val.toString();
 			}
-
-			// Handle objects with cycles
-			if (val && typeof val === "object") {
-				if (seen.has(val)) {
-					return "[ConstellationCoreDumpExtractor] - Link to already observed object, removed to prevent recursion";
-				}
-				seen.add(val);
-			}
-
 			return val;
-		},
-		space
-	);
+		}
+
+		// Cycle detection
+		if (seen.has(val)) {
+			return "[ConstellationCoreDumpExtractor] - Link to already observed object, removed to prevent recursion";
+		}
+		seen.add(val);
+
+		// Handle arrays
+		if (Array.isArray(val)) {
+			const out: any[] = [];
+			for (let i = 0; i < val.length; i++) {
+				try {
+					out[i] = safeSerialize(val[i]);
+				} catch (e) {
+					out[i] = `[Error extracting array item: ${String(e)}]`;
+				}
+			}
+			return out;
+		}
+
+		// Handle objects
+		const out: Record<string, any> = {};
+		for (const key of Object.keys(val)) {
+			try {
+				const v = val[key]; // this may throw if getter explodes
+				out[key] = safeSerialize(v);
+			} catch (e) {
+				out[key] = `[Error extracting property '${key}': ${String(e)}]`;
+			}
+		}
+		return out;
+	}
+
+	try {
+		return JSON.stringify(safeSerialize(value), null, space);
+	} catch (e) {
+		// Final guarantee: you get something
+		return `[Unserializable data: ${String(e)}]`;
+	}
 }
 
 export default function createCoreDump(crashedProgram: ProcessInformation) {
