@@ -88,7 +88,7 @@ export default class ImportResolver {
 		if (structure[directory] !== undefined) return;
 
 		// regex
-		const importRegex = /^import\s+(.*?)\s+from\s+["'](.+?)["']/gm;
+		const importRegex = /^(import|export)\s+(.*?)\s+from\s+["'](.+?)["']/gm;
 
 		const code = (await this.#fs.readFile(directory)) || "";
 		if (code == "") {
@@ -98,10 +98,10 @@ export default class ImportResolver {
 		// get matches
 		const matches = [...code.matchAll(importRegex)];
 
-		// get information about imports
+		// get information about imports/reexports
 		const importsInformation = await Promise.all(
 			matches.map(async (match) => {
-				const [original, bindings, specifier] = match;
+				const [original, keyword, bindings, specifier] = match;
 
 				// Resolve import specifier to a real path
 				const resolved =
@@ -115,11 +115,13 @@ export default class ImportResolver {
 								`${specifier}.js`
 							);
 
+				const importString = `${keyword} ${bindings} from "${resolved}"`;
+
 				return {
 					importTarget: resolved,
 					bindings,
 					originalImportString: original,
-					importString: `import ${bindings} from "${resolved}"`
+					importString
 				};
 			})
 		);
@@ -269,8 +271,11 @@ export default class ImportResolver {
 			split.forEach((item) => {
 				const trimmed = item.trim();
 
-				if (trimmed.startsWith("import")) {
-					// this is an import
+				if (
+					trimmed.startsWith("import") ||
+					(trimmed.startsWith("export") && trimmed.includes("from"))
+				) {
+					// this is an import or export-from
 					const currentImport = importNumber++;
 					const target = ripeBranch.importTargets[currentImport];
 
@@ -283,7 +288,7 @@ export default class ImportResolver {
 
 					contents += resolved;
 				} else {
-					// just a normal line, append it.
+					// just a normal line, append it
 					contents += item;
 				}
 			});
