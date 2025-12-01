@@ -56,7 +56,7 @@ export class SettingsPages {
 	#updateStatus?: {
 		sysver: string;
 		sysbuild: number;
-		cliResult?: softwareupdateResult;
+		cliResult?: softwareupdateResult | { state: "error"; error: Error };
 	};
 	async Updates() {
 		this.#parent.panelkit.reset();
@@ -75,9 +75,16 @@ export class SettingsPages {
 		}
 
 		if (this.#updateStatus.cliResult == undefined) {
-			this.#updateStatus.cliResult = ((
-				await this.#env.shell.exec("softwareupdate", "statusjson")
-			)?.result as softwareupdateResult) || { state: "checking" };
+			try {
+				this.#updateStatus.cliResult = ((
+					await this.#env.shell.exec("softwareupdate", "statusjson")
+				)?.result as softwareupdateResult) || { state: "checking" };
+			} catch (e: unknown) {
+				this.#updateStatus.cliResult = {
+					state: "error",
+					error: e as Error
+				};
+			}
 		}
 
 		const state = this.#updateStatus;
@@ -120,6 +127,11 @@ export class SettingsPages {
 				);
 
 				break;
+			case "error":
+				card(
+					`Failed to run software update utility (${String(cliResult.error)})`,
+					"triangle-alert"
+				);
 		}
 	}
 	Network() {
