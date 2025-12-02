@@ -31,51 +31,34 @@ export default class WindowSystemInteractions {
 
 		const win = parent.target.window;
 
-		if (parent.target.hasMoved) {
-			win.move(x, y);
-			win.unfullscreen();
+		win.move(x, y);
+		win.unfullscreen();
 
-			let side: "left" | "right" | "fullscreen" | undefined = undefined;
+		let side: "left" | "right" | "fullscreen" | undefined = undefined;
 
-			if (x < this.#parent.bounds.left) {
-				side = "left";
-			} else if (
-				x + win.dimensions.width >
-				this.#GraphicalInterface.displayWidth -
-					this.#parent.bounds.right
-			) {
-				side = "right";
-			} else if (y < this.#parent.bounds.upper) {
-				side = "fullscreen";
-			}
-
-			// no snapping needed
-			if (side == undefined) {
-				if (parent.snappingWindow?.window == win) {
-					parent.snappingWindow = undefined;
-				}
-				return;
-			}
-
-			parent.snappingWindow = {
-				window: win,
-				side
-			};
-		} else {
-			const distanceX = Math.abs(
-				parent.target.windowX - parent.target.originX
-			);
-			const distanceY = Math.abs(
-				parent.target.windowY - parent.target.originY
-			);
-			const distancePythagoras = Math.sqrt(
-				distanceX ** 2 + distanceY ** 2
-			);
-
-			if (distancePythagoras > 10) {
-				parent.target.hasMoved = true;
-			}
+		if (x < this.#parent.bounds.left) {
+			side = "left";
+		} else if (
+			x + win.dimensions.width >
+			this.#GraphicalInterface.displayWidth - this.#parent.bounds.right
+		) {
+			side = "right";
+		} else if (y < this.#parent.bounds.upper) {
+			side = "fullscreen";
 		}
+
+		// no snapping needed
+		if (side == undefined) {
+			if (parent.snappingWindow?.window == win) {
+				parent.snappingWindow = undefined;
+			}
+			return;
+		}
+
+		parent.snappingWindow = {
+			window: win,
+			side
+		};
 	}
 
 	windowPointerUp(e: PointerEvent) {

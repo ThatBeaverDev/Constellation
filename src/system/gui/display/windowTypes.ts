@@ -161,9 +161,7 @@ export class GraphicalWindow {
 				originY: this.position.top,
 
 				windowX: this.position.left,
-				windowY: this.position.top,
-
-				hasMoved: false
+				windowY: this.position.top
 			};
 
 			const rect = this.container.getBoundingClientRect();
