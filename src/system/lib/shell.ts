@@ -86,39 +86,55 @@ export default class Shell {
 	async #getUtility(
 		name: string
 	): Promise<(parent: TerminalAlias, ...args: any[]) => any> {
-		if (name == "help") {
-			return () => {
-				const commandNames = this.#index.map((item) =>
-					item.textAfterAll("/").textBeforeLast(".")
-				);
-				commandNames.sort();
-
-				return `List of commands on this system are as follows:\n${commandNames.join("\n")}`;
-			};
-		}
-
-		for (const item of this.#index) {
-			const filename = item.textAfterAll("/").textBeforeLast(".");
-
-			if (filename == name) {
-				// this is the one
-				const include = await this.#env.include(item);
-
-				if (include == undefined)
-					throw new Error("File at include does not exist");
-
-				const fnc = include.default;
-
-				if (typeof fnc !== "function")
-					throw new Error(
-						"The default export of the library file is not a function and is therefore invalid."
+		switch (name) {
+			case "help":
+				return () => {
+					const commandNames = this.#index.map((item) =>
+						item.textAfterAll("/").textBeforeLast(".")
 					);
+					commandNames.sort();
 
-				return fnc;
-			}
+					return `List of commands on this system are as follows:\n${commandNames.join("\n")}`;
+				};
+			case "which":
+				return async (parent: TerminalAlias, util: string) => {
+					for (const item of this.#index) {
+						const filename = item
+							.textAfterAll("/")
+							.textBeforeLast(".");
+
+						if (filename == util) {
+							// this is the one
+							return item;
+						}
+					}
+
+					return `${util} not found`;
+				};
+			default:
+				for (const item of this.#index) {
+					const filename = item.textAfterAll("/").textBeforeLast(".");
+
+					if (filename == name) {
+						// this is the one
+						const include = await this.#env.include(item);
+
+						if (include == undefined)
+							throw new Error("File at include does not exist");
+
+						const fnc = include.default;
+
+						if (typeof fnc !== "function")
+							throw new Error(
+								"The default export of the library file is not a function and is therefore invalid."
+							);
+
+						return fnc;
+					}
+				}
+
+				throw new Error("No such utility found.");
 		}
-
-		throw new Error("No such utility found.");
 	}
 
 	exec = async (
