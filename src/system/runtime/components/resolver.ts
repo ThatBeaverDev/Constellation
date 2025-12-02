@@ -106,10 +106,15 @@ export default class ImportResolver {
 				// Resolve import specifier to a real path
 				const resolved =
 					specifier.startsWith(".") || specifier.startsWith("/")
-						? this.#fs.resolve(
-								directory.textBeforeLast("/"),
-								specifier
-							)
+						? specifier.endsWith(".js")
+							? this.#fs.resolve(
+									directory.textBeforeLast("/"),
+									specifier
+								)
+							: this.#fs.resolve(
+									directory.textBeforeLast("/"),
+									specifier
+								) + ".js"
 						: this.#fs.resolve(
 								"/System/CoreLibraries",
 								`${specifier}.js`
