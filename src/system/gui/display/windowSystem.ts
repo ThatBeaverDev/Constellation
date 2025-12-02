@@ -33,8 +33,6 @@ export default class WindowSystem {
 
 				windowX: number;
 				windowY: number;
-
-				hasMoved: boolean;
 		  }
 		| undefined = undefined;
 	startMouseX = 0;
