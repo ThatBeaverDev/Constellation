@@ -2,13 +2,7 @@ import ConstellationKernel from "../../../kernel.js";
 import { DOMHandler } from "../../../tui/display.js";
 import { TextInterface } from "../../../tui/tui.js";
 import { type GraphicalWindow } from "../../display/windowTypes.js";
-import {
-	canvasPosition,
-	canvasRenderingStep,
-	uikitBoxConfig,
-	uikitCanvasOptions,
-	uikitIconOptions
-} from "../definitions.js";
+import { uikitBoxConfig, uikitIconOptions } from "../definitions.js";
 import { defaultConfig } from "./defaultConfig.js";
 
 export default class uiKitCreators {
@@ -284,9 +278,7 @@ export default class uiKitCreators {
 		x: number,
 		y: number,
 		width: number,
-		height: number,
-		renderingSteps: canvasRenderingStep[],
-		options: uikitCanvasOptions
+		height: number
 	) => {
 		const canvas = document.createElement("canvas");
 		canvas.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;`;
@@ -296,83 +288,6 @@ export default class uiKitCreators {
 		canvas.className = "uikitCanvas";
 
 		if (this.#window) this.#window.body.appendChild(canvas);
-
-		const ctx = canvas.getContext("2d");
-
-		if (ctx == null) throw new Error("canvas ctx is null");
-
-		for (const st of renderingSteps) {
-			const d = st.data;
-
-			switch (st.type) {
-				case "line":
-					const start = d.start;
-					const mids = d.mids;
-					const end = d.end;
-
-					ctx.strokeStyle = d.colour;
-
-					ctx.beginPath();
-					ctx.moveTo(start.x, start.y);
-
-					for (const i in mids) {
-						ctx.lineTo(mids[i].x, mids[i].y);
-					}
-
-					ctx.lineTo(end.x, end.y);
-					ctx.stroke();
-
-					break;
-				case "rectangle":
-					const pos1: canvasPosition = d.position1;
-					const pos2: canvasPosition = d.position2;
-
-					const width = Math.abs(pos2.x - pos1.x);
-					const height = Math.abs(pos2.y - pos1.y);
-
-					const anchor: canvasPosition = {
-						x: Math.min(pos1.x, pos2.x),
-						y: Math.min(pos1.y, pos2.y)
-					};
-
-					ctx.fillStyle = d.backgroundColour;
-					ctx.strokeStyle = d.borderColour;
-
-					ctx.fillRect(anchor.x, anchor.y, width, height);
-					ctx.strokeRect(anchor.x, anchor.y, width, height);
-
-					break;
-				case "image": {
-					const url = d.url;
-
-					function getDataUriKey(uri: string): string {
-						if (dataUriKeyMap[uri]) return dataUriKeyMap[uri];
-						const key = `d${dataUriCounter++}`;
-						dataUriKeyMap[uri] = key;
-						return key;
-					}
-
-					const key = getDataUriKey(url);
-
-					let image;
-					if (imageCache[key] == undefined) {
-						image = new Image();
-						image.src =
-							this.#ConstellationKernel.lib.blobifier.dataUriToBlobUrl(
-								d.url
-							);
-						imageCache[key] = image;
-					} else {
-						image = imageCache[key];
-					}
-
-					// @ts-expect-error // doesn't understand, mere program.
-					ctx.drawImage(image, ...d.args);
-
-					break;
-				}
-			}
-		}
 
 		return canvas;
 	};
@@ -441,7 +356,3 @@ export default class uiKitCreators {
 		return iframe;
 	};
 }
-
-const imageCache: Record<string, HTMLImageElement> = {};
-const dataUriKeyMap: Record<string, string> = {};
-let dataUriCounter = 0;

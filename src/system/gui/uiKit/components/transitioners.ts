@@ -1,11 +1,15 @@
 import { setElementStyle } from "../../html.js";
-import { step } from "../definitions.js";
+import { ConfigStep } from "../definitions.js";
 
 export default class uiKitTransitioners {
 	textboxElem: HTMLInputElement | HTMLTextAreaElement | undefined;
 	hasTextbox: boolean = false;
 
-	uikitIcon(element: HTMLElement, oldStep: step, newStep: step): boolean {
+	uikitIcon(
+		element: HTMLElement,
+		oldStep: ConfigStep,
+		newStep: ConfigStep
+	): boolean {
 		for (const i in newStep.args) {
 			const oldArg = oldStep.args[i];
 			const newArg = newStep.args[i];
@@ -47,7 +51,11 @@ export default class uiKitTransitioners {
 		return true;
 	}
 
-	uikitText(element: HTMLElement, oldStep: step, newStep: step): boolean {
+	uikitText(
+		element: HTMLElement,
+		oldStep: ConfigStep,
+		newStep: ConfigStep
+	): boolean {
 		for (const i in newStep.args) {
 			const oldArg = oldStep.args[i];
 			const newArg = newStep.args[i];
@@ -85,7 +93,11 @@ export default class uiKitTransitioners {
 		return true;
 	}
 
-	uikitBox(element: HTMLElement, oldStep: step, newStep: step): boolean {
+	uikitBox(
+		element: HTMLElement,
+		oldStep: ConfigStep,
+		newStep: ConfigStep
+	): boolean {
 		for (const i in newStep.args) {
 			const oldArg = oldStep.args[i];
 			const newArg = newStep.args[i];
@@ -147,8 +159,8 @@ export default class uiKitTransitioners {
 
 	uikitEmbeddedTui(
 		element: HTMLElement,
-		oldStep: step,
-		newStep: step
+		oldStep: ConfigStep,
+		newStep: ConfigStep
 	): boolean {
 		for (const i in newStep.args) {
 			const oldArg = oldStep.args[i];
@@ -182,8 +194,8 @@ export default class uiKitTransitioners {
 
 	uikitIframe(
 		element: HTMLIFrameElement,
-		oldStep: step,
-		newStep: step
+		oldStep: ConfigStep,
+		newStep: ConfigStep
 	): boolean {
 		for (const i in newStep.args) {
 			const oldArg = oldStep.args[i];
