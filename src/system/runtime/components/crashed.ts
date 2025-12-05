@@ -89,7 +89,7 @@ export async function dump(
 	const name = nameCoreDump(crashedProgram);
 	const content = createCoreDump(crashedProgram);
 
-	const directory = `/System/dumps/${name}`;
+	const directory = `/System/dumps/${name}.txt`;
 	console.warn(directory);
 
 	await ConstellationKernel.fs.writeFile(directory, content);
