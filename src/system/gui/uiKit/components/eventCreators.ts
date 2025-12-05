@@ -1,13 +1,13 @@
-import { UiKitRenderer } from "../uiKit.js";
 import { defaultConfig } from "./defaultConfig.js";
 
 export default class UIKitEventListeners {
-	#parent: UiKitRenderer;
-	get #signal() {
-		return this.#parent.signal;
+	#signal: AbortSignal;
+	setSignal(signal: AbortSignal) {
+		this.#signal = signal;
 	}
-	constructor(parent: UiKitRenderer) {
-		this.#parent = parent;
+
+	constructor(signal: AbortSignal) {
+		this.#signal = signal;
 	}
 
 	uikitButton(

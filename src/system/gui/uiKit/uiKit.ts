@@ -20,9 +20,9 @@ import {
 	uikitIconOptions,
 	uikitTextareaConfig,
 	uikitTextboxConfig,
-	clickReference
+	clickReference,
+	ConfigStep
 } from "./definitions.js";
-import canvasKit from "./components/canvasKit.js";
 import uikitEventCreators from "./components/eventCreators.js";
 import uiKitTransitioners from "./components/transitioners.js";
 import ConstellationKernel from "../../kernel.js";
@@ -31,8 +31,10 @@ import {
 	UiKitElement,
 	UiKitTextboxElement
 } from "./components/elementReference.js";
+import { UiKitCanvasElement } from "./components/canvas/canvas.js";
 import { isArrow } from "../../security/isArrow.js";
 import { defaultConfig } from "./components/defaultConfig.js";
+import { proxyContext } from "./components/canvas/ctx.js";
 
 // type
 export type UiKitRenderer = UiKitRendererClass;
@@ -41,12 +43,15 @@ export type UiKitRenderer = UiKitRendererClass;
 export class UiKitRendererClass {
 	#process?: Process;
 	#window: GraphicalWindow;
+
+	#index: number = 0;
 	readonly #steps: step[] = [];
-	#displayedSteps: step[] = [];
-	elemID: number = 0;
+	#displayedSteps: Partial<step[]> = [];
+	#nextDisplayedSteps: step[] = [];
+
 	// add abort controller to remove event listeners
-	controller = new AbortController();
-	signal: AbortSignal = this.controller.signal;
+	#controller = new AbortController();
+	#signal: AbortSignal = this.#controller.signal;
 	#context?: ContextMenu;
 
 	// window stuff
@@ -130,11 +135,6 @@ export class UiKitRendererClass {
 		this.#window.fullscreen();
 	}
 
-	#items: any[] = [];
-
-	#mustRedraw: boolean = false;
-
-	canvas: canvasKit = new canvasKit(this.#steps);
 	lastClick: number = 0;
 
 	#ConstellationKernel: ConstellationKernel;
@@ -177,7 +177,7 @@ export class UiKitRendererClass {
 		}
 
 		this.#creators = new uiKitCreators(ConstellationKernel, this.#window);
-		this.#eventCreators = new uikitEventCreators(this);
+		this.#eventCreators = new uikitEventCreators(this.#signal);
 
 		this.#transitioners = new uiKitTransitioners();
 
@@ -188,6 +188,7 @@ export class UiKitRendererClass {
 
 	clear = () => {
 		this.#steps.splice(0, this.#steps.length + 10);
+		this.#index = 0;
 
 		// window dimensions
 		this.windowWidth = this.#window.body.clientWidth;
@@ -196,6 +197,31 @@ export class UiKitRendererClass {
 		// window position
 		this.windowX = this.#window.position.left;
 		this.windowY = this.#window.position.top;
+
+		this.#nextDisplayedSteps = [];
+
+		// Abort all listeners, but keep the elements unless they are removed
+		this.#controller.abort();
+		this.#controller = new AbortController();
+		this.#signal = this.#controller.signal;
+		this.#eventCreators.setSignal(this.#signal);
+
+		this.#window.body.addEventListener(
+			"wheel",
+			(e) => {
+				function clampMin(n: number, min: number) {
+					if (n > min) return min;
+
+					return n;
+				}
+
+				this.scroll = clampMin(
+					this.scroll - e.deltaY,
+					this.furthestScroll
+				);
+			},
+			{ signal: this.#signal, passive: false }
+		);
 
 		// other window properties
 	};
@@ -208,12 +234,12 @@ export class UiKitRendererClass {
 		colour: string = "",
 		options: uikitIconOptions = {}
 	) {
-		const obj: step = {
+		const obj: ConfigStep = {
 			type: "uikitIcon",
 			args: [x, y, iconName, iconScale, colour, options]
 		};
 
-		return new UiKitElement(this, this.#steps.push(obj));
+		return new UiKitElement(this, this.#nextStep(obj));
 	}
 
 	text(
@@ -223,12 +249,12 @@ export class UiKitRendererClass {
 		fontSize: number = 15,
 		colour: string = ""
 	) {
-		const obj: step = {
+		const obj: ConfigStep = {
 			type: "uikitText",
 			args: [x, y, string, fontSize, colour]
 		};
 
-		return new UiKitElement(this, this.#steps.push(obj));
+		return new UiKitElement(this, this.#nextStep(obj));
 	}
 	button(
 		x: number,
@@ -241,12 +267,12 @@ export class UiKitRendererClass {
 		if (leftClickCallback) isArrow(leftClickCallback, true);
 		if (rightClickCallback) isArrow(rightClickCallback, true);
 
-		const obj: step = {
+		const obj: ConfigStep = {
 			type: "uikitButton",
 			args: [x, y, string, leftClickCallback, rightClickCallback, size]
 		};
 
-		return new UiKitElement(this, this.#steps.push(obj));
+		return new UiKitElement(this, this.#nextStep(obj));
 	}
 	textbox(
 		x: number,
@@ -269,29 +295,29 @@ export class UiKitRendererClass {
 				options[i] ?? defaultConfig.uikitTextbox[i];
 		}
 
-		const obj: step = {
+		const obj: ConfigStep = {
 			type: "uikitTextbox",
 			args: [x, y, width, height, backtext, callbacks, opts]
 		};
-		return new UiKitTextboxElement(this, this.#steps.push(obj));
+		return new UiKitTextboxElement(this, this.#nextStep(obj));
 	}
 
 	verticalLine(x: number, y: number, height: number) {
-		const obj: step = {
+		const obj: ConfigStep = {
 			type: "uikitVerticalLine",
 			args: [x, y, height]
 		};
 
-		return new UiKitElement(this, this.#steps.push(obj));
+		return new UiKitElement(this, this.#nextStep(obj));
 	}
 
 	horizontalLine(x: number, y: number, width: number) {
-		const obj: step = {
+		const obj: ConfigStep = {
 			type: "uikitHorizontalLine",
 			args: [x, y, width]
 		};
 
-		return new UiKitElement(this, this.#steps.push(obj));
+		return new UiKitElement(this, this.#nextStep(obj));
 	}
 
 	progressBar(
@@ -301,12 +327,12 @@ export class UiKitRendererClass {
 		height: number,
 		progress: number | "throb"
 	) {
-		const obj: step = {
+		const obj: ConfigStep = {
 			type: "uikitProgressBar",
 			args: [x, y, width, height, progress]
 		};
 
-		return new UiKitElement(this, this.#steps.push(obj));
+		return new UiKitElement(this, this.#nextStep(obj));
 	}
 
 	textarea(
@@ -320,12 +346,12 @@ export class UiKitRendererClass {
 		if (callbacks.enter) isArrow(callbacks.enter, true);
 		if (callbacks.update) isArrow(callbacks.update, true);
 
-		const obj: step = {
+		const obj: ConfigStep = {
 			type: "uikitTextarea",
 			args: [x, y, width, height, callbacks, options]
 		};
 
-		return new UiKitTextboxElement(this, this.#steps.push(obj));
+		return new UiKitTextboxElement(this, this.#nextStep(obj));
 	}
 
 	box(
@@ -335,30 +361,30 @@ export class UiKitRendererClass {
 		height: number,
 		config?: uikitBoxConfig
 	) {
-		const obj: step = {
+		const obj: ConfigStep = {
 			type: "uikitBox",
 			args: [x, y, width, height, config]
 		};
 
-		return new UiKitElement(this, this.#steps.push(obj));
+		return new UiKitElement(this, this.#nextStep(obj));
 	}
 
 	canvas2D(x: number, y: number, width: number, height: number) {
-		const obj: step = {
+		const obj: ConfigStep = {
 			type: "uikitCanvas2D",
-			args: [x, y, width, height, []] // last arguement (the []) is the list of drawing commands
+			args: [x, y, width, height]
 		};
 
-		return new UiKitElement(this, this.#steps.push(obj));
+		return new UiKitCanvasElement(this, obj, this.#nextStep(obj));
 	}
 
 	embeddedTui(x: number, y: number, width: number, height: number) {
-		const obj: step = {
+		const obj: ConfigStep = {
 			type: "uikitEmbeddedTui",
 			args: [x, y, width, height]
 		};
 
-		return new UiKitElement(this, this.#steps.push(obj));
+		return new UiKitElement(this, this.#nextStep(obj));
 	}
 
 	iframe(
@@ -369,12 +395,12 @@ export class UiKitRendererClass {
 		URL: string,
 		onMessage: (data: any) => Promise<void> | void
 	) {
-		const obj: step = {
+		const obj: ConfigStep = {
 			type: "uikitIframe",
 			args: [x, y, width, height, URL, onMessage]
 		};
 
-		return new UiKitElement(this, this.#steps.push(obj));
+		return new UiKitElement(this, this.#nextStep(obj));
 	}
 
 	onClick(
@@ -383,6 +409,10 @@ export class UiKitRendererClass {
 		rightClickCallback?: clickReference["right"],
 		otherConfig?: onClickOptions
 	) {
+		const UserInterface = this.#ConstellationKernel.ui;
+		if (!(UserInterface.type == "GraphicalInterface")) return;
+		const guiScale = UserInterface.displayScaling;
+
 		if (leftClickCallback) isArrow(leftClickCallback, true);
 		if (rightClickCallback) isArrow(rightClickCallback, true);
 
@@ -397,14 +427,107 @@ export class UiKitRendererClass {
 				? undefined
 				: rightClickCallback.bind(this.#process);
 
+		const step = this.#steps[elemID - 1];
+
 		// insure elemID is valid
-		if (elemID > 0 && elemID <= this.#steps.length) {
+		if (elemID > 0 && elemID <= this.#steps.length && step) {
 			// assign data
-			this.#steps[elemID - 1].onClick = {
-				...(otherConfig || {}),
-				left,
-				right
-			};
+			const element = step.element;
+
+			element.classList.add("clickable");
+
+			const longPressHoldDuration = 500;
+
+			element.addEventListener(
+				"pointerdown",
+				(event: PointerEvent) => {
+					const start = Date.now();
+					event.preventDefault();
+
+					if (event.pointerType == "mouse") {
+						// this is handled on mouse UP
+						return;
+					}
+
+					const hold = () => {
+						// remove event listener
+						element.removeEventListener("pointerup", release);
+
+						// long press
+						if (right) {
+							right(
+								event.clientX / guiScale,
+								event.clientY / guiScale
+							);
+						}
+					};
+					const release = () => {
+						// remove timeout
+						clearTimeout(timeOut);
+
+						// data
+						const now = Date.now();
+						const duration = now - start;
+
+						// trigger
+						if (duration > longPressHoldDuration) {
+							// long press
+							if (right) {
+								right(
+									event.clientX / guiScale,
+									event.clientY / guiScale
+								);
+							}
+						} else {
+							// tap
+							if (left) {
+								left(
+									event.clientX / guiScale,
+									event.clientY / guiScale
+								);
+							}
+						}
+					};
+					const timeOut = setTimeout(hold, longPressHoldDuration);
+
+					element.addEventListener("pointerup", release, {
+						once: true
+					});
+				},
+				{ signal: this.#signal }
+			);
+
+			element.addEventListener(
+				"pointerup",
+				(event) => {
+					if (event.pointerType == "mouse") {
+						// only accept left click
+						if (event.button !== 0) return;
+
+						if (left) {
+							left(
+								event.clientX / guiScale,
+								event.clientY / guiScale
+							);
+						}
+						return;
+					}
+				},
+				{
+					signal: this.#signal
+				}
+			);
+
+			element.addEventListener(
+				"contextmenu",
+				(event: PointerEvent) => {
+					event.preventDefault();
+					if (!right) return;
+
+					right(event.clientX / guiScale, event.clientY / guiScale);
+				},
+				{ signal: this.#signal }
+			);
 		} else {
 			throw new UIError(`onClick called with invalid elemID: ${elemID}`);
 		}
@@ -421,13 +544,22 @@ export class UiKitRendererClass {
 		data: string
 	) {
 		const elemID = Number(elementID);
+		const step = this.#steps[elemID - 1];
 
 		// insure elemID is valid
-		if (elemID > 0 && elemID <= this.#steps.length) {
-			// assign data
-			this.#steps[elemID - 1].onDrag = { type, data };
+		if (elemID > 0 && elemID <= this.#steps.length && step) {
+			// Heya! can you finish implementing the drag stuff?
+
+			step.element.addEventListener("dragstart", (event) => {}, {
+				signal: this.#signal
+			});
+			step.element.addEventListener("dragend", (event) => {}, {
+				signal: this.#signal
+			});
 		} else {
-			throw new UIError(`onClick called with invalid elemID: ${elemID}`);
+			throw new UIError(
+				`setElementDragResult called with invalid elemID: ${elemID}`
+			);
 		}
 	}
 
@@ -435,13 +567,14 @@ export class UiKitRendererClass {
 		if (callback) isArrow(callback, true);
 
 		const elemID = Number(elementID);
+		const step = this.#steps[elemID - 1];
 
 		// insure elemID is valid
-		if (elemID > 0 && elemID <= this.#steps.length) {
-			// assign data
-			this.#steps[elemID - 1].onDrop = { callback };
+		if (elemID > 0 && elemID <= this.#steps.length && step) {
 		} else {
-			throw new UIError(`onClick called with invalid elemID: ${elemID}`);
+			throw new UIError(
+				`onElementDrop called with invalid elemID: ${elemID}`
+			);
 		}
 	}
 
@@ -451,13 +584,46 @@ export class UiKitRendererClass {
 	 */
 	passthrough(elementID: number | UiKitElement) {
 		const elemID = Number(elementID);
+		const step = this.#steps[elemID - 1];
 
 		// insure elemID is valid
-		if (elemID > 0 && elemID <= this.#steps.length) {
+		if (elemID > 0 && elemID <= this.#steps.length && step) {
 			// assign data
-			this.#steps[elemID - 1].passthrough = true;
+			step.element.style.pointerEvents = "none";
 		} else {
-			throw new UIError(`onClick called with invalid elemID: ${elemID}`);
+			throw new UIError(
+				`passthrough called with invalid elemID: ${elemID}`
+			);
+		}
+	}
+
+	getCanvasContext(
+		elementID: UiKitCanvasElement,
+		contextId: string,
+		options?: any
+	) {
+		const elemID = Number(elementID);
+		const step = this.#steps[elemID - 1];
+
+		// insure elemID is valid
+		if (
+			elemID > 0 &&
+			elemID <= this.#steps.length &&
+			step &&
+			step.element instanceof HTMLCanvasElement
+		) {
+			// assign data
+			const canvas = step.element;
+
+			const ctx = canvas.getContext(contextId, options)!;
+
+			const proxied = proxyContext(elementID, ctx);
+
+			return proxied;
+		} else {
+			throw new UIError(
+				`getCanvasContext called with invalid elemID or non-canvas: ${elemID}`
+			);
 		}
 	}
 
@@ -615,37 +781,32 @@ export class UiKitRendererClass {
 		});
 	}
 
-	redraw = () => {
-		this.#mustRedraw = true;
-	};
-
 	#deleteElements() {
 		// remove all event listeners
-		this.controller.abort();
+		this.#controller.abort();
 
 		// recreate the AbortController so the next set can be bulk removed
-		this.controller = new AbortController();
-		this.signal = this.controller.signal;
-
-		this.#displayedSteps = [];
+		this.#controller = new AbortController();
+		this.#signal = this.#controller.signal;
+		this.#eventCreators.setSignal(this.#signal);
 
 		// delete all the elements
-		for (const i in this.#items) {
-			const item = this.#items[i];
+		for (const i in this.#displayedSteps) {
+			const item = this.#displayedSteps[i]?.element;
 
 			// just incase
-			if (item !== null) {
-				this.removeElement(item);
+			if (item == null) {
+				if (item !== undefined) {
+					this.#removeElement(item);
+				}
 			}
-			// @ts-ignore
-			this.#items.splice(i, 1);
 		}
 
 		// just make sure everything is gone
 		this.#window.body.innerHTML = "";
 	}
 
-	removeElement = (element: HTMLElement) => {
+	#removeElement = (element: HTMLElement) => {
 		const c = this.#creators;
 
 		if (c.focusedTextbox == element) {
@@ -674,6 +835,119 @@ export class UiKitRendererClass {
 		element.remove();
 	};
 
+	#nextStep(configStep: ConfigStep, id?: number): number {
+		let identifier = id ? id : this.#steps.length + 1;
+		this.#index = identifier;
+
+		const UserInterface = this.#ConstellationKernel.ui;
+		if (!(UserInterface.type == "GraphicalInterface")) return identifier;
+
+		const oldStep = this.#displayedSteps[identifier - 1];
+		const oldElement = oldStep?.element;
+
+		// if the element has disappeared, simply remove the old one.
+		if (configStep == undefined) {
+			if (oldElement) this.#removeElement(oldElement);
+			return identifier;
+		}
+
+		let newStep: step;
+
+		let stepChanged =
+			!oldStep ||
+			oldStep.type !== configStep.type ||
+			JSON.stringify(oldStep.args) !== JSON.stringify(configStep.args);
+
+		if (stepChanged) {
+			const applyCreator = () => {
+				if (oldElement) this.#removeElement(oldElement);
+
+				const creator: (
+					id: number,
+					x: number,
+					y: number,
+					...args: any[]
+				) => HTMLElement = this.#creators[configStep.type].bind(
+					this.#creators
+				);
+				if (!creator) {
+					throw new UIError(
+						`Creator is not defined for ${configStep.type}`
+					);
+				}
+
+				// @ts-expect-error // run the creator
+				const element = creator(identifier, ...configStep.args);
+
+				return element;
+			};
+
+			// use a transitioner to simply modify properties if possible.
+			if (oldStep?.type === configStep?.type) {
+				// get the transitioner
+				const transitioner: (
+					element: HTMLElement,
+					oldStep: ConfigStep,
+					newStep: ConfigStep
+				) => boolean =
+					// @ts-expect-error
+					this.#transitioners[oldStep?.type];
+
+				// prevent trying to apply a transitioner on an element that doesn't exist.
+				if (transitioner == undefined || !oldElement) {
+					newStep = { ...configStep, element: applyCreator() };
+				} else {
+					// apply the transitioner
+					const result = transitioner(
+						oldElement,
+						oldStep,
+						configStep
+					);
+
+					// if it returns false, it can't manage that particular transition.
+					if (result == false) {
+						newStep = { ...configStep, element: applyCreator() };
+					} else {
+						stepChanged = false;
+						newStep = { ...configStep, element: oldElement };
+					}
+				}
+			} else {
+				newStep = { ...configStep, element: applyCreator() };
+			}
+		} else {
+			newStep = { ...configStep, element: oldElement! };
+		}
+
+		if (typeof id == "number") {
+			this.#steps.splice(id, 1, newStep);
+		} else {
+			this.#steps.push(newStep);
+		}
+
+		// add event listeners to the element
+		// the old element had all uiKit event listeners removed by the AbortController
+
+		// event creators manage element-type specific events
+		const eventCreator:
+			| ((element: HTMLElement, ...args: any) => void)
+			// @ts-expect-error
+			| undefined = this.#eventCreators[configStep.type];
+
+		if (typeof eventCreator === "function")
+			eventCreator.bind(this.#eventCreators)(
+				newStep.element,
+				...configStep.args
+			);
+
+		// prevent layering issues from lower elements being recreated.
+		newStep.element.style.zIndex = String(identifier);
+
+		this.#nextDisplayedSteps.push(newStep);
+
+		return identifier;
+	}
+
 	/**
 	 * Commits all UI elements since the last `renderer.clear()` call.
 	 */
@@ -681,9 +955,7 @@ export class UiKitRendererClass {
 		const UserInterface = this.#ConstellationKernel.ui;
 		if (!(UserInterface.type == "GraphicalInterface")) return;
 
-		this.windowWidth = this.#window.body.clientWidth;
-		this.windowHeight = this.#window.body.clientHeight;
-
+		// focus textbox if relevant
 		if (this.#creators.textboxElems !== undefined) {
 			if (
 				UserInterface.windowSystem.focusedWindow == this.#window.winID
@@ -694,339 +966,17 @@ export class UiKitRendererClass {
 			}
 		}
 
-		function objectEquality(
-			object1: Record<string, any>,
-			object2: Record<string, any>
-		) {
-			const keys1 = Object.keys(object1);
-			const keys2 = Object.keys(object2);
-
-			if (keys1 !== keys2) return false;
-
-			for (const key in object1) {
-				const val1 = object1[key];
-				const val2 = object2[key];
-
-				if (typeof val1 !== typeof val2) return false;
-
-				switch (typeof val1) {
-					case "object": {
-						const same = objectEquality(val1, val2);
-						if (!same) return false;
-						break;
-					}
-					case "function": {
-						const fn1 = val1.toString();
-						const fn2 = val2.toString();
-
-						if (fn1 !== fn2) return false;
-						break;
-					}
-					default: {
-						const same = val1 == val2;
-						if (!same) return false;
-					}
-				}
-			}
-		}
-
-		if (!this.#mustRedraw) {
-			if (this.#steps.length === this.#displayedSteps.length) {
-				let same = true;
-
-				for (let i = 0; i < this.#steps.length; i++) {
-					const st = this.#steps[i];
-					const ds = this.#displayedSteps[i];
-
-					if (st.type !== ds.type) {
-						same = false;
-						break;
-					}
-
-					const argsSame = objectEquality(st.args, ds.args);
-					if (!argsSame) {
-						same = false;
-						break;
-					}
-				}
-
-				if (same) return;
-			}
-		}
-
-		// prevent infinite redraws
-		this.#mustRedraw = false;
-
-		// Abort all listeners, but keep the elements unless they are removed
-		this.controller.abort();
-		this.controller = new AbortController();
-		this.signal = this.controller.signal;
-
-		this.#window.body.addEventListener(
-			"wheel",
-			(e) => {
-				function clampMin(n: number, min: number) {
-					if (n > min) return min;
-
-					return n;
-				}
-
-				this.scroll = clampMin(
-					this.scroll - e.deltaY,
-					this.furthestScroll
-				);
-			},
-			{ signal: this.signal, passive: false }
-		);
-
-		const gui = this.#ConstellationKernel.ui;
-		if (!(gui.type == "GraphicalInterface")) return;
-
-		const guiScale = gui.displayScaling || 0;
-
-		const newItems: HTMLElement[] = [];
-		const newDisplayedSteps: step[] = [];
-
+		// remove extra elements
 		for (
-			let i = 0;
+			let i = this.#index;
 			i < Math.max(this.#steps.length, this.#displayedSteps.length);
 			i++
 		) {
-			const newStep = this.#steps[i];
-			const oldStep = this.#displayedSteps[i];
-			const oldElement = this.#items[i];
-
-			// if the element has disappeared, simply remove the old one.
-			if (newStep == undefined) {
-				this.removeElement(oldElement);
-				continue;
-			}
-
-			let element: HTMLElement;
-
-			let stepChanged =
-				!oldStep ||
-				oldStep.type !== newStep.type ||
-				JSON.stringify(oldStep.args) !== JSON.stringify(newStep.args);
-
-			if (stepChanged) {
-				const applyCreator = () => {
-					if (oldElement) this.removeElement(oldElement);
-
-					const creator: (
-						id: number,
-						x: number,
-						y: number,
-						...args: any[]
-					) => HTMLElement = this.#creators[newStep.type].bind(
-						this.#creators
-					);
-					if (!creator) {
-						throw new UIError(
-							`Creator is not defined for ${newStep.type}`
-						);
-					}
-
-					// @ts-expect-error // run the creator
-					const element = creator(i + 1, ...newStep.args);
-
-					if (newStep.passthrough == true) {
-						element.style.pointerEvents = "none";
-					}
-
-					return element;
-				};
-
-				// use a transitioner to simply modify properties if possible.
-				if (oldStep?.type === newStep?.type) {
-					// get the transitioner
-					const transitioner: (
-						element: HTMLElement,
-						oldStep: step,
-						newStep: step
-					) => boolean =
-						// @ts-expect-error
-						this.#transitioners[oldStep?.type];
-
-					// prevent trying to apply a transitioner on an element that doesn't exist.
-					if (transitioner == undefined) {
-						element = applyCreator();
-					} else {
-						// apply the transitioner
-						const result = transitioner(
-							oldElement,
-							oldStep,
-							newStep
-						);
-
-						// if it returns false, it can't manage that particular transition.
-						if (result == false) {
-							element = applyCreator();
-						} else {
-							stepChanged = false;
-							element = oldElement;
-						}
-					}
-				} else {
-					element = applyCreator();
-				}
-			} else {
-				element = oldElement!;
-			}
-
-			// add event listeners to the element
-			// the old element had all uiKit event listeners removed by the AbortController
-
-			// event creators manage element-type specific events
-			const eventCreator:
-				| ((element: HTMLElement, ...args: any) => void)
-				// @ts-expect-error
-				| undefined = this.#eventCreators[newStep.type];
-
-			if (typeof eventCreator === "function")
-				eventCreator.bind(this.#eventCreators)(
-					element,
-					...newStep.args
-				);
-
-			if (newStep.onClick) {
-				element.classList.add("clickable");
-				element.style.setProperty(
-					"--scale",
-					String(newStep.onClick.scale || 1.3)
-				);
-				element.style.setProperty(
-					"--click-scale",
-					String(newStep.onClick.clickScale || 1.5)
-				);
-				element.style.setProperty(
-					"--origin",
-					newStep.onClick.origin || "center"
-				);
-
-				const longPressHoldDuration = 500;
-
-				element.addEventListener(
-					"pointerdown",
-					(event: PointerEvent) => {
-						const start = Date.now();
-						event.preventDefault();
-
-						if (event.pointerType == "mouse") {
-							// this is handled on mouse UP
-							return;
-						}
-
-						const hold = () => {
-							// remove event listener
-							element.removeEventListener("pointerup", release);
-
-							// long press
-							if (newStep?.onClick?.right) {
-								newStep.onClick.right(
-									event.clientX / guiScale,
-									event.clientY / guiScale
-								);
-							}
-						};
-						const release = () => {
-							// remove timeout
-							clearTimeout(timeOut);
-
-							// data
-							const now = Date.now();
-							const duration = now - start;
-
-							// trigger
-							if (duration > longPressHoldDuration) {
-								// long press
-								if (newStep?.onClick?.right) {
-									newStep.onClick.right(
-										event.clientX / guiScale,
-										event.clientY / guiScale
-									);
-								}
-							} else {
-								// tap
-								if (newStep?.onClick?.left) {
-									newStep.onClick.left(
-										event.clientX / guiScale,
-										event.clientY / guiScale
-									);
-								}
-							}
-						};
-						const timeOut = setTimeout(hold, longPressHoldDuration);
-
-						element.addEventListener("pointerup", release, {
-							once: true
-						});
-					},
-					{ signal: this.signal }
-				);
-
-				element.addEventListener(
-					"pointerup",
-					(event) => {
-						if (event.pointerType == "mouse") {
-							// only accept right click
-							if (event.button !== 0) return;
-
-							if (newStep?.onClick?.left) {
-								newStep.onClick.left(
-									event.clientX / guiScale,
-									event.clientY / guiScale
-								);
-							}
-							return;
-						}
-					},
-					{
-						signal: this.signal
-					}
-				);
-
-				element.addEventListener(
-					"contextmenu",
-					(event: PointerEvent) => {
-						event.preventDefault();
-						if (!newStep?.onClick?.right) return;
-
-						newStep.onClick.right(
-							event.clientX / guiScale,
-							event.clientY / guiScale
-						);
-					},
-					{ signal: this.signal }
-				);
-			}
-
-			if (newStep.onDrag) {
-				// Heya! can you finish implementing the drag stuff?
-
-				element.addEventListener("dragstart", (event) => {}, {
-					signal: this.signal
-				});
-				element.addEventListener("dragend", (event) => {}, {
-					signal: this.signal
-				});
-			}
-
-			// prevent layering issues from lower elements being recreated.
-			element.style.zIndex = String(i);
-
-			newItems.push(element);
-			newDisplayedSteps.push(newStep);
+			const element = this.#displayedSteps[i]?.element;
+			if (element) this.#removeElement(element);
 		}
 
-		//// remove missed old elements
-		//for (let i = this.steps.length; i < this.items.length; i++) {
-		//	const item = this.items[i];
-		//	if (item) item.remove();
-		//}
-
-		this.#items = newItems;
-		this.#displayedSteps = newDisplayedSteps;
+		this.#displayedSteps = this.#nextDisplayedSteps;
 	};
 
 	terminate() {

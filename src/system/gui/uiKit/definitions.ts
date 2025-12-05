@@ -30,13 +30,12 @@ export interface onDropReference {
 }
 
 // steps
-export interface step {
+export interface ConfigStep {
 	type: uikitCreatorName;
 	args: any[];
-	onClick?: clickReference;
-	onDrag?: onDragReference;
-	onDrop?: onDropReference;
-	passthrough?: boolean;
+}
+export interface step extends ConfigStep {
+	element: HTMLElement;
 }
 
 export interface textboxCallbackObject {
