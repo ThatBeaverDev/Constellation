@@ -29,14 +29,14 @@ export default class CoreExecutable extends Service {
 		// GUI manager permissions
 		this.env.setDirectoryPermission(guiManagerDirectory, "operator", true);
 
-		// filetype database m anager permissions
+		// filetype database manager permissions
 		this.env.setDirectoryPermission(
 			filetypeDatabaseManagerDirectory,
 			"systemFiles",
 			true
 		);
 
-		// software update installer
+		// software update installer permissions
 		this.env.setDirectoryPermission(
 			"/System/CoreExecutables/SoftwareUpdateInstaller.srvc",
 			"operator",
