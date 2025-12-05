@@ -153,6 +153,8 @@ async function startupKernel(root: string, canInstall: boolean = true) {
 		install: installIsNeeded
 	});
 
+	await currentKernel.init();
+
 	/* -------------------- Start actual Kernel if the last one was an installer once it exits -------------------- */
 
 	if (installIsNeeded) {
