@@ -144,12 +144,6 @@ export default class ConstellationKernel implements Terminatable {
 		} else {
 			this.ui = new TextInterface(this);
 		}
-
-		try {
-			this.init();
-		} catch (e: unknown) {
-			panic(this, e, "systemInit");
-		}
 	}
 
 	setBootStatus(
