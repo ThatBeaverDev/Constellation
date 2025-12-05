@@ -229,4 +229,10 @@ export default class EnvFs {
 			);
 		}
 	};
+
+	pathAsDriveRoot = (directory: string) => {
+		const kernel = this.#ConstellationKernel;
+
+		return kernel.fs.resolve(kernel.rootPoint, directory);
+	};
 }
