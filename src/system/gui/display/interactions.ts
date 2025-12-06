@@ -1,4 +1,5 @@
 import { GraphicalInterface } from "../gui.js";
+import { snappingWindowInfo } from "./definitions.js";
 import WindowSystem from "./windowSystem.js";
 
 export default class WindowSystemInteractions {
@@ -34,21 +35,26 @@ export default class WindowSystemInteractions {
 		win.move(x, y);
 		win.unfullscreen();
 
-		let side: "left" | "right" | "fullscreen" | undefined = undefined;
+		let side: snappingWindowInfo["side"] | undefined = undefined;
 
-		if (x < this.#parent.bounds.left) {
+		if (y < this.#parent.bounds.upper) {
+			side = "fullscreen";
+		} else if (x < this.#parent.bounds.left) {
 			side = "left";
 		} else if (
 			x + win.dimensions.width >
 			this.#GraphicalInterface.displayWidth - this.#parent.bounds.right
 		) {
 			side = "right";
-		} else if (y < this.#parent.bounds.upper) {
-			side = "fullscreen";
+		} else if (
+			y + win.dimensions.height >
+			this.#GraphicalInterface.displayHeight - this.#parent.bounds.lower
+		) {
+			side = "bottom";
 		}
 
-		// no snapping needed
 		if (side == undefined) {
+			// no snapping needed
 			if (parent.snappingWindow?.window == win) {
 				parent.snappingWindow = undefined;
 			}
@@ -61,7 +67,7 @@ export default class WindowSystemInteractions {
 		};
 	}
 
-	windowPointerUp(e: PointerEvent) {
+	windowPointerUp() {
 		const parent = this.#parent;
 
 		if (parent.snappingWindow !== undefined) {
@@ -117,6 +123,35 @@ export default class WindowSystemInteractions {
 					height =
 						this.#GraphicalInterface.displayHeight -
 						(topBound + bottomBound);
+					break;
+				case "top":
+					x = leftBound;
+					y = topBound;
+
+					width =
+						this.#GraphicalInterface.displayWidth -
+						(leftBound + rightBound);
+					height =
+						this.#GraphicalInterface.displayHeight / 2 -
+						(topBound + bottomBound);
+					break;
+
+				case "bottom":
+					x = leftBound;
+					y = this.#GraphicalInterface.displayHeight / 2;
+
+					width =
+						this.#GraphicalInterface.displayWidth -
+						(leftBound + rightBound);
+					height =
+						this.#GraphicalInterface.displayHeight / 2 -
+						bottomBound;
+					break;
+
+				default:
+					throw new Error(
+						`Undefined snapping side: ${parent.snappingWindow.side}`
+					);
 			}
 
 			win.move(x, y);
@@ -134,6 +169,98 @@ export default class WindowSystemInteractions {
 
 	documentTouchMove(e: TouchEvent) {
 		e.preventDefault();
+	}
+
+	keydown(e: KeyboardEvent) {
+		if (!e.altKey) return;
+
+		switch (e.code) {
+			/* -------------------- Window Snapping -------------------- */
+			case "ArrowLeft": {
+				const window = this.#parent.getWindowOfId(
+					this.#parent.focusedWindow
+				);
+
+				if (!window) return;
+
+				this.#parent.snappingWindow = {
+					side: "left",
+					window
+				};
+
+				this.windowPointerUp();
+
+				break;
+			}
+			case "ArrowRight": {
+				const window = this.#parent.getWindowOfId(
+					this.#parent.focusedWindow
+				);
+
+				if (!window) return;
+
+				if (this.#parent.snappingWindow) {
+					window.move(undefined, undefined, true);
+				} else {
+					this.#parent.snappingWindow = {
+						side: "right",
+						window
+					};
+
+					this.windowPointerUp();
+				}
+
+				break;
+			}
+			case "ArrowUp": {
+				const window = this.#parent.getWindowOfId(
+					this.#parent.focusedWindow
+				);
+
+				if (!window) return;
+
+				this.#parent.snappingWindow = {
+					side: "top",
+					window
+				};
+
+				this.windowPointerUp();
+
+				break;
+			}
+			case "ArrowDown": {
+				const window = this.#parent.getWindowOfId(
+					this.#parent.focusedWindow
+				);
+
+				if (!window) return;
+
+				this.#parent.snappingWindow = {
+					side: "bottom",
+					window
+				};
+
+				this.windowPointerUp();
+
+				break;
+			}
+			case "Enter": {
+				const window = this.#parent.getWindowOfId(
+					this.#parent.focusedWindow
+				);
+
+				if (!window) return;
+
+				this.#parent.snappingWindow = {
+					side: "fullscreen",
+					window
+				};
+
+				this.windowPointerUp();
+
+				break;
+			}
+		}
 	}
 
 	async terminate() {}

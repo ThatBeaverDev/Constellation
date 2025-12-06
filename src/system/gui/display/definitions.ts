@@ -8,7 +8,7 @@ export interface UserPromptConfig {
 }
 export interface snappingWindowInfo {
 	window: GraphicalWindow;
-	side: "left" | "right" | "fullscreen";
+	side: "left" | "right" | "fullscreen" | "bottom" | "top";
 }
 
 export const windowFocusPadding = 2;
