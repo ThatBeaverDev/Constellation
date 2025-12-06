@@ -374,13 +374,6 @@ export default class Dock implements Terminatable {
 				if (directory == this.parent.directory) {
 					// it's us - show login shell options.
 
-					//buttons[`book-open-text-:-About ${this.parent.config.name}`];
-					//buttons[`cog-:-Settings`];
-					//buttons["rotate-cw-:-Restart"];
-					//buttons["power-:-Shut Down"];
-					//buttons["lock-:-Lock"];
-					//buttons[`log-out-:-Logout from ${this.env.user}`];
-
 					contextTitle = String(this.parent.config.name);
 
 					contextMenuItems[

@@ -21,8 +21,8 @@ export default class dockAndDesktop extends Overlay {
 			]
 		},
 		menubar: {},
-		name: "Constellation",
-		icon: "/System/CoreAssets/Logos/Constellation-lucide.svg"
+		name: "Constellation Shell",
+		icon: this.env.fs.resolve("./resources/icon.svg")
 	};
 	oldConfig: string = "";
 	tick: number = 0;
@@ -32,7 +32,6 @@ export default class dockAndDesktop extends Overlay {
 		this.renderer.hideWindowHeader();
 		this.renderer.hideWindowCorners();
 
-		//this.renderer.setIcon("dock")
 		this.renderer.setIcon(this.config.icon);
 		this.renderer.windowName = this.config.name;
 
