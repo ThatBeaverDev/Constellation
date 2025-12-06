@@ -1,4 +1,5 @@
 import ConstellationKernel from "..//kernel.js";
+import * as executables from "../runtime/components/executables.js";
 import { UserInterfaceBase } from "../ui/ui.js";
 import currentHandler, { Handler } from "./display.js";
 
@@ -8,6 +9,7 @@ export class TextInterface implements UserInterfaceBase {
 	type: "TextInterface" = "TextInterface";
 	#ConstellationKernel: ConstellationKernel;
 	displayInterface: Handler;
+	guiPrograms: executables.Process[] = [];
 
 	constructor(ConstellationKernel: ConstellationKernel, handler?: Handler) {
 		this.#ConstellationKernel = ConstellationKernel;
@@ -78,14 +80,14 @@ export class TextInterface implements UserInterfaceBase {
 				this.displayInterface.clearView();
 			};
 
-			await this.#ConstellationKernel.runtime.execute(
+			const proc = await this.#ConstellationKernel.runtime.execute(
 				"/System/CoreExecutables/Shell.appl",
 				[],
 				username,
 				password,
 				undefined,
 				false,
-				undefined,
+				true,
 				{
 					print: shellPrintLn,
 					getInput: shellGetInput,
@@ -93,6 +95,8 @@ export class TextInterface implements UserInterfaceBase {
 				},
 				true
 			);
+
+			this.guiPrograms.push(proc.process);
 		} catch (e: unknown) {
 			if (e instanceof Error) {
 				post(String(e.stack));
@@ -115,7 +119,11 @@ export class TextInterface implements UserInterfaceBase {
 		this.displayInterface.post(text);
 	}
 
-	terminate() {
+	async terminate() {
+		for (const proc of this.guiPrograms) {
+			await this.#ConstellationKernel.runtime.terminateProcess(proc);
+		}
+
 		this.displayInterface.terminate();
 	}
 }
