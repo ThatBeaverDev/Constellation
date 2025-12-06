@@ -72,7 +72,7 @@ export interface ProcessAlias {
 	id: number;
 	startTime: number;
 
-	icon?: string;
+	icon: string | Promise<string>;
 	name: string;
 	type: "application" | "service";
 

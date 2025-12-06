@@ -85,6 +85,11 @@ compile() {
 
     # Build application installer
     ./scripts/tcpkg build/apps/gui/system/applicationInstaller build/indexes/com.constellation.applicationInstaller.idx -overide=true
+
+    # Build Process manager
+    mkdir -p build/apps/gui/system/monitor/resources
+    cp assets/apps/monitor.svg build/apps/gui/system/monitor/resources/icon.svg
+    ./scripts/tcpkg build/apps/gui/system/monitor build/indexes/com.constellation.systemMonitor.idx -overide=true
 }
 
 # first param is directory, second param is name

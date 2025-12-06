@@ -261,7 +261,12 @@ export default class uiKitCreators {
 		box.style.height = `${height}px`;
 
 		if (config?.background == "sidebar") {
-			box.style.background = `var(--headerColour)`;
+			if (this.#window?.container.classList.contains("frosted")) {
+				box.style.background = "";
+				box.classList.add("glass");
+			} else {
+				box.style.background = `var(--headerColour)`;
+			}
 		} else {
 			box.style.background = `${config?.background || "var(--bg-light)"}`;
 		}

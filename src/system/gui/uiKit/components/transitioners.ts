@@ -1,9 +1,15 @@
+import { GraphicalWindow } from "../../display/windowTypes.js";
 import { setElementStyle } from "../../html.js";
 import { ConfigStep } from "../definitions.js";
 
 export default class uiKitTransitioners {
 	textboxElem: HTMLInputElement | HTMLTextAreaElement | undefined;
 	hasTextbox: boolean = false;
+	#window?: GraphicalWindow;
+
+	constructor(window?: GraphicalWindow) {
+		this.#window = window;
+	}
 
 	uikitIcon(
 		element: HTMLElement,
@@ -93,11 +99,11 @@ export default class uiKitTransitioners {
 		return true;
 	}
 
-	uikitBox(
+	uikitBox = (
 		element: HTMLElement,
 		oldStep: ConfigStep,
 		newStep: ConfigStep
-	): boolean {
+	): boolean => {
 		for (const i in newStep.args) {
 			const oldArg = oldStep.args[i];
 			const newArg = newStep.args[i];
@@ -140,18 +146,21 @@ export default class uiKitTransitioners {
 						}
 					}
 
-					if (newArg?.isFrosted == true) {
-						element.classList.add("frosted");
-					} else {
-						element.classList.remove("frosted");
-					}
-
 					if (newArg?.background == "sidebar") {
-						setElementStyle(
-							element,
-							"background",
-							"var(--headerColour)"
-						);
+						if (
+							this.#window?.container.classList.contains(
+								"frosted"
+							)
+						) {
+							setElementStyle(element, "background", "");
+							element.classList.add("glass");
+						} else {
+							setElementStyle(
+								element,
+								"background",
+								"var(--headerColour)"
+							);
+						}
 					} else {
 						setElementStyle(
 							element,
@@ -159,6 +168,13 @@ export default class uiKitTransitioners {
 							`${newArg?.background || "var(--bg-light)"}`
 						);
 					}
+
+					if (newArg?.isFrosted == true) {
+						element.classList.add("frosted");
+					} else {
+						element.classList.remove("frosted");
+					}
+
 					break;
 				default:
 					throw new Error("Unknown key: " + i);
@@ -166,7 +182,7 @@ export default class uiKitTransitioners {
 		}
 
 		return true;
-	}
+	};
 
 	uikitEmbeddedTui(
 		element: HTMLElement,

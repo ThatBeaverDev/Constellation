@@ -183,7 +183,7 @@ export class UiKitRendererClass {
 		this.#creators = new uiKitCreators(ConstellationKernel, this.#window);
 		this.#eventCreators = new uikitEventCreators(this.#signal);
 
-		this.#transitioners = new uiKitTransitioners();
+		this.#transitioners = new uiKitTransitioners(window);
 
 		document.addEventListener("pointerdown", () => {
 			this.lastClick = Date.now();
