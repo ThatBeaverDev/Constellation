@@ -53,58 +53,86 @@ export default class WindowSystem {
 		lower: 0
 	};
 
-	_snappingWindow: snappingWindowInfo | undefined;
-	_snappingWindowDisplay: HTMLDivElement;
+	#snappingWindow: snappingWindowInfo | undefined;
+	#snappingWindowDisplay: HTMLDivElement;
+	/**
+	 * Set up undefined to unsnap and set to an object to snap a window
+	 */
 	set snappingWindow(info: snappingWindowInfo | undefined) {
 		// make it snap
 
 		if (info == undefined) {
 			// no more snapping
 
-			this._snappingWindowDisplay.classList.remove("snapRight");
-			this._snappingWindowDisplay.classList.remove("snapLeft");
-			this._snappingWindowDisplay.classList.remove("snapFullscreen");
+			this.#snappingWindowDisplay.classList.remove("snapRight");
+			this.#snappingWindowDisplay.classList.remove("snapLeft");
+			this.#snappingWindowDisplay.classList.remove("snapFullscreen");
 
-			this._snappingWindow = undefined;
+			this.#snappingWindow = undefined;
 
 			return;
 		}
 
-		this._snappingWindowDisplay.style.zIndex =
-			this._snappingWindow?.window.container.style.zIndex || "Infinity";
+		this.#snappingWindowDisplay.style.zIndex =
+			this.#snappingWindow?.window.container.style.zIndex || "Infinity";
 
 		if (
-			this._snappingWindow?.window === info.window &&
-			this._snappingWindow.side == info.side
+			this.#snappingWindow?.window === info.window &&
+			this.#snappingWindow.side == info.side
 		) {
 			return;
 		}
 
 		switch (info.side) {
 			case "left":
-				this._snappingWindowDisplay.classList.remove("snapRight");
-				this._snappingWindowDisplay.classList.remove("snapFullscreen");
-				this._snappingWindowDisplay.classList.add("snapLeft");
+				this.#snappingWindowDisplay.classList.remove("snapRight");
+				this.#snappingWindowDisplay.classList.remove("snapFullscreen");
+				this.#snappingWindowDisplay.classList.remove("snapBottom");
+				this.#snappingWindowDisplay.classList.remove("snapTop");
+				this.#snappingWindowDisplay.classList.add("snapLeft");
 
 				break;
 			case "right":
-				this._snappingWindowDisplay.classList.remove("snapLeft");
-				this._snappingWindowDisplay.classList.remove("snapFullscreen");
-				this._snappingWindowDisplay.classList.add("snapRight");
+				this.#snappingWindowDisplay.classList.remove("snapFullscreen");
+				this.#snappingWindowDisplay.classList.remove("snapBottom");
+				this.#snappingWindowDisplay.classList.remove("snapTop");
+				this.#snappingWindowDisplay.classList.remove("snapLeft");
+				this.#snappingWindowDisplay.classList.add("snapRight");
 
 				break;
 			case "fullscreen":
-				this._snappingWindowDisplay.classList.remove("snapLeft");
-				this._snappingWindowDisplay.classList.remove("snapRight");
-				this._snappingWindowDisplay.classList.add("snapFullscreen");
+				this.#snappingWindowDisplay.classList.remove("snapRight");
+				this.#snappingWindowDisplay.classList.remove("snapBottom");
+				this.#snappingWindowDisplay.classList.remove("snapTop");
+				this.#snappingWindowDisplay.classList.remove("snapLeft");
+				this.#snappingWindowDisplay.classList.add("snapFullscreen");
+
 				break;
+			case "bottom":
+				this.#snappingWindowDisplay.classList.remove("snapRight");
+				this.#snappingWindowDisplay.classList.remove("snapFullscreen");
+				this.#snappingWindowDisplay.classList.remove("snapTop");
+				this.#snappingWindowDisplay.classList.remove("snapLeft");
+				this.#snappingWindowDisplay.classList.add("snapBottom");
+
+				break;
+			case "top":
+				this.#snappingWindowDisplay.classList.remove("snapRight");
+				this.#snappingWindowDisplay.classList.remove("snapFullscreen");
+				this.#snappingWindowDisplay.classList.remove("snapBottom");
+				this.#snappingWindowDisplay.classList.remove("snapLeft");
+				this.#snappingWindowDisplay.classList.add("snapTop");
+
+				break;
+			default:
+				throw new Error(`Undefined snapping side: ${info.side}`);
 		}
 
-		this._snappingWindow = info;
+		this.#snappingWindow = info;
 	}
 
 	get snappingWindow(): snappingWindowInfo | undefined {
-		return this._snappingWindow;
+		return this.#snappingWindow;
 	}
 
 	update: ReturnType<typeof setInterval>;
@@ -123,7 +151,7 @@ export default class WindowSystem {
 
 		GraphicalInterface.container.appendChild(elem);
 
-		this._snappingWindowDisplay = elem;
+		this.#snappingWindowDisplay = elem;
 
 		// init css styles
 		this.cssVariables = new cssVariables(
@@ -169,6 +197,11 @@ export default class WindowSystem {
 			{ passive: false }
 		);
 
+		document.addEventListener(
+			"keydown",
+			this.interactions.keydown.bind(this.interactions)
+		);
+
 		this.styleElem = document.createElement("style");
 		this.styleElem.id = String(window.renderID++);
 		this.styleElem.className = "windowsAnimationStyles";
@@ -205,7 +238,7 @@ export default class WindowSystem {
 	}
 
 	async terminate() {
-		this._snappingWindowDisplay.remove();
+		this.#snappingWindowDisplay.remove();
 
 		// submodules
 		await this.cssVariables.terminate();
@@ -228,6 +261,10 @@ export default class WindowSystem {
 		document.removeEventListener(
 			"touchmove",
 			this.interactions.documentTouchMove
+		);
+		document.removeEventListener(
+			"keydown",
+			this.interactions.keydown.bind(this.interactions)
 		);
 
 		// close windows
