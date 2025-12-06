@@ -2,19 +2,20 @@
 <g clip-path="url(#clip0_38_1109)">
 <rect width="125" height="125" rx="22.5" fill="white"/>
 <g filter="url(#filter0_d_38_1109)">
-<rect x="4" y="5" width="116" height="116" rx="17.5" fill="#E6E6E6"/>
+<rect x="7" y="8" width="110" height="110" rx="16.5948" fill="#E6E6E6"/>
 </g>
 <g clip-path="url(#clip1_38_1109)">
-<path d="M14.6728 89.448C11.1802 85.967 11.1698 80.3126 14.6624 76.8316L33.6761 57.8811L14.6617 38.93C11.1693 35.4489 11.1802 29.7938 14.6728 26.3129C18.1654 22.8322 23.8387 22.8217 27.3313 26.3025L52.6904 51.5774C54.4752 53.3563 55.3429 55.703 55.3008 58.0369C55.2632 60.2666 54.3955 62.484 52.6904 64.1835L27.3313 89.4584C23.8387 92.9394 18.1654 92.929 14.6728 89.448Z" fill="#333333"/>
-<rect x="112" y="74.1964" width="17.8571" height="53.75" rx="8.92857" transform="rotate(90 112 74.1964)" fill="#333333"/>
+<path d="M14.6728 94.4486C11.1802 90.9676 11.1698 85.3132 14.6624 81.8322L33.6761 62.8817L14.6617 43.9305C11.1693 40.4495 11.1802 34.7944 14.6728 31.3134C18.1654 27.8327 23.8387 27.8223 27.3313 31.3031L52.6904 56.578C54.4752 58.3568 55.3429 60.7036 55.3008 63.0375C55.2632 65.2671 54.3955 67.4846 52.6904 69.184L27.3313 94.4589C23.8387 97.9399 18.1654 97.9295 14.6728 94.4486Z" fill="#333333"/>
+<rect x="112" y="79.1969" width="17.8571" height="53.75" rx="8.92857" transform="rotate(90 112 79.1969)" fill="#333333"/>
 </g>
 </g>
 <defs>
-<filter id="filter0_d_38_1109" x="0" y="5" width="124" height="124" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<filter id="filter0_d_38_1109" x="0" y="4.7931" width="124" height="124" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
 <feFlood flood-opacity="0" result="BackgroundImageFix"/>
 <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-<feOffset dy="4"/>
-<feGaussianBlur stdDeviation="2"/>
+<feMorphology radius="2" operator="dilate" in="SourceAlpha" result="effect1_dropShadow_38_1109"/>
+<feOffset dy="3.7931"/>
+<feGaussianBlur stdDeviation="2.5"/>
 <feComposite in2="hardAlpha" operator="out"/>
 <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
 <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_38_1109"/>
@@ -24,7 +25,7 @@
 <rect width="125" height="125" fill="white"/>
 </clipPath>
 <clipPath id="clip1_38_1109">
-<rect width="100" height="69" fill="white" transform="translate(12 22.9995)"/>
+<rect width="100" height="69" fill="white" transform="translate(12 28)"/>
 </clipPath>
 </defs>
 </svg>
