@@ -1,8 +1,7 @@
-import PanelKit from "panelkit";
+import { PanelKitGuiApplication } from "panelkit";
 import { ConstellationApplicationInstaller } from "../../../../../system/lib/packaging/definitions";
 
-export default class ApplicationInstaller extends GuiApplication {
-	panelkit = new PanelKit(this.renderer);
+export default class ApplicationInstaller extends PanelKitGuiApplication {
 	application!: ConstellationApplicationInstaller;
 
 	targetDirectory?: string;

@@ -5,17 +5,6 @@ import { openFile } from "gui";
 import { directoryPointType } from "../../../../system/security/definitions.js";
 import { bytesToSize } from "../components/utils.js";
 
-const clamp = (n: number, min: number, max: number) => {
-	if (n < min) {
-		return min;
-	}
-	if (max < n) {
-		return max;
-	}
-
-	return n;
-};
-
 export interface listing {
 	name: string;
 	path: string;
@@ -44,7 +33,7 @@ export default class finder extends GuiApplication {
 	async init() {
 		const [initialDirectory = "/"] = this.args;
 
-		await this.cd(initialDirectory);
+		await this.cd(initialDirectory, false);
 
 		this.renderer.setIcon(
 			this.env.fs.resolve(this.directory, "./resources/icon.svg")
@@ -62,45 +51,11 @@ export default class finder extends GuiApplication {
 		shiftKey: boolean,
 		repeat: boolean
 	) {
+		this.panelkit.keydown(code, metaKey, altKey, ctrlKey, shiftKey, repeat);
+
 		switch (code) {
-			case "ArrowDown":
-				if (shiftKey) {
-					this.selector = clamp(
-						this.selector + 2,
-						0,
-						this.listing.length - 1
-					);
-				} else {
-					this.selector = clamp(
-						this.selector + 1,
-						0,
-						this.listing.length - 1
-					);
-				}
-				break;
-			case "ArrowUp":
-				if (shiftKey) {
-					this.selector = clamp(
-						this.selector - 2,
-						0,
-						this.listing.length - 1
-					);
-				} else {
-					this.selector = clamp(
-						this.selector - 1,
-						0,
-						this.listing.length - 1
-					);
-				}
-				break;
-			case "Enter":
-				const obj = this.listing[this.selector];
-				this.cd(obj.path);
-				this.selector = 0;
-				break;
 			case "Escape":
-				this.selector = 0;
-				this.cd("..");
+				this.cd("..", false);
 				break;
 			case "KeyG":
 				// cd to user-provided directory
@@ -110,15 +65,17 @@ export default class finder extends GuiApplication {
 					this.env.fs.resolve(this.directory, "./resources/icon.svg")
 				);
 
-				this.cd(target == "" ? "." : target);
+				this.cd(target == "" ? "." : target, false);
 				break;
 		}
 	}
 
-	async cd(directory: string) {
+	async cd(directory: string, isRefresh: boolean) {
 		this.ok = false;
-		delete this.textDisplay;
+		this.textDisplay = "";
 		this.listing = [];
+
+		if (!isRefresh) this.panelkit.keyboardFocus = 0;
 
 		const oldDir = String(this.path);
 		if (oldDir !== directory) {
@@ -279,7 +236,7 @@ export default class finder extends GuiApplication {
 
 	frame() {
 		if (this.location == undefined) return;
-		if (this.counter++ % 250 == 0) this.cd(this.path);
+		if (this.counter++ % 250 == 0) this.cd(this.path, true);
 
 		// insure we are ready to render
 		if (!this.ok) return;
@@ -307,7 +264,8 @@ export default class finder extends GuiApplication {
 						this.env.fs.resolve(
 							userinf?.directory || "/",
 							"./Documents"
-						)
+						),
+						false
 					);
 				}
 			},
@@ -322,7 +280,8 @@ export default class finder extends GuiApplication {
 						this.env.fs.resolve(
 							userinf?.directory || "/",
 							"./Desktop"
-						)
+						),
+						false
 					);
 				}
 			},
@@ -337,7 +296,8 @@ export default class finder extends GuiApplication {
 						this.env.fs.resolve(
 							userinf?.directory || "/",
 							"./Notes"
-						)
+						),
+						false
 					);
 				}
 			},
@@ -348,7 +308,7 @@ export default class finder extends GuiApplication {
 				callback: () => {
 					const userinf = this.env.users.userInfo(this.env.user);
 
-					this.cd(userinf?.directory || "/");
+					this.cd(userinf?.directory || "/", false);
 				}
 			}
 		);
@@ -368,13 +328,13 @@ export default class finder extends GuiApplication {
 				this.renderer.setContextMenu(x, y, undefined, {
 					"Show Contents": this.isApplication(directory)
 						? async () => {
-								await this.cd(directory);
+								await this.cd(directory, false);
 							}
 						: undefined,
 					Properties: () => showPropertiesOfPath(directory),
 					Duplicate: async () => {
 						await this.env.fs.copy(directory, `${directory} copy`);
-						this.cd(this.path);
+						this.cd(this.path, false);
 					},
 					Rename: async () => {
 						const newName = await this.renderer.askUserQuestion(
@@ -392,7 +352,7 @@ export default class finder extends GuiApplication {
 						);
 
 						await this.env.fs.move(directory, newDirectory);
-						this.cd(this.path);
+						this.cd(this.path, false);
 					},
 					Delete: async () => {
 						const stats = await this.env.fs.stat(directory);
@@ -425,7 +385,7 @@ export default class finder extends GuiApplication {
 							await this.env.fs.deleteFile(directory);
 						}
 
-						this.cd(this.path);
+						this.cd(this.path, false);
 					}
 				});
 			};
@@ -481,7 +441,7 @@ export default class finder extends GuiApplication {
 			if (this.isApplication(path)) {
 				this.env.exec(path);
 			} else {
-				await this.cd(path);
+				await this.cd(path, false);
 			}
 		} else {
 			openFile(this.env, path);
