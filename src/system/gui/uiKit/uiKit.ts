@@ -106,6 +106,10 @@ export class UiKitRendererClass {
 	setIcon(name: string) {
 		this.#window.setIcon(name);
 	}
+	getIcon() {
+		return this.#window.iconName;
+	}
+
 	makeWindowInvisible() {
 		this.#window.hide();
 	}
@@ -184,6 +188,18 @@ export class UiKitRendererClass {
 		document.addEventListener("pointerdown", () => {
 			this.lastClick = Date.now();
 		});
+
+		if (process) this.#loadIcon(process);
+	}
+
+	async #loadIcon(process: GuiApplication) {
+		const processPath = process.env.fs.resolve("./config.js");
+		const conf: ApplicationManifest = (
+			await process.env.include(processPath)
+		).default;
+
+		if (conf.icon && this.getIcon() == "app-window-mac")
+			this.setIcon(conf.icon);
 	}
 
 	clear = () => {
