@@ -1,10 +1,9 @@
-import PanelKit from "panelkit";
+import { PanelKitGuiApplication } from "panelkit";
 import { SettingsPages } from "../components/pages.js";
 
-export default class systemSettings extends GuiApplication {
+export default class systemSettings extends PanelKitGuiApplication {
 	page: keyof SettingsPages = "Home";
 	pages!: SettingsPages;
-	panelkit: PanelKit = new PanelKit(this.renderer);
 
 	async init() {
 		this.panelkit.sidebarWidth = 110;

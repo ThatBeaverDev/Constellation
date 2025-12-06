@@ -7,6 +7,9 @@ export default class PanelKit {
 	padding = 15;
 	sidebarWidth = 150;
 
+	keyboardFocus: number = 0;
+	#items: { trigger?: Function }[] = [];
+
 	x = this.sidebarWidth + this.padding;
 	y = this.padding;
 	#lastType: "card" | "item" | "title" | undefined;
@@ -37,9 +40,25 @@ export default class PanelKit {
 
 		this.#lastType = type;
 	}
+	#newItem(conf: { trigger?: Function }, height: number) {
+		this.#items.push(conf);
+
+		const isFocused = this.keyboardFocus == this.#items.length;
+
+		const lowestPoint = this.y + height + this.minorPadding;
+		if (isFocused && lowestPoint > this.#renderer.windowHeight)
+			this.#renderer.scroll -= lowestPoint - this.#renderer.windowHeight;
+
+		return isFocused;
+	}
 
 	reset() {
 		this.#renderer.furthestScroll = this.y;
+
+		this.#items = [];
+		if (this.keyboardFocus > this.#items.length) {
+			//this.keyboardFocus = this.#items.length;
+		}
 
 		if (this.#renderer.scroll > 0) {
 			this.#renderer.scroll = 0;
@@ -64,12 +83,18 @@ export default class PanelKit {
 	) => {
 		this.#typeChange("card");
 
+		/* -------------------- Keyboard support -------------------- */
+
+		const isFocused = this.#newItem({ trigger: onClick }, this.cardSize);
+
+		/* -------------------- Main rendering -------------------- */
+
 		const cardWidth =
 			this.#renderer.windowWidth - this.sidebarWidth - this.padding * 2;
 
 		this.#renderer
 			.box(this.x, this.y, cardWidth, this.cardSize, {
-				background: "sidebar",
+				background: isFocused ? "var(--accent)" : "sidebar",
 				borderRadius: 10
 			})
 			.onClick(onClick, onRightClick, {});
@@ -184,6 +209,12 @@ export default class PanelKit {
 
 		const cardHeight = titleHeight + descriptionHeight + tripleMinorPadding;
 
+		/* -------------------- Keyboard support -------------------- */
+
+		const isFocused = this.#newItem({ trigger: onClick }, cardHeight);
+
+		/* -------------------- Return to spaghetti -------------------- */
+
 		const iconScale = (cardHeight - tripleMinorPadding) / 24;
 		const iconSize = 24 * iconScale;
 		const iconTop = this.y + (cardHeight - iconSize) / 2;
@@ -192,7 +223,7 @@ export default class PanelKit {
 
 		this.#renderer
 			.box(this.x, this.y, cardWidth, cardHeight, {
-				background: "sidebar",
+				background: isFocused ? "var(--accent)" : "sidebar",
 				borderRadius: 10
 			})
 			.onClick(onClick, onRightClick);
@@ -290,8 +321,14 @@ export default class PanelKit {
 		const cardHeight =
 			titleHeight + descriptionHeight + linkHeight + tripleMinorPadding;
 
+		/* -------------------- Keyboard support -------------------- */
+
+		const isFocused = this.#newItem({}, cardHeight);
+
+		/* -------------------- More spaghetti -------------------- */
+
 		this.#renderer.box(this.x, this.y, cardWidth, cardHeight, {
-			background: "sidebar",
+			background: isFocused ? "var(--accent)" : "sidebar",
 			borderRadius: 10
 		});
 		this.#renderer
@@ -317,9 +354,15 @@ export default class PanelKit {
 	) => {
 		this.#typeChange("item");
 
+		/* -------------------- Keyboard support -------------------- */
+
+		const isFocused = this.#newItem({ trigger: onClick }, this.itemSize);
+
+		/* -------------------- Main rendering -------------------- */
+
 		this.#renderer
 			.box(this.x, this.y, this.itemSize, this.itemSize, {
-				background: "sidebar",
+				background: isFocused ? "var(--accent)" : "sidebar",
 				borderRadius: 4
 			})
 			.onClick(onClick, onRightClick);
@@ -497,6 +540,12 @@ export default class PanelKit {
 
 		let rowID = 0;
 		for (const row of contents) {
+			/* -------------------- Keyboard support -------------------- */
+
+			const isFocused = this.#newItem({}, this.cardSize);
+
+			/* -------------------- Main rendering -------------------- */
+
 			const cardWidth =
 				this.#renderer.windowWidth -
 				this.sidebarWidth -
@@ -513,7 +562,7 @@ export default class PanelKit {
 			}
 
 			this.#renderer.box(this.x, this.y, cardWidth, this.cardSize, {
-				background: colour,
+				background: isFocused ? "var(--accent" : colour,
 				borderRadius
 			});
 
@@ -571,4 +620,55 @@ export default class PanelKit {
 
 		this.y += height + this.padding;
 	};
+
+	keydown = (
+		code: string,
+		metaKey: boolean,
+		altKey: boolean,
+		ctrlKey: boolean,
+		shiftKey: boolean,
+		repeat: boolean
+	) => {
+		switch (code) {
+			case "Enter":
+				if (metaKey || altKey || ctrlKey || shiftKey || repeat) break;
+
+				const trigger = this.#items[this.keyboardFocus - 1]?.trigger;
+
+				if (trigger) trigger();
+
+				break;
+
+			case "ArrowDown":
+				if (metaKey || altKey || ctrlKey || shiftKey) break;
+
+				this.keyboardFocus++;
+				if (this.keyboardFocus < 0) this.keyboardFocus = 1;
+
+				break;
+
+			case "ArrowUp":
+				if (metaKey || altKey || ctrlKey || shiftKey) break;
+
+				this.keyboardFocus--;
+				if (this.keyboardFocus < 0) this.keyboardFocus = 1;
+
+				break;
+		}
+	};
+}
+
+export class PanelKitGuiApplication extends GuiApplication {
+	panelkit = new PanelKit(this.renderer);
+
+	keydown(
+		code: string,
+		metaKey: boolean,
+		altKey: boolean,
+		ctrlKey: boolean,
+		shiftKey: boolean,
+		repeat: boolean
+	): void | Promise<void> {
+		this.panelkit.keydown(code, metaKey, altKey, ctrlKey, shiftKey, repeat);
+	}
 }

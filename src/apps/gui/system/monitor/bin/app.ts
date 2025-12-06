@@ -1,10 +1,9 @@
-import PanelKit from "panelkit";
+import { PanelKitGuiApplication } from "panelkit";
 import { ProcessAlias } from "../../../../../system/security/definitions";
 
 type Table = (string | { type: "icon"; icon: string })[][];
 
-export default class ProcessManager extends GuiApplication {
-	panelkit = new PanelKit(this.renderer);
+export default class ProcessManager extends PanelKitGuiApplication {
 	processes: ProcessAlias[] = [];
 	data: Table = [];
 	processedData: { guiApps: Table; services: Table } = {
@@ -74,7 +73,7 @@ export default class ProcessManager extends GuiApplication {
 			this.processedData.guiApps
 		);
 		this.panelkit.table(
-			`Processes (${this.processedData.services.length - 1})`,
+			`Services (${this.processedData.services.length - 1})`,
 			this.processedData.services
 		);
 

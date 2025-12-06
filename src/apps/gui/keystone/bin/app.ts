@@ -8,11 +8,9 @@ export default class KeystoneSearch extends Overlay {
 	results: object[] = [];
 	files: string[] = [];
 	fileInfo: fileInfo[] = [];
-	searchInterval?: ReturnType<typeof setInterval>;
 	ok: boolean = true;
 	entries: any;
 	rendering: fileInfo[] = [];
-	selector: number = 0;
 	counter: number = 0;
 
 	async init() {
@@ -69,9 +67,7 @@ export default class KeystoneSearch extends Overlay {
 		this.ok = true;
 	}
 
-	selectItem(index = this.selector) {
-		if (this.selector == undefined || this.renderer == undefined) return;
-
+	selectItem(index: number) {
 		const item = this.rendering[index];
 
 		this.env.exec(item.directory);
@@ -86,32 +82,41 @@ export default class KeystoneSearch extends Overlay {
 		shiftKey: boolean,
 		repeat: boolean
 	): void | Promise<void> {
-		if (metaKey || altKey || ctrlKey || shiftKey) return;
-
-		switch (code) {
-			case "ArrowDown":
-				this.selector++;
-				break;
-			case "ArrowUp":
-				this.selector--;
-				break;
-			case "Enter":
-				this.selectItem(this.selector);
-				break;
-		}
+		this.panelkit.keydown(code, metaKey, altKey, ctrlKey, shiftKey, repeat);
 	}
+
 	frame() {
 		if (this.ok !== true) {
 			return;
 		}
 
-		if (this.selector == undefined) {
-			this.selector = 0;
-		}
-
 		this.renderer.clear();
 		this.panelkit.reset();
 		this.panelkit.sidebarWidth = 0;
+
+		const textbox = this.renderer.textbox(
+			0,
+			0,
+			this.renderer.windowWidth,
+			40,
+			"Search for apps...",
+			{
+				update: () => {
+					this.panelkit.keyboardFocus = 1;
+					this.search(textbox.getContents() ?? "");
+				}
+			}
+		);
+
+		if (this.counter++ % 50 == 0) {
+			const query = this.renderer.getTextboxContent(textbox);
+
+			if (query == null) {
+				return;
+			}
+
+			this.search(query);
+		}
 
 		this.panelkit.blankSpace(40);
 
@@ -123,36 +128,8 @@ export default class KeystoneSearch extends Overlay {
 			});
 		}
 
-		const textbox = this.renderer.textbox(
-			0,
-			0,
-			this.renderer.windowWidth,
-			40,
-			"Search for apps...",
-			{
-				update: () => this.search,
-				enter: () => {
-					this.selectItem(this.selector);
-				}
-			}
-		);
-
-		if (++this.counter == 0) {
-			this.searchInterval = setInterval(async () => {
-				const query = this.renderer.getTextboxContent(textbox);
-
-				if (query == null) {
-					return;
-				}
-
-				await this.search(query);
-			}, 250);
-		}
-
 		this.renderer.commit();
 	}
 
-	async terminate() {
-		clearInterval(this.searchInterval);
-	}
+	async terminate() {}
 }
