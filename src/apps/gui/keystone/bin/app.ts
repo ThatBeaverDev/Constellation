@@ -1,20 +1,23 @@
 import { fileInfo } from "../lib/appfind.js";
 import { Fzf } from "fzf";
+import PanelKit from "/System/CoreLibraries/panelkit.js";
 
 export default class KeystoneSearch extends Overlay {
+	panelkit = new PanelKit(this.renderer);
+
 	results: object[] = [];
 	files: string[] = [];
 	fileInfo: fileInfo[] = [];
 	searchInterval?: ReturnType<typeof setInterval>;
 	ok: boolean = true;
 	entries: any;
-	rendering: any[] = [];
+	rendering: fileInfo[] = [];
 	selector: number = 0;
 	counter: number = 0;
 
 	async init() {
 		this.renderer.windowName = "Keystone Search";
-		this.renderer.setIcon("search");
+		this.renderer.setIcon("./resources/icon.svg");
 
 		await this.env.shell.index();
 
@@ -49,6 +52,7 @@ export default class KeystoneSearch extends Overlay {
 		this.ok = false;
 
 		// file info
+		// @ts-expect-error
 		this.rendering = results
 			.map((item: string) => {
 				for (const itm of this.fileInfo) {
@@ -106,6 +110,18 @@ export default class KeystoneSearch extends Overlay {
 		}
 
 		this.renderer.clear();
+		this.panelkit.reset();
+		this.panelkit.sidebarWidth = 0;
+
+		this.panelkit.blankSpace(40);
+
+		for (const index in this.rendering) {
+			const item = this.rendering[index];
+
+			this.panelkit.card(item.name, item.icon, () => {
+				this.selectItem(Number(index));
+			});
+		}
 
 		const textbox = this.renderer.textbox(
 			0,
@@ -131,27 +147,6 @@ export default class KeystoneSearch extends Overlay {
 
 				await this.search(query);
 			}, 250);
-		}
-
-		let y = 50;
-		for (const idx in this.rendering) {
-			const itm = this.rendering[idx];
-
-			this.renderer.icon(10, y, itm.icon, undefined, undefined, {
-				noProcess: true
-			});
-
-			const pre = this.selector == Number(idx) ? "> " : "  ";
-
-			this.renderer.button(
-				40,
-				y,
-				pre + (itm.name || itm.directory),
-				async () => {
-					this.selectItem(Number(idx));
-				}
-			);
-			y += 27.5;
 		}
 
 		this.renderer.commit();
