@@ -247,6 +247,21 @@ export class ProgramRuntime {
 	 */
 	async execute(
 		appdir: string,
+		args: any[],
+		user: string,
+		password: string,
+		parent?: ProcessInformation,
+		waitForInit?: boolean,
+		includeProcess?: true,
+		cliHooks?: {
+			print: (text: string) => void;
+			getInput: (query: string) => Promise<string>;
+			clearView: () => void;
+		},
+		forceTextEntrypoint?: boolean
+	): Promise<executionProcessResult>;
+	async execute(
+		appdir: string,
 		args: any[] = [],
 		user: string,
 		password: string,
