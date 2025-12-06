@@ -170,6 +170,12 @@ export const files: Record<
 	"/build/indexes/com.constellation.applicationInstaller.idx": {
 		type: "application",
 		directory: "/System/CoreExecutables/applicationInstaller.appl"
+	},
+
+	// process manager
+	"/build/indexes/com.constellation.systemMonitor.idx": {
+		type: "application",
+		directory: "/System/CoreExecutables/processManager.appl"
 	}
 };
 

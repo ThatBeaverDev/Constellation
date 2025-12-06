@@ -41,19 +41,33 @@ export default class EnvProcesses {
 					? "application"
 					: "service",
 
+			icon:
+				"renderer" in process.program &&
+				process.program.renderer instanceof UiKitRendererClass
+					? process.program.renderer.getIcon()
+					: new Promise(async (resolve) => {
+							const configPath =
+								this.#ConstellationKernel.fs.resolve(
+									process.directory,
+									"./config.js"
+								);
+
+							const blobURI =
+								await this.#ConstellationKernel.runtime.importsRewriter.resolve(
+									configPath
+								);
+
+							const exports = await import(blobURI);
+
+							resolve(exports?.default?.icon);
+						}),
+
 			terminate: () => {
 				this.#ConstellationKernel.runtime.terminateProcess(
 					process.program
 				);
 			}
 		};
-
-		if (
-			"renderer" in process.program &&
-			process.program.renderer instanceof UiKitRendererClass
-		) {
-			obj.icon = process.program.renderer.getIcon();
-		}
 
 		return obj;
 	}
