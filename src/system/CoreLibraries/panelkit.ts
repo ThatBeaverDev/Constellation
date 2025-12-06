@@ -72,10 +72,7 @@ export default class PanelKit {
 				background: "sidebar",
 				borderRadius: 10
 			})
-			.onClick(onClick, onRightClick, {
-				scale: 1.1,
-				clickScale: 1.2
-			});
+			.onClick(onClick, onRightClick, {});
 
 		// sizes
 		const iconScale = (this.cardSize - this.minorPadding * 2) / 24;
@@ -423,5 +420,147 @@ export default class PanelKit {
 		});
 
 		this.sidebarWidth = width;
+	};
+
+	table = (
+		title: string,
+		contents: (string | { type: "icon"; icon: string })[][]
+	) => {
+		this.title(title);
+
+		this.#typeChange("card");
+
+		const widths: Record<string, number> = {};
+		const heights: Record<string, number> = {};
+
+		const itemWidth = (
+			item: string | { type: "icon"; icon: string }
+		): number => {
+			if (typeof item == "string") {
+				if (item in widths) {
+					return widths[item];
+				}
+
+				const width = this.#renderer.getTextWidth(item);
+				widths[item] = width;
+
+				return width;
+			} else {
+				switch (item.type) {
+					case "icon":
+						return 24 * this.itemScale;
+					default:
+						throw new Error(`Unknown item type: ${item.type}`);
+				}
+			}
+		};
+
+		const itemHeight = (
+			item: string | { type: "icon"; icon: string }
+		): number => {
+			if (typeof item == "string") {
+				if (item in heights) {
+					return heights[item];
+				}
+
+				const width = this.#renderer.getTextHeight(item);
+				heights[item] = width;
+
+				return width;
+			} else {
+				switch (item.type) {
+					case "icon":
+						return 24 * this.itemScale;
+					default:
+						throw new Error(`Unknown item type: ${item.type}`);
+				}
+			}
+		};
+
+		const widthOfColumn = (id: number) => {
+			let maxWidth = 0;
+			for (const row of contents) {
+				const item = row[id];
+				if (!item) continue;
+
+				const width = itemWidth(item);
+
+				if (width > maxWidth) {
+					maxWidth = width;
+				}
+			}
+
+			return maxWidth;
+		};
+
+		const rowWidths = contents.map((_, index) => widthOfColumn(index));
+
+		let rowID = 0;
+		for (const row of contents) {
+			const cardWidth =
+				this.#renderer.windowWidth -
+				this.sidebarWidth -
+				this.padding * 2;
+
+			let colour = "sidebar";
+			if (rowID++ % 2 !== 0) colour = "var(--bg)";
+
+			let borderRadius: number | [number, number, number, number] = 0;
+			if (rowID == 1) {
+				borderRadius = [10, 10, 0, 0];
+			} else if (rowID == contents.length) {
+				borderRadius = [0, 0, 10, 10];
+			}
+
+			this.#renderer.box(this.#x, this.#y, cardWidth, this.cardSize, {
+				background: colour,
+				borderRadius
+			});
+
+			let x = this.#x + this.minorPadding;
+			let i = 0;
+			for (const item of row) {
+				const height = itemHeight(item);
+				const top = this.#y + (this.cardSize - height) / 2;
+
+				const rowWidth = rowWidths[i] + this.padding * 2;
+
+				if (typeof item == "string") {
+					this.#renderer.text(x, top, item);
+				} else {
+					switch (item.type) {
+						case "icon":
+							this.#renderer.icon(
+								x +
+									(rowWidth -
+										this.padding -
+										24 * this.itemScale) /
+										2,
+								top,
+								item.icon,
+								this.itemScale
+							);
+							break;
+
+						default:
+							throw new Error(`Unknown item type: ${item.type}`);
+					}
+				}
+
+				x += rowWidth;
+
+				if (rowID == 1) {
+					this.#renderer.verticalLine(
+						x - this.padding,
+						this.#y,
+						this.cardSize
+					);
+				}
+
+				i++;
+			}
+
+			this.#y += this.cardSize;
+		}
 	};
 }
