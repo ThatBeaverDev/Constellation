@@ -16,7 +16,7 @@ export default class systemSettings extends GuiApplication {
 		);
 
 		this.renderer.windowName = "System Settings";
-		this.renderer.setIcon("cog");
+		this.renderer.setIcon(this.env.fs.resolve("./resources/icon.svg"));
 	}
 
 	async frame() {

@@ -157,6 +157,7 @@ export default class ApplicationInstaller extends GuiApplication {
 
 	async init(args: string[]) {
 		this.renderer.windowName = "Application Installer";
+		this.renderer.setIcon("./resources/icon.svg");
 
 		try {
 			this.application = JSON.parse(await this.env.fs.readFile(args[0]));

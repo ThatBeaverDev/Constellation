@@ -4,7 +4,7 @@ const manifest: ApplicationManifest = {
 	category: "Utilities",
 	author: "ThatBeaverDev",
 	version: 1,
-	icon: "package-open",
+	icon: "./resources/icon.svg",
 	filetypes: [".inst"]
 };
 
