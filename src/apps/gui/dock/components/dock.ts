@@ -20,8 +20,10 @@ export default class Dock implements Terminatable {
 	readonly renderer: dockAndDesktop["renderer"];
 	readonly env: dockAndDesktop["env"];
 
-	dockHeight: number = 50;
-	dockPadding: number = 10;
+	dockHeight: number = 75;
+	dockPadding: number = 15;
+	dockCornerRadius: number = 20;
+
 	wins: WindowAlias[] = [];
 	programs: Record<string, Program> = {};
 	ok: boolean = false;
@@ -277,7 +279,7 @@ export default class Dock implements Terminatable {
 			{
 				background: "rgb(from var(--bg-dark) r g b / 0.5)",
 				isFrosted: true,
-				borderRadius: "10"
+				borderRadius: this.dockCornerRadius
 			}
 		);
 
