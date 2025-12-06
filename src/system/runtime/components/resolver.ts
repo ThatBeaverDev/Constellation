@@ -29,19 +29,19 @@ export default class ImportResolver {
 	async resolve(directory: string) {
 		// build the structure
 		const structure: ImportStructure = {};
-		await this.walk(directory, structure);
+		await this.#walk(directory, structure);
 
 		// find leaves
-		const leaves = this.findLeaves(structure);
+		const leaves = this.#findLeaves(structure);
 
 		// resolve leaves
 		const resolvedFiles: ResolvedStructure = {};
-		this.resolveLeaves(leaves, resolvedFiles);
+		this.#resolveLeaves(leaves, resolvedFiles);
 
 		// find ripe branches until finished
 		while (true) {
 			// find ripe branches
-			const ripeBranches = this.findRipeBranches(
+			const ripeBranches = this.#findRipeBranches(
 				structure,
 				resolvedFiles
 			);
@@ -50,7 +50,7 @@ export default class ImportResolver {
 			if (Object.keys(ripeBranches).length == 0) break;
 
 			// resolve the ripe branches
-			this.resolveRipeBranches(ripeBranches, resolvedFiles);
+			this.#resolveRipeBranches(ripeBranches, resolvedFiles);
 		}
 
 		// check that everything ended up resolved
@@ -83,7 +83,7 @@ export default class ImportResolver {
 	 * @param directory - Directory to start from
 	 * @param structure - Structure to write to
 	 */
-	async walk(directory: string, structure: ImportStructure) {
+	async #walk(directory: string, structure: ImportStructure) {
 		// exit if we've already been walked
 		if (structure[directory] !== undefined) return;
 
@@ -160,7 +160,7 @@ export default class ImportResolver {
 
 		// walk imported files
 		for (const dir of data.importTargets) {
-			await this.walk(dir, structure);
+			await this.#walk(dir, structure);
 		}
 	}
 
@@ -171,7 +171,7 @@ export default class ImportResolver {
 	 * @param structure - Structure to search
 	 * @returns - ImportStructure of files with no imports
 	 */
-	findLeaves(structure: ImportStructure) {
+	#findLeaves(structure: ImportStructure) {
 		// find items with no imports (leaves)
 		const leaves: ImportStructure = {};
 
@@ -193,7 +193,7 @@ export default class ImportResolver {
 	 * @param leaves - ImportStructure of only leaves
 	 * @param resolvedStructure - Structure to write resolved leaves to
 	 */
-	resolveLeaves(
+	#resolveLeaves(
 		leaves: ImportStructure,
 		resolvedStructure: ResolvedStructure
 	) {
@@ -227,7 +227,7 @@ export default class ImportResolver {
 	 * @param resolvedStructure - Structure of resolved files to check
 	 * @returns - ImportStructure of files with all imports already resolved
 	 */
-	findRipeBranches(
+	#findRipeBranches(
 		structure: ImportStructure,
 		resolvedStructure: ResolvedStructure
 	) {
@@ -262,7 +262,7 @@ export default class ImportResolver {
 	 * @param leaves - ImportStructure of only ripe branches
 	 * @param resolvedStructure - Structure to write resolved ripe branches to
 	 */
-	resolveRipeBranches(
+	#resolveRipeBranches(
 		ripeBranches: ImportStructure,
 		resolvedStructure: ResolvedStructure
 	) {
