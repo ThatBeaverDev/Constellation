@@ -11,6 +11,7 @@ export default class systemLoginInterface extends GuiApplication {
 		this.renderer.hideWindowCorners();
 		this.renderer.makeWindowInvisible();
 		this.renderer.maximiseWindow();
+		this.renderer.windowName = "Constellation LoginUI";
 
 		this.users = this.env.users.all();
 
