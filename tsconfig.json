@@ -22,6 +22,9 @@
 			"ES6"
 		],
 		"paths": {
+			"/System/CoreLibraries/*": [
+				"./src/system/CoreLibraries/*"
+			],
 			"pathinf": [
 				"./src/system/CoreLibraries/pathinf.ts"
 			],
@@ -39,7 +42,7 @@
 			],
 			"panelkit": [
 				"./src/system/CoreLibraries/panelkit.ts"
-			]
+			],
 		},
 		"noUnusedLocals": true,
 		// types
@@ -62,7 +65,8 @@
 		"./build",
 		"./src/apps/app-template",
 		"./src/apps/types",
-		"./node_modules"
+		"./node_modules",
+		"*.ignore"
 	],
 	"watchOptions": {
 		"watchFile": "useFsEvents",
