@@ -86,8 +86,7 @@
 	height: 100%;
 	flex: 1 1 auto;
 
-	overflow-x: clip;
-	overflow-y: scroll;
+	overflow: hidden;
 	padding: 1px;
 
 	scrollbar-width: none;
