@@ -265,7 +265,15 @@ export default class uiKitCreators {
 		} else {
 			box.style.background = `${config?.background || "var(--bg-light)"}`;
 		}
-		box.style.borderRadius = `${config?.borderRadius}px`;
+
+		const borderRadius = config?.borderRadius;
+		if (borderRadius) {
+			if (borderRadius instanceof Array) {
+				box.style.borderRadius = `${borderRadius.join("px ")}px`;
+			} else {
+				box.style.borderRadius = `${borderRadius}px`;
+			}
+		}
 
 		if (config?.isFrosted == true) box.classList.add("frosted");
 

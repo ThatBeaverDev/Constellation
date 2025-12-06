@@ -11,11 +11,7 @@ export class uiKitInitialisationError extends Error {
 export type uikitCreatorName = Extract<keyof uiKitCreators, `uikit${string}`>;
 
 // onClick types
-export interface onClickOptions {
-	scale?: number;
-	clickScale?: number;
-	origin?: string;
-}
+export interface onClickOptions {}
 export interface clickReference extends onClickOptions {
 	left?: (x: number, y: number) => Promise<any> | any;
 	right?: (x: number, y: number) => Promise<any> | any;
@@ -60,7 +56,10 @@ export type uikitTextareaConfig = {
 	disableMobileAutocorrect?: boolean;
 };
 export type uikitBoxConfig = {
-	borderRadius?: number | string;
+	borderRadius?:
+		| number
+		| string
+		| [number | string, number | string, number | string, number | string];
 	isFrosted?: boolean;
 	background?: string | "sidebar";
 };

@@ -123,11 +123,22 @@ export default class uiKitTransitioners {
 					break;
 				case 4:
 					// config
-					setElementStyle(
-						element,
-						"borderRadius",
-						`${newArg?.borderRadius}px`
-					);
+					const borderRadius = newArg?.borderRadius;
+					if (borderRadius) {
+						if (borderRadius instanceof Array) {
+							setElementStyle(
+								element,
+								"borderRadius",
+								`${borderRadius.join("px ")}px`
+							);
+						} else {
+							setElementStyle(
+								element,
+								"borderRadius",
+								`${borderRadius}px`
+							);
+						}
+					}
 
 					if (newArg?.isFrosted == true) {
 						element.classList.add("frosted");
