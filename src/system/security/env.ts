@@ -260,12 +260,7 @@ export class ApplicationAuthorisationAPI {
 				// all good
 				break;
 			case "user":
-				// all ok IF we're only reading or have permission to write
-				if (isWriteOperation && this.#permissions.userFiles == false) {
-					throw new PermissionsError(
-						`Permission denied in action upon ${directory} - domain ${domainType}, isWriteOperation: ${isWriteOperation}`
-					);
-				}
+				// all ok
 				break;
 			case "system":
 				if (

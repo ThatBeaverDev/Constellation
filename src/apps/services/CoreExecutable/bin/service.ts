@@ -11,7 +11,6 @@ export default class CoreExecutable extends Service {
 		const dockDirectory = "/System/CoreExecutables/Dock.appl";
 		const loginInterfaceDirectory =
 			"/System/CoreExecutables/systemLoginInterface.appl";
-		const finderDirectory = "/Applications/Finder.appl";
 		const guiManagerDirectory = "/System/CoreExecutables/guiManager.appl";
 		const filetypeDatabaseManagerDirectory =
 			"/System/CoreExecutables/filetypeDatabaseManager.srvc";
@@ -22,9 +21,6 @@ export default class CoreExecutable extends Service {
 
 		// loginUI permissions
 		this.env.setDirectoryPermission(loginInterfaceDirectory, "users", true);
-
-		// finder permissions
-		this.env.setDirectoryPermission(finderDirectory, "userFiles", true);
 
 		// GUI manager permissions
 		this.env.setDirectoryPermission(guiManagerDirectory, "operator", true);

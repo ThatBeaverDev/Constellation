@@ -13,7 +13,6 @@ export type Permission =
 	| "systemControl"
 	| "containers"
 	| "systemFiles"
-	| "userFiles"
 	| "users"
 	| "processes"
 	| "network"
@@ -64,7 +63,6 @@ export class ConstellationPermissionsManager {
 			systemControl: false,
 			containers: false,
 			systemFiles: false,
-			userFiles: false,
 			users: false,
 			processes: false,
 			network: false,
@@ -226,10 +224,6 @@ export class ConstellationPermissionsManager {
 		systemFiles: {
 			description:
 				"Allows the application to edit system files, therefore possibly breaking or changing the behaviour of the system. DO NOT PROVIDE TO UNKNOWN APPS."
-		},
-		userFiles: {
-			description:
-				"Allow the application to edit and delete all user files. This means apps can delete ALL your files!"
 		},
 		users: {
 			description:
