@@ -37,6 +37,12 @@
 	-webkit-backdrop-filter: blur(10px);
 }
 
+.glass {
+	background: transparent;
+	backdrop-filter: blur(1px) brightness(3);
+	-webkit-backdrop-filter: blur(1px) brightness(3);
+}
+
 .windowContainer.focused {
 	border: var(--border) solid 2px;
 }
