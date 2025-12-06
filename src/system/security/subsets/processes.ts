@@ -1,4 +1,5 @@
 import ConstellationKernel from "../..//kernel.js";
+import { UiKitRendererClass } from "../../gui/uiKit/uiKit.js";
 import { ProcessInformation } from "../../runtime/runtime.js";
 import { ProcessAlias } from "../definitions.js";
 import { Permission } from "../permissions.js";
@@ -15,26 +16,44 @@ export default class EnvProcesses {
 		this.#checkPermission = permissionCheck;
 	}
 
-	#processToAlias(Program: ProcessInformation): ProcessAlias {
+	#processToAlias(process: ProcessInformation): ProcessAlias {
 		const obj: ProcessAlias = {
-			directory: Program.directory,
-			args: Program.args,
+			directory: process.directory,
+			args: process.args,
 
-			children: Program.children.map((child) =>
+			children: process.children.map((child) =>
 				this.#processToAlias(child)
 			),
-			kernelID: Program.kernel.id,
+			kernelID: process.kernel.id,
 
-			id: Program.id,
-			username: Program.user,
-			startTime: Program.startTime,
+			id: process.id,
+			username: process.user,
+			startTime: process.startTime,
+
+			name:
+				"renderer" in process.program &&
+				process.program.renderer instanceof UiKitRendererClass
+					? process.program.renderer.windowName
+					: Object.getPrototypeOf(process.program).constructor.name,
+			type:
+				"renderer" in process.program &&
+				process.program.renderer instanceof UiKitRendererClass
+					? "application"
+					: "service",
 
 			terminate: () => {
 				this.#ConstellationKernel.runtime.terminateProcess(
-					Program.program
+					process.program
 				);
 			}
 		};
+
+		if (
+			"renderer" in process.program &&
+			process.program.renderer instanceof UiKitRendererClass
+		) {
+			obj.icon = process.program.renderer.getIcon();
+		}
 
 		return obj;
 	}
