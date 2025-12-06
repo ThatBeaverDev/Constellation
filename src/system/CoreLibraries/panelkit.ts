@@ -7,8 +7,8 @@ export default class PanelKit {
 	padding = 15;
 	sidebarWidth = 150;
 
-	#x = this.sidebarWidth + this.padding;
-	#y = this.padding;
+	x = this.sidebarWidth + this.padding;
+	y = this.padding;
 	#lastType: "card" | "item" | "title" | undefined;
 
 	cardScale = 1.5;
@@ -24,14 +24,14 @@ export default class PanelKit {
 	#typeChange(type: "card" | "title" | "item") {
 		if (this.#lastType == type) return;
 
-		this.#x = this.sidebarWidth + this.padding;
+		this.x = this.sidebarWidth + this.padding;
 		switch (this.#lastType) {
 			case "card":
 				break;
 			case "title":
 				break;
 			case "item":
-				this.#y += this.itemSize + this.padding;
+				this.y += this.itemSize + this.padding;
 				break;
 		}
 
@@ -39,14 +39,14 @@ export default class PanelKit {
 	}
 
 	reset() {
-		this.#renderer.furthestScroll = this.#y;
+		this.#renderer.furthestScroll = this.y;
 
 		if (this.#renderer.scroll > 0) {
 			this.#renderer.scroll = 0;
 		}
 
-		this.#x = this.sidebarWidth + this.padding;
-		this.#y = this.padding + this.#renderer.scroll;
+		this.x = this.sidebarWidth + this.padding;
+		this.y = this.padding + this.#renderer.scroll;
 		this.#lastType = undefined;
 	}
 
@@ -68,7 +68,7 @@ export default class PanelKit {
 			this.#renderer.windowWidth - this.sidebarWidth - this.padding * 2;
 
 		this.#renderer
-			.box(this.#x, this.#y, cardWidth, this.cardSize, {
+			.box(this.x, this.y, cardWidth, this.cardSize, {
 				background: "sidebar",
 				borderRadius: 10
 			})
@@ -80,12 +80,12 @@ export default class PanelKit {
 		const nameHeight = this.#renderer.getTextHeight(name);
 
 		// icon positions
-		const iconLeft = this.#x + (this.cardSize - iconSize) / 2;
-		const iconTop = this.#y + (this.cardSize - iconSize) / 2;
+		const iconLeft = this.x + (this.cardSize - iconSize) / 2;
+		const iconTop = this.y + (this.cardSize - iconSize) / 2;
 
 		// name positions
 		const nameLeft = iconLeft + (iconSize + this.minorPadding);
-		const nameTop = this.#y + (this.cardSize - nameHeight) / 2;
+		const nameTop = this.y + (this.cardSize - nameHeight) / 2;
 
 		// draw icon
 		this.#renderer.icon(iconLeft, iconTop, icon, iconScale).passthrough();
@@ -102,11 +102,11 @@ export default class PanelKit {
 					: 24 * this.cardScale + this.minorPadding;
 			const buttonWidth = iconWidth + textWidth + 10;
 
-			const buttonLeft = this.#x + (cardWidth - (buttonWidth + 5));
-			const textTop = this.#y + (this.cardSize - textHeight) / 2;
+			const buttonLeft = this.x + (cardWidth - (buttonWidth + 5));
+			const textTop = this.y + (this.cardSize - textHeight) / 2;
 
 			this.#renderer
-				.box(buttonLeft, this.#y + 5, buttonWidth, this.cardSize - 10, {
+				.box(buttonLeft, this.y + 5, buttonWidth, this.cardSize - 10, {
 					background: "var(--bg-lighter)",
 					borderRadius: 5
 				})
@@ -114,7 +114,7 @@ export default class PanelKit {
 
 			if (feature.icon) {
 				this.#renderer
-					.icon(buttonLeft + 5, this.#y + 10, feature.icon)
+					.icon(buttonLeft + 5, this.y + 10, feature.icon)
 					.passthrough();
 
 				const textLeft = buttonLeft + iconSize + 5;
@@ -129,21 +129,21 @@ export default class PanelKit {
 			}
 		}
 
-		this.#y += this.cardSize + this.padding;
+		this.y += this.cardSize + this.padding;
 	};
 
 	title = (text: string) => {
 		this.#typeChange("title");
 
 		// draw text
-		this.#renderer.text(this.#x, this.#y, text, 17);
+		this.#renderer.text(this.x, this.y, text, 17);
 
 		// calculate height
 		const titleHeight = this.#renderer.getTextHeight(text, 15);
 
 		// next line
-		this.#x = this.sidebarWidth + this.padding;
-		this.#y += titleHeight + this.padding;
+		this.x = this.sidebarWidth + this.padding;
+		this.y += titleHeight + this.padding;
 	};
 
 	mediumCard = (
@@ -177,7 +177,7 @@ export default class PanelKit {
 
 		const titleHeight = this.#renderer.getTextHeight(name, 18);
 
-		const textTop = this.#y + this.minorPadding;
+		const textTop = this.y + this.minorPadding;
 
 		const descriptionHeight = this.#renderer.getTextHeight(description, 13);
 		const descriptionTop = textTop + this.minorPadding + titleHeight;
@@ -186,19 +186,19 @@ export default class PanelKit {
 
 		const iconScale = (cardHeight - tripleMinorPadding) / 24;
 		const iconSize = 24 * iconScale;
-		const iconTop = this.#y + (cardHeight - iconSize) / 2;
+		const iconTop = this.y + (cardHeight - iconSize) / 2;
 
-		const textLeft = this.#x + iconSize + tripleMinorPadding;
+		const textLeft = this.x + iconSize + tripleMinorPadding;
 
 		this.#renderer
-			.box(this.#x, this.#y, cardWidth, cardHeight, {
+			.box(this.x, this.y, cardWidth, cardHeight, {
 				background: "sidebar",
 				borderRadius: 10
 			})
 			.onClick(onClick, onRightClick);
 
 		this.#renderer
-			.icon(this.#x + tripleMinorPadding / 2, iconTop, icon, iconScale)
+			.icon(this.x + tripleMinorPadding / 2, iconTop, icon, iconScale)
 			.passthrough();
 
 		// title
@@ -219,13 +219,13 @@ export default class PanelKit {
 			const buttonHeight = cardHeight - doubleMinorPadding;
 
 			const buttonLeft =
-				this.#x + (cardWidth - (buttonWidth + this.minorPadding));
-			const textTop = this.#y + (cardHeight - textHeight) / 2;
+				this.x + (cardWidth - (buttonWidth + this.minorPadding));
+			const textTop = this.y + (cardHeight - textHeight) / 2;
 
 			this.#renderer
 				.box(
 					buttonLeft,
-					this.#y + (cardHeight - buttonHeight) / 2,
+					this.y + (cardHeight - buttonHeight) / 2,
 					buttonWidth,
 					buttonHeight,
 					{
@@ -239,7 +239,7 @@ export default class PanelKit {
 				this.#renderer
 					.icon(
 						buttonLeft + this.minorPadding,
-						this.#y + doubleMinorPadding,
+						this.y + doubleMinorPadding,
 						feature.icon
 					)
 					.passthrough();
@@ -256,7 +256,7 @@ export default class PanelKit {
 			}
 		}
 
-		this.#y += cardHeight + this.padding;
+		this.y += cardHeight + this.padding;
 	};
 
 	bigCard = (title: string, subtext: string, href?: string) => {
@@ -277,7 +277,7 @@ export default class PanelKit {
 
 		const titleHeight = this.#renderer.getTextHeight(name, 18);
 
-		const textTop = this.#y + this.minorPadding;
+		const textTop = this.y + this.minorPadding;
 
 		const descriptionHeight = this.#renderer.getTextHeight(description);
 		const descriptionTop = textTop + this.minorPadding + titleHeight;
@@ -290,23 +290,23 @@ export default class PanelKit {
 		const cardHeight =
 			titleHeight + descriptionHeight + linkHeight + tripleMinorPadding;
 
-		this.#renderer.box(this.#x, this.#y, cardWidth, cardHeight, {
+		this.#renderer.box(this.x, this.y, cardWidth, cardHeight, {
 			background: "sidebar",
 			borderRadius: 10
 		});
 		this.#renderer
-			.text(this.#x + this.minorPadding, textTop, name, 18)
+			.text(this.x + this.minorPadding, textTop, name, 18)
 			.passthrough();
 		this.#renderer
-			.text(this.#x + this.minorPadding, descriptionTop, description)
+			.text(this.x + this.minorPadding, descriptionTop, description)
 			.passthrough();
 		if (link) {
 			this.#renderer
-				.text(this.#x + this.minorPadding, linkTop, link)
+				.text(this.x + this.minorPadding, linkTop, link)
 				.passthrough();
 		}
 
-		this.#y += this.cardSize + this.padding;
+		this.y += this.cardSize + this.padding;
 	};
 
 	item = (
@@ -318,7 +318,7 @@ export default class PanelKit {
 		this.#typeChange("item");
 
 		this.#renderer
-			.box(this.#x, this.#y, this.itemSize, this.itemSize, {
+			.box(this.x, this.y, this.itemSize, this.itemSize, {
 				background: "sidebar",
 				borderRadius: 4
 			})
@@ -330,15 +330,15 @@ export default class PanelKit {
 		const nameHeight = this.#renderer.getTextHeight(name);
 
 		// icon positions
-		const iconLeft = this.#x + (this.itemSize - iconSize) / 2;
+		const iconLeft = this.x + (this.itemSize - iconSize) / 2;
 		const iconTop =
-			this.#y +
+			this.y +
 			(this.itemSize - (iconSize + this.minorPadding + nameHeight)) / 2;
 
 		// name positions
-		const nameLeft = this.#x + (this.itemSize - nameWidth) / 2;
+		const nameLeft = this.x + (this.itemSize - nameWidth) / 2;
 		const nameTop =
-			this.#y +
+			this.y +
 			(iconSize + this.minorPadding) +
 			(this.itemSize - (iconSize + this.minorPadding + nameHeight)) / 2;
 
@@ -348,11 +348,11 @@ export default class PanelKit {
 		// draw name
 		this.#renderer.text(nameLeft, nameTop, name).passthrough();
 
-		this.#x += this.itemSize + this.padding;
+		this.x += this.itemSize + this.padding;
 
-		if (this.#x > this.#renderer.windowWidth) {
-			this.#x = this.sidebarWidth + this.padding;
-			this.#y += this.itemSize + this.padding;
+		if (this.x > this.#renderer.windowWidth) {
+			this.x = this.sidebarWidth + this.padding;
+			this.y += this.itemSize + this.padding;
 		}
 	};
 
@@ -512,16 +512,16 @@ export default class PanelKit {
 				borderRadius = [0, 0, 10, 10];
 			}
 
-			this.#renderer.box(this.#x, this.#y, cardWidth, this.cardSize, {
+			this.#renderer.box(this.x, this.y, cardWidth, this.cardSize, {
 				background: colour,
 				borderRadius
 			});
 
-			let x = this.#x + this.minorPadding;
+			let x = this.x + this.minorPadding;
 			let i = 0;
 			for (const item of row) {
 				const height = itemHeight(item);
-				const top = this.#y + (this.cardSize - height) / 2;
+				const top = this.y + (this.cardSize - height) / 2;
 
 				const rowWidth = rowWidths[i] + this.padding * 2;
 
@@ -552,7 +552,7 @@ export default class PanelKit {
 				if (rowID == 1) {
 					this.#renderer.verticalLine(
 						x - this.padding,
-						this.#y,
+						this.y,
 						this.cardSize
 					);
 				}
@@ -560,7 +560,15 @@ export default class PanelKit {
 				i++;
 			}
 
-			this.#y += this.cardSize;
+			this.y += this.cardSize;
 		}
+
+		this.y += this.padding;
+	};
+
+	blankSpace = (height: number) => {
+		this.#typeChange("card");
+
+		this.y += height + this.padding;
 	};
 }
