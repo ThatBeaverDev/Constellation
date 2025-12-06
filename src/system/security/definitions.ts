@@ -72,6 +72,10 @@ export interface ProcessAlias {
 	id: number;
 	startTime: number;
 
+	icon?: string;
+	name: string;
+	type: "application" | "service";
+
 	terminate: Function;
 }
 export type User = {
