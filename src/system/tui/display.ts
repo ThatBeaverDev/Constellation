@@ -1,14 +1,16 @@
 import { isCommandLine } from "../getPlatform.js";
 import { constructDOMInterface } from "../io/getShadowDom.js";
-import ConstellationKernel, { Terminatable } from "../kernel.js";
+import ConstellationKernel from "../kernel.js";
 
-export interface Handler extends Terminatable {
+export interface Handler {
 	init(): Promise<void>;
 
 	post(text: string): void;
 
 	getInput(query: string): Promise<string>;
 	clearView(): void;
+
+	terminate(): void;
 }
 
 export class CommandLineHandler implements Handler {
@@ -26,7 +28,11 @@ export class CommandLineHandler implements Handler {
 		this.#readline = await import("node:readline");
 	}
 
+	isGettingInput: boolean = false;
 	getInput = (query: string): Promise<string> => {
+		if (this.isGettingInput) throw new Error("Already reading input!");
+
+		this.isGettingInput = true;
 		return new Promise((resolve: (result: string) => void) => {
 			if (this.#readline == undefined) {
 				resolve("");
@@ -39,8 +45,9 @@ export class CommandLineHandler implements Handler {
 			});
 
 			rl.question(query, (response: string) => {
-				resolve(response);
 				rl.close();
+				resolve(response);
+				this.isGettingInput = false;
 			});
 		});
 	};
