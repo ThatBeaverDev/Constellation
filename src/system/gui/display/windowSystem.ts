@@ -65,8 +65,10 @@ export default class WindowSystem {
 			// no more snapping
 
 			this.#snappingWindowDisplay.classList.remove("snapRight");
-			this.#snappingWindowDisplay.classList.remove("snapLeft");
 			this.#snappingWindowDisplay.classList.remove("snapFullscreen");
+			this.#snappingWindowDisplay.classList.remove("snapBottom");
+			this.#snappingWindowDisplay.classList.remove("snapTop");
+			this.#snappingWindowDisplay.classList.remove("snapLeft");
 
 			this.#snappingWindow = undefined;
 
