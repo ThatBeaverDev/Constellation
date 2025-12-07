@@ -36,8 +36,6 @@ export default class dockAndDesktop extends Overlay {
 
 		/* -------------------- Desktop -------------------- */
 
-		this.env.warn("Running desktop");
-
 		const userinf = this.env.users.userInfo(this.env.user);
 		if (!userinf) throw new Error("Executed with non-existent user?");
 
