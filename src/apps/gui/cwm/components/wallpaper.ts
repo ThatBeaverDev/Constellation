@@ -19,8 +19,6 @@ export class ConstellationWindowManagerWallpaper {
 
 		this.wallpaperPath =
 			userinf?.pictures?.wallpaper || this.defaultWallpaper;
-
-		await this.env.shell.index();
 	}
 
 	render() {

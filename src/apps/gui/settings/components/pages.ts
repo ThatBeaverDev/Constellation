@@ -76,6 +76,8 @@ export class SettingsPages {
 
 		if (this.#updateStatus.cliResult == undefined) {
 			try {
+				await this.#env.shell.index();
+
 				this.#updateStatus.cliResult = ((
 					await this.#env.shell.exec("softwareupdate", "statusjson")
 				)?.result as softwareupdateResult) || { state: "checking" };
