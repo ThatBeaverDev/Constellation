@@ -75,6 +75,8 @@ export class ApplicationAuthorisationAPI {
 		processInfo?: ProcessInformation,
 		isGlobal: boolean = false
 	) {
+		ConstellationKernel.security.users.validatePassword(user, password);
+
 		this.#environmentCreator = environmentCreator;
 		this.#ConstellationKernel = ConstellationKernel;
 		this.#isGlobal = isGlobal;
