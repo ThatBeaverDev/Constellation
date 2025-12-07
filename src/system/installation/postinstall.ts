@@ -12,7 +12,8 @@ export default async function postinstall(
 		{
 			profilePicture: PostInstallOptions.user.profilePicture,
 			fullName: PostInstallOptions.user.displayName,
-			allowGraphicalLogin: "true"
+			allowGraphicalLogin: "true",
+			wallpaperPath: PostInstallOptions.user.wallpaperPath
 		}
 	);
 }
