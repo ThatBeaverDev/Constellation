@@ -37,15 +37,15 @@ compile() {
     ./scripts/tcpkg build/apps/gui/keystone build/indexes/com.constellation.search.idx -override=true
 
     # Build the Dock
-    mkdir -p build/apps/gui/dock/resources
-    cp assets/apps/dock.svg build/apps/gui/dock/resources/icon.svg
-    ./scripts/tcpkg build/apps/gui/dock build/indexes/com.constellation.dock.idx -override=true
+    mkdir -p build/apps/gui/system/dock/resources
+    cp assets/apps/dock.svg build/apps/gui/system/dock/resources/icon.svg
+    ./scripts/tcpkg build/apps/gui/system/dock build/indexes/com.constellation.dock.idx -override=true
     
     # Build app library
     ./scripts/tcpkg build/apps/gui/library build/indexes/com.constellation.library.idx -override=true
 
     # Build the systemLoginInterface
-    ./scripts/tcpkg build/apps/gui/systemLoginInterface build/indexes/com.constellation.systemLoginInterface.idx -override=true
+    ./scripts/tcpkg build/apps/gui/system/systemLoginInterface build/indexes/com.constellation.systemLoginInterface.idx -override=true
 
     # Build the calculator
     mkdir -p build/apps/gui/calculator/resources
@@ -75,7 +75,7 @@ compile() {
     ./scripts/tcpkg build/apps/gui/preview build/indexes/com.constellation.preview.idx -override=true
 
     # Build ConstellationGuiManager
-    ./scripts/tcpkg build/apps/gui/cwm build/indexes/com.constellation.guiManager.idx -override=true
+    ./scripts/tcpkg build/apps/gui/system/cwm build/indexes/com.constellation.guiManager.idx -override=true
 
     # Build usershell
     ./scripts/tcpkg build/apps/tui/usershell build/indexes/com.constellation.usershell.idx -override=true
@@ -84,12 +84,17 @@ compile() {
     ./scripts/tcpkg build/apps/services/SoftwareUpdateHandler build/indexes/com.constellation.updateinstaller.idx -overide=true
 
     # Build application installer
+    mkdir -p build/apps/gui/system/applicationInstaller/resources
+    cp assets/apps/installer.svg build/apps/gui/system/applicationInstaller/resources/icon.svg
     ./scripts/tcpkg build/apps/gui/system/applicationInstaller build/indexes/com.constellation.applicationInstaller.idx -overide=true
 
     # Build Process manager
     mkdir -p build/apps/gui/system/monitor/resources
     cp assets/apps/monitor.svg build/apps/gui/system/monitor/resources/icon.svg
     ./scripts/tcpkg build/apps/gui/system/monitor build/indexes/com.constellation.systemMonitor.idx -overide=true
+
+    # Build Desktop
+    ./scripts/tcpkg build/apps/gui/system/desktop build/indexes/com.constellation.desktop.idx -overide=true
 
     # Build Text editor
     ./scripts/tcpkg build/apps/gui/text build/indexes/com.constellation.textedit.idx -overide=true
