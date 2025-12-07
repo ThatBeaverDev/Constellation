@@ -355,35 +355,8 @@ export default class finder extends GuiApplication {
 						this.cd(this.path, false);
 					},
 					Delete: async () => {
-						const stats = await this.env.fs.stat(directory);
-
-						if (stats.isDirectory()) {
-							const walk = async (directory: string) => {
-								const items =
-									await this.env.fs.listDirectory(directory);
-
-								for (const item of items) {
-									const path = this.env.fs.resolve(
-										directory,
-										item
-									);
-
-									const stats = await this.env.fs.stat(path);
-
-									if (stats.isDirectory()) {
-										await walk(path);
-									} else {
-										await this.env.fs.deleteFile(path);
-									}
-								}
-
-								await this.env.fs.deleteDirectory(directory);
-							};
-
-							await walk(directory);
-						} else {
-							await this.env.fs.deleteFile(directory);
-						}
+						await this.env.shell.index();
+						await this.env.shell.exec("rm", directory);
 
 						this.cd(this.path, false);
 					}
