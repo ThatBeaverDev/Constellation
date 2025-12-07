@@ -66,7 +66,7 @@ export class FilesystemInstaller {
 						hasFoundJSONFile = true;
 					}
 				} else {
-					if (item.endsWith(".json")) {
+					if (item.endsWith(".json") && isUpdate) {
 						hasFoundJSONFile = true;
 						continue;
 					}
