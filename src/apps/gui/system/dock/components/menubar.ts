@@ -1,4 +1,4 @@
-import { Terminatable } from "../../../../system/kernel.js";
+import { Terminatable } from "../../../../../system/kernel.js";
 import dockAndDesktop from "../bin/app.js";
 
 export interface menubarConfig {}
@@ -62,7 +62,9 @@ export default class menubar implements Terminatable {
 		}
 		this.counter++;
 
-		this.renderer.box(0, 0, this.renderer.windowWidth, this.barHeight, {
+		const menubarLeft = 10;
+		const menubarWidth = this.renderer.windowWidth - menubarLeft * 2;
+		this.renderer.box(menubarLeft, 0, menubarWidth, this.barHeight, {
 			background: "rgb(from var(--bg-dark) r g b / 0.5)",
 			borderRadius: "0px 0px 10px 10",
 			isFrosted: true
@@ -87,13 +89,14 @@ export default class menubar implements Terminatable {
 		switch (focusName) {
 			case "undefined":
 			case "guimgr":
-			case "Constellation":
+			case "Constellation Shell":
 				focusName = "Desktop";
 				break;
 		}
 
 		const focusWidth = this.renderer.getTextWidth(focusName);
-		const focusLeft = (this.renderer.windowWidth - focusWidth) / 2;
+		const focusLeft =
+			(menubarWidth - focusWidth) / 2 + (menubarLeft - textPadding);
 		this.renderer.text(focusLeft, textPadding, focusName);
 
 		// ----- right -----
