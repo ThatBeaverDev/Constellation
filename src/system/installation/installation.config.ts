@@ -182,6 +182,12 @@ export const files: Record<
 	"/build/indexes/com.constellation.desktop.idx": {
 		type: "application",
 		directory: "/System/CoreExecutables/desktop.appl"
+	},
+
+	// textedit
+	"/build/indexes/com.constellation.textedit.idx": {
+		type: "application",
+		directory: "/Applications/Text.appl"
 	}
 };
 

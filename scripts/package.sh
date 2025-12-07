@@ -90,6 +90,9 @@ compile() {
     mkdir -p build/apps/gui/system/monitor/resources
     cp assets/apps/monitor.svg build/apps/gui/system/monitor/resources/icon.svg
     ./scripts/tcpkg build/apps/gui/system/monitor build/indexes/com.constellation.systemMonitor.idx -overide=true
+
+    # Build Text editor
+    ./scripts/tcpkg build/apps/gui/text build/indexes/com.constellation.textedit.idx -overide=true
 }
 
 # first param is directory, second param is name
