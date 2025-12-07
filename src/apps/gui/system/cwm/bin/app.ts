@@ -1,6 +1,7 @@
-import ConstellationKernel from "../../../../system/kernel.js";
-import { GuiApplication } from "../../../../system/runtime/components/executables.js";
-import { ProcessInformation } from "../../../../system/runtime/runtime.js";
+import ConstellationKernel from "../../../../../system/kernel.js";
+import { GuiApplication } from "../../../../../system/runtime/components/executables.js";
+import { IPCMessage } from "../../../../../system/runtime/components/messages.js";
+import { ProcessInformation } from "../../../../../system/runtime/runtime.js";
 import { ConstellationWindowManagerWallpaper } from "../components/wallpaper.js";
 
 export default class ConstellationWindowManager
@@ -8,7 +9,7 @@ export default class ConstellationWindowManager
 	implements GuiApplication
 {
 	renderer: GuiApplication["renderer"];
-	wallpaper?: ConstellationWindowManagerWallpaper;
+	wallpaper!: ConstellationWindowManagerWallpaper;
 
 	constructor(
 		ConstellationKernel: ConstellationKernel,
@@ -51,8 +52,9 @@ export default class ConstellationWindowManager
 	}
 
 	async init() {
-		this.wallpaper = new ConstellationWindowManagerWallpaper(this);
+		this.shout("ConstellationWindowManager");
 
+		this.wallpaper = new ConstellationWindowManagerWallpaper(this);
 		await this.wallpaper.init();
 	}
 
@@ -61,8 +63,25 @@ export default class ConstellationWindowManager
 
 		this.renderer.clear();
 
-		if (this.wallpaper) this.wallpaper.render();
+		this.wallpaper.render();
 
 		this.renderer.commit();
+	}
+
+	onmessage(msg: IPCMessage): void {
+		if (!msg.originDirectory.startsWith("/System/CoreExecutables")) return;
+
+		switch (msg.intent) {
+			case "changeWallpaper":
+				this.wallpaper.wallpaperPath = String(
+					msg.data ?? this.wallpaper.defaultWallpaper
+				);
+
+				break;
+			default:
+				this.env.warn(
+					`Message with invalid intent '${msg.intent}' recieved.`
+				);
+		}
 	}
 }
