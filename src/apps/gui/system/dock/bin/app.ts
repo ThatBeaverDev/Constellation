@@ -34,6 +34,8 @@ export default class dockAndDesktop extends Overlay {
 		this.renderer.hideWindowHeader();
 		this.renderer.hideWindowCorners();
 
+		/* -------------------- Desktop -------------------- */
+
 		this.env.warn("Running desktop");
 
 		const userinf = this.env.users.userInfo(this.env.user);
@@ -44,8 +46,12 @@ export default class dockAndDesktop extends Overlay {
 			[userinf.directory + "/Desktop"]
 		);
 
+		/* -------------------- Icon and Name -------------------- */
+
 		this.renderer.setIcon(this.config.icon);
 		this.renderer.windowName = this.config.name;
+
+		/* -------------------- Recieve Keypresses -------------------- */
 
 		// ask to listen to every key pressed if we're not allowed :>
 		let getPerms: boolean | undefined = false;
@@ -57,14 +63,36 @@ export default class dockAndDesktop extends Overlay {
 			return;
 		}
 
+		/* -------------------- Change the wallpaper -------------------- */
+
+		await this.changeWallpaper(userinf.pictures.wallpaper);
+
+		/* -------------------- Load config -------------------- */
+
 		await this.loadConfig();
+
+		/* -------------------- Create components -------------------- */
 
 		this.dock = new Dock(this);
 		this.menubar = new menubar(this);
 
+		/* -------------------- Prevent minimising -------------------- */
+
 		this.renderer.minimiseWindow = () => {
 			this.showApps = true;
 		};
+	}
+
+	changeWallpaper(path?: string) {
+		const cwm = this.env.getPIDOfName("ConstellationWindowManager");
+		if (!cwm) {
+			this.env.warn(
+				"Constellation Window Manager is not running. Cannot change wallpaper."
+			);
+			return;
+		}
+
+		this.env.sendmessage(cwm, "changeWallpaper", path);
 	}
 
 	async loadConfig() {
@@ -196,6 +224,8 @@ export default class dockAndDesktop extends Overlay {
 	}
 
 	async terminate() {
+		this.changeWallpaper();
+
 		this.dock?.terminate();
 		this.menubar?.terminate();
 	}
