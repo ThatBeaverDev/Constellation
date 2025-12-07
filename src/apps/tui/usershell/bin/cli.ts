@@ -1,4 +1,5 @@
 import TerminalAlias from "../../../../system/lib/terminalAlias";
+import { tokenise } from "../components/tokenise.js";
 
 export default class UserShell extends CommandLineApplication {
 	get path() {
@@ -29,10 +30,35 @@ export default class UserShell extends CommandLineApplication {
 		this.env.shell.setRef(this.ref);
 	}
 
+	tokenise(cmd: string) {
+		return tokenise(cmd, true);
+
+		//return cmd.split(" ").filter((item) => item !== "");
+	}
+
 	async frame() {
 		const cmd = await this.getInput(`${this.env.user} ${this.path} > `);
+		if (cmd.trim() == "") {
+			return;
+		}
 
-		const bits = cmd.split(" ").filter((item) => item !== "");
+		let bits: string[] = [];
+		try {
+			bits = this.tokenise(cmd).map((item) => {
+				const quotes = ['"', "'", "`"];
+
+				if (quotes.includes(item[0])) {
+					if (item.at(-1) == item[0]) {
+						return item.substring(1, item.length - 1);
+					}
+				}
+
+				return item;
+			});
+		} catch (e) {
+			this.println(Stringify(e));
+			return;
+		}
 
 		function Stringify(data: any) {
 			const StringResult = String(data);
