@@ -16,15 +16,37 @@ export default class EnvFs {
 			directory: string,
 			isWriteOperation: boolean
 		) => void,
-		directory: string
+		directory: string,
+		user: string
 	) {
 		this.#ConstellationKernel = ConstellationKernel;
 		this.#directoryActionCheck = directoryActionCheck;
 
-		this.resolve = ConstellationKernel.fs.resolve.bind(
-			ConstellationKernel.fs,
-			directory
-		);
+		this.resolve = (base: string, ...targets: string[]) => {
+			const process = (path: string): string => {
+				if (path == "~") {
+					return this.#ConstellationKernel.security.users.getUser(
+						user
+					).directory;
+				} else if (path.substring(0, 1) == "~/") {
+					return (
+						this.#ConstellationKernel.security.users.getUser(user)
+							.directory + path.substring(2)
+					);
+				} else {
+					return path;
+				}
+			};
+
+			const processedBase = process(base);
+			const processedTargets = targets.map((target) => process(target));
+
+			return ConstellationKernel.fs.resolve(
+				directory,
+				processedBase,
+				...processedTargets
+			);
+		};
 		this.relative = ConstellationKernel.fs.relative;
 	}
 
