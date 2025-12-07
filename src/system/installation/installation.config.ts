@@ -201,8 +201,7 @@ export interface PostInstallOptions {
 		displayName: string;
 		password: string;
 		profilePicture: string;
-		//language: string
-		//wallpaper: string
+		wallpaperPath?: string;
 	};
 }
 
@@ -212,7 +211,5 @@ export const developmentOptions: PostInstallOptions = {
 		displayName: "Developer",
 		password: "dev",
 		profilePicture: "hammer"
-		//language: "",
-		//wallpaper: ""
 	}
 };
