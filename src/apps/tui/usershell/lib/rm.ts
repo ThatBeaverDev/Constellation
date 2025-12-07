@@ -1,35 +1,36 @@
 import TerminalAlias from "../../../../system/lib/terminalAlias";
 
-interface RemovalUtilityOptions {
-	recursive: boolean;
-	target: string;
-}
+export default async function rm(
+	parent: TerminalAlias,
+	...directories: string[]
+) {
+	for (const dir of directories) {
+		const directory = parent.env.fs.resolve(parent.path, dir);
 
-export default async function rm(parent: TerminalAlias, ...args: string[]) {
-	const env = parent.env;
+		const stats = await parent.env.fs.stat(directory);
 
-	const cfg: RemovalUtilityOptions = {
-		recursive: false,
-		target: ""
-	};
+		if (stats.isDirectory()) {
+			const walk = async (directory: string) => {
+				const items = await parent.env.fs.listDirectory(directory);
 
-	args.forEach((arg) => {
-		if (arg[0] == "-") {
-			switch (arg) {
-				case "-r":
-					cfg.recursive = true;
-					break;
-			}
+				for (const item of items) {
+					const path = parent.env.fs.resolve(directory, item);
+
+					const stats = await parent.env.fs.stat(path);
+
+					if (stats.isDirectory()) {
+						await walk(path);
+					} else {
+						await parent.env.fs.deleteFile(path);
+					}
+				}
+
+				await parent.env.fs.deleteDirectory(directory);
+			};
+
+			await walk(directory);
 		} else {
-			cfg.target = arg;
+			await parent.env.fs.deleteFile(directory);
 		}
-	});
-
-	if (cfg.target == "") return "Target for deletion must be specified";
-
-	if (cfg.recursive) {
-		await env.fs.deleteDirectory(cfg.target);
-	} else {
-		await env.fs.deleteFile(cfg.target);
 	}
 }
