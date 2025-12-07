@@ -1,10 +1,10 @@
 import { buildNumber } from "./buildver.js";
 
 export default {
-	name: "Constellation 25.11.1a Sahara",
+	name: "Constellation 25.12 Sahara",
 	description:
-		"25.11.1a is an update to Constellation featuring bugfixes, Software update support, a redesigned settings app and stronger permissions enforcement.",
+		"25.12 is an update to Constellation featuring updates to icons and new features such as the process manager and text viewer.",
 	githubRelease:
-		"https://github.com/ThatBeaverDev/Constellation/releases/tag/21.11.1a",
+		"https://github.com/ThatBeaverDev/Constellation/releases/tag/21.12",
 	buildNumber
 };
