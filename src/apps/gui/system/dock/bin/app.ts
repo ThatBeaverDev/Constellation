@@ -1,3 +1,4 @@
+import { executionResult } from "../../../../../system/runtime/runtime.js";
 import Dock, { dockConfig } from "../components/dock.js";
 import menubar, { menubarConfig } from "../components/menubar.js";
 
@@ -26,11 +27,22 @@ export default class dockAndDesktop extends Overlay {
 	};
 	oldConfig: string = "";
 	tick: number = 0;
+	desktop?: executionResult;
 
 	async init() {
 		this.renderer.makeWindowInvisible();
 		this.renderer.hideWindowHeader();
 		this.renderer.hideWindowCorners();
+
+		this.env.warn("Running desktop");
+
+		const userinf = this.env.users.userInfo(this.env.user);
+		if (!userinf) throw new Error("Executed with non-existent user?");
+
+		this.desktop = await this.env.exec(
+			"/System/CoreExecutables/desktop.appl",
+			[userinf.directory + "/Desktop"]
+		);
 
 		this.renderer.setIcon(this.config.icon);
 		this.renderer.windowName = this.config.name;
@@ -94,6 +106,11 @@ export default class dockAndDesktop extends Overlay {
 	}
 
 	frame() {
+		if (this.desktop?.hasExited !== false) {
+			console.error("Desktop was terminated. Exiting dock.");
+			this.exit();
+		}
+
 		// resize and reposition
 		this.renderer.moveWindow(0, 0);
 		this.renderer.resizeWindow(

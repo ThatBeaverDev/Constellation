@@ -9,6 +9,7 @@ export default class CoreExecutable extends Service {
 
 	async init() {
 		const dockDirectory = "/System/CoreExecutables/Dock.appl";
+		const desktopDirectory = "/System/CoreExecutables/desktop.appl";
 		const loginInterfaceDirectory =
 			"/System/CoreExecutables/systemLoginInterface.appl";
 		const guiManagerDirectory = "/System/CoreExecutables/guiManager.appl";
@@ -18,6 +19,9 @@ export default class CoreExecutable extends Service {
 		// dock permissions
 		this.env.setDirectoryPermission(dockDirectory, "windows", true);
 		this.env.setDirectoryPermission(dockDirectory, "keylogger", true);
+
+		// desktop permissions
+		this.env.setDirectoryPermission(desktopDirectory, "windows", true);
 
 		// loginUI permissions
 		this.env.setDirectoryPermission(loginInterfaceDirectory, "users", true);

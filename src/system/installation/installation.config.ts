@@ -176,6 +176,12 @@ export const files: Record<
 	"/build/indexes/com.constellation.systemMonitor.idx": {
 		type: "application",
 		directory: "/System/CoreExecutables/processManager.appl"
+	},
+
+	// desktop
+	"/build/indexes/com.constellation.desktop.idx": {
+		type: "application",
+		directory: "/System/CoreExecutables/desktop.appl"
 	}
 };
 

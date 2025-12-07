@@ -1,6 +1,6 @@
-import { Terminatable } from "../../../../system/kernel.js";
-import { ProgramManifest } from "../../../../system/runtime/components/executables.js";
-import { WindowAlias } from "../../../../system/security/definitions.js";
+import { Terminatable } from "../../../../../system/kernel.js";
+import { ProgramManifest } from "../../../../../system/runtime/components/executables.js";
+import { WindowAlias } from "../../../../../system/security/definitions.js";
 import dockAndDesktop from "../bin/app.js";
 import { getAppConfig, pathIcon } from "pathinf";
 
