@@ -22,6 +22,10 @@ export async function pathIcon(
 	env: ApplicationAuthorisationAPI,
 	directory: string
 ): Promise<string | never> {
+	if (!directory.startsWith("/")) {
+		throw new Error("Pathicon requires an absolute path.");
+	}
+
 	const stats = await env.fs.stat(directory);
 
 	const extension = directory.textAfterAll(".");
