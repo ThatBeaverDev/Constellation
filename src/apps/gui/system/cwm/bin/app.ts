@@ -60,6 +60,7 @@ export default class ConstellationWindowManager
 
 	frame() {
 		this.renderer.resizeWindow(window.innerWidth, window.innerHeight);
+		this.renderer.moveWindow(0, 0);
 
 		this.renderer.clear();
 
@@ -68,14 +69,25 @@ export default class ConstellationWindowManager
 		this.renderer.commit();
 	}
 
-	onmessage(msg: IPCMessage): void {
+	async onmessage(msg: IPCMessage): Promise<void> {
 		if (!msg.originDirectory.startsWith("/System/CoreExecutables")) return;
 
 		switch (msg.intent) {
 			case "changeWallpaper":
-				this.wallpaper.wallpaperPath = String(
+				const wallpaperPath = String(
 					msg.data ?? this.wallpaper.defaultWallpaper
 				);
+
+				const contents = await this.env.fs.readFile(wallpaperPath);
+
+				if (contents == undefined) {
+					this.env.warn(
+						`File at ${JSON.stringify(wallpaperPath)} does not exist!`
+					);
+					return;
+				}
+
+				this.wallpaper.wallpaperPath = wallpaperPath;
 
 				break;
 			default:
