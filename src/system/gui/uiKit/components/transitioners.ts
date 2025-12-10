@@ -2,7 +2,7 @@ import { GraphicalWindow } from "../../display/windowTypes.js";
 import { setElementStyle } from "../../html.js";
 import { ConfigStep } from "../definitions.js";
 
-export default class uiKitTransitioners {
+export default class UiKitTransitioners {
 	textboxElem: HTMLInputElement | HTMLTextAreaElement | undefined;
 	hasTextbox: boolean = false;
 	#window?: GraphicalWindow;
