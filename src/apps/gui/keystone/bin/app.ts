@@ -1,4 +1,4 @@
-import { fileInfo } from "../lib/appfind.js";
+import { fileInfo } from "../../../services/filetypeDatabaseManager/lib/appfind.js";
 import { Fzf } from "fzf";
 import PanelKit from "/System/CoreLibraries/panelkit.js";
 
