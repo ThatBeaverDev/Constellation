@@ -11,7 +11,7 @@ export type fileInfo = {
 
 export type appFindResult = { files: fileInfo[]; names: string[] };
 
-export default async function find(
+export default async function findApplications(
 	parent: TerminalAlias,
 	directories: string[] = [
 		"/System/CoreExecutables",
@@ -21,24 +21,33 @@ export default async function find(
 	let files: fileInfo[] = [];
 	let names: string[] = [];
 
-	for (const directory of directories) {
-		const list = await parent.env.fs.listDirectory(directory);
+	for (const searchDirectory of directories) {
+		const list = await parent.env.fs.listDirectory(searchDirectory);
 
 		const localNames = list.map((item: string) =>
-			parent.env.fs.resolve(directory, String(item))
+			parent.env.fs.resolve(searchDirectory, String(item))
 		);
 		names = [...localNames, ...names];
 
 		// build file objects
 		const localFiles: fileInfo[] = [];
-		for (const dir of localNames) {
-			const config = await getAppConfig(parent.env, dir);
+		for (const applicationDirectory of localNames) {
+			if (
+				!(
+					applicationDirectory.endsWith(".appl") ||
+					applicationDirectory.endsWith(".srvc")
+				)
+			) {
+				continue;
+			}
+
+			const config = await getAppConfig(parent.env, applicationDirectory);
 
 			const obj: fileInfo = {
-				directory: dir,
-				name: await pathName(parent.env, dir),
-				icon: await pathIcon(parent.env, dir),
-				visible: await pathVisible(parent.env, dir),
+				directory: applicationDirectory,
+				name: await pathName(parent.env, applicationDirectory),
+				icon: await pathIcon(parent.env, applicationDirectory),
+				visible: await pathVisible(parent.env, applicationDirectory),
 				filetypes: config?.filetypes || []
 			};
 
