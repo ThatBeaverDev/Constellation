@@ -30,7 +30,7 @@ export async function openFile(
 	if (app == undefined) {
 		// deal with it
 		env.debug(
-			`libgui: Cannot open file at ${directory} because no application is capable.`
+			`libgui: Cannot open file at ${directory} because no application is capable of opening filetype ${filetype}.`
 		);
 		return false;
 	} else {

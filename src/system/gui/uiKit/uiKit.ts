@@ -24,7 +24,7 @@ import {
 	ConfigStep
 } from "./definitions.js";
 import uikitEventCreators from "./components/eventCreators.js";
-import uiKitTransitioners from "./components/transitioners.js";
+import UiKitTransitioners from "./components/transitioners.js";
 import ConstellationKernel from "../../kernel.js";
 import { GraphicalInterface } from "../gui.js";
 import {
@@ -35,6 +35,7 @@ import { UiKitCanvasElement } from "./components/canvas/canvas.js";
 import { isArrow } from "../../security/isArrow.js";
 import { defaultConfig } from "./components/defaultConfig.js";
 import { proxyContext } from "./components/canvas/ctx.js";
+import UiKitAudioSystem from "./components/audio.js";
 
 // type
 export type UiKitRenderer = UiKitRendererClass;
@@ -182,8 +183,7 @@ export class UiKitRendererClass {
 
 		this.#creators = new uiKitCreators(ConstellationKernel, this.#window);
 		this.#eventCreators = new uikitEventCreators(this.#signal);
-
-		this.#transitioners = new uiKitTransitioners(window);
+		this.#transitioners = new UiKitTransitioners(window);
 
 		document.addEventListener("pointerdown", () => {
 			this.lastClick = Date.now();
@@ -695,7 +695,7 @@ export class UiKitRendererClass {
 
 	readonly #creators: uiKitCreators;
 	readonly #eventCreators: uikitEventCreators;
-	readonly #transitioners: uiKitTransitioners;
+	readonly #transitioners: UiKitTransitioners;
 
 	/**
 	 * Sets the displayed context menu of the window. use .removeContextMenu() to remove it.
