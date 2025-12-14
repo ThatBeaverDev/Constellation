@@ -1,4 +1,4 @@
-import { ApplicationAuthorisationAPI } from "../security/env.js";
+import { ApplicationAuthorisationAPI } from "../security/components/env/env.js";
 
 const applicationExtensions = ["appl", "srvc"];
 

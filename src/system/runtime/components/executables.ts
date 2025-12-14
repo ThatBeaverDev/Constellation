@@ -1,5 +1,5 @@
 import { UiKitRenderer } from "../../gui/uiKit/uiKit.js";
-import { ApplicationAuthorisationAPI } from "../../security/env.js";
+import { ApplicationAuthorisationAPI } from "../../security/components/env/env.js";
 import { ProcessInformation } from "../runtime.js";
 import { IPCMessage, replyCallback } from "./messages.js";
 import ConstellationKernel from "../../kernel.js";

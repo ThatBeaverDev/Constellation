@@ -1,21 +1,24 @@
-import { FilesystemAPI } from "../../fs/fs.js";
-import { executionResult, ProcessInformation } from "../runtime/runtime.js";
-import { appName } from "../runtime/components/appName.js";
-import { PermissionsError } from "../errors.js";
-import { Framework, Process } from "../runtime/components/executables.js";
-import Shell from "../lib/shell.js";
-import Users from "./users.js";
+import { FilesystemAPI } from "../../../../fs/fs.js";
+import {
+	executionResult,
+	ProcessInformation
+} from "../../../runtime/runtime.js";
+import { appName } from "../../../runtime/components/appName.js";
+import { PermissionsError } from "../../../errors.js";
+import { Framework, Process } from "../../../runtime/components/executables.js";
+import Shell from "../../../lib/shell.js";
+import Users from "../users.js";
 import {
 	DirectoryPermissionStats,
 	Permission,
 	ConstellationPermissionsManager
-} from "./permissions.js";
-import ConstellationKernel from "..//kernel.js";
-import EnvWindows from "./subsets/windows.js";
-import EnvUsers from "./subsets/users.js";
-import EnvFs from "./subsets/fs.js";
-import EnvProcesses from "./subsets/processes.js";
-import { replyCallback } from "../runtime/components/messages.js";
+} from "../permissions.js";
+import ConstellationKernel from "../../../kernel.js";
+import EnvWindows from "./components/windows.js";
+import EnvUsers from "./components/users.js";
+import EnvFs from "./components/fs.js";
+import EnvProcesses from "./components/processes.js";
+import { replyCallback } from "../../../runtime/components/messages.js";
 
 const name = "/System/security/env.js";
 

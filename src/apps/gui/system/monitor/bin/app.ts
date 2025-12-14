@@ -1,5 +1,5 @@
 import { PanelKitGuiApplication } from "panelkit";
-import { ProcessAlias } from "../../../../../system/security/definitions";
+import { ProcessAlias } from "../../../../../system/security/components/definitions";
 
 type Table = (string | { type: "icon"; icon: string })[][];
 

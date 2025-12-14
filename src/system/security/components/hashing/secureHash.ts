@@ -1,4 +1,4 @@
-/// <reference path="../../../../node_modules/@types/node/index.d.ts" />
+/// <reference path="../../../../../node_modules/@types/node/index.d.ts" />
 
 import { exec } from "child_process";
 import { readFile, writeFile } from "fs/promises";

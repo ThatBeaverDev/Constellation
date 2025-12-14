@@ -1,7 +1,7 @@
-import { UserAlias } from "../definitions.js";
+import { UserAlias } from "../../definitions.js";
 import { ApplicationAuthorisationAPI, EnvironmentCreator } from "../env.js";
-import { Permission } from "../permissions.js";
-import { User } from "../definitions.js";
+import { Permission } from "../../permissions.js";
+import { User } from "../../definitions.js";
 
 export default class EnvUsers {
 	#env: ApplicationAuthorisationAPI;

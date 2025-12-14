@@ -6,15 +6,15 @@ import ProcessWaitingObject from "./components/appWaitingObject.js";
 import {
 	ApplicationAuthorisationAPI,
 	EnvironmentCreator
-} from "../security/env.js";
+} from "../security/components/env/env.js";
 import ConstellationKernel, { Terminatable } from "../kernel.js";
 import { dump } from "./components/crashed.js";
 import { defaultConfiguration } from "../constellation.config.js";
 import { UserPromptConfig } from "../gui/display/definitions.js";
-import ApplicationVerifier from "../security/runtimeDefender.js";
+import ApplicationVerifier from "../security/components/runtime/runtimeDefender.js";
 import { appName } from "./components/appName.js";
 import ImportResolver from "./components/resolver.js";
-import { isArrow } from "../security/isArrow.js";
+import { isArrow } from "../security/components/testers/isArrow.js";
 
 const path = "/System/runtime.js";
 

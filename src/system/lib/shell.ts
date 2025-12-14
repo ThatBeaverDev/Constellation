@@ -1,5 +1,5 @@
 import TerminalAlias from "./terminalAlias.js";
-import { ApplicationAuthorisationAPI } from "../security/env.js";
+import { ApplicationAuthorisationAPI } from "../security/components/env/env.js";
 
 type shellResult = {
 	result: any;

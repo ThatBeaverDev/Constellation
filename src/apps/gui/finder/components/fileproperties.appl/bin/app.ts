@@ -2,7 +2,7 @@ import { pathIcon } from "pathinf";
 import { Stats } from "../../../../../../fs/BrowserFsTypes.js";
 import PanelKit from "panelkit";
 import { bytesToSize } from "../../utils.js";
-import { ApplicationAuthorisationAPI } from "../../../../../../system/security/env.js";
+import { ApplicationAuthorisationAPI } from "../../../../../../system/security/components/env/env.js";
 
 async function recursiveInfo(
 	env: ApplicationAuthorisationAPI,

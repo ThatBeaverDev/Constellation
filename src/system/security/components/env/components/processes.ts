@@ -1,8 +1,8 @@
-import ConstellationKernel from "../..//kernel.js";
-import { UiKitRendererClass } from "../../gui/uiKit/uiKit.js";
-import { ProcessInformation } from "../../runtime/runtime.js";
-import { ProcessAlias } from "../definitions.js";
-import { Permission } from "../permissions.js";
+import ConstellationKernel from "../../../../kernel.js";
+import { UiKitRendererClass } from "../../../../gui/uiKit/uiKit.js";
+import { ProcessInformation } from "../../../../runtime/runtime.js";
+import { ProcessAlias } from "../../definitions.js";
+import { Permission } from "../../permissions.js";
 
 export default class EnvProcesses {
 	#ConstellationKernel: ConstellationKernel;

@@ -2,7 +2,7 @@ import { pathIcon } from "pathinf";
 import { Stats } from "../../../../fs/BrowserFsTypes.js";
 import PanelKit from "panelkit";
 import { openFile } from "gui";
-import { directoryPointType } from "../../../../system/security/definitions.js";
+import { directoryPointType } from "../../../../system/security/components/definitions.js";
 import { bytesToSize } from "../components/utils.js";
 
 export interface listing {

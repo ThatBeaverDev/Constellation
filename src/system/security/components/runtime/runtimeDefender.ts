@@ -1,4 +1,5 @@
-import ConstellationKernel, { Terminatable } from "..//kernel.js";
+import ConstellationKernel, { Terminatable } from "../../../kernel.js";
+import { checkProgramClass } from "./checkExtension.js";
 
 const path = "/System/Security/runtimeDefender.js";
 
@@ -21,7 +22,13 @@ export default class ApplicationVerifier implements Terminatable {
 		this.#ConstellationKernel = ConstellationKernel;
 	}
 
-	async verifyApplication(directory: string) {
+	async verifyApplication(directory: string): Promise<
+		| { result: true }
+		| {
+				result: false;
+				reason: string;
+		  }
+	> {
 		this.#ConstellationKernel.lib.logging.debug(
 			path,
 			`Starting verification of application at ${directory}`
@@ -37,7 +44,7 @@ export default class ApplicationVerifier implements Terminatable {
 				`Application at ${directory} has failed needed files testing. It lacks a config file.`
 			);
 
-			return false;
+			return { result: false, reason: "No config.js" };
 		} else {
 			// check the config has something inside
 		}
@@ -48,7 +55,7 @@ export default class ApplicationVerifier implements Terminatable {
 				`Application at ${directory} has failed needed files testing. It lacks a bin folder.`
 			);
 
-			return false;
+			return { result: false, reason: "No bin directory" };
 		}
 
 		this.#ConstellationKernel.lib.logging.debug(
@@ -62,9 +69,11 @@ export default class ApplicationVerifier implements Terminatable {
 					path,
 					`Application at ${directory} has failed subdirectories testing.`
 				);
-				throw new Error(
-					`Application at ${directory} has failed the security check: it has an invalid subdirectory (${item}).`
-				);
+
+				return {
+					result: false,
+					reason: `Invalid directory present: ${item}`
+				};
 			}
 		});
 
@@ -73,9 +82,12 @@ export default class ApplicationVerifier implements Terminatable {
 			`Application at ${directory} has passed subdirectories testing.`
 		);
 
-		const binListing = await this.#ConstellationKernel.fs.readdir(
-			this.#ConstellationKernel.fs.resolve(directory, "bin")
+		const binDirectory = this.#ConstellationKernel.fs.resolve(
+			directory,
+			"bin"
 		);
+		const binListing =
+			await this.#ConstellationKernel.fs.readdir(binDirectory);
 		for (const item of binListing) {
 			const allowedFileNames = ["app", "cli", "service"];
 
@@ -88,7 +100,33 @@ export default class ApplicationVerifier implements Terminatable {
 						`Application at ${directory} has passed entrypoint testing.`
 					);
 
-					return true;
+					/* -------------------- Worker class extensivity check -------------------- */
+
+					const entrypointPath = this.#ConstellationKernel.fs.resolve(
+						binDirectory,
+						item
+					);
+					const entrypointBlobURI =
+						await this.#ConstellationKernel.runtime.importsRewriter.resolve(
+							entrypointPath
+						);
+
+					const classOk = await checkProgramClass(
+						this.#ConstellationKernel,
+						entrypointBlobURI
+					);
+
+					/* -------------------- return -------------------- */
+
+					if (!classOk)
+						return {
+							result: false,
+							reason: "Class is not extensive of Process."
+						};
+					else
+						return {
+							result: true
+						};
 				}
 			}
 
@@ -107,7 +145,7 @@ export default class ApplicationVerifier implements Terminatable {
 			`Application at ${directory} has failed entrypoint testing.`
 		);
 
-		return false;
+		return { result: false, reason: "No entrypoint found." };
 	}
 
 	async terminate() {}
