@@ -1,7 +1,7 @@
-import { Stats } from "../../../fs/BrowserFsTypes.js";
-import { getParentDirectory } from "../../io/fspath.js";
-import ConstellationKernel from "../..//kernel.js";
-import { directoryPointType as directoryPoint } from "../definitions.js";
+import ConstellationKernel from "../../../../kernel.js";
+import { getParentDirectory } from "../../../../io/fspath.js";
+import { directoryPointType as directoryPoint } from "../../definitions.js";
+import { Stats } from "../../../../../fs/BrowserFsTypes.js";
 
 export default class EnvFs {
 	#ConstellationKernel: ConstellationKernel;
@@ -231,6 +231,12 @@ export default class EnvFs {
 
 	resolve = (base: string, ...targets: string[]): string => "/";
 	relative = (from: string, to: string): string => "/";
+
+	async blobify(directory: string) {
+		return await this.#ConstellationKernel.lib.blobifier.blobifyDirectory(
+			directory
+		);
+	}
 
 	expectFileType = async (
 		directory: string,

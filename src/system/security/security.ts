@@ -1,7 +1,7 @@
 import ConstellationKernel, { Terminatable } from "..//kernel.js";
-import { EnvironmentCreator } from "./env.js";
-import { ConstellationPermissionsManager } from "./permissions.js";
-import Users from "./users.js";
+import { EnvironmentCreator } from "./components/env/env.js";
+import { ConstellationPermissionsManager } from "./components/permissions.js";
+import Users from "./components/users.js";
 
 export default class Security {
 	env: EnvironmentCreator & Terminatable;

@@ -32,7 +32,7 @@ import {
 	UiKitTextboxElement
 } from "./components/elementReference.js";
 import { UiKitCanvasElement } from "./components/canvas/canvas.js";
-import { isArrow } from "../../security/isArrow.js";
+import { isArrow } from "../../security/components/testers/isArrow.js";
 import { defaultConfig } from "./components/defaultConfig.js";
 import { proxyContext } from "./components/canvas/ctx.js";
 import UiKitAudioSystem from "./components/audio.js";

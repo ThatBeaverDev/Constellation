@@ -1,5 +1,5 @@
 import { filetypeDatabase } from "../../apps/services/filetypeDatabaseManager/bin/service.js";
-import { ApplicationAuthorisationAPI } from "../security/env.js";
+import { ApplicationAuthorisationAPI } from "../security/components/env/env.js";
 
 async function typeOfPath(env: ApplicationAuthorisationAPI, directory: string) {
 	const stats = await env.fs.stat(directory);

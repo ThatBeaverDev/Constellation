@@ -1,5 +1,5 @@
 // globals.d.ts
-import { ApplicationAuthorisationAPI } from "./system/security/env.js";
+import { ApplicationAuthorisationAPI } from "./system/security/components/env/env.js";
 import * as executables from "./system/runtime/components/executables.js";
 
 export {}; // mark as module to allow global augment

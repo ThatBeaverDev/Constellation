@@ -1,4 +1,3 @@
-import { Permission } from "../../../../../../system/security/permissions.js";
 import {
 	RuntimeBoolean,
 	RuntimeCallable,
@@ -9,6 +8,7 @@ import {
 import { DynamicScope } from "../scopes/DynamicScope.js";
 import { CrlRuntime } from "../runtime.js";
 import { unwrapValue } from "../utils.js";
+import { Permission } from "../../../../../../system/security/components/permissions.js";
 
 export default class PermissionsAPI extends DynamicScope {
 	constructor(

@@ -1,8 +1,8 @@
-import WindowSystem from "../../gui/display/windowSystem.js";
-import { GraphicalWindow } from "../../gui/display/windowTypes.js";
-import ConstellationKernel from "../..//kernel.js";
-import { WindowAlias } from "../definitions.js";
-import { Permission } from "../permissions.js";
+import WindowSystem from "../../../../gui/display/windowSystem.js";
+import { GraphicalWindow } from "../../../../gui/display/windowTypes.js";
+import ConstellationKernel from "../../../../kernel.js";
+import { WindowAlias } from "../../definitions.js";
+import { Permission } from "../../permissions.js";
 
 export default class EnvWindows {
 	#ConstellationKernel: ConstellationKernel;

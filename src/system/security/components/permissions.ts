@@ -1,7 +1,7 @@
-import { PermissionsError } from "../errors.js";
-import { FilesystemAPI } from "../../fs/fs.js";
+import { FilesystemAPI } from "../../../fs/fs.js";
+import { PermissionsError } from "../../errors.js";
+import ConstellationKernel from "../../kernel.js";
 import { defaultUser } from "./users.js";
-import ConstellationKernel from "../kernel.js";
 
 export const permissionsDirectory = "/System/applicationPermissions.json";
 

@@ -8,7 +8,7 @@ import {
 	ConstellationConfiguration,
 	defaultConfiguration
 } from "./constellation.config.js";
-import Security from "./security/index.js";
+import Security from "./security/security.js";
 import { GraphicalInterface } from "./gui/gui.js";
 import blobifier from "./lib/blobify.js";
 import LoggingAPI, { CapitalisedLogLevel } from "./lib/logging.js";
