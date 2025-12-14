@@ -120,6 +120,8 @@ body {
 }
 
 .uikitProgressBar {
+	position: absolute;
+
 	background-color: var(--bg);
 
 	overflow: hidden;
@@ -159,6 +161,6 @@ body {
 	background-color: var(--bg-light);
 }
 
-.uikitContextContainer > .uiKitButton {
+.uikitContextContainer>.uiKitButton {
 	position: absolute;
 }
