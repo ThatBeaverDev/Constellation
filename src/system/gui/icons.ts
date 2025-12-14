@@ -89,9 +89,12 @@ export class Icons {
 			// literally just an empty SVG.
 			icon.src =
 				"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg==";
-
 			return icon;
-		} else if (name[0] == "/" || name.startsWith("http")) {
+		} else if (
+			name[0] == "/" ||
+			name.startsWith("http") ||
+			name.startsWith("data:")
+		) {
 			if (!this.cache[name]) {
 				// load from url or fs
 				icon.dataset.directory = name;
@@ -122,7 +125,8 @@ export class Icons {
 
 		if (
 			directory.startsWith("http://") ||
-			directory.startsWith("https://")
+			directory.startsWith("https://") ||
+			directory.startsWith("data:")
 		) {
 			icon.src = directory;
 			clone.src = directory;
