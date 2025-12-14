@@ -184,6 +184,51 @@ export default class UiKitTransitioners {
 		return true;
 	};
 
+	uikitProgressBar(
+		element: HTMLElement,
+		oldStep: ConfigStep,
+		newStep: ConfigStep
+	): boolean {
+		for (const i in newStep.args) {
+			const oldArg = oldStep.args[i];
+			const newArg = newStep.args[i];
+
+			if (oldArg == newArg) continue;
+
+			switch (Number(i)) {
+				case 0:
+					// X position
+					setElementStyle(element, "left", `${newArg}px`);
+					break;
+				case 1:
+					// Y position
+					setElementStyle(element, "top", `${newArg}px`);
+					break;
+				case 2:
+					// width
+					setElementStyle(element, "width", `${newArg}px`);
+				case 3:
+					// height
+					setElementStyle(element, "height", `${newArg}px`);
+					break;
+				case 4:
+					// progress
+					const progressBar = element.childNodes[0];
+
+					// @ts-expect-error
+					progressBar.style.width = `${newArg}%`;
+					break;
+				case 5:
+					// onDrag is fine
+					break;
+				default:
+					throw new Error("Unknown key: " + i);
+			}
+		}
+
+		return true;
+	}
+
 	uikitEmbeddedTui(
 		element: HTMLElement,
 		oldStep: ConfigStep,

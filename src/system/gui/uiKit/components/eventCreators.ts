@@ -1,13 +1,23 @@
+import { GraphicalWindow } from "../../display/windowTypes.js";
+import { GraphicalInterface } from "../../gui.js";
 import { defaultConfig } from "./defaultConfig.js";
 
 export default class UIKitEventListeners {
 	#signal: AbortSignal;
+	#gui: GraphicalInterface;
+	#window: GraphicalWindow;
 	setSignal(signal: AbortSignal) {
 		this.#signal = signal;
 	}
 
-	constructor(signal: AbortSignal) {
+	constructor(
+		GraphicalInterface: GraphicalInterface,
+		signal: AbortSignal,
+		window: GraphicalWindow
+	) {
+		this.#gui = GraphicalInterface;
 		this.#signal = signal;
+		this.#window = window;
 	}
 
 	uikitButton(
@@ -70,6 +80,57 @@ export default class UIKitEventListeners {
 
 					callbacks.update(event.key, val);
 				}
+			},
+			{ signal: this.#signal }
+		);
+	}
+
+	uikitProgressBar(
+		element: HTMLDivElement,
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		progress: number | "throb",
+		onDrag: (progress: number) => Promise<void> | void
+	) {
+		if (!onDrag) return;
+		if (!element.dataset.isDragging) element.dataset.isDragging = "false";
+
+		element.addEventListener(
+			"pointerdown",
+			(e) => {
+				element.dataset.isDragging = "true";
+			},
+			{ signal: this.#signal }
+		);
+
+		this.#gui.container.addEventListener(
+			"pointermove",
+			(e) => {
+				if (element.dataset.isDragging !== "true") return;
+
+				function clamp(n: number, min: number, max: number) {
+					if (n < min) return min;
+					if (n > max) return max;
+
+					return n;
+				}
+
+				const mouseX = e.clientX - this.#window.position.left;
+				const progressX = clamp(mouseX - x, 0, width);
+
+				const newProgress = (progressX / width) * 100;
+
+				onDrag(newProgress);
+			},
+			{ signal: this.#signal }
+		);
+
+		this.#gui.container.addEventListener(
+			"pointerup",
+			(e) => {
+				element.dataset.isDragging = "false";
 			},
 			{ signal: this.#signal }
 		);
