@@ -1,4 +1,5 @@
 import { ApplicationAuthorisationAPI } from "../security/components/env/env.js";
+import { fileCover } from "/System/CoreLibraries/music-metadata.js";
 
 const applicationExtensions = ["appl", "srvc"];
 
@@ -657,6 +658,8 @@ export async function pathIcon(
 			return "/System/CoreAssets/Vectors/files/file-database-json.svg";
 
 		case "mp3":
+			return await fileCover(env, directory);
+
 		case "ogg":
 		case "m4a":
 		case "flac":
