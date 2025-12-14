@@ -74,11 +74,21 @@ export default class ConstellationWindowManager
 
 		switch (msg.intent) {
 			case "changeWallpaper":
-				const wallpaperPath = String(
-					msg.data ?? this.wallpaper.defaultWallpaper
-				);
+				const wallpaperPath =
+					msg.data ?? this.wallpaper.defaultWallpaper;
 
-				const contents = await this.env.fs.readFile(wallpaperPath);
+				if (!(wallpaperPath instanceof String)) {
+					this.env.warn(
+						"Wallpaper could not be changed because requested path",
+						wallpaperPath,
+						"is not a string."
+					);
+					return;
+				}
+
+				const contents = await this.env.fs.readFile(
+					wallpaperPath.toString()
+				);
 
 				if (contents == undefined) {
 					this.env.warn(
@@ -87,7 +97,7 @@ export default class ConstellationWindowManager
 					return;
 				}
 
-				this.wallpaper.wallpaperPath = wallpaperPath;
+				this.wallpaper.wallpaperPath = wallpaperPath.toString();
 
 				break;
 			default:
