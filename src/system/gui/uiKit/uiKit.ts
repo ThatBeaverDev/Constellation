@@ -1009,6 +1009,19 @@ export class UiKitRendererClass {
 		}
 
 		this.#displayedSteps = this.#nextDisplayedSteps;
+
+		/* ---------- Make sure no 'rogue' elements are present that shouldn't be ---------- */
+
+		const windowBodyElements = this.#window.body.children;
+		const allowedElements: Element[] = this.#displayedSteps.map(
+			(item) => item.element
+		);
+
+		for (const el of windowBodyElements) {
+			if (!allowedElements.includes(el)) {
+				el.remove();
+			}
+		}
 	};
 
 	terminate() {
