@@ -77,6 +77,7 @@ export type canvasLineOptions = {
 
 export interface uikitIconOptions {
 	noProcess?: boolean;
+	borderRadius?: number;
 }
 
 export const font = "system-ui, Arial, monospace";
