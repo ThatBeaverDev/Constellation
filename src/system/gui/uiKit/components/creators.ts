@@ -50,6 +50,9 @@ export default class uiKitCreators {
 		if (options.noProcess) {
 			icon.classList.add("darkmode");
 		}
+		if (options.borderRadius) {
+			icon.style.borderRadius = `${options.borderRadius}px`;
+		}
 
 		if (this.#window) this.#window.body.appendChild(icon);
 
@@ -191,7 +194,12 @@ export default class uiKitCreators {
 		onDrag: (progress: number) => Promise<void> | void
 	) => {
 		const bar = document.createElement("div");
-		bar.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;`;
+		bar.style.left = `${x}px`;
+		bar.style.top = `${y}px`;
+
+		bar.style.width = `${width}px`;
+		bar.style.height = `${height}px`;
+
 		bar.id = String(window.renderID++);
 		bar.className = "uikitProgressBar";
 

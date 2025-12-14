@@ -48,6 +48,13 @@ export default class UiKitTransitioners {
 					break;
 				case 5:
 					// options
+					if (newArg?.noProcess !== oldArg?.noProcess) return false;
+
+					setElementStyle(
+						element,
+						"borderRadius",
+						newArg?.borderRadius ?? 0
+					);
 					return false;
 				default:
 					throw new Error("Unknown key: " + i);
@@ -200,17 +207,22 @@ export default class UiKitTransitioners {
 					// X position
 					setElementStyle(element, "left", `${newArg}px`);
 					break;
+
 				case 1:
 					// Y position
 					setElementStyle(element, "top", `${newArg}px`);
 					break;
+
 				case 2:
 					// width
 					setElementStyle(element, "width", `${newArg}px`);
+					break;
+
 				case 3:
 					// height
 					setElementStyle(element, "height", `${newArg}px`);
 					break;
+
 				case 4:
 					// progress
 					const progressBar = element.childNodes[0];
@@ -218,9 +230,11 @@ export default class UiKitTransitioners {
 					// @ts-expect-error
 					progressBar.style.width = `${newArg}%`;
 					break;
+
 				case 5:
 					// onDrag is fine
 					break;
+
 				default:
 					throw new Error("Unknown key: " + i);
 			}

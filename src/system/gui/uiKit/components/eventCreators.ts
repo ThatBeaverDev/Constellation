@@ -101,31 +101,33 @@ export default class UIKitEventListeners {
 			"pointerdown",
 			(e) => {
 				element.dataset.isDragging = "true";
+
+				moveProgress(e);
 			},
 			{ signal: this.#signal }
 		);
 
-		this.#gui.container.addEventListener(
-			"pointermove",
-			(e) => {
-				if (element.dataset.isDragging !== "true") return;
+		const moveProgress = (e: PointerEvent) => {
+			if (element.dataset.isDragging !== "true") return;
 
-				function clamp(n: number, min: number, max: number) {
-					if (n < min) return min;
-					if (n > max) return max;
+			function clamp(n: number, min: number, max: number) {
+				if (n < min) return min;
+				if (n > max) return max;
 
-					return n;
-				}
+				return n;
+			}
 
-				const mouseX = e.clientX - this.#window.position.left;
-				const progressX = clamp(mouseX - x, 0, width);
+			const mouseX = e.clientX - this.#window.position.left;
+			const progressX = clamp(mouseX - x, 0, width);
 
-				const newProgress = (progressX / width) * 100;
+			const newProgress = (progressX / width) * 100;
 
-				onDrag(newProgress);
-			},
-			{ signal: this.#signal }
-		);
+			onDrag(newProgress);
+		};
+
+		this.#gui.container.addEventListener("pointermove", moveProgress, {
+			signal: this.#signal
+		});
 
 		this.#gui.container.addEventListener(
 			"pointerup",
