@@ -69,9 +69,18 @@ export default class PanelKit {
 		this.#lastType = undefined;
 	}
 
+	/**
+	 * Renders a card on the application
+	 * @param name - The text of the card
+	 * @param icon - The icon of the card
+	 * @param onClick - The callback to be triggered when the card is clicked
+	 * @param onRightClick - The callback to be triggered when the card is right-clicked
+	 * @param feature - Optional feature for the right of the card such as a button
+	 * @param progress - Optional progress bar to render at the bottom of the card
+	 */
 	card = (
 		name: string,
-		icon: string,
+		icon?: string,
 		onClick?: (x: number, y: number) => void,
 		onRightClick?: (x: number, y: number) => void,
 		feature?: {
@@ -79,7 +88,8 @@ export default class PanelKit {
 			text: string;
 			icon?: string;
 			onClick: () => Promise<void> | void;
-		}
+		},
+		progress?: number
 	) => {
 		this.#typeChange("card");
 
@@ -101,19 +111,24 @@ export default class PanelKit {
 
 		// sizes
 		const iconScale = (this.cardSize - this.minorPadding * 2) / 24;
-		const iconSize = 24 * iconScale;
+		const iconSize = icon ? 24 * iconScale : 0;
 		const nameHeight = this.#renderer.getTextHeight(name);
 
 		// icon positions
-		const iconLeft = this.x + (this.cardSize - iconSize) / 2;
-		const iconTop = this.y + (this.cardSize - iconSize) / 2;
+		const iconLeft = icon
+			? this.x + (this.cardSize - iconSize) / 2
+			: this.x;
+		const iconTop = icon ? this.y + (this.cardSize - iconSize) / 2 : this.y;
 
 		// name positions
 		const nameLeft = iconLeft + (iconSize + this.minorPadding);
 		const nameTop = this.y + (this.cardSize - nameHeight) / 2;
 
 		// draw icon
-		this.#renderer.icon(iconLeft, iconTop, icon, iconScale).passthrough();
+		if (icon)
+			this.#renderer
+				.icon(iconLeft, iconTop, icon, iconScale)
+				.passthrough();
 
 		// draw name
 		this.#renderer.text(nameLeft, nameTop, name).passthrough();
@@ -152,6 +167,15 @@ export default class PanelKit {
 					.text(buttonLeft + 5, textTop, feature.text)
 					.passthrough();
 			}
+		}
+
+		if (progress) {
+			this.#renderer.horizontalLine(
+				this.x,
+				this.y + this.cardSize,
+				cardWidth * progress,
+				"var(--accent)"
+			);
 		}
 
 		this.y += this.cardSize + this.padding;
