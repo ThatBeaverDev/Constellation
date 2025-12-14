@@ -2,6 +2,8 @@
 	--headerColour: var(--bg-light);
 	--backgroundColour: var(--bg-dark);
 
+	white-space: pre;
+
 	background-color: var(--backgroundColour);
 
 	/* Outline */
