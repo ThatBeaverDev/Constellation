@@ -284,9 +284,9 @@ export class ProgramRuntime {
 		);
 
 		const isOk = await this.Verifier.verifyApplication(appdir);
-		if (!isOk)
+		if (!isOk.result)
 			throw new Error(
-				`Application at ${appdir} is damaged and can't be ran.`
+				`Application at ${appdir} failed checks: ${isOk.reason}`
 			);
 
 		/* ---------- Work out directory to import from ---------- */
@@ -587,7 +587,13 @@ export class ProgramRuntime {
 		if (proc instanceof GuiApplication) {
 			try {
 				proc?.renderer?.terminate();
-			} catch {}
+			} catch (e) {
+				this.#ConstellationKernel.lib.logging.warn(
+					path,
+					"Couldn't terminate process' renderer: ",
+					e
+				);
+			}
 		}
 
 		// remove the parent's child item
