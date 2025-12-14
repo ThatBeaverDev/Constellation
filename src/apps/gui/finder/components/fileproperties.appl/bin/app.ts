@@ -61,7 +61,7 @@ export default class FinderFileProperties extends GuiApplication {
 	panelkit = new PanelKit(this.renderer);
 	counter = 0;
 
-	async init(args: any[]) {
+	async init(args: unknown[]) {
 		this.path = String(args[0]);
 		this.filename = this.path.textAfterAll("/");
 		if (this.filename == "") {

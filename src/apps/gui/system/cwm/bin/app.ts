@@ -14,7 +14,7 @@ export default class ConstellationWindowManager
 	constructor(
 		ConstellationKernel: ConstellationKernel,
 		directory: string,
-		args: any[],
+		args: unknown[],
 		user: string,
 		password: string,
 		processInfo: ProcessInformation

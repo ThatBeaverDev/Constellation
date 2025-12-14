@@ -61,7 +61,7 @@ export default class calc extends GuiApplication {
 						this.mode = "answer";
 						try {
 							this.result = evaluate(this.text, this.env);
-						} catch (e: any) {
+						} catch (e: unknown) {
 							this.text = String(e);
 							this.result = NaN;
 						}
@@ -141,7 +141,7 @@ export default class calc extends GuiApplication {
 						this.mode = "answer";
 						try {
 							this.result = evaluate(this.text, this.env);
-						} catch (e: any) {
+						} catch (e: unknown) {
 							this.text = String(e);
 							this.result = NaN;
 						}

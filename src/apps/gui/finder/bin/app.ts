@@ -88,8 +88,10 @@ export default class finder extends GuiApplication {
 		let directoryContents;
 		try {
 			directoryContents = await this.env.fs.listDirectory(dir);
-		} catch (e: any) {
-			if (e.constructor.name == "PermissionsError") {
+		} catch (e: unknown) {
+			if (
+				Object.getPrototypeOf(e).constructor.name == "PermissionsError"
+			) {
 				// this is just a no permissions case
 				this.textDisplay = `You don't have permission to view '${this.path}'`;
 				this.ok = true;
