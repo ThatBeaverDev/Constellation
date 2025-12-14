@@ -133,7 +133,7 @@ export default class dockAndDesktop extends Overlay {
 
 	frame() {
 		if (this.desktop?.hasExited !== false) {
-			console.error("Desktop was terminated. Exiting dock.");
+			this.env.error("Desktop was terminated. Exiting dock.");
 			this.exit();
 		}
 

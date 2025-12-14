@@ -9,7 +9,6 @@ export default class KeystoneSearch extends Overlay {
 	files: string[] = [];
 	fileInfo: fileInfo[] = [];
 	ok: boolean = true;
-	entries: any;
 	rendering: fileInfo[] = [];
 	counter: number = 0;
 

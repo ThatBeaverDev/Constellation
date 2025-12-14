@@ -90,7 +90,7 @@ export default class UserShell extends CommandLineApplication {
 			this.println(Stringify(result));
 		} catch (e) {
 			this.println(String(e));
-			console.error(e);
+			this.env.error(e);
 		}
 	}
 }
