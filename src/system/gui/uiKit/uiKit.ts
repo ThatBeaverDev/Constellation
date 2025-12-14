@@ -47,7 +47,7 @@ export class UiKitRendererClass {
 
 	#index: number = 0;
 	readonly #steps: step[] = [];
-	#displayedSteps: Partial<step[]> = [];
+	#displayedSteps: step[] = [];
 	#nextDisplayedSteps: step[] = [];
 
 	// add abort controller to remove event listeners
@@ -182,7 +182,12 @@ export class UiKitRendererClass {
 		}
 
 		this.#creators = new uiKitCreators(ConstellationKernel, this.#window);
-		this.#eventCreators = new uikitEventCreators(this.#signal);
+		this.#eventCreators = new uikitEventCreators(
+			UserInterface,
+			this.#signal,
+			this.#window
+		);
+		this.audio = new UiKitAudioSystem(this, this.#ConstellationKernel);
 		this.#transitioners = new UiKitTransitioners(window);
 
 		document.addEventListener("pointerdown", () => {
@@ -204,7 +209,6 @@ export class UiKitRendererClass {
 
 	clear = () => {
 		this.#steps.splice(0, this.#steps.length + 10);
-		this.#index = 0;
 
 		// window dimensions
 		this.windowWidth = this.#window.body.clientWidth;
@@ -239,13 +243,13 @@ export class UiKitRendererClass {
 			{ signal: this.#signal, passive: false }
 		);
 
-		// other window properties
+		this.#index = 0;
 	};
 
 	icon(
-		x: number = 0,
-		y: number = 0,
-		iconName: string = "circle-help",
+		x: number,
+		y: number,
+		iconName: string,
 		iconScale: number = 1,
 		colour: string = "",
 		options: uikitIconOptions = {}
@@ -327,10 +331,10 @@ export class UiKitRendererClass {
 		return new UiKitElement(this, this.#nextStep(obj));
 	}
 
-	horizontalLine(x: number, y: number, width: number) {
+	horizontalLine(x: number, y: number, width: number, colour: string) {
 		const obj: ConfigStep = {
 			type: "uikitHorizontalLine",
-			args: [x, y, width]
+			args: [x, y, width, colour]
 		};
 
 		return new UiKitElement(this, this.#nextStep(obj));
@@ -341,11 +345,12 @@ export class UiKitRendererClass {
 		y: number,
 		width: number,
 		height: number,
-		progress: number | "throb"
+		progress: number | "throb",
+		onDrag: (progress: number) => Promise<void> | void
 	) {
 		const obj: ConfigStep = {
 			type: "uikitProgressBar",
-			args: [x, y, width, height, progress]
+			args: [x, y, width, height, progress, onDrag]
 		};
 
 		return new UiKitElement(this, this.#nextStep(obj));
@@ -443,10 +448,10 @@ export class UiKitRendererClass {
 				? undefined
 				: rightClickCallback.bind(this.#process);
 
-		const step = this.#steps[elemID - 1];
+		const step = this.#steps[elemID];
 
 		// insure elemID is valid
-		if (elemID > 0 && elemID <= this.#steps.length && step) {
+		if (elemID >= 0 && elemID < this.#steps.length && step) {
 			// assign data
 			const element = step.element;
 
@@ -560,10 +565,10 @@ export class UiKitRendererClass {
 		data: string
 	) {
 		const elemID = Number(elementID);
-		const step = this.#steps[elemID - 1];
+		const step = this.#steps[elemID];
 
 		// insure elemID is valid
-		if (elemID > 0 && elemID <= this.#steps.length && step) {
+		if (elemID >= 0 && elemID < this.#steps.length && step) {
 			// Heya! can you finish implementing the drag stuff?
 
 			step.element.addEventListener("dragstart", (event) => {}, {
@@ -583,10 +588,10 @@ export class UiKitRendererClass {
 		if (callback) isArrow(callback, true);
 
 		const elemID = Number(elementID);
-		const step = this.#steps[elemID - 1];
+		const step = this.#steps[elemID];
 
 		// insure elemID is valid
-		if (elemID > 0 && elemID <= this.#steps.length && step) {
+		if (elemID >= 0 && elemID < this.#steps.length && step) {
 		} else {
 			throw new UIError(
 				`onElementDrop called with invalid elemID: ${elemID}`
@@ -600,10 +605,10 @@ export class UiKitRendererClass {
 	 */
 	passthrough(elementID: number | UiKitElement) {
 		const elemID = Number(elementID);
-		const step = this.#steps[elemID - 1];
+		const step = this.#steps[elemID];
 
 		// insure elemID is valid
-		if (elemID > 0 && elemID <= this.#steps.length && step) {
+		if (elemID >= 0 && elemID < this.#steps.length && step) {
 			// assign data
 			step.element.style.pointerEvents = "none";
 		} else {
@@ -619,12 +624,12 @@ export class UiKitRendererClass {
 		options?: any
 	) {
 		const elemID = Number(elementID);
-		const step = this.#steps[elemID - 1];
+		const step = this.#steps[elemID];
 
 		// insure elemID is valid
 		if (
-			elemID > 0 &&
-			elemID <= this.#steps.length &&
+			elemID >= 0 &&
+			elemID < this.#steps.length &&
 			step &&
 			step.element instanceof HTMLCanvasElement
 		) {
@@ -696,6 +701,7 @@ export class UiKitRendererClass {
 	readonly #creators: uiKitCreators;
 	readonly #eventCreators: uikitEventCreators;
 	readonly #transitioners: UiKitTransitioners;
+	readonly audio: UiKitAudioSystem;
 
 	/**
 	 * Sets the displayed context menu of the window. use .removeContextMenu() to remove it.
@@ -852,13 +858,12 @@ export class UiKitRendererClass {
 	};
 
 	#nextStep(configStep: ConfigStep, id?: number): number {
-		let identifier = id ? id : this.#steps.length + 1;
-		this.#index = identifier;
+		let identifier = id !== undefined ? id : this.#index++;
 
 		const UserInterface = this.#ConstellationKernel.ui;
 		if (!(UserInterface.type == "GraphicalInterface")) return identifier;
 
-		const oldStep = this.#displayedSteps[identifier - 1];
+		const oldStep = this.#displayedSteps[identifier];
 		const oldElement = oldStep?.element;
 
 		// if the element has disappeared, simply remove the old one.
@@ -872,11 +877,22 @@ export class UiKitRendererClass {
 		let stepChanged =
 			!oldStep ||
 			oldStep.type !== configStep.type ||
+			oldStep.args.length !== configStep.args.length ||
 			JSON.stringify(oldStep.args) !== JSON.stringify(configStep.args);
 
 		if (stepChanged) {
 			const applyCreator = () => {
-				if (oldElement) this.#removeElement(oldElement);
+				oldElement;
+				if (oldElement) {
+					this.#removeElement(oldElement);
+				} else {
+					//console.debug(
+					//	"old element not present for removal.",
+					//	identifier,
+					//	oldStep,
+					//	configStep
+					//);
+				}
 
 				const creator: (
 					id: number,
@@ -984,7 +1000,7 @@ export class UiKitRendererClass {
 
 		// remove extra elements
 		for (
-			let i = this.#index;
+			let i = Number(this.#index);
 			i < Math.max(this.#steps.length, this.#displayedSteps.length);
 			i++
 		) {
@@ -997,6 +1013,7 @@ export class UiKitRendererClass {
 
 	terminate() {
 		this.#deleteElements();
+		this.audio.terminate();
 
 		this.#window.remove();
 

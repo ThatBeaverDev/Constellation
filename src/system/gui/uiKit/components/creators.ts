@@ -160,12 +160,21 @@ export default class uiKitCreators {
 		return line;
 	};
 
-	uikitHorizontalLine = (id: number, x: number, y: number, width: number) => {
+	uikitHorizontalLine = (
+		id: number,
+		x: number,
+		y: number,
+		width: number,
+		colour: string
+	) => {
 		const line = document.createElement("div");
 		line.className = "uikitHorizontalLine";
 
 		line.id = String(window.renderID++);
-		line.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px;`;
+		line.style.left = `${x}px`;
+		line.style.top = `${y}px`;
+		line.style.width = `${width}px`;
+		line.style.borderColor = colour;
 
 		if (this.#window) this.#window.body.appendChild(line);
 
@@ -178,21 +187,21 @@ export default class uiKitCreators {
 		y: number,
 		width: number,
 		height: number,
-		progress: number | "throb"
+		progress: number | "throb",
+		onDrag: (progress: number) => Promise<void> | void
 	) => {
 		const bar = document.createElement("div");
 		bar.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;`;
 		bar.id = String(window.renderID++);
 		bar.className = "uikitProgressBar";
 
-		const progressor = document.createElement("div");
+		const progressBar = document.createElement("div");
 
-		progressor.style.width = progress + "%";
+		progressBar.style.width = progress + "%";
+		progressBar.id = String(window.renderID++);
+		progressBar.className = "uikitProgressBarInner";
 
-		progressor.id = String(window.renderID++);
-		progressor.className = "uikitProgressBarInner";
-
-		bar.innerHTML = progressor.outerHTML;
+		bar.appendChild(progressBar);
 
 		if (this.#window) this.#window.body.appendChild(bar);
 
