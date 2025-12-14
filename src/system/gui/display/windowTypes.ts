@@ -180,8 +180,8 @@ export class GraphicalWindow {
 		this.container.addEventListener("pointerup", containerPointerUp);
 
 		// buttons
-		const closePointerDown = () => this.close();
-		this.closeButton.addEventListener("pointerdown", closePointerDown);
+		const closePointerUp = () => this.close();
+		this.closeButton.addEventListener("pointerdown", closePointerUp);
 		const fullscreenPointerDown = () => {
 			if (this.fullscreened) {
 				this.unfullscreen();
