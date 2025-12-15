@@ -175,9 +175,9 @@ export class GraphicalWindow {
 		};
 		this.header.addEventListener("pointerdown", headerPointerDown);
 
-		const containerPointerUp = () =>
+		const containerPointerDown = () =>
 			this.#WindowSystem.focusWindow(this.winID);
-		this.container.addEventListener("pointerup", containerPointerUp);
+		this.container.addEventListener("pointerdown", containerPointerDown);
 
 		// buttons
 		const closePointerUp = () => this.close();
