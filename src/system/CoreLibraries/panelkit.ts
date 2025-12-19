@@ -188,7 +188,20 @@ export default class PanelKit {
 		this.#renderer.text(this.x, this.y, text, 17);
 
 		// calculate height
-		const titleHeight = this.#renderer.getTextHeight(text, 15);
+		const titleHeight = this.#renderer.getTextHeight(text, 17);
+
+		// next line
+		this.x = this.sidebarWidth + this.padding;
+		this.y += titleHeight + this.padding;
+	};
+	info = (text: string) => {
+		this.#typeChange("title");
+
+		// draw text
+		this.#renderer.text(this.x, this.y, text, 13);
+
+		// calculate height
+		const titleHeight = this.#renderer.getTextHeight(text, 13);
 
 		// next line
 		this.x = this.sidebarWidth + this.padding;
@@ -205,7 +218,7 @@ export default class PanelKit {
 			type: "button";
 			text: string;
 			icon?: string;
-			onClick: () => Promise<void> | void;
+			onClick: () => any;
 		}
 	) => {
 		this.#typeChange("card");
@@ -643,6 +656,45 @@ export default class PanelKit {
 		this.#typeChange("card");
 
 		this.y += height + this.padding;
+	};
+
+	textInput = (
+		text: string,
+		backtext: string,
+		onEnter: (contents: string) => any
+	) => {
+		this.#typeChange("title");
+
+		// draw text
+		this.#renderer.text(this.x, this.y, text, 17);
+
+		// calculate dimensions
+		const titleWidth = this.#renderer.getTextWidth(text, 17);
+		const titleHeight = this.#renderer.getTextHeight(text, 17);
+
+		// textbox
+		const textboxLeft = Math.max(
+			this.#renderer.windowWidth / 2,
+			this.x + titleWidth + this.minorPadding
+		);
+		const textbox = this.#renderer.textbox(
+			textboxLeft,
+			this.y,
+			this.#renderer.windowWidth - (this.padding + textboxLeft),
+			titleHeight + 5,
+			backtext,
+			{
+				enter: (contents: string) => {
+					onEnter(contents);
+				}
+			}
+		);
+
+		// next line
+		this.x = this.sidebarWidth + this.padding;
+		this.y += titleHeight + this.padding;
+
+		return textbox.getContents();
 	};
 
 	keydown = (
