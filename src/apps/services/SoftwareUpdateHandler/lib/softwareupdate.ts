@@ -18,7 +18,7 @@ export default async function softwareupdate(
 	parent: TerminalAlias,
 	command: string
 ): Promise<any> {
-	const currentBuild = (await parent.env.include("/System/buildver.js"))
+	const currentBuild = (await parent.env.fs.include("/System/buildver.js"))
 		.buildNumber;
 
 	switch (command) {

@@ -323,7 +323,7 @@ export default class CodeRuntimeEvaluator {
 		);
 
 		// get the library
-		const exportee = await this.runtime.app.env.include(coreLibraryPath);
+		const exportee = await this.runtime.app.env.fs.include(coreLibraryPath);
 		const lib = exportee.default as typeof DynamicScope;
 
 		// create it
