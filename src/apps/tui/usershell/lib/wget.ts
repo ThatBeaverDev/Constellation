@@ -1,5 +1,5 @@
 import TerminalAlias from "../../../../system/lib/terminalAlias";
-import * as mime from "mime";
+import * as mimes from "/System/CoreLibraries/mimes";
 
 export default async function wget(
 	parent: TerminalAlias,
@@ -32,7 +32,7 @@ export default async function wget(
 	let content;
 	if (isBinary) {
 		// make data:uri
-		const mimeType = mime.getType(out.textAfterAll("."));
+		const mimeType = mimes.getMimeType(out.textAfterAll("."));
 
 		content = `data:${mimeType},${data}`;
 	} else {

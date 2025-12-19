@@ -78,7 +78,7 @@ export default class FinderFileProperties extends GuiApplication {
 	}
 
 	async refresh() {
-		this.icon = await pathIcon(this.env, this.path);
+		this.icon = await pathIcon(this.env.fs, this.path);
 		this.renderer.setIcon(this.icon);
 
 		this.stats = await this.env.fs.stat(this.path);

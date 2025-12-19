@@ -1,11 +1,11 @@
-import { FilesystemAPI } from "../../fs/fs.js";
+import { SystemFilesystemDriver } from "../../fs/fs.js";
 import { Terminatable } from "../kernel.js";
 
 export default class blobifier implements Terminatable {
 	index: Record<string, string> = {};
 	cache: Record<string, { uri: string; mime: string }> = {};
 
-	constructor(public fs: FilesystemAPI) {}
+	constructor(public fs: SystemFilesystemDriver) {}
 
 	blobify(
 		value: string | Uint8Array<ArrayBuffer>,

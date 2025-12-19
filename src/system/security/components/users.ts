@@ -1,4 +1,4 @@
-import { FilesystemAPI } from "../../../fs/fs.js";
+import { SystemFilesystemDriver } from "../../../fs/fs.js";
 import { resolveDirectory } from "../../io/fspath.js";
 import ConstellationKernel from "../../kernel.js";
 import { sha512 } from "../../lib/crypto.js";
@@ -14,7 +14,7 @@ const usersParentFolder = "/Users";
 
 export default class Users {
 	usersStorage: Record<User["name"], User> = {};
-	fs: FilesystemAPI;
+	fs: SystemFilesystemDriver;
 
 	#ConstellationKernel: ConstellationKernel;
 	constructor(ConstellationKernel: ConstellationKernel) {

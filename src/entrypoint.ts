@@ -9,7 +9,7 @@ import { getFlagValue } from "./system/lib/flags.js";
 
 applyStringPrototypes();
 
-const { FilesystemAPI } = await import("./fs/fs.js");
+const { SystemFilesystemDriver } = await import("./fs/fs.js");
 
 if (isNode) {
 	console.log(
@@ -53,7 +53,7 @@ if (isCommandLine) {
 const isDevmode = Boolean(getFlagValue("dev"));
 
 function getRequiredLibraries(root: string) {
-	const fsApi = new FilesystemAPI(root);
+	const fsApi = new SystemFilesystemDriver(root);
 	const blobifier = new Blobifier(fsApi);
 	const processor = new ImportResolver(fsApi, blobifier);
 

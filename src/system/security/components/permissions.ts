@@ -1,4 +1,4 @@
-import { FilesystemAPI } from "../../../fs/fs.js";
+import { SystemFilesystemDriver } from "../../../fs/fs.js";
 import { PermissionsError } from "../../errors.js";
 import ConstellationKernel from "../../kernel.js";
 import { defaultUser } from "./users.js";
@@ -35,7 +35,7 @@ export class ConstellationPermissionsManager {
 	#ConstellationKernel: ConstellationKernel;
 
 	constructor(
-		public fs: FilesystemAPI,
+		public fs: SystemFilesystemDriver,
 		ConstellationKernel: ConstellationKernel
 	) {
 		this.#ConstellationKernel = ConstellationKernel;

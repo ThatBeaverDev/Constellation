@@ -1,4 +1,4 @@
-import { FilesystemAPI } from "../../fs/fs.js";
+import { SystemFilesystemDriver } from "../../fs/fs.js";
 import ConstellationKernel from "../kernel.js";
 
 const path = "/System/gui/icons.js";
@@ -7,7 +7,7 @@ export class Icons {
 	cache: Record<string, HTMLImageElement> = {};
 	div: HTMLDivElement;
 	#ConstellationKernel: ConstellationKernel;
-	fs: FilesystemAPI;
+	fs: SystemFilesystemDriver;
 
 	constructor(ConstellationKernel: ConstellationKernel) {
 		this.#ConstellationKernel = ConstellationKernel;

@@ -74,7 +74,7 @@ export default class Dock implements Terminatable {
 		for (const i in this.config.pins) {
 			const pin = this.config.pins[i];
 
-			const manifest = await getAppConfig(this.env, pin);
+			const manifest = await getAppConfig(this.env.fs, pin);
 			if (!manifest) continue;
 
 			pins[i] = {
@@ -86,7 +86,7 @@ export default class Dock implements Terminatable {
 
 		const programs: Record<string, Program | undefined> = {};
 
-		const manifest = await getAppConfig(this.env, this.parent.directory);
+		const manifest = await getAppConfig(this.env.fs, this.parent.directory);
 		if (!manifest)
 			throw new Error("dockAndDesktop executable was deleted?");
 
@@ -94,7 +94,7 @@ export default class Dock implements Terminatable {
 			windows: [],
 			isPinned: true,
 			manifest,
-			icon: await pathIcon(this.env, this.parent.directory)
+			icon: await pathIcon(this.env.fs, this.parent.directory)
 		};
 
 		if (this.pinsInfo !== undefined) {
@@ -102,14 +102,14 @@ export default class Dock implements Terminatable {
 				const progDir = prog.directory;
 
 				if (programs[progDir] == undefined) {
-					const manifest = await getAppConfig(this.env, progDir);
+					const manifest = await getAppConfig(this.env.fs, progDir);
 					if (!manifest) continue;
 
 					programs[progDir] = {
 						windows: [],
 						isPinned: true,
 						manifest,
-						icon: await pathIcon(this.env, progDir)
+						icon: await pathIcon(this.env.fs, progDir)
 					};
 				}
 			}
@@ -120,14 +120,14 @@ export default class Dock implements Terminatable {
 			if (winDir == undefined) continue;
 
 			if (programs[winDir] == undefined) {
-				const manifest = await getAppConfig(this.env, winDir);
+				const manifest = await getAppConfig(this.env.fs, winDir);
 				if (!manifest) continue;
 
 				programs[winDir] = {
 					windows: [],
 					isPinned: this.config.pins.includes(winDir),
 					manifest,
-					icon: await pathIcon(this.env, winDir)
+					icon: await pathIcon(this.env.fs, winDir)
 				};
 
 				if (programs[winDir].manifest.userspace == false) {

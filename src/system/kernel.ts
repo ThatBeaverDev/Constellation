@@ -1,6 +1,6 @@
 import * as installer from "./installation/index.js";
 
-import { FilesystemAPI } from "../fs/fs.js";
+import { SystemFilesystemDriver } from "../fs/fs.js";
 
 import { executionResult, ProgramRuntime } from "./runtime/runtime.js";
 import panic from "./lib/panic.js";
@@ -14,7 +14,7 @@ import blobifier from "./lib/blobify.js";
 import LoggingAPI, { CapitalisedLogLevel } from "./lib/logging.js";
 import { TextInterface } from "./tui/tui.js";
 import { tcupkg } from "./lib/packaging/tcupkg.js";
-import { ConstellationFileIndex } from "./lib/packaging/definitions.js";
+import { LatestFileIndex } from "./lib/packaging/definitions.js";
 import { tcpkg } from "./lib/packaging/tcpkg.js";
 import postinstall from "./installation/postinstall.js";
 import IPCMessageSender from "./runtime/components/messages.js";
@@ -28,7 +28,7 @@ if (defaultConfiguration.dynamic.isDevmode) {
 const path = "/System/kernel.js";
 
 interface ConstellationKernelConfiguration {
-	installationIdx?: ConstellationFileIndex;
+	installationIdx?: LatestFileIndex;
 	install?: boolean;
 }
 
@@ -41,7 +41,7 @@ export default class ConstellationKernel implements Terminatable {
 	id: number = kernelID++;
 
 	// subsystems
-	fs: FilesystemAPI & Terminatable;
+	fs: SystemFilesystemDriver & Terminatable;
 	security: Security & Terminatable;
 	runtime: ProgramRuntime & Terminatable;
 	config: ConstellationConfiguration;
@@ -50,11 +50,9 @@ export default class ConstellationKernel implements Terminatable {
 		logging: LoggingAPI;
 		messageAPI: IPCMessageSender;
 		packaging: {
-			tcpkg: (
-				packageDirectory: string
-			) => Promise<ConstellationFileIndex>;
+			tcpkg: (packageDirectory: string) => Promise<LatestFileIndex>;
 			tcupkg: (
-				idxFile: ConstellationFileIndex,
+				idxFile: LatestFileIndex,
 				directory: string
 			) => Promise<void>;
 		};
@@ -79,7 +77,7 @@ export default class ConstellationKernel implements Terminatable {
 		public rootPoint: string,
 		public isGraphical: boolean,
 		logs: any[] = [],
-		FsAPI: FilesystemAPI,
+		FsAPI: SystemFilesystemDriver,
 		public startupConfiguration?: ConstellationKernelConfiguration
 	) {
 		if (defaultConfiguration.dynamic.isDevmode) {
@@ -102,7 +100,7 @@ export default class ConstellationKernel implements Terminatable {
 						return false;
 
 					await tcupkg(
-						this,
+						this.fs,
 						startupConfiguration.installationIdx,
 						"/"
 					);
@@ -130,8 +128,8 @@ export default class ConstellationKernel implements Terminatable {
 			messageAPI: new IPCMessageSender(),
 			packaging: {
 				// preinsert the `ConstellationKernel` arguement.
-				tcpkg: tcpkg.bind(undefined, this),
-				tcupkg: tcupkg.bind(undefined, this)
+				tcpkg: tcpkg.bind(undefined, this.fs),
+				tcupkg: tcupkg.bind(undefined, this.fs)
 			}
 		};
 		this.security = new Security(this);
