@@ -1,7 +1,9 @@
 const fakeKernel: any = {
 	security: {
 		env: {
-			newEnv() {}
+			newEnv() {
+				return {};
+			}
 		}
 	},
 	ui: {
@@ -82,7 +84,7 @@ onmessage = async (e: MessageEvent<{ program: string; processes: string }>) => {
 		// all good :>
 		postMessage({ result: true });
 	} catch (e) {
-		console.debug("Applicaton verification failed: " + String(e));
+		console.error("Applicaton verification failed: " + String(e));
 		postMessage({ result: false, reason: String(e) });
 	}
 };
