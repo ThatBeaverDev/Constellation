@@ -1,4 +1,4 @@
-import { FilesystemAPI } from "../../../../fs/fs.js";
+import { SystemFilesystemDriver } from "../../../../fs/fs.js";
 import {
 	executionResult,
 	ProcessInformation
@@ -25,12 +25,12 @@ const name = "/System/security/env.js";
 const globalPermissionsHost = "/System/globalPermissionsHost.js";
 
 export class EnvironmentCreator {
-	filesystem: FilesystemAPI;
+	filesystem: SystemFilesystemDriver;
 	users: Users;
 	permissions: ConstellationPermissionsManager;
 	#ConstellationKernel: ConstellationKernel;
 	constructor(
-		filesystem: FilesystemAPI,
+		filesystem: SystemFilesystemDriver,
 		users: Users,
 		permissions: ConstellationPermissionsManager,
 		ConstellationKernel: ConstellationKernel

@@ -1,4 +1,4 @@
-import { ApplicationAuthorisationAPI } from "../security/components/env/env";
+import { FilesystemInterface } from "../security/components/env/components/fs";
 import { parseBlob } from "./metadata/music-metadata";
 
 // Source - https://stackoverflow.com/a
@@ -39,10 +39,10 @@ async function resizeImage(url: string, width: number, height: number) {
 }
 
 export async function metadataForFile(
-	env: ApplicationAuthorisationAPI,
+	fs: FilesystemInterface,
 	directory: string
 ) {
-	const datauri = await env.fs.readFile(directory);
+	const datauri = await fs.readFile(directory);
 
 	function dataUriToBlob(dataURI: string) {
 		const [header, data] = dataURI.split(",");
@@ -77,12 +77,12 @@ export async function metadataForFile(
 }
 
 export async function fileCover(
-	env: ApplicationAuthorisationAPI,
+	fs: FilesystemInterface,
 	directory: string,
 	width: number = 250,
 	height: number = 250
 ) {
-	const { common } = await metadataForFile(env, directory);
+	const { common } = await metadataForFile(fs, directory);
 	const picture = common.picture[0];
 
 	const b64 = _arrayBufferToBase64(picture.data);

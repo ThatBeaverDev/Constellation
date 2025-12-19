@@ -6,12 +6,8 @@ import {
 	FileSystemConfiguration,
 	FSModule,
 	Stats
-} from "./BrowserFsTypes";
-import {
-	getParentDirectory,
-	normaliseDirectory,
-	resolveDirectory
-} from "../system/io/fspath.js";
+} from "./BrowserFsTypes.js";
+import { getParentDirectory, resolveDirectory } from "../system/io/fspath.js";
 import { relative } from "../system/io/nodepath.js";
 
 /* ------------------------------------------------------------- Constants and Timestamp Function ------------------------------------------------------------- */
@@ -109,7 +105,7 @@ const readdir = async (directory: string): Promise<string[]> => {
 
 /* ------------------------------------------------------------- Create Directory Function ------------------------------------------------------------- */
 
-const mkdir = async (directory: string): Promise<undefined> => {
+const mkdir = async (directory: string): Promise<void> => {
 	const parentDirectory = getParentDirectory(directory);
 
 	const parentListing = await readdir(parentDirectory);
@@ -234,7 +230,7 @@ if (defaultConfiguration.dynamic.isDevmode) {
 
 /* ------------------------------------------------------------- FilesystemAPI Class ------------------------------------------------------------- */
 
-export class FilesystemAPI {
+export class SystemFilesystemDriver {
 	rootPoint: string;
 	constructor(rootPoint: string) {
 		if (rootPoint !== "/") {
@@ -251,7 +247,7 @@ export class FilesystemAPI {
 
 	async writeFile(directory: string, content: string) {
 		const realpath = this.#realDir(directory);
-		return await writeFile(realpath, content);
+		await writeFile(realpath, content);
 	}
 
 	async readFile(directory: string) {
@@ -287,9 +283,6 @@ export class FilesystemAPI {
 		return relative(from, to);
 	}
 
-	normalize(path: string) {
-		return normaliseDirectory(path);
-	}
 	#realDir(path: string) {
 		let dir = commandLineBase + this.rootPoint + path;
 
@@ -302,7 +295,7 @@ export class FilesystemAPI {
 		}
 	}
 
-	async stat(directory: string): ReturnType<typeof stat> {
+	async stat(directory: string) {
 		const realpath = this.#realDir(directory);
 		return await stat(realpath);
 	}

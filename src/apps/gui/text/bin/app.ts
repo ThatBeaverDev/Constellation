@@ -1,3 +1,4 @@
+import { archiveSafeReadfile } from "/System/CoreLibraries/archives";
 import { pathIcon } from "/System/CoreLibraries/pathinf";
 
 export default class TextViewer extends GuiApplication {
@@ -20,7 +21,7 @@ export default class TextViewer extends GuiApplication {
 		//}
 
 		const filetype = this.file.textAfterAll(".");
-		const text = (await this.env.fs.readFile(this.file)) ?? "";
+		const text = (await archiveSafeReadfile(this.env.fs, this.file)) ?? "";
 
 		switch (filetype) {
 			case "json":
@@ -34,7 +35,7 @@ export default class TextViewer extends GuiApplication {
 				this.text = text;
 		}
 
-		this.fileicon = await pathIcon(this.env, this.file);
+		this.fileicon = await pathIcon(this.env.fs, this.file);
 		this.renderer.setIcon(this.fileicon);
 		this.renderer.windowName = `Text Viewer - ${this.file}`;
 

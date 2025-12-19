@@ -39,7 +39,7 @@ export default class ConstellationDesktop extends GuiApplication {
 				return {
 					name: path.textAfterAll("/"),
 					icon: await pathIcon(
-						this.env,
+						this.env.fs,
 						this.env.fs.resolve(this.path, path)
 					),
 					path

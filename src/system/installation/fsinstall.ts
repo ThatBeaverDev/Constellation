@@ -5,14 +5,14 @@ import {
 	installerFileEntryType
 } from "./installation.config.js";
 import ConstellationKernel from "..//kernel.js";
-import { FilesystemAPI } from "../../fs/fs.js";
+import { SystemFilesystemDriver } from "../../fs/fs.js";
 import { isCommandLine } from "../getPlatform.js";
 import { tcupkg } from "../lib/packaging/tcupkg.js";
 
 const path = "/System/installer/fsinstall.js";
 
 export class FilesystemInstaller {
-	fs: FilesystemAPI;
+	fs: SystemFilesystemDriver;
 	#ConstellationKernel: ConstellationKernel;
 
 	constructor(ConstellationKernel: ConstellationKernel) {
@@ -200,7 +200,11 @@ export class FilesystemInstaller {
 
 					// unpackage it using the kernel unpackager
 					//writingWaitlist.push(
-					await tcupkg(this.#ConstellationKernel, content, directory);
+					await tcupkg(
+						this.#ConstellationKernel.fs,
+						content,
+						directory
+					);
 					//);
 
 					break;

@@ -3,7 +3,35 @@ import { getParentDirectory } from "../../../../io/fspath.js";
 import { directoryPointType as directoryPoint } from "../../definitions.js";
 import { Stats } from "../../../../../fs/BrowserFsTypes.js";
 
-export default class EnvFs {
+export interface FilesystemInterface {
+	createDirectory(directory: string): Promise<void>;
+	listDirectory(directory: string): Promise<string[]>;
+	deleteDirectory(directory: string): Promise<void>;
+
+	writeFile(directory: string, contents: string): Promise<void>;
+	deleteFile(directory: string): Promise<void>;
+	move(oldDirectory: string, newDirectory: string): Promise<void>;
+
+	readFile(directory: string): Promise<string>;
+
+	copy(oldDirectory: string, newDirectory: string): Promise<void>;
+
+	stat(directory: string): Promise<Stats>;
+	typeOfFile(directory: string): Promise<directoryPoint | never>;
+
+	resolve(base: string, ...targets: string[]): string;
+	relative(from: string, to: string): string;
+
+	blobify(directory: string): Promise<string>;
+
+	expectFileType(directory: string, expectedType: directoryPoint): void;
+
+	pathAsDriveRoot(directory: string): string;
+
+	include(directory: string): any;
+}
+
+export default class EnvFs implements FilesystemInterface {
 	#ConstellationKernel: ConstellationKernel;
 	#directoryActionCheck: (
 		directory: string,
@@ -50,18 +78,17 @@ export default class EnvFs {
 		this.relative = ConstellationKernel.fs.relative;
 	}
 
-	createDirectory = async (directory: string): Promise<true> => {
+	createDirectory = async (directory: string) => {
 		try {
 			this.#directoryActionCheck(directory, true);
 
 			await this.#ConstellationKernel.fs.mkdir(directory);
-			return true;
 		} catch (error: any) {
 			error.message = "env.fs.createDirectory: " + error.message;
 			throw error;
 		}
 	};
-	listDirectory = async (directory: string = "/"): Promise<string[]> => {
+	listDirectory = async (directory: string): Promise<string[]> => {
 		try {
 			this.#directoryActionCheck(directory, false);
 
@@ -72,7 +99,7 @@ export default class EnvFs {
 			throw error;
 		}
 	};
-	deleteDirectory = async (directory: string): Promise<true> => {
+	deleteDirectory = async (directory: string): Promise<void> => {
 		try {
 			this.#directoryActionCheck(directory, true);
 
@@ -88,37 +115,34 @@ export default class EnvFs {
 						throw err;
 				}
 			}
-
-			return true;
 		} catch (error: any) {
 			error.message = "env.fs.deleteDirectory: " + error.message;
 			throw error;
 		}
 	};
 
-	writeFile = async (directory: string, contents: string): Promise<true> => {
+	writeFile = async (directory: string, contents: string): Promise<void> => {
 		try {
 			this.#directoryActionCheck(directory, true);
 
 			await this.#ConstellationKernel.fs.writeFile(directory, contents);
-			return true;
 		} catch (error: any) {
 			error.message = "env.fs.writeFile: " + error.message;
 			throw error;
 		}
 	};
-	deleteFile = async (directory: string): Promise<true> => {
+	deleteFile = async (directory: string): Promise<void> => {
 		try {
 			this.#directoryActionCheck(directory, true);
 
 			await this.#ConstellationKernel.fs.unlink(directory);
-			return true;
 		} catch (error: any) {
 			error.message = "env.fs.deleteFile: " + error.message;
 			throw error;
 		}
 	};
-	readFile = async (directory: string): Promise<string> => {
+
+	async readFile(directory: string): Promise<string> {
 		try {
 			this.#directoryActionCheck(directory, false);
 
@@ -134,7 +158,7 @@ export default class EnvFs {
 			error.message = "env.fs.readFile: " + error.message;
 			throw error;
 		}
-	};
+	}
 	move = async (
 		oldDirectory: string,
 		newDirectory: string
@@ -153,7 +177,10 @@ export default class EnvFs {
 		}
 	};
 
-	async copy(oldDirectory: string, newDirectory: string): Promise<void> {
+	copy = async (
+		oldDirectory: string,
+		newDirectory: string
+	): Promise<void> => {
 		try {
 			this.#directoryActionCheck(oldDirectory, true);
 			this.#directoryActionCheck(newDirectory, true);
@@ -163,7 +190,7 @@ export default class EnvFs {
 			error.message = "env.fs.copy: " + error.message;
 			throw error;
 		}
-	}
+	};
 
 	stat = async (directory: string): Promise<Stats> => {
 		try {

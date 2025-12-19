@@ -1,5 +1,6 @@
 import { PanelKitGuiApplication } from "panelkit";
 import { ConstellationApplicationInstaller } from "../../../../../system/lib/packaging/definitions";
+import { archiveSafeReadfile } from "/System/CoreLibraries/archives";
 
 export default class ApplicationInstaller extends PanelKitGuiApplication {
 	application!: ConstellationApplicationInstaller;
@@ -159,7 +160,9 @@ export default class ApplicationInstaller extends PanelKitGuiApplication {
 		this.renderer.setIcon("./resources/icon.svg");
 
 		try {
-			this.application = JSON.parse(await this.env.fs.readFile(args[0]));
+			this.application = JSON.parse(
+				await archiveSafeReadfile(this.env.fs, args[0])
+			);
 		} catch (e) {
 			this.renderer.prompt(
 				"Please open a .inst installer file.",

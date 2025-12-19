@@ -41,13 +41,16 @@ export default async function findApplications(
 				continue;
 			}
 
-			const config = await getAppConfig(parent.env, applicationDirectory);
+			const config = await getAppConfig(
+				parent.env.fs,
+				applicationDirectory
+			);
 
 			const obj: fileInfo = {
 				directory: applicationDirectory,
-				name: await pathName(parent.env, applicationDirectory),
-				icon: await pathIcon(parent.env, applicationDirectory),
-				visible: await pathVisible(parent.env, applicationDirectory),
+				name: await pathName(parent.env.fs, applicationDirectory),
+				icon: await pathIcon(parent.env.fs, applicationDirectory),
+				visible: await pathVisible(parent.env.fs, applicationDirectory),
 				filetypes: config?.filetypes || []
 			};
 

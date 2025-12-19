@@ -1085,3 +1085,19 @@ const mimes: Record<string, string[]> = {
 };
 
 export default mimes;
+
+/**
+ * Retrieves the MIME type for a file extension.
+ * @param extension - File extension. NO FULLSTOP! (eg: mp3)
+ * @returns MIME type or null if not found
+ */
+export function getMimeType(extension: string): string | null {
+	for (const type in mimes) {
+		const extensions = mimes[type];
+		if (extensions.includes(extension)) {
+			return type;
+		}
+	}
+
+	return null;
+}
