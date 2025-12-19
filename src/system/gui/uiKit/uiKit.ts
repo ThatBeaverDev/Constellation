@@ -200,7 +200,7 @@ export class UiKitRendererClass {
 	async #loadIcon(process: GuiApplication) {
 		const processPath = process.env.fs.resolve("./config.js");
 		const conf: ApplicationManifest = (
-			await process.env.include(processPath)
+			await process.env.fs.include(processPath)
 		).default;
 
 		if (conf.icon && this.getIcon() == "app-window-mac")

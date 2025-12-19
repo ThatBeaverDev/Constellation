@@ -263,4 +263,26 @@ export default class EnvFs {
 
 		return kernel.fs.resolve(kernel.rootPoint, directory);
 	};
+
+	async include(directory: string): Promise<any> {
+		let url = directory;
+
+		this.#directoryActionCheck(directory, false);
+
+		let type = directory.includes("://") ? "URL" : "directory";
+
+		switch (type) {
+			case "directory":
+				const blob =
+					await this.#ConstellationKernel.runtime.importsRewriter.resolve(
+						directory
+					);
+
+				return await import(blob);
+			case "URL":
+				const exports = await import(url.toString());
+
+				return exports;
+		}
+	}
 }

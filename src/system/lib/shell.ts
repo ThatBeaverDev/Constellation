@@ -117,7 +117,7 @@ export default class Shell {
 
 					if (filename == name) {
 						// this is the one
-						const include = await this.#env.include(item);
+						const include = await this.#env.fs.include(item);
 
 						if (include == undefined)
 							throw new Error("File at include does not exist");

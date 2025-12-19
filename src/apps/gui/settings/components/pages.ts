@@ -67,9 +67,9 @@ export class SettingsPages {
 
 		if (this.#updateStatus == undefined) {
 			this.#updateStatus = {
-				sysver: (await this.#env.include("/System/manifest.js"))
+				sysver: (await this.#env.fs.include("/System/manifest.js"))
 					.version,
-				sysbuild: (await this.#env.include("/System/buildver.js"))
+				sysbuild: (await this.#env.fs.include("/System/buildver.js"))
 					.buildNumber
 			};
 		}
