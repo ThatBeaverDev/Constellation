@@ -30,7 +30,7 @@ export interface ProgramManifest {
 		| "Games"
 		| "Graphics and Design"
 		| "Social"
-		| "Weather"
+		| "Information"
 		| "Utilities";
 	/**
 	 * The author of the application's name.
