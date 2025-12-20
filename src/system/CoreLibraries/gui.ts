@@ -1,8 +1,10 @@
 import { filetypeDatabase } from "../../apps/services/filetypeDatabaseManager/bin/service.js";
 import { ApplicationAuthorisationAPI } from "../security/components/env/env.js";
+import { archiveSafeStat } from "/System/CoreLibraries/archives.js";
+import EnvFs from "/System/security/components/env/components/fs.js";
 
-async function typeOfPath(env: ApplicationAuthorisationAPI, directory: string) {
-	const stats = await env.fs.stat(directory);
+export async function typeOfPath(fs: EnvFs, directory: string) {
+	const stats = await archiveSafeStat(fs, directory);
 
 	if (stats.isDirectory()) {
 		return "folder";
@@ -16,25 +18,49 @@ async function typeOfPath(env: ApplicationAuthorisationAPI, directory: string) {
 
 export async function openFile(
 	env: ApplicationAuthorisationAPI,
-	directory: string
-): Promise<boolean | never> {
-	const filetype = await typeOfPath(env, directory);
-	if (filetype == undefined) return false;
-
-	const dbContents = await env.fs.readFile("/System/ftypedb.json");
-
-	const db = JSON.parse(dbContents) as filetypeDatabase;
-
-	const app = db.assignments[filetype];
-
-	if (app == undefined) {
-		// deal with it
-		env.debug(
-			`libgui: Cannot open file at ${directory} because no application is capable of opening filetype ${filetype}.`
-		);
-		return false;
-	} else {
-		env.exec(app[0], [directory]);
-		return true;
+	path: string,
+	options?: {
+		program?: string;
+		allowPicker?: boolean;
+		forcePicker?: boolean;
 	}
+): Promise<boolean> {
+	const type = await typeOfPath(env.fs, path);
+	if (!type) return false;
+
+	const db: filetypeDatabase = JSON.parse(
+		await env.fs.readFile("/System/ftypedb.json")
+	);
+
+	let app: string | undefined = options?.program ?? db.defaults[type];
+
+	async function picker() {
+		const exec = await env.exec(
+			"/System/CoreLibraries/gui/selectApp.appl",
+			[path]
+		);
+
+		return await exec.promise;
+	}
+
+	if (options?.forcePicker == true) {
+		app = await picker();
+	} else {
+		if (db.handlers[type]?.length == 1) {
+			// if there's only one we might as well
+			app = db.handlers[type][0];
+		}
+
+		// ask the user what they want
+		if (!app && (options?.allowPicker ?? true) == true) {
+			env.debug(`No default app for ${type}, querying user.`);
+			app = await picker();
+		}
+	}
+
+	// last resort
+	if (typeof app !== "string") return false;
+
+	env.exec(app, [path]);
+	return true;
 }
