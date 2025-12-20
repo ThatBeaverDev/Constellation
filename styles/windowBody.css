@@ -1,6 +1,7 @@
 .windowContainer {
-	--headerColour: var(--bg-light);
+	--panelColour: rgba(255 255 255 / 10%);
 	--backgroundColour: var(--bg-dark);
+	--headerBlur: 15px;
 
 	white-space: pre;
 
@@ -49,10 +50,6 @@
 	border: var(--border) solid 2px;
 }
 
-.windowContainer:not(.focused) {
-	--headerColour: var(--bg);
-}
-
 .windowContainer.invisible {
 	background: none;
 	border: none;
@@ -68,7 +65,7 @@
 	resize: none !important;
 }
 
-.windowContainer.invisible > .windowBody > * {
+.windowContainer.invisible>.windowBody>* {
 	pointer-events: all;
 }
 
@@ -76,7 +73,7 @@
 	border-radius: 0px !important;
 }
 
-.windowContainer.sqare > .windowHeader {
+.windowContainer.sqare>.windowHeader {
 	border-radius: 0px !important;
 }
 

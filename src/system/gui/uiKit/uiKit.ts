@@ -29,6 +29,7 @@ import ConstellationKernel from "../../kernel.js";
 import { GraphicalInterface } from "../gui.js";
 import {
 	UiKitElement,
+	uikitProgressBarElement,
 	UiKitTextboxElement
 } from "./components/elementReference.js";
 import { UiKitCanvasElement } from "./components/canvas/canvas.js";
@@ -36,6 +37,7 @@ import { isArrow } from "../../security/components/testers/isArrow.js";
 import { defaultConfig } from "./components/defaultConfig.js";
 import { proxyContext } from "./components/canvas/ctx.js";
 import UiKitAudioSystem from "./components/audio.js";
+import { setElementStyle } from "../html.js";
 
 // type
 export type UiKitRenderer = UiKitRendererClass;
@@ -102,6 +104,27 @@ export class UiKitRendererClass {
 			throw new Error("No GUI found");
 
 		return gui.displayHeight;
+	}
+
+	set windowBackgroundStyles(background: "glow" | string) {
+		if (background == "glow") {
+			setElementStyle(
+				this.#window.container,
+				"background",
+				"rgba(5, 5, 5, 90%)"
+			);
+			setElementStyle(
+				this.#window.container,
+				"backdropFilter",
+				"blur(25px)"
+			);
+		} else {
+			setElementStyle(this.#window.container, "background", background);
+			setElementStyle(this.#window.container, "backdropFilter", "");
+		}
+	}
+	get windowBackgroundStyles() {
+		return this.#window.container.style.background;
 	}
 
 	setIcon(name: string) {
@@ -193,6 +216,8 @@ export class UiKitRendererClass {
 		document.addEventListener("pointerdown", () => {
 			this.lastClick = Date.now();
 		});
+
+		this.windowBackgroundStyles = "glow";
 
 		if (process) this.#loadIcon(process);
 	}
@@ -346,14 +371,15 @@ export class UiKitRendererClass {
 		width: number,
 		height: number,
 		progress: number | "throb",
-		onDrag: (progress: number) => Promise<void> | void
+		onDrag: (progress: number) => Promise<void> | void,
+		colour: string = "panel"
 	) {
 		const obj: ConfigStep = {
 			type: "uikitProgressBar",
-			args: [x, y, width, height, progress, onDrag]
+			args: [x, y, width, height, progress, onDrag, colour]
 		};
 
-		return new UiKitElement(this, this.#nextStep(obj));
+		return new uikitProgressBarElement(this, this.#nextStep(obj));
 	}
 
 	textarea(
@@ -414,11 +440,12 @@ export class UiKitRendererClass {
 		width: number,
 		height: number,
 		URL: string,
-		onMessage: (data: any) => Promise<void> | void
+		onMessage: (data: any) => Promise<void> | void,
+		isTransparent: boolean = false
 	) {
 		const obj: ConfigStep = {
 			type: "uikitIframe",
-			args: [x, y, width, height, URL, onMessage]
+			args: [x, y, width, height, URL, onMessage, isTransparent]
 		};
 
 		return new UiKitElement(this, this.#nextStep(obj));
@@ -551,6 +578,17 @@ export class UiKitRendererClass {
 			);
 		} else {
 			throw new UIError(`onClick called with invalid elemID: ${elemID}`);
+		}
+	}
+
+	setProgressbarDrag(id: number | uikitProgressBarElement, progress: number) {
+		const elemID = Number(id);
+
+		const step = this.#steps[elemID];
+
+		// insure elemID is valid
+		if (elemID >= 0 && elemID < this.#steps.length && step) {
+			step.args[5];
 		}
 	}
 

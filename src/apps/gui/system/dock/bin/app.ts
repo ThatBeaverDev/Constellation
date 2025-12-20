@@ -30,6 +30,7 @@ export default class dockAndDesktop extends Overlay {
 	desktop?: executionResult;
 
 	async init() {
+		this.renderer.windowBackgroundStyles = "";
 		this.renderer.makeWindowInvisible();
 		this.renderer.hideWindowHeader();
 		this.renderer.hideWindowCorners();

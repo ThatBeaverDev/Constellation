@@ -153,27 +153,34 @@ export default class UiKitTransitioners {
 						}
 					}
 
-					if (newArg?.background == "sidebar") {
+					if (newArg?.background == "panel") {
 						if (
 							this.#window?.container.classList.contains(
 								"frosted"
 							)
 						) {
 							setElementStyle(element, "background", "");
+							setElementStyle(element, "backdropFilter", "");
 							element.classList.add("glass");
 						} else {
 							setElementStyle(
 								element,
 								"background",
-								"var(--headerColour)"
+								"var(--panelColour)"
+							);
+							setElementStyle(
+								element,
+								"backdropFilter",
+								"blur(var(--headerBlur))"
 							);
 						}
 					} else {
 						setElementStyle(
 							element,
 							"background",
-							`${newArg?.background || "var(--bg-light)"}`
+							`${newArg?.background ?? "var(--bg-light)"}`
 						);
+						setElementStyle(element, "backdropFilter", "");
 					}
 
 					if (newArg?.isFrosted == true) {
@@ -233,6 +240,42 @@ export default class UiKitTransitioners {
 
 				case 5:
 					// onDrag is fine
+					break;
+
+				case 6:
+					// colour
+					setElementStyle(element, "background", newArg);
+
+					if (newArg == "panel") {
+						if (
+							this.#window?.container.classList.contains(
+								"frosted"
+							)
+						) {
+							setElementStyle(element, "background", "");
+							setElementStyle(element, "backdropFilter", "");
+							element.classList.add("glass");
+						} else {
+							setElementStyle(
+								element,
+								"background",
+								"var(--panelColour)"
+							);
+							setElementStyle(
+								element,
+								"backdropFilter",
+								"blur(var(--headerBlur))"
+							);
+						}
+					} else {
+						setElementStyle(
+							element,
+							"background",
+							`${newArg ?? "var(--bg-light)"}`
+						);
+						setElementStyle(element, "backdropFilter", "");
+					}
+
 					break;
 
 				default:

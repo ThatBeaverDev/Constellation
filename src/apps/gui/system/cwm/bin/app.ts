@@ -49,6 +49,7 @@ export default class ConstellationWindowManager
 		window.square();
 
 		this.renderer = gui.uiKit.newRenderer(this, window);
+		this.renderer.windowBackgroundStyles = "";
 	}
 
 	async init() {
@@ -74,10 +75,10 @@ export default class ConstellationWindowManager
 
 		switch (msg.intent) {
 			case "changeWallpaper":
-				const wallpaperPath =
+				const wallpaperPath: any =
 					msg.data ?? this.wallpaper.defaultWallpaper;
 
-				if (!(wallpaperPath instanceof String)) {
+				if (!(typeof wallpaperPath == "string")) {
 					this.env.warn(
 						"Wallpaper could not be changed because requested path",
 						wallpaperPath,
@@ -86,9 +87,7 @@ export default class ConstellationWindowManager
 					return;
 				}
 
-				const contents = await this.env.fs.readFile(
-					wallpaperPath.toString()
-				);
+				const contents = await this.env.fs.readFile(wallpaperPath);
 
 				if (contents == undefined) {
 					this.env.warn(
@@ -97,7 +96,7 @@ export default class ConstellationWindowManager
 					return;
 				}
 
-				this.wallpaper.wallpaperPath = wallpaperPath.toString();
+				this.wallpaper.wallpaperPath = wallpaperPath;
 
 				break;
 			default:
