@@ -114,11 +114,6 @@ export const files: Record<
 		type: "application",
 		directory: "/System/CoreExecutables/systemLoginInterface.appl"
 	},
-	// Calculator
-	"/build/indexes/com.constellation.calculator.idx": {
-		type: "application",
-		directory: "/Applications/calculator.appl"
-	},
 	// Out of box experience
 	"/build/indexes/com.constellation.oobe.idx": {
 		type: "application",
