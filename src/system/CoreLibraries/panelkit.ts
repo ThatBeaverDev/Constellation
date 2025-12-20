@@ -1,11 +1,14 @@
 import { UiKitRenderer } from "../gui/uiKit/uiKit.js";
+import { uikitProgressBarElement } from "/System/gui/uiKit/components/elementReference.js";
 
 export default class PanelKit {
 	#renderer: UiKitRenderer;
 
 	minorPadding = 5;
 	padding = 15;
+
 	sidebarWidth = 150;
+	viewWidth = 150;
 
 	keyboardFocus: number = 0;
 	#items: { trigger?: Function }[] = [];
@@ -40,7 +43,10 @@ export default class PanelKit {
 
 		this.#lastType = type;
 	}
-	#newItem(conf: { trigger?: Function }, height: number) {
+	#newItem(
+		conf: { trigger?: Function; left?: Function; right?: Function },
+		height: number
+	) {
 		this.#items.push(conf);
 
 		const isFocused = this.keyboardFocus == this.#items.length;
@@ -52,8 +58,11 @@ export default class PanelKit {
 		return isFocused;
 	}
 
-	reset() {
+	reset(sidebarWidth?: number, viewWidth?: number) {
 		this.#renderer.furthestScroll = this.y;
+		this.#renderer.windowBackgroundStyles = "glow";
+
+		if (sidebarWidth) this.sidebarWidth = sidebarWidth;
 
 		this.#items = [];
 		if (this.keyboardFocus > this.#items.length) {
@@ -67,6 +76,9 @@ export default class PanelKit {
 		this.x = this.sidebarWidth + this.padding;
 		this.y = this.padding + this.#renderer.scroll;
 		this.#lastType = undefined;
+
+		this.viewWidth =
+			viewWidth ?? this.#renderer.windowWidth - this.sidebarWidth;
 	}
 
 	/**
@@ -76,7 +88,6 @@ export default class PanelKit {
 	 * @param onClick - The callback to be triggered when the card is clicked
 	 * @param onRightClick - The callback to be triggered when the card is right-clicked
 	 * @param feature - Optional feature for the right of the card such as a button
-	 * @param progress - Optional progress bar to render at the bottom of the card
 	 */
 	card = (
 		name: string,
@@ -88,8 +99,7 @@ export default class PanelKit {
 			text: string;
 			icon?: string;
 			onClick: () => Promise<void> | void;
-		},
-		progress?: number
+		}
 	) => {
 		this.#typeChange("card");
 
@@ -104,7 +114,7 @@ export default class PanelKit {
 
 		this.#renderer
 			.box(this.x, this.y, cardWidth, this.cardSize, {
-				background: isFocused ? "var(--accent)" : "sidebar",
+				background: isFocused ? "var(--accent)" : "panel",
 				borderRadius: 10
 			})
 			.onClick(onClick, onRightClick, {});
@@ -147,7 +157,7 @@ export default class PanelKit {
 
 			this.#renderer
 				.box(buttonLeft, this.y + 5, buttonWidth, this.cardSize - 10, {
-					background: "var(--bg-lighter)",
+					background: "panel",
 					borderRadius: 5
 				})
 				.onClick(feature.onClick);
@@ -167,15 +177,6 @@ export default class PanelKit {
 					.text(buttonLeft + 5, textTop, feature.text)
 					.passthrough();
 			}
-		}
-
-		if (progress) {
-			this.#renderer.horizontalLine(
-				this.x,
-				this.y + this.cardSize,
-				cardWidth * progress,
-				"var(--accent)"
-			);
 		}
 
 		this.y += this.cardSize + this.padding;
@@ -211,7 +212,7 @@ export default class PanelKit {
 	mediumCard = (
 		title: string,
 		subtext: string,
-		icon: string,
+		icon?: string,
 		onClick?: (x: number, y: number) => void,
 		onRightClick?: (x: number, y: number) => void,
 		feature?: {
@@ -253,21 +254,25 @@ export default class PanelKit {
 		/* -------------------- Return to spaghetti -------------------- */
 
 		const iconScale = (cardHeight - tripleMinorPadding) / 24;
-		const iconSize = 24 * iconScale;
+		const iconSize = icon ? 24 * iconScale : 0;
 		const iconTop = this.y + (cardHeight - iconSize) / 2;
+		const iconLeft = icon
+			? this.x + tripleMinorPadding / 2
+			: this.x + this.minorPadding;
 
-		const textLeft = this.x + iconSize + tripleMinorPadding;
+		const textLeft = iconLeft + iconSize + (icon ? this.minorPadding : 0);
 
 		this.#renderer
 			.box(this.x, this.y, cardWidth, cardHeight, {
-				background: isFocused ? "var(--accent)" : "sidebar",
+				background: isFocused ? "var(--accent)" : "panel",
 				borderRadius: 10
 			})
 			.onClick(onClick, onRightClick);
 
-		this.#renderer
-			.icon(this.x + tripleMinorPadding / 2, iconTop, icon, iconScale)
-			.passthrough();
+		if (icon)
+			this.#renderer
+				.icon(iconLeft, iconTop, icon, iconScale)
+				.passthrough();
 
 		// title
 		this.#renderer.text(textLeft, textTop, name, 18).passthrough();
@@ -297,22 +302,26 @@ export default class PanelKit {
 					buttonWidth,
 					buttonHeight,
 					{
-						background: "var(--bg-lighter)",
+						background: "panel",
 						borderRadius: 5
 					}
 				)
 				.onClick(feature.onClick);
 
 			if (feature.icon) {
+				const iconScale = (buttonHeight - this.minorPadding * 2) / 24;
+				const iconSize = feature.icon ? 24 * iconScale : 0;
+
 				this.#renderer
 					.icon(
 						buttonLeft + this.minorPadding,
 						this.y + doubleMinorPadding,
-						feature.icon
+						feature.icon,
+						iconScale
 					)
 					.passthrough();
 
-				const textLeft = buttonLeft + iconSize + this.minorPadding;
+				const textLeft = buttonLeft + iconSize + this.minorPadding * 2;
 
 				this.#renderer
 					.text(textLeft, textTop, feature.text)
@@ -365,7 +374,7 @@ export default class PanelKit {
 		/* -------------------- More spaghetti -------------------- */
 
 		this.#renderer.box(this.x, this.y, cardWidth, cardHeight, {
-			background: isFocused ? "var(--accent)" : "sidebar",
+			background: isFocused ? "var(--accent)" : "panel",
 			borderRadius: 10
 		});
 		this.#renderer
@@ -399,7 +408,7 @@ export default class PanelKit {
 
 		this.#renderer
 			.box(this.x, this.y, this.itemSize, this.itemSize, {
-				background: isFocused ? "var(--accent)" : "sidebar",
+				background: isFocused ? "var(--accent)" : "panel",
 				borderRadius: 4
 			})
 			.onClick(onClick, onRightClick);
@@ -439,23 +448,23 @@ export default class PanelKit {
 	sidebar = (
 		...steps: (
 			| { type: "title"; text: string }
-			| { type: "item"; text: string; icon: string; callback: () => void }
+			| {
+					type: "item";
+					text: string;
+					icon: string;
+					callback: () => void;
+					focused: boolean;
+			  }
 		)[]
 	) => {
-		// draw sidebar
-		this.#renderer.box(
-			0,
-			0,
-			this.sidebarWidth,
-			this.#renderer.windowHeight + 100,
-			{
-				background: "sidebar"
-			}
-		);
-
 		// functions
 		let y = 4;
-		const button = (text: string, icon: string, callback: () => void) => {
+		const button = (
+			text: string,
+			icon: string,
+			callback: () => void,
+			isFocused: boolean
+		) => {
 			const textWidth = this.#renderer.getTextWidth(text);
 			const totalWidth =
 				this.minorPadding +
@@ -470,7 +479,8 @@ export default class PanelKit {
 
 			this.#renderer
 				.box(0, y, this.sidebarWidth, 25, {
-					background: "sidebar"
+					background: isFocused ? "panel" : "transparent",
+					borderRadius: 1000
 				})
 				.onClick(callback);
 
@@ -491,7 +501,12 @@ export default class PanelKit {
 		steps.forEach((item) => {
 			switch (item.type) {
 				case "item":
-					button(item.text, item.icon, item.callback);
+					button(
+						item.text,
+						item.icon,
+						item.callback,
+						item.focused ?? false
+					);
 					break;
 				case "title":
 					title(item.text);
@@ -588,8 +603,7 @@ export default class PanelKit {
 				this.sidebarWidth -
 				this.padding * 2;
 
-			let colour = "sidebar";
-			if (rowID++ % 2 !== 0) colour = "var(--bg)";
+			const colour = rowID++ % 2 == 0 ? "panel" : "transparent";
 
 			let borderRadius: number | [number, number, number, number] = 0;
 			if (rowID == 1) {
@@ -696,6 +710,94 @@ export default class PanelKit {
 
 		return textbox.getContents();
 	};
+
+	progressBar = (
+		progression: number,
+		change: (progress: number) => Promise<void> | void,
+		height?: number,
+		leftText?: string,
+		rightText?: string
+	) => {
+		this.#typeChange("card");
+
+		/* -------------------- Keyboard support -------------------- */
+
+		let progress: uikitProgressBarElement;
+
+		const skipInterval = 10;
+		const isFocused = this.#newItem(
+			{
+				left: () => {
+					progress.dragTo(progression - skipInterval);
+				},
+				right: () => {
+					progress.dragTo(progression + skipInterval);
+				}
+			},
+			this.cardSize
+		);
+
+		/* -------------------- Main rendering -------------------- */
+
+		const leftTextWidth = leftText
+			? this.#renderer.getTextWidth(leftText) + this.minorPadding
+			: 0;
+		const rightTextWidth = rightText
+			? this.#renderer.getTextWidth(rightText) + this.minorPadding
+			: 0;
+
+		const leftTextHeight = leftText
+			? this.#renderer.getTextHeight(leftText)
+			: 0;
+		const rightTextHeight = rightText
+			? this.#renderer.getTextHeight(rightText)
+			: 0;
+
+		const progressBarHeight = height ?? this.cardSize;
+
+		const tallest = Math.max(
+			leftTextHeight,
+			progressBarHeight,
+			rightTextHeight
+		);
+
+		const barWidth =
+			this.#renderer.windowWidth -
+			this.sidebarWidth -
+			this.padding * 2 -
+			(leftTextWidth + rightTextWidth);
+
+		const barTop = this.y + (tallest - progressBarHeight) / 2;
+
+		progress = this.#renderer.progressBar(
+			this.x + leftTextWidth,
+			barTop,
+			barWidth,
+			progressBarHeight,
+			progression,
+			change,
+			isFocused ? "var(--accent)" : "panel"
+		);
+
+		if (leftText) {
+			const textTop = this.y + (tallest - leftTextHeight) / 2;
+
+			this.#renderer.text(this.x, textTop, leftText);
+		}
+		if (rightText) {
+			const textTop = this.y + (tallest - leftTextHeight) / 2;
+
+			this.#renderer.text(
+				this.x + leftTextWidth + barWidth + this.minorPadding,
+				textTop,
+				rightText
+			);
+		}
+
+		this.y += tallest + this.padding;
+	};
+
+	buttonCollection = () => {};
 
 	keydown = (
 		code: string,
