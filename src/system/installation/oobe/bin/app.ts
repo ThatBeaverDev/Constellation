@@ -86,7 +86,7 @@ export default class GuiOutOfBoxInstaller extends GuiApplication {
 			this.renderer
 				.box(boxLeft, boxTop, boxWidth, boxHeight, {
 					borderRadius: 5,
-					background: "sidebar"
+					background: "surface-2"
 				})
 				.onClick(onClick);
 

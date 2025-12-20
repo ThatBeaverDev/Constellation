@@ -56,6 +56,7 @@ export default class ConstellationDesktop extends GuiApplication {
 
 		this.renderer.clear();
 		this.panelkit.reset();
+		this.renderer.windowBackgroundStyles = "";
 		this.panelkit.sidebarWidth = 0;
 
 		let x = this.env.windows.leftBound + this.padding;

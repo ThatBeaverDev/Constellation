@@ -77,7 +77,7 @@ function _insertNewlines(
 ): string {
 	const spaceWidth = getTextWidth(" ", size, fontFamily);
 
-	const words = text.split(" ");
+	const words = String(text).split(" ");
 	let result = "";
 	let runningWidth = 0;
 

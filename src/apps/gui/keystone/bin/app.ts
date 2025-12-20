@@ -91,6 +91,7 @@ export default class KeystoneSearch extends Overlay {
 
 		this.renderer.clear();
 		this.panelkit.reset();
+		this.renderer.windowBackgroundStyles = "";
 		this.panelkit.sidebarWidth = 0;
 
 		const textbox = this.renderer.textbox(

@@ -7,6 +7,7 @@ export default class systemLoginInterface extends GuiApplication {
 	sideglassSize: number = 200;
 
 	async init() {
+		this.renderer.windowBackgroundStyles = "";
 		this.renderer.hideWindowHeader();
 		this.renderer.hideWindowCorners();
 		this.renderer.makeWindowInvisible();

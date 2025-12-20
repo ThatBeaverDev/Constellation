@@ -68,3 +68,17 @@ export class UiKitTextboxElement extends UiKitElement {
 		return this;
 	}
 }
+
+export class uikitProgressBarElement extends UiKitElement {
+	#renderer: UiKitRenderer;
+
+	constructor(renderer: UiKitRenderer, id: number) {
+		super(renderer, id);
+
+		this.#renderer = renderer;
+	}
+
+	dragTo(progress: number) {
+		this.#renderer.setProgressbarDrag(this, progress);
+	}
+}
