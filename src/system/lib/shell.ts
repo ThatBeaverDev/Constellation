@@ -1,10 +1,10 @@
 import TerminalAlias from "./terminalAlias.js";
 import { ApplicationAuthorisationAPI } from "../security/components/env/env.js";
 
-type shellResult = {
-	result: any;
+export interface shellResult<T = any> {
+	result: T;
 	ref: TerminalAlias;
-};
+}
 
 export default class Shell {
 	readonly #directory: string;
