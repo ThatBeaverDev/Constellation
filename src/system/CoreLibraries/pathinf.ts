@@ -659,6 +659,7 @@ export async function pathIcon(
 		case "ogg":
 		case "m4a":
 		case "flac":
+		case "opus":
 			return "/System/CoreAssets/Vectors/files/file-media-audio.svg";
 
 		case "mp4":
