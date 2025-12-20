@@ -47,11 +47,6 @@ compile() {
     # Build the systemLoginInterface
     ./scripts/tcpkg build/apps/gui/system/systemLoginInterface build/indexes/com.constellation.systemLoginInterface.idx -override=true
 
-    # Build the calculator
-    mkdir -p build/apps/gui/calculator/resources
-    cp assets/apps/calculator.svg build/apps/gui/calculator/resources/icon.svg
-    ./scripts/tcpkg build/apps/gui/calculator build/indexes/com.constellation.calculator.idx -override=true
-
     # Package media files
     ./scripts/tcpkg assets/sounds build/indexes/sounds.idx -override=true
     ./scripts/tcpkg assets/wallpapers build/indexes/wallpapers.idx -override=true
