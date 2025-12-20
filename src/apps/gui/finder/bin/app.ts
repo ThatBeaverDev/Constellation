@@ -332,6 +332,11 @@ export default class Finder extends GuiApplication {
 				"Show Contents": this.isApplication(path)
 					? () => this.cd(path, false)
 					: undefined,
+				"Open With": () => {
+					openFile(this.env, path, {
+						forcePicker: true
+					});
+				},
 				Properties: () => properties(path),
 				Duplicate: async () => {
 					await this.env.fs.copy(path, `${path} copy`);
