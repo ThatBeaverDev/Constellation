@@ -47,12 +47,6 @@ export async function archiveTypeSupported(
 	return supported.includes(path.textAfterAll("."));
 }
 
-export async function archiveSafeReadfile(fs: EnvFs, directory: string) {
-	const handler = await getArchiveHandler(fs, directory);
-
-	return await handler.readFile(directory);
-}
-
 export async function getArchiveHandler(fs: FilesystemInterface, path: string) {
 	const contents = await fs.readFile(path);
 
@@ -327,4 +321,22 @@ class IndexFilesystemAPI implements FilesystemInterface {
 	include = async (directory: string) => {
 		return await this.#fs.include(directory);
 	};
+}
+
+export async function archiveSafeReadfile(fs: EnvFs, directory: string) {
+	const handler = await getFilesystemInterface(
+		fs,
+		getParentDirectory(directory)
+	);
+
+	return await handler.readFile(directory);
+}
+
+export async function archiveSafeStat(fs: EnvFs, directory: string) {
+	const handler = await getFilesystemInterface(
+		fs,
+		getParentDirectory(directory)
+	);
+
+	return await handler.stat(directory);
 }
