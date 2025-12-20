@@ -198,11 +198,18 @@ export default class Finder extends GuiApplication {
 				? await this.#directorySubtext(fs, path, lastModifiedText)
 				: await this.#fileSubtext(fs, path, lastModifiedText);
 
+		let icon = "";
+		try {
+			icon = await pathIcon(fs, path);
+		} catch (e) {
+			console.warn(e);
+		}
+
 		return {
 			name,
 			path,
 			type,
-			icon: await pathIcon(fs, path),
+			icon,
 			subtext,
 			hasAccess:
 				type === "directory" && subtext === "Insufficient Permissions."
@@ -277,9 +284,16 @@ export default class Finder extends GuiApplication {
 	#renderSidebar() {
 		const panels = this.panelkit;
 
+		const user = this.env.users.userInfo(this.env.user);
+
 		const jump = (dir: string) => {
-			const user = this.env.users.userInfo(this.env.user);
 			this.cd(this.env.fs.resolve(user?.directory || "/", dir), false);
+		};
+
+		const isFocused = (dir: string) => {
+			return (
+				this.env.fs.resolve(user?.directory || "/", dir) == this.path
+			);
 		};
 
 		panels.sidebar(
@@ -288,30 +302,52 @@ export default class Finder extends GuiApplication {
 				type: "item",
 				text: "Documents",
 				icon: "file-stack",
-				callback: () => jump("Documents")
+				callback: () => jump("Documents"),
+				focused: isFocused("Documents")
 			},
 			{
 				type: "item",
 				text: "Desktop",
 				icon: "dock",
-				callback: () => jump("Desktop")
+				callback: () => jump("Desktop"),
+				focused: isFocused("Desktop")
 			},
 			{
 				type: "item",
 				text: "Notes",
 				icon: "notebook",
-				callback: () => jump("Notes")
+				callback: () => jump("Notes"),
+				focused: isFocused("Notes")
 			},
 			{
 				type: "item",
 				text: "Home",
 				icon: "house",
-				callback: () =>
-					this.cd(
-						this.env.users.userInfo(this.env.user)?.directory ||
-							"/",
-						false
-					)
+				callback: () => jump("."),
+				focused: isFocused(".")
+			},
+
+			{ type: "title", text: "Key Locations" },
+			{
+				type: "item",
+				text: "Root",
+				icon: "hard-drive",
+				callback: () => jump("/"),
+				focused: isFocused("/")
+			},
+			{
+				type: "item",
+				text: "Applications",
+				icon: "square-function",
+				callback: () => jump("/Applications"),
+				focused: isFocused("/Applications")
+			},
+			{
+				type: "item",
+				text: "Users",
+				icon: "users-round",
+				callback: () => jump("/Users"),
+				focused: isFocused("/Users")
 			}
 		);
 	}
@@ -406,16 +442,19 @@ export default class Finder extends GuiApplication {
 		const fs = await getFilesystemInterface(this.env.fs, path);
 		const stat = await fs.stat(path);
 
-		if (
-			stat.isDirectory() ||
-			(await archiveTypeSupported(this.env.fs, path))
-		) {
+		const isDirectory = stat.isDirectory();
+		const isSupportedArchive = await archiveTypeSupported(
+			this.env.fs,
+			path
+		);
+
+		if (isDirectory || isSupportedArchive) {
 			this.isApplication(path)
 				? this.env.exec(path)
 				: this.cd(path, false);
 			return;
+		} else {
+			openFile(this.env, path);
 		}
-
-		openFile(this.env, path);
 	}
 }
