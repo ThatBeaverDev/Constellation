@@ -80,6 +80,8 @@ export default class ConstellationKernel implements Terminatable {
 		FsAPI: SystemFilesystemDriver,
 		public startupConfiguration?: ConstellationKernelConfiguration
 	) {
+		this.logs = logs;
+
 		if (defaultConfiguration.dynamic.isDevmode) {
 			(globalThis as any).kernels.push(this);
 		}
@@ -91,33 +93,26 @@ export default class ConstellationKernel implements Terminatable {
 			if (bootBackground) bootBackground.remove();
 		}
 
-		this.logs = logs;
-
-		try {
-			if (startupConfiguration?.installationIdx) {
-				this.#install = async () => {
-					if (startupConfiguration?.installationIdx == undefined)
-						return false;
-
-					await tcupkg(
-						this.fs,
-						startupConfiguration.installationIdx,
-						"/"
-					);
-
+		if (startupConfiguration?.installationIdx) {
+			this.#install = async () => {
+				if (startupConfiguration?.installationIdx == undefined)
 					return false;
-				};
-			} else {
-				this.#install = async (
-					kernel: ConstellationKernel,
-					isUpdate: boolean
-				) => {
-					return await installer.install(kernel, isUpdate);
-				};
-			}
-		} catch (e) {
-			// TODO: PANIC
-			throw e;
+
+				await tcupkg(
+					this.fs,
+					startupConfiguration.installationIdx,
+					"/"
+				);
+
+				return false;
+			};
+		} else {
+			this.#install = async (
+				kernel: ConstellationKernel,
+				isUpdate: boolean
+			) => {
+				return await installer.install(kernel, isUpdate);
+			};
 		}
 
 		// subsystems
@@ -160,42 +155,132 @@ export default class ConstellationKernel implements Terminatable {
 	}
 
 	async init() {
-		await this.fs.init();
+		try {
+			await this.fs.init();
 
-		const forceInstaller = Boolean(getFlagValue("forceInstall"));
+			const forceInstaller = Boolean(getFlagValue("forceInstall"));
 
-		// work out whether we need to install
-		const configFileExists =
-			(await this.fs.readFile("/System/config.json")) !== undefined;
-		const isSoftwareUpdate =
-			(await this.fs.readFile("/System/message.txt")) == "updateSystem";
+			// work out whether we need to install
+			const configFileExists =
+				(await this.fs.readFile("/System/config.json")) !== undefined;
+			const isSoftwareUpdate =
+				(await this.fs.readFile("/System/message.txt")) ==
+				"updateSystem";
 
-		if (isSoftwareUpdate) {
-			await this.fs.unlink("/System/message.txt");
-		}
-
-		const canInstallFlag = this.startupConfiguration?.install;
-		const canInstallFlagAbsolute =
-			canInstallFlag == undefined ? true : canInstallFlag;
-
-		const installerRequired =
-			((!configFileExists || forceInstaller) && canInstallFlagAbsolute) ||
-			isSoftwareUpdate;
-
-		// install if needed
-		let guiInstallerRequired = false;
-		if (installerRequired) {
-			// install and terminate so the kernel we wrote to disk can boot
-			await this.#install(this, isSoftwareUpdate);
-
-			// terminate if it's not a software update
-			if (!isSoftwareUpdate) {
-				this.terminate();
-				return;
+			if (isSoftwareUpdate) {
+				await this.fs.unlink("/System/message.txt");
 			}
-		} else if (this.config.dynamic.isDevmode) {
-			guiInstallerRequired = false;
-		} else {
+
+			const canInstallFlag = this.startupConfiguration?.install;
+			const canInstallFlagAbsolute =
+				canInstallFlag == undefined ? true : canInstallFlag;
+
+			const installerRequired =
+				((!configFileExists || forceInstaller) &&
+					canInstallFlagAbsolute) ||
+				isSoftwareUpdate;
+
+			// install if needed
+			let guiInstallerRequired = false;
+			if (installerRequired) {
+				// install and terminate so the kernel we wrote to disk can boot
+				await this.#install(this, isSoftwareUpdate);
+
+				// terminate if it's not a software update
+				if (!isSoftwareUpdate) {
+					this.terminate();
+					return;
+				}
+			} else if (this.config.dynamic.isDevmode) {
+				guiInstallerRequired = false;
+			} else {
+				const config = await this.fs.readFile("/System/config.json");
+
+				if (config == undefined)
+					throw new Error(
+						"Config file became undefined between check and installation execution"
+					);
+
+				const configJson: ConstellationConfiguration =
+					JSON.parse(config);
+
+				guiInstallerRequired = !configJson.guiInstallerRan;
+			}
+
+			await this.security.init();
+
+			if (this.ui) {
+				await this.ui.init();
+			}
+			await this.runtime.init();
+
+			// remove bootUI now that we're done
+			if (this.ui.type == "GraphicalInterface") {
+				const bootBackground = document.querySelector("div.bootCover");
+				if (bootBackground) bootBackground.classList.add("fadeOut");
+
+				if (bootBackground)
+					setTimeout(() => bootBackground.remove(), 5000);
+			}
+
+			// start kernel execution loop
+			this.executionLoop();
+
+			const runGuiInstaller = async () => {
+				const log = this.lib.logging.log.bind(this.lib.logging, path);
+				const debug = this.lib.logging.debug.bind(
+					this.lib.logging,
+					path
+				);
+
+				const guiInstallerPath =
+					"/System/CoreExecutables/OOBEInstaller.appl";
+
+				const pipe: any[] = [];
+
+				log("Running GUI installer");
+				const exec = await this.runtime.execute(
+					guiInstallerPath,
+					pipe,
+					"system",
+					this.config.systemPassword,
+					undefined,
+					true,
+					true,
+					this.ui instanceof TextInterface
+						? {
+								print: this.ui.displayInterface.post,
+								getInput: this.ui.displayInterface.getInput,
+								clearView: this.ui.displayInterface.clearView
+							}
+						: undefined
+				);
+
+				debug(
+					"Attaching background check for GUI installer completion"
+				);
+				let interval = setInterval(() => {
+					if (pipe.length > 0) {
+						log("GUI installer has completed.");
+						postinstall(this, pipe[0]);
+
+						debug("Terminating GUI installer.");
+						if ("process" in exec)
+							this.runtime.terminateProcess(exec.process);
+
+						clearInterval(interval);
+						return;
+					}
+				});
+
+				await exec.promise;
+			};
+
+			if (guiInstallerRequired) {
+				await runGuiInstaller();
+			}
+
+			// write to config
 			const config = await this.fs.readFile("/System/config.json");
 
 			if (config == undefined)
@@ -204,129 +289,53 @@ export default class ConstellationKernel implements Terminatable {
 				);
 
 			const configJson: ConstellationConfiguration = JSON.parse(config);
+			configJson.guiInstallerRan = true;
 
-			guiInstallerRequired = !configJson.guiInstallerRan;
-		}
-
-		await this.security.init();
-
-		if (this.ui) {
-			await this.ui.init();
-		}
-		await this.runtime.init();
-
-		// remove bootUI now that we're done
-		if (this.ui.type == "GraphicalInterface") {
-			const bootBackground = document.querySelector("div.bootCover");
-			if (bootBackground) bootBackground.classList.add("fadeOut");
-
-			if (bootBackground) setTimeout(() => bootBackground.remove(), 5000);
-		}
-
-		// start kernel execution loop
-		this.executionLoop();
-
-		const runGuiInstaller = async () => {
-			const log = this.lib.logging.log.bind(this.lib.logging, path);
-			const debug = this.lib.logging.debug.bind(this.lib.logging, path);
-
-			const guiInstallerPath =
-				"/System/CoreExecutables/OOBEInstaller.appl";
-
-			const pipe: any[] = [];
-
-			log("Running GUI installer");
-			const exec = await this.runtime.execute(
-				guiInstallerPath,
-				pipe,
-				"system",
-				this.config.systemPassword,
-				undefined,
-				true,
-				true,
-				this.ui instanceof TextInterface
-					? {
-							print: this.ui.displayInterface.post,
-							getInput: this.ui.displayInterface.getInput,
-							clearView: this.ui.displayInterface.clearView
-						}
-					: undefined
+			// write back to disc
+			await this.fs.writeFile(
+				"/System/config.json",
+				JSON.stringify(configJson)
 			);
 
-			debug("Attaching background check for GUI installer completion");
-			let interval = setInterval(() => {
-				if (pipe.length > 0) {
-					log("GUI installer has completed.");
-					postinstall(this, pipe[0]);
+			await this.ui.postinstall();
 
-					debug("Terminating GUI installer.");
-					if ("process" in exec)
-						this.runtime.terminateProcess(exec.process);
+			const coreExecDirectory =
+				"/System/CoreExecutables/CoreExecutable.srvc";
 
-					clearInterval(interval);
-					return;
-				}
-			});
+			this.security.permissions.setDirectoryPermission(
+				coreExecDirectory,
+				"operator",
+				true
+			);
+			this.security.permissions.setDirectoryPermission(
+				coreExecDirectory,
+				"managePermissions",
+				true
+			);
+
+			let exec: executionResult;
+
+			try {
+				exec = await this.runtime.execute(
+					coreExecDirectory,
+					[],
+					"system",
+					this.config.systemPassword,
+					undefined,
+					false
+				);
+			} catch (e) {
+				panic(this, e, "executeCoreExecutableDuringStartup");
+				return;
+			}
 
 			await exec.promise;
-		};
+			// now this means that the core process has terminated and the system can power off.
 
-		if (guiInstallerRequired) {
-			await runGuiInstaller();
-		}
-
-		// write to config
-		const config = await this.fs.readFile("/System/config.json");
-
-		if (config == undefined)
-			throw new Error(
-				"Config file became undefined between check and installation execution"
-			);
-
-		const configJson: ConstellationConfiguration = JSON.parse(config);
-		configJson.guiInstallerRan = true;
-
-		// write back to disc
-		await this.fs.writeFile(
-			"/System/config.json",
-			JSON.stringify(configJson)
-		);
-
-		await this.ui.postinstall();
-
-		const coreExecDirectory = "/System/CoreExecutables/CoreExecutable.srvc";
-
-		this.security.permissions.setDirectoryPermission(
-			coreExecDirectory,
-			"operator",
-			true
-		);
-		this.security.permissions.setDirectoryPermission(
-			coreExecDirectory,
-			"managePermissions",
-			true
-		);
-
-		let exec: executionResult;
-
-		try {
-			exec = await this.runtime.execute(
-				coreExecDirectory,
-				[],
-				"system",
-				this.config.systemPassword,
-				undefined,
-				false
-			);
+			await this.terminate();
 		} catch (e) {
-			panic(this, e, "executeCoreExecutableDuringStartup");
-			return;
+			panic(this, e, "kernelInitfpr");
 		}
-
-		await exec.promise;
-		// now this means that the core process has terminated and the system can power off.
-
-		await this.terminate();
 	}
 
 	async executionLoop() {
