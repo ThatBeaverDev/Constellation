@@ -11,7 +11,7 @@ export default class PanelKit {
 	viewWidth = 150;
 
 	keyboardFocus: number = 0;
-	#items: { trigger?: Function }[] = [];
+	#items: { trigger?: Function; left?: Function; right?: Function }[] = [];
 
 	x = this.sidebarWidth + this.padding;
 	y = this.padding;
@@ -711,12 +711,22 @@ export default class PanelKit {
 		return textbox.getContents();
 	};
 
+	/**
+	 * Renders a panelkit progress bar.
+	 * @param progression - Progression of progress as a percentage integer (eg 80% is 80)
+	 * @param onChange - Callback accepting a new progress for when the progression is changed either by user drag or keyboard
+	 * @param progressBarHeight - How tall the progress bar is
+	 * @param leftText - The text for the left side of the progress bar
+	 * @param rightText - The text for the right side of the progress bar
+	 * @param keyboardSkipInterval - How far keyboard should skip as a percentage integer, default 10%
+	 */
 	progressBar = (
 		progression: number,
-		change: (progress: number) => Promise<void> | void,
-		height?: number,
+		onChange: (progress: number) => Promise<void> | void,
+		progressBarHeight: number = this.cardSize,
 		leftText?: string,
-		rightText?: string
+		rightText?: string,
+		keyboardSkipInterval: number = 10
 	) => {
 		this.#typeChange("card");
 
@@ -724,14 +734,16 @@ export default class PanelKit {
 
 		let progress: uikitProgressBarElement;
 
-		const skipInterval = 10;
 		const isFocused = this.#newItem(
 			{
 				left: () => {
-					progress.dragTo(progression - skipInterval);
+					const newProgression = progression - keyboardSkipInterval;
+
+					progress.dragTo(newProgression);
 				},
 				right: () => {
-					progress.dragTo(progression + skipInterval);
+					const newProgression = progression + keyboardSkipInterval;
+					progress.dragTo(newProgression);
 				}
 			},
 			this.cardSize
@@ -753,8 +765,6 @@ export default class PanelKit {
 			? this.#renderer.getTextHeight(rightText)
 			: 0;
 
-		const progressBarHeight = height ?? this.cardSize;
-
 		const tallest = Math.max(
 			leftTextHeight,
 			progressBarHeight,
@@ -775,7 +785,7 @@ export default class PanelKit {
 			barWidth,
 			progressBarHeight,
 			progression,
-			change,
+			onChange,
 			isFocused ? "var(--accent)" : "panel"
 		);
 
@@ -808,14 +818,36 @@ export default class PanelKit {
 		repeat: boolean
 	) => {
 		switch (code) {
-			case "Enter":
-				if (metaKey || altKey || ctrlKey || shiftKey || repeat) break;
+			case "Enter": {
+				if (metaKey || altKey || ctrlKey || shiftKey) break;
 
 				const trigger = this.#items[this.keyboardFocus - 1]?.trigger;
-
 				if (trigger) trigger();
 
 				break;
+			}
+
+			case "ArrowLeft": {
+				if (metaKey || altKey || ctrlKey || shiftKey) break;
+
+				const trigger = this.#items[this.keyboardFocus - 1]?.left;
+				if (trigger) {
+					trigger();
+				}
+
+				break;
+			}
+
+			case "ArrowRight": {
+				if (metaKey || altKey || ctrlKey || shiftKey) break;
+
+				const trigger = this.#items[this.keyboardFocus - 1]?.right;
+				if (trigger) {
+					trigger();
+				}
+
+				break;
+			}
 
 			case "ArrowDown":
 				if (metaKey || altKey || ctrlKey || shiftKey) break;
