@@ -198,11 +198,11 @@ export default class UiKitTransitioners {
 		return true;
 	};
 
-	uikitProgressBar(
+	uikitProgressBar = (
 		element: HTMLElement,
 		oldStep: ConfigStep,
 		newStep: ConfigStep
-	): boolean {
+	): boolean => {
 		for (const i in newStep.args) {
 			const oldArg = oldStep.args[i];
 			const newArg = newStep.args[i];
@@ -284,7 +284,7 @@ export default class UiKitTransitioners {
 		}
 
 		return true;
-	}
+	};
 
 	uikitEmbeddedTui(
 		element: HTMLElement,

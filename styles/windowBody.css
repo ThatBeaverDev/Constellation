@@ -65,7 +65,7 @@
 	resize: none !important;
 }
 
-.windowContainer.invisible>.windowBody>* {
+.windowContainer.invisible > .windowBody > * {
 	pointer-events: all;
 }
 
@@ -73,7 +73,7 @@
 	border-radius: 0px !important;
 }
 
-.windowContainer.sqare>.windowHeader {
+.windowContainer.sqare > .windowHeader {
 	border-radius: 0px !important;
 }
 

@@ -58,7 +58,6 @@ export default async function zipToIndex(dataURI: string) {
 				};
 			}
 
-			console.debug(idx);
 			resolve(idx);
 		});
 	});
