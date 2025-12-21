@@ -588,7 +588,7 @@ export class UiKitRendererClass {
 
 		// insure elemID is valid
 		if (elemID >= 0 && elemID < this.#steps.length && step) {
-			step.args[5];
+			step.args[5](progress);
 		}
 	}
 
