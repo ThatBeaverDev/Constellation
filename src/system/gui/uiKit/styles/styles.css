@@ -161,6 +161,6 @@ body {
 	background-color: var(--bg-light);
 }
 
-.uikitContextContainer>.uiKitButton {
+.uikitContextContainer > .uiKitButton {
 	position: absolute;
 }

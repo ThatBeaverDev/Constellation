@@ -202,7 +202,7 @@ export default class Finder extends GuiApplication {
 		try {
 			icon = await pathIcon(fs, path);
 		} catch (e) {
-			console.warn(e);
+			this.env.warn(e);
 		}
 
 		return {
@@ -261,7 +261,7 @@ export default class Finder extends GuiApplication {
 			const icon = await pathIcon(fs, this.path);
 			if (icon !== this.icon) this.icon = icon;
 		} catch (e) {
-			console.warn(e);
+			this.env.warn(e);
 		}
 	}
 

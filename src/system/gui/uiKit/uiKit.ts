@@ -923,13 +923,6 @@ export class UiKitRendererClass {
 				oldElement;
 				if (oldElement) {
 					this.#removeElement(oldElement);
-				} else {
-					//console.debug(
-					//	"old element not present for removal.",
-					//	identifier,
-					//	oldStep,
-					//	configStep
-					//);
 				}
 
 				const creator: (

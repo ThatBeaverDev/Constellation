@@ -18,7 +18,7 @@
 	overflow: hidden;
 }
 
-.overlay>* {
+.overlay > * {
 	pointer-events: auto;
 }
 
