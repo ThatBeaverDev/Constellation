@@ -50,7 +50,10 @@ export interface UserAlias {
 	fullName: string;
 	pictures: {
 		profile: string;
+		changeProfile(newProfile: string): void;
+
 		wallpaper?: string;
+		changeWallpaper(newWallpaper?: string): void;
 	};
 	id: string;
 	directory: string;

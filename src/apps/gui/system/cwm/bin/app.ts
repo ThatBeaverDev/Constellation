@@ -71,14 +71,16 @@ export default class ConstellationWindowManager
 	}
 
 	async onmessage(msg: IPCMessage): Promise<void> {
-		if (!msg.originDirectory.startsWith("/System/CoreExecutables")) return;
-
 		switch (msg.intent) {
 			case "changeWallpaper":
 				const wallpaperPath: any =
-					msg.data ?? this.wallpaper.defaultWallpaper;
+					msg.data ??
+					ConstellationWindowManagerWallpaper.defaultWallpaper;
 
-				if (!(typeof wallpaperPath == "string")) {
+				if (
+					typeof wallpaperPath !== "string" &&
+					typeof wallpaperPath !== "undefined"
+				) {
 					this.env.warn(
 						"Wallpaper could not be changed because requested path",
 						wallpaperPath,
@@ -87,7 +89,10 @@ export default class ConstellationWindowManager
 					return;
 				}
 
-				const contents = await this.env.fs.readFile(wallpaperPath);
+				const contents = await this.env.fs.readFile(
+					wallpaperPath ??
+						ConstellationWindowManagerWallpaper.defaultWallpaper
+				);
 
 				if (contents == undefined) {
 					this.env.warn(
@@ -96,7 +101,9 @@ export default class ConstellationWindowManager
 					return;
 				}
 
-				this.wallpaper.wallpaperPath = wallpaperPath;
+				this.wallpaper.wallpaperPath =
+					wallpaperPath ??
+					ConstellationWindowManagerWallpaper.defaultWallpaper;
 
 				break;
 			default:

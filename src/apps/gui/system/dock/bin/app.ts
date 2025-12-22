@@ -82,16 +82,9 @@ export default class dockAndDesktop extends Overlay {
 		};
 	}
 
-	changeWallpaper(path?: string) {
-		const cwm = this.env.getPIDOfName("ConstellationWindowManager");
-		if (!cwm) {
-			this.env.warn(
-				"Constellation Window Manager is not running. Cannot change wallpaper."
-			);
-			return;
-		}
-
-		this.env.sendmessage(cwm, "changeWallpaper", path);
+	async changeWallpaper(path?: string) {
+		await this.env.shell.index();
+		await this.env.shell.exec("wallpaper", path);
 	}
 
 	async loadConfig() {
