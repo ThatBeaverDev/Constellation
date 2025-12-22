@@ -1,13 +1,18 @@
 import TerminalAlias from "../../../../system/lib/terminalAlias.js";
 import { userspacePackage } from "/System/lib/packaging/tcpkg.js";
 
-export default async function tcupkg(
+export default async function tcpkg(
 	parent: TerminalAlias,
 	input: string,
 	output: string
 ) {
 	parent.env.fs.writeFile(
-		output,
-		JSON.stringify(await userspacePackage(parent.env.fs, input))
+		parent.env.fs.resolve(parent.path, output),
+		JSON.stringify(
+			await userspacePackage(
+				parent.env.fs,
+				parent.env.fs.resolve(parent.path, input)
+			)
+		)
 	);
 }
