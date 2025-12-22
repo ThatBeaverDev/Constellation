@@ -76,7 +76,6 @@ export type canvasLineOptions = {
 };
 
 export interface uikitIconOptions {
-	noProcess?: boolean;
 	borderRadius?: number;
 }
 

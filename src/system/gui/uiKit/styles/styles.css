@@ -48,6 +48,21 @@ body {
 	-webkit-user-select: all !important;
 }
 
+.uikitImage {
+	position: absolute;
+	user-select: none;
+	-webkit-user-drag: none;
+	-webkit-user-select: none;
+
+	object-fit: cover;
+}
+
+.uikitImage.clickable {
+	user-select: all !important;
+	-webkit-user-drag: all !important;
+	-webkit-user-select: all !important;
+}
+
 .uikitText,
 .uikitButton {
 	padding: 0px;

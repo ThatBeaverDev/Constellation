@@ -47,9 +47,6 @@ export default class uiKitCreators {
 		icon.style.height = `${scale * 24}px`;
 		icon.style.color = colour;
 
-		if (options.noProcess) {
-			icon.classList.add("darkmode");
-		}
 		if (options.borderRadius) {
 			icon.style.borderRadius = `${options.borderRadius}px`;
 		}
@@ -57,6 +54,38 @@ export default class uiKitCreators {
 		if (this.#window) this.#window.body.appendChild(icon);
 
 		return icon;
+	};
+
+	uikitImage = (
+		id: number,
+		x: number,
+		y: number,
+		location: string,
+		width: number,
+		height: number,
+		options: uikitIconOptions
+	) => {
+		const kernel = this.#ConstellationKernel;
+
+		let image;
+		if (!(kernel.ui.type == "GraphicalInterface")) {
+			image = document.createElement("img");
+		} else {
+			image = kernel.ui.getImage(location);
+		}
+
+		image.style.left = `${x}px`;
+		image.style.top = `${y}px`;
+		image.style.width = `${width}px`;
+		image.style.height = `${height}px`;
+
+		if (options.borderRadius) {
+			image.style.borderRadius = `${options.borderRadius}px`;
+		}
+
+		if (this.#window) this.#window.body.appendChild(image);
+
+		return image;
 	};
 
 	uikitText = (

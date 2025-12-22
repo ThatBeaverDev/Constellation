@@ -1,17 +1,22 @@
-import { Icons } from "./icons.js";
+import { IconGenerator } from "./components/icons.js";
 import ConstellationKernel, { Terminatable } from "../kernel.js";
 import WindowSystem from "./display/windowSystem.js";
 import UiKitInstanceCreator from "./uiKit/uiKit.js";
 import { UserInterfaceBase } from "../ui/ui.js";
 import { font } from "./uiKit/definitions.js";
 import { constructDOMInterface } from "../io/getShadowDom.js";
+import { ImageGenerator } from "./components/images.js";
 
 export class GraphicalInterface implements UserInterfaceBase {
 	type: "GraphicalInterface" = "GraphicalInterface";
-	icons: Icons & Terminatable;
-	getIcon: Icons["getIcon"];
+	icons: IconGenerator & Terminatable;
+	images: ImageGenerator & Terminatable;
+
 	windowSystem: WindowSystem & Terminatable;
 	uiKit: UiKitInstanceCreator & Terminatable;
+
+	getIcon: IconGenerator["getIcon"];
+	getImage: ImageGenerator["getImage"];
 
 	// GUI
 	#shadowDomHost: HTMLDivElement;
@@ -38,8 +43,13 @@ export class GraphicalInterface implements UserInterfaceBase {
 
 		// submodules
 		// icon stuff
-		this.icons = new Icons(ConstellationKernel);
+		this.icons = new IconGenerator(ConstellationKernel);
 		this.getIcon = this.icons.getIcon.bind(this.icons);
+
+		// images stuff
+		this.images = new ImageGenerator(ConstellationKernel);
+		this.getImage = this.images.getImage.bind(this.images);
+
 		// UiKit
 		this.uiKit = new UiKitInstanceCreator(ConstellationKernel, this);
 		// GUI Windows

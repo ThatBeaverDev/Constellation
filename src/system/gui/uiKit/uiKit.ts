@@ -287,6 +287,22 @@ export class UiKitRendererClass {
 		return new UiKitElement(this, this.#nextStep(obj));
 	}
 
+	image(
+		x: number,
+		y: number,
+		location: string,
+		width: number,
+		height: number,
+		options: uikitIconOptions = {}
+	) {
+		const obj: ConfigStep = {
+			type: "uikitImage",
+			args: [x, y, location, width, height, options]
+		};
+
+		return new UiKitElement(this, this.#nextStep(obj));
+	}
+
 	text(
 		x: number,
 		y: number,
