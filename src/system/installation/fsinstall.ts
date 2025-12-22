@@ -99,7 +99,7 @@ export class FilesystemInstaller {
 
 	async downloadAndConvert(URL: string) {
 		try {
-			const response = await fetch(URL);
+			const response = await fetch(`${URL}?dt=${Date.now()}`);
 			if (!response.ok) {
 				throw new InstallationError("Failed to download the file.");
 			}
@@ -128,7 +128,7 @@ export class FilesystemInstaller {
 					return fs.readFile(path, { encoding: "utf8" });
 				}
 			: async (location: string): Promise<string> => {
-					const req = await fetch(location);
+					const req = await fetch(`${location}?dt=${Date.now()}`);
 					if (!req.ok) {
 						throw new InstallationError(
 							`Failed to fetch file from location ${location}`
