@@ -100,7 +100,7 @@ export class ProgramRuntime {
 	 */
 	EnvironmentCreator: EnvironmentCreator & Terminatable;
 	Verifier: ApplicationVerifier & Terminatable;
-	associations: Partial<Record<string, Process["id"]>> = {};
+	associations: PartialRecord<string, Process["id"]> = {};
 	id: number = nextProgramRuntimeId++;
 	#ConstellationKernel: ConstellationKernel;
 	isTerminating: boolean = false;

@@ -33,4 +33,7 @@ declare global {
 	const Module: typeof executables.Module;
 
 	type ApplicationManifest = executables.ProgramManifest;
+	type PartialRecord<A extends string | number | symbol, B> = Partial<
+		Record<A, B>
+	>;
 }

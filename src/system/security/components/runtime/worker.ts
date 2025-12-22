@@ -84,7 +84,7 @@ onmessage = async (e: MessageEvent<{ program: string; processes: string }>) => {
 		// all good :>
 		postMessage({ result: true });
 	} catch (e) {
-		console.error("Applicaton verification failed: " + String(e));
+		console.error("Application verification failed: " + String(e));
 		postMessage({ result: false, reason: String(e) });
 	}
 };
