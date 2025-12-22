@@ -63,6 +63,8 @@ export default class ConstellationKernel implements Terminatable {
 		ConstellationKernel: ConstellationKernel,
 		isSoftwareUpdate: boolean
 	) => Promise<boolean>;
+	bootTimestamp = Date.now();
+
 	async triggerUpdate() {
 		await this.fs.writeFile("/System/message.txt", "updateSystem");
 

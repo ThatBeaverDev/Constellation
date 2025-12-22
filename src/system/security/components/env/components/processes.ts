@@ -79,4 +79,8 @@ export default class EnvProcesses {
 			this.#processToAlias(process)
 		);
 	}
+
+	total(): number {
+		return this.#ConstellationKernel.runtime.processes.length;
+	}
 }

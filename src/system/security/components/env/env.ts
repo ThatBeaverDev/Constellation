@@ -472,4 +472,7 @@ export class ApplicationAuthorisationAPI {
 			? "GUI"
 			: "TUI";
 	}
+	get systemUptime() {
+		return Date.now() - this.#ConstellationKernel.bootTimestamp;
+	}
 }
