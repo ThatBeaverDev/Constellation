@@ -54,12 +54,12 @@ export default async function softwareupdate(
 		}
 		case "install":
 			parent.env.exec(
-				"/System/CoreExecutable/SoftwareUpdateHandler.srvc",
+				"/System/CoreExecutables/SoftwareUpdateHandler.srvc",
 				[]
 			);
 
 			break;
 		default:
-			return `Commands:\nbuild`;
+			return `Commands:\nbuild\nstatusjson\ninstall`;
 	}
 }

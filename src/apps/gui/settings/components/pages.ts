@@ -115,9 +115,7 @@ export class SettingsPages {
 						text: "Install",
 						icon: "hard-drive-download",
 						onClick: () => {
-							this.#env.exec(
-								"/System/CoreExecutables/SoftwareUpdateInstaller.srvc"
-							);
+							this.#env.shell.exec("softwareupdate", "install");
 						}
 					}
 				);
