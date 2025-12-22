@@ -3,9 +3,10 @@ import ConstellationWindowManager from "../bin/app.js";
 export class ConstellationWindowManagerWallpaper {
 	env: ConstellationWindowManager["env"];
 	renderer: ConstellationWindowManager["renderer"];
-	defaultWallpaper =
+	static defaultWallpaper =
 		"/System/CoreAssets/Wallpapers/Bailey Zindel - Yosemite Valley.jpg";
-	wallpaperPath: string = this.defaultWallpaper;
+	wallpaperPath: string =
+		ConstellationWindowManagerWallpaper.defaultWallpaper;
 
 	constructor(public parent: ConstellationWindowManager) {
 		this.env = parent.env;
@@ -18,7 +19,8 @@ export class ConstellationWindowManagerWallpaper {
 		if (userinf == undefined) return;
 
 		this.wallpaperPath =
-			userinf?.pictures?.wallpaper || this.defaultWallpaper;
+			userinf?.pictures?.wallpaper ??
+			ConstellationWindowManagerWallpaper.defaultWallpaper;
 	}
 
 	render() {

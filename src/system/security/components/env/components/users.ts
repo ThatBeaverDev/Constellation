@@ -33,7 +33,14 @@ export default class EnvUsers {
 			fullName: user.fullName,
 			pictures: {
 				profile: user.profilePicture,
-				wallpaper: user.wallpaperPath
+				changeProfile(newProfile) {
+					user.profilePicture = newProfile;
+				},
+
+				wallpaper: user.wallpaperPath,
+				changeWallpaper(newWallpaper) {
+					user.wallpaperPath = newWallpaper;
+				}
 			},
 			directory: user.directory,
 			id: user.id,

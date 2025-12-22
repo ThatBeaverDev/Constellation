@@ -63,7 +63,7 @@ export default class systemSettings extends PanelKitGuiApplication {
 				focused: this.page == "Cloud"
 			},
 
-			//{ type: "title", text: "Graphical Shell" },
+			{ type: "title", text: "Graphical Shell" },
 			//{
 			//	type: "item",
 			//	text: "Dock",
@@ -82,6 +82,15 @@ export default class systemSettings extends PanelKitGuiApplication {
 			//	},
 			//	focused: this.page == "Menubar"
 			//},
+			{
+				type: "item",
+				text: "Wallpaper",
+				icon: "wallpaper",
+				callback: () => {
+					this.page = "Wallpaper";
+				},
+				focused: this.page == "Wallpaper"
+			},
 
 			{ type: "title", text: "System" },
 			{
