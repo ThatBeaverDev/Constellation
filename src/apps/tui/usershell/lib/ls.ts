@@ -10,7 +10,12 @@ export default async function ls(parent: TerminalAlias, directory = ".") {
 		return e;
 	}
 
-	const formatted = list.join("   ");
+	let formatted = "";
+	if (list.length > 5) {
+		formatted = list.join("\n");
+	} else {
+		formatted = list.join("    ");
+	}
 
 	return formatted;
 }
