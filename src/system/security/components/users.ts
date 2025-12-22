@@ -120,7 +120,7 @@ export default class Users {
 	async newUser(
 		username: string,
 		password: string,
-		extraOptions?: Partial<Record<keyof User, string>>
+		extraOptions?: PartialRecord<keyof User, string>
 	) {
 		this.#ConstellationKernel.lib.logging.log(
 			path,
