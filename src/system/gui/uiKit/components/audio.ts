@@ -18,7 +18,9 @@ export default class UiKitAudioSystem {
 		const contents = await this.#ConstellationKernel.fs.readFile(path);
 		if (!contents || !contents.startsWith("data:")) return;
 
-		const audio = new UiKitAudio(this.#parent, contents);
+		const audio = new UiKitAudio(this.#parent, contents, () => {
+			this.#audio = this.#audio.filter((item) => item !== audio);
+		});
 		this.#audio.push(audio);
 
 		return audio;
@@ -26,6 +28,7 @@ export default class UiKitAudioSystem {
 
 	terminate() {
 		this.#audio.forEach((item) => item.terminate());
+		this.#audio = [];
 	}
 }
 
@@ -33,12 +36,18 @@ export class UiKitAudio {
 	#audio: HTMLAudioElement;
 	#parent: UiKitRendererClass;
 	#isPlaying: boolean = false;
+	#onTerminate: Function;
 
-	constructor(parent: UiKitRendererClass, dataURI: string) {
+	constructor(
+		parent: UiKitRendererClass,
+		dataURI: string,
+		onTerminate: () => any
+	) {
 		this.#audio = new Audio(dataURI);
 		this.#parent = parent;
-
 		this.#parent;
+
+		this.#onTerminate = onTerminate;
 	}
 
 	set playbackTime(value: number) {
@@ -103,7 +112,15 @@ export class UiKitAudio {
 	}
 
 	terminate() {
+		this.#onTerminate();
+
 		this.pause();
+		this.#audio.currentTime = 0;
+
+		// remove metadata
+		this.#audio.src = "";
+		this.#audio.load();
+
 		this.#audio.remove();
 	}
 }
