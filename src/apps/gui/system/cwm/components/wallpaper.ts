@@ -25,16 +25,12 @@ export class ConstellationWindowManagerWallpaper {
 		const windowWidth = this.renderer.windowWidth;
 		const windowHeight = this.renderer.windowHeight;
 
-		const iconDefaultSize = 24;
-		const iconHorizontalScaling = windowWidth / iconDefaultSize;
-		const iconVerticlaScaling = windowHeight / iconDefaultSize;
-
-		const iconScale = Math.max(iconHorizontalScaling, iconVerticlaScaling);
-		const iconSize = iconDefaultSize * iconScale;
-
-		const left = (this.renderer.windowWidth - iconSize) / 2;
-		const top = (this.renderer.windowHeight - iconSize) / 2;
-
-		this.renderer.icon(left, top, this.wallpaperPath, iconScale);
+		this.renderer.image(
+			0,
+			0,
+			this.wallpaperPath,
+			windowWidth,
+			windowHeight
+		);
 	}
 }

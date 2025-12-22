@@ -292,8 +292,7 @@ export default class Dock implements Terminatable {
 				y,
 				icon,
 				iconScale * scale,
-				undefined,
-				{ noProcess: true }
+				undefined
 			);
 
 			if (program.windows.length !== 0) {

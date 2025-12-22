@@ -1,9 +1,9 @@
-import { SystemFilesystemDriver } from "../../fs/fs.js";
-import ConstellationKernel from "../kernel.js";
+import { SystemFilesystemDriver } from "../../../fs/fs.js";
+import ConstellationKernel from "../../kernel.js";
 
 const path = "/System/gui/icons.js";
 
-export class Icons {
+export class IconGenerator {
 	cache: Record<string, HTMLImageElement> = {};
 	div: HTMLDivElement;
 	#ConstellationKernel: ConstellationKernel;
@@ -21,18 +21,7 @@ export class Icons {
 			throw new Error("Hidden container not found.");
 		}
 		hidden.appendChild(this.div);
-
-		this.eventListenerTarget = window.matchMedia(
-			"(prefers-color-scheme: dark)"
-		);
-
-		this.eventListenerTarget.addEventListener(
-			"change",
-			this.resetCache.bind(this)
-		);
 	}
-
-	eventListenerTarget: MediaQueryList;
 
 	resetCache() {
 		this.#ConstellationKernel.lib.logging.debug(path, "Resetting Cache...");
@@ -75,16 +64,16 @@ export class Icons {
 
 		icon.id = id;
 		icon.className = "uikitIcon";
-		icon.width = 24;
+
 		icon.height = 24;
 		icon.alt = name;
 
-		const finalIcon = this.applyIcon(icon, id, name);
+		const finalIcon = this.#applyIcon(icon, id, name);
 
 		return finalIcon;
 	}
 
-	applyIcon(icon: HTMLImageElement, id: string, name: string) {
+	#applyIcon(icon: HTMLImageElement, id: string, name: string) {
 		if (name == "") {
 			// literally just an empty SVG.
 			icon.src =
@@ -99,7 +88,7 @@ export class Icons {
 				// load from url or fs
 				icon.dataset.directory = name;
 				icon.src = ""; // placeholder
-				this.applySourceAndCache(icon, name);
+				this.#applySourceAndCache(icon, name);
 			} else {
 				const clone = this.cache[name].cloneNode(
 					true
@@ -120,7 +109,7 @@ export class Icons {
 		return icon;
 	}
 
-	async applySourceAndCache(icon: HTMLImageElement, directory: string) {
+	async #applySourceAndCache(icon: HTMLImageElement, directory: string) {
 		const clone = icon.cloneNode(true) as HTMLImageElement;
 
 		if (
@@ -180,10 +169,7 @@ export class Icons {
 	}
 
 	async terminate() {
+		this.resetCache();
 		this.div.remove();
-		this.eventListenerTarget.removeEventListener(
-			"change",
-			this.resetCache.bind(this)
-		);
 	}
 }

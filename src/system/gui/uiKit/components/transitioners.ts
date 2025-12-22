@@ -48,7 +48,57 @@ export default class UiKitTransitioners {
 					break;
 				case 5:
 					// options
-					if (newArg?.noProcess !== oldArg?.noProcess) return false;
+
+					setElementStyle(
+						element,
+						"borderRadius",
+						newArg?.borderRadius ?? 0
+					);
+					return false;
+				default:
+					throw new Error("Unknown key: " + i);
+			}
+		}
+
+		return true;
+	}
+
+	uikitImage(
+		element: HTMLElement,
+		oldStep: ConfigStep,
+		newStep: ConfigStep
+	): boolean {
+		for (const i in newStep.args) {
+			const oldArg = oldStep.args[i];
+			const newArg = newStep.args[i];
+
+			if (oldArg == newArg) continue;
+
+			// x = 0, y = 0, name = "circle-help", scale = 1, colour: string
+
+			switch (Number(i)) {
+				case 0:
+					// X position
+					setElementStyle(element, "left", `${newArg}px`);
+					break;
+				case 1:
+					// Y position
+					setElementStyle(element, "top", `${newArg}px`);
+					break;
+				case 2:
+					// location
+					// not easily changable from here
+					return false; // indicate to commit that it's better to just recreate the element, let's be real.
+				case 3:
+					// width
+					setElementStyle(element, "width", `${newArg}px`);
+					break;
+				case 4:
+					// height
+					setElementStyle(element, "height", `${newArg}px`);
+					break;
+				case 5:
+					// options
 
 					setElementStyle(
 						element,
