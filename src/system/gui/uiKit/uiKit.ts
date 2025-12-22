@@ -111,7 +111,7 @@ export class UiKitRendererClass {
 			setElementStyle(
 				this.#window.container,
 				"background",
-				"rgba(5, 5, 5, 90%)"
+				"rgba(5, 5, 5, 75%)"
 			);
 			setElementStyle(
 				this.#window.container,
