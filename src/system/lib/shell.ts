@@ -133,7 +133,7 @@ export default class Shell {
 					}
 				}
 
-				throw new Error("No such utility found.");
+				throw new Error(`No utility found by name ${name}.`);
 		}
 	}
 
