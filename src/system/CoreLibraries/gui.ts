@@ -31,10 +31,9 @@ export async function openFile(
 	const db: filetypeDatabase = JSON.parse(
 		await env.fs.readFile("/System/ftypedb.json")
 	);
-
 	let app: string | undefined = options?.program ?? db.defaults[type];
 
-	async function picker() {
+	async function chooseApplication() {
 		const exec = await env.exec(
 			"/System/CoreLibraries/gui/selectApp.appl",
 			[path]
@@ -44,7 +43,7 @@ export async function openFile(
 	}
 
 	if (options?.forcePicker == true) {
-		app = await picker();
+		app = await chooseApplication();
 	} else {
 		if (db.handlers[type]?.length == 1) {
 			// if there's only one we might as well
@@ -54,7 +53,7 @@ export async function openFile(
 		// ask the user what they want
 		if (!app && (options?.allowPicker ?? true) == true) {
 			env.debug(`No default app for ${type}, querying user.`);
-			app = await picker();
+			app = await chooseApplication();
 		}
 	}
 
@@ -63,4 +62,25 @@ export async function openFile(
 
 	env.exec(app, [path]);
 	return true;
+}
+
+export async function userSelectFile(
+	env: ApplicationAuthorisationAPI,
+	allowedResults: ["*"] | ("folders" | "applications" | `.${string}`)[] = [
+		"*"
+	]
+) {
+	const exec = await env.exec("/Applications/Finder.appl", [
+		undefined,
+		{
+			dialogue: true,
+			allow: allowedResults
+		}
+	]);
+
+	const path = await exec.promise;
+
+	if (typeof path == "string") {
+		return path;
+	}
 }

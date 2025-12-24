@@ -21,7 +21,6 @@ export interface Listing {
 
 export default class Finder extends GuiApplication {
 	name = "Finder";
-	icon = "folder";
 
 	path = "/";
 	selector = 0;
@@ -36,20 +35,38 @@ export default class Finder extends GuiApplication {
 	panelkit = new PanelKit(this.renderer);
 
 	currentFS?: FilesystemInterface;
+	dialogueState:
+		| { isDialogue: false }
+		| { isDialogue: true; allow: string[] } = { isDialogue: false };
 
 	/* ───────────────────────────── Init ───────────────────────────── */
 
 	async init() {
-		const [initialDirectory = "/"] = this.args;
+		const [initialDirectory = "/", dialogueState = false] = this.args;
+
+		const isDialogue =
+			dialogueState == true || dialogueState?.dialogue == true;
+
+		this.dialogueState.isDialogue = isDialogue;
+		if (this.dialogueState.isDialogue == true) {
+			this.dialogueState.allow = dialogueState?.allow ?? ["*"];
+
+			const width = 650;
+			const height = 550;
+
+			this.renderer.resizeWindow(width, height);
+			this.renderer.moveWindow(
+				(this.renderer.displayWidth - width) / 2,
+				(this.renderer.displayHeight - height) / 2
+			);
+		}
 
 		await this.cd(initialDirectory, false);
 
-		this.renderer.setIcon(
-			this.env.fs.resolve(this.directory, "./resources/icon.svg")
-		);
-
-		this.renderer.windowName = "Finder";
-		this.renderer.windowShortName = "Finder";
+		this.renderer.windowName = isDialogue
+			? "Select a File to open"
+			: "Finder";
+		this.renderer.windowShortName = isDialogue ? "Select File" : "Finder";
 	}
 
 	/* ───────────────────────────── Input ───────────────────────────── */
@@ -114,7 +131,7 @@ export default class Finder extends GuiApplication {
 		}
 
 		this.location = await this.#generateListing(fs, ".");
-		this.listing = await this.#buildListing(fs, contents);
+		this.listing = await this.#buildListings(fs, contents);
 
 		await this.#updateIcon(fs);
 		this.ok = true;
@@ -149,7 +166,7 @@ export default class Finder extends GuiApplication {
 
 	/* ───────────────────────────── Listings ───────────────────────────── */
 
-	async #buildListing(
+	async #buildListings(
 		fs: FilesystemInterface,
 		contents: string[]
 	): Promise<Listing[]> {
@@ -259,7 +276,8 @@ export default class Finder extends GuiApplication {
 	async #updateIcon(fs: FilesystemInterface) {
 		try {
 			const icon = await pathIcon(fs, this.path);
-			if (icon !== this.icon) this.icon = icon;
+
+			this.renderer.setIcon(icon);
 		} catch (e) {
 			this.env.warn(e);
 		}
@@ -270,7 +288,7 @@ export default class Finder extends GuiApplication {
 	frame() {
 		if (!this.location || !this.ok) return;
 
-		if (this.counter++ % 250 === 0) {
+		if (this.counter++ % 1000 === 0) {
 			this.cd(this.path, true);
 			return;
 		}
@@ -356,6 +374,7 @@ export default class Finder extends GuiApplication {
 		const panels = this.panelkit;
 
 		panels.reset();
+		panels.doubleClickToInteract = true;
 
 		const properties = (path: string) =>
 			this.env.exec(
@@ -369,7 +388,7 @@ export default class Finder extends GuiApplication {
 					? () => this.cd(path, false)
 					: undefined,
 				"Open With": () => {
-					openFile(this.env, path, {
+					this.openFile(path, {
 						forcePicker: true
 					});
 				},
@@ -417,6 +436,14 @@ export default class Finder extends GuiApplication {
 		panels.title("Directory contents");
 
 		for (const item of this.listing) {
+			if (
+				this.dialogueState.isDialogue &&
+				item.type !== "directory" &&
+				!this.#dialogueCanSubmit(item)
+			) {
+				continue;
+			}
+
 			panels.mediumCard(
 				item.name,
 				item.subtext,
@@ -430,6 +457,29 @@ export default class Finder extends GuiApplication {
 				}
 			);
 		}
+
+		if (this.dialogueState.isDialogue) {
+			const selection = this.listing[this.panelkit.keyboardFocus - 2];
+			const isAllowedSubmission = this.#dialogueCanSubmit(selection);
+
+			this.panelkit.bottomBar(
+				{
+					type: "string",
+					text: selection
+						? `'${selection?.path.textAfterAll("/")}' Selected.`
+						: "Nothing Selected."
+				},
+				{
+					type: "button",
+					text: "Done",
+					onclick: () => {
+						if (selection) this.#pickerSubmit(selection);
+					},
+					isPrimary: true,
+					allow: isAllowedSubmission
+				}
+			);
+		}
 	}
 
 	/* ───────────────────────────── Utilities ───────────────────────────── */
@@ -438,7 +488,14 @@ export default class Finder extends GuiApplication {
 		return path.endsWith(".appl") || path.endsWith(".srvc");
 	}
 
-	async openFile(path: string) {
+	async openFile(
+		path: string,
+		options?: {
+			program?: string;
+			allowPicker?: boolean;
+			forcePicker?: boolean;
+		}
+	) {
 		const fs = await getFilesystemInterface(this.env.fs, path);
 		const stat = await fs.stat(path);
 
@@ -454,7 +511,50 @@ export default class Finder extends GuiApplication {
 				: this.cd(path, false);
 			return;
 		} else {
-			openFile(this.env, path);
+			if (this.dialogueState.isDialogue) {
+				if (!this.currentFS) return;
+
+				const listing = await this.#generateListing(
+					this.currentFS,
+					path
+				);
+				if (!listing) return;
+
+				this.#pickerSubmit(listing);
+			} else {
+				openFile(this.env, path, options);
+			}
 		}
+	}
+
+	#pickerSubmit(file: Listing) {
+		const canSubmit = this.#dialogueCanSubmit(file);
+
+		if (canSubmit) {
+			this.exit(file.path);
+		} else {
+			this.env.warn("Dialogue submit attempted which is not valid.");
+		}
+	}
+
+	#dialogueCanSubmit(item?: Listing) {
+		if (item == undefined) return false;
+		if (this.dialogueState.isDialogue !== true) return false;
+		if (this.dialogueState.allow.includes("*")) return true;
+
+		if (item.type == "directory") {
+			// folders
+			const isApp = this.isApplication(item.path);
+
+			if (isApp) {
+				return this.dialogueState.allow.includes("applications");
+			} else {
+				return this.dialogueState.allow.includes("folders");
+			}
+		}
+
+		// files
+		const filetype = "." + item.path.textAfterAll(".");
+		return this.dialogueState.allow.includes(filetype);
 	}
 }
