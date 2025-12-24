@@ -3,6 +3,14 @@ import ConstellationKernel from "../../kernel.js";
 
 const path = "/System/gui/icons.js";
 
+function isURL(url: string) {
+	return (
+		url.startsWith("http://") ||
+		url.startsWith("https://") ||
+		url.startsWith("data:")
+	);
+}
+
 export class IconGenerator {
 	cache: Record<string, HTMLImageElement> = {};
 	div: HTMLDivElement;
@@ -64,7 +72,7 @@ export class IconGenerator {
 
 		icon.id = id;
 		icon.className = "uikitIcon";
-
+		icon.width = 24;
 		icon.height = 24;
 		icon.alt = name;
 
@@ -78,12 +86,9 @@ export class IconGenerator {
 			// literally just an empty SVG.
 			icon.src =
 				"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg==";
+
 			return icon;
-		} else if (
-			name[0] == "/" ||
-			name.startsWith("http") ||
-			name.startsWith("data:")
-		) {
+		} else if (name[0] == "/" || isURL(name)) {
 			if (!this.cache[name]) {
 				// load from url or fs
 				icon.dataset.directory = name;
@@ -112,11 +117,7 @@ export class IconGenerator {
 	async #applySourceAndCache(icon: HTMLImageElement, directory: string) {
 		const clone = icon.cloneNode(true) as HTMLImageElement;
 
-		if (
-			directory.startsWith("http://") ||
-			directory.startsWith("https://") ||
-			directory.startsWith("data:")
-		) {
+		if (isURL(directory)) {
 			icon.src = directory;
 			clone.src = directory;
 
@@ -169,7 +170,6 @@ export class IconGenerator {
 	}
 
 	async terminate() {
-		this.resetCache();
 		this.div.remove();
 	}
 }
