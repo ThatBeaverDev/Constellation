@@ -22,6 +22,9 @@ export default class PanelKit {
 
 	itemScale = 1.5;
 	itemSize = 50 * this.itemScale;
+	doubleClickToInteract = false;
+
+	#lastClick = 0;
 
 	constructor(renderer: UiKitRenderer) {
 		this.#renderer = renderer;
@@ -46,8 +49,8 @@ export default class PanelKit {
 	#newItem(
 		conf: { trigger?: Function; left?: Function; right?: Function },
 		height: number
-	) {
-		this.#items.push(conf);
+	): { id: number; isFocused: boolean } {
+		const id = this.#items.push(conf);
 
 		const isFocused = this.keyboardFocus == this.#items.length;
 
@@ -55,7 +58,25 @@ export default class PanelKit {
 		if (isFocused && lowestPoint > this.#renderer.windowHeight)
 			this.#renderer.scroll -= lowestPoint - this.#renderer.windowHeight;
 
-		return isFocused;
+		return { id, isFocused };
+	}
+	#considerOnclick(id: number, onclick?: (x: number, y: number) => any) {
+		if (!this.doubleClickToInteract) return onclick;
+		if (!onclick) return undefined;
+
+		return (x: number, y: number) => {
+			if (
+				this.keyboardFocus == id &&
+				Date.now() - this.#lastClick < 250
+			) {
+				this.keyboardFocus = id;
+				this.#lastClick = Date.now();
+				return onclick(x, y);
+			}
+
+			this.keyboardFocus = id;
+			this.#lastClick = Date.now();
+		};
 	}
 
 	reset(sidebarWidth?: number, viewWidth?: number) {
@@ -99,13 +120,17 @@ export default class PanelKit {
 			text: string;
 			icon?: string;
 			onClick: () => Promise<void> | void;
-		}
+		},
+		allow: boolean = true
 	) => {
 		this.#typeChange("card");
 
 		/* -------------------- Keyboard support -------------------- */
 
-		const isFocused = this.#newItem({ trigger: onClick }, this.cardSize);
+		const { id, isFocused } = this.#newItem(
+			{ trigger: onClick },
+			this.cardSize
+		);
 
 		/* -------------------- Main rendering -------------------- */
 
@@ -117,7 +142,7 @@ export default class PanelKit {
 				background: isFocused ? "var(--accent)" : "panel",
 				borderRadius: 10
 			})
-			.onClick(onClick, onRightClick, {});
+			.onClick(this.#considerOnclick(id, onClick), onRightClick);
 
 		// sizes
 		const iconScale = (this.cardSize - this.minorPadding * 2) / 24;
@@ -141,7 +166,15 @@ export default class PanelKit {
 				.passthrough();
 
 		// draw name
-		this.#renderer.text(nameLeft, nameTop, name).passthrough();
+		this.#renderer
+			.text(
+				nameLeft,
+				nameTop,
+				name,
+				undefined,
+				allow ? "var(--text)" : "var(--text-muted)"
+			)
+			.passthrough();
 
 		if (feature) {
 			const textWidth = this.#renderer.getTextWidth(feature.text);
@@ -158,7 +191,7 @@ export default class PanelKit {
 			this.#renderer
 				.box(buttonLeft, this.y + 5, buttonWidth, this.cardSize - 10, {
 					background: "panel",
-					borderRadius: 5
+					borderRadius: this.minorPadding
 				})
 				.onClick(feature.onClick);
 
@@ -220,7 +253,8 @@ export default class PanelKit {
 			text: string;
 			icon?: string;
 			onClick: () => any;
-		}
+		},
+		allow: boolean = true
 	) => {
 		this.#typeChange("card");
 		const doubleMinorPadding = this.minorPadding * 2;
@@ -249,7 +283,10 @@ export default class PanelKit {
 
 		/* -------------------- Keyboard support -------------------- */
 
-		const isFocused = this.#newItem({ trigger: onClick }, cardHeight);
+		const { isFocused, id } = this.#newItem(
+			{ trigger: onClick },
+			cardHeight
+		);
 
 		/* -------------------- Return to spaghetti -------------------- */
 
@@ -267,7 +304,7 @@ export default class PanelKit {
 				background: isFocused ? "var(--accent)" : "panel",
 				borderRadius: 10
 			})
-			.onClick(onClick, onRightClick);
+			.onClick(this.#considerOnclick(id, onClick), onRightClick);
 
 		if (icon)
 			this.#renderer
@@ -275,7 +312,15 @@ export default class PanelKit {
 				.passthrough();
 
 		// title
-		this.#renderer.text(textLeft, textTop, name, 18).passthrough();
+		this.#renderer
+			.text(
+				textLeft,
+				textTop,
+				name,
+				18,
+				allow ? "var(--text)" : "var(--text-muted)"
+			)
+			.passthrough();
 		// subtext
 		this.#renderer
 			.text(textLeft, descriptionTop, description, 13)
@@ -303,7 +348,7 @@ export default class PanelKit {
 					buttonHeight,
 					{
 						background: "panel",
-						borderRadius: 5
+						borderRadius: this.minorPadding
 					}
 				)
 				.onClick(feature.onClick);
@@ -369,7 +414,7 @@ export default class PanelKit {
 
 		/* -------------------- Keyboard support -------------------- */
 
-		const isFocused = this.#newItem({}, cardHeight);
+		const { isFocused } = this.#newItem({}, cardHeight);
 
 		/* -------------------- More spaghetti -------------------- */
 
@@ -402,7 +447,10 @@ export default class PanelKit {
 
 		/* -------------------- Keyboard support -------------------- */
 
-		const isFocused = this.#newItem({ trigger: onClick }, this.itemSize);
+		const { isFocused, id } = this.#newItem(
+			{ trigger: onClick },
+			this.itemSize
+		);
 
 		/* -------------------- Main rendering -------------------- */
 
@@ -411,7 +459,7 @@ export default class PanelKit {
 				background: isFocused ? "var(--accent)" : "panel",
 				borderRadius: 4
 			})
-			.onClick(onClick, onRightClick);
+			.onClick(this.#considerOnclick(id, onClick), onRightClick);
 
 		// sizes
 		const iconSize = 24 * this.itemScale;
@@ -484,8 +532,15 @@ export default class PanelKit {
 				})
 				.onClick(callback);
 
-			this.#renderer.icon(this.minorPadding, y, icon).passthrough();
-			this.#renderer.text(32, y + 3, text).passthrough();
+			const iconSize = 24;
+			const iconScale = iconSize / 24;
+
+			this.#renderer
+				.icon(this.minorPadding, y, icon, iconScale)
+				.passthrough();
+			this.#renderer
+				.text(iconSize + this.minorPadding, y + 3, text)
+				.passthrough();
 
 			y += 30;
 		};
@@ -594,7 +649,7 @@ export default class PanelKit {
 		for (const row of contents) {
 			/* -------------------- Keyboard support -------------------- */
 
-			const isFocused = this.#newItem({}, this.cardSize);
+			const { isFocused } = this.#newItem({}, this.cardSize);
 
 			/* -------------------- Main rendering -------------------- */
 
@@ -734,7 +789,7 @@ export default class PanelKit {
 
 		let progress: uikitProgressBarElement;
 
-		const isFocused = this.#newItem(
+		const { isFocused } = this.#newItem(
 			{
 				left: () => {
 					const newProgression = progression - keyboardSkipInterval;
@@ -808,6 +863,162 @@ export default class PanelKit {
 	};
 
 	buttonCollection = () => {};
+
+	bottomBar = (
+		left:
+			| { type: "string"; text: string }
+			| {
+					type: "button";
+					text: string;
+					icon?: string;
+					onclick: () => any;
+					allow: boolean;
+					isPrimary?: boolean;
+			  },
+		right:
+			| { type: "string"; text: string }
+			| {
+					type: "button";
+					text: string;
+					icon?: string;
+					onclick: () => any;
+					allow: boolean;
+					isPrimary?: boolean;
+			  }
+	) => {
+		const barHeight = 25 + this.minorPadding * 2;
+		const barTop = this.#renderer.windowHeight - barHeight;
+		const windowWidth = this.#renderer.windowWidth;
+
+		this.#renderer.box(0, barTop, this.#renderer.windowWidth, barHeight, {
+			background: "panel"
+		});
+
+		switch (left.type) {
+			case "string": {
+				const textHeight = this.#renderer.getTextHeight(left.text);
+				const textTop = barTop + (barHeight - textHeight) / 2;
+
+				this.#renderer.text(this.minorPadding, textTop, left.text);
+
+				break;
+			}
+			case "button": {
+				const textWidth = this.#renderer.getTextWidth(left.text);
+
+				let buttonWidth =
+					this.minorPadding + textWidth + this.minorPadding;
+				const buttonHeight = barHeight - this.minorPadding * 2;
+
+				const iconSize = buttonHeight - this.minorPadding * 2;
+				const iconScale = iconSize / 24;
+
+				if (left.icon) {
+					buttonWidth += this.minorPadding; // gap between text and icon
+
+					buttonWidth += iconScale;
+				}
+
+				const buttonLeft = this.minorPadding;
+				const buttonTop = barTop + this.minorPadding;
+
+				this.#renderer
+					.box(buttonLeft, buttonTop, buttonWidth, buttonHeight, {
+						background:
+							left.isPrimary && left.allow
+								? "var(--accent)"
+								: "panel",
+						borderRadius: this.minorPadding
+					})
+					.onClick(left.onclick);
+
+				const textHeight = this.#renderer.getTextHeight(left.text);
+
+				const textLeft =
+					this.minorPadding +
+					buttonLeft +
+					(left.icon ? iconSize + this.minorPadding : 0);
+				const textTop = buttonTop + (buttonHeight - textHeight) / 2;
+
+				this.#renderer
+					.text(
+						textLeft,
+						textTop,
+						left.text,
+						undefined,
+						left.allow ? "var(--text)" : "var(--text-muted)"
+					)
+					.passthrough();
+
+				break;
+			}
+		}
+
+		switch (right.type) {
+			case "string": {
+				const textWidth = this.#renderer.getTextWidth(right.text);
+				const textHeight = this.#renderer.getTextHeight(right.text);
+
+				const textLeft =
+					windowWidth - (textWidth + 2 * this.minorPadding);
+				const textTop = barTop + (barHeight - textHeight) / 2;
+
+				this.#renderer.text(textLeft, textTop, left.text);
+				break;
+			}
+			case "button": {
+				const textWidth = this.#renderer.getTextWidth(right.text);
+
+				let buttonWidth =
+					this.minorPadding + textWidth + this.minorPadding;
+				const buttonHeight = barHeight - this.minorPadding * 2;
+
+				const iconSize = buttonHeight - this.minorPadding * 2;
+				const iconScale = iconSize / 24;
+
+				if (right.icon) {
+					buttonWidth += this.minorPadding; // gap between text and icon
+
+					buttonWidth += iconScale;
+				}
+
+				const buttonLeft =
+					this.#renderer.windowWidth -
+					(buttonWidth + this.minorPadding);
+				const buttonTop = barTop + this.minorPadding;
+
+				this.#renderer
+					.box(buttonLeft, buttonTop, buttonWidth, buttonHeight, {
+						background:
+							right.isPrimary && right.allow
+								? "var(--accent)"
+								: "panel",
+						borderRadius: this.minorPadding
+					})
+					.onClick(right.onclick);
+
+				const textHeight = this.#renderer.getTextHeight(right.text);
+
+				const textLeft =
+					this.minorPadding +
+					buttonLeft +
+					(right.icon ? iconSize + this.minorPadding : 0);
+				const textTop = buttonTop + (buttonHeight - textHeight) / 2;
+
+				this.#renderer
+					.text(
+						textLeft,
+						textTop,
+						right.text,
+						undefined,
+						right.allow ? "var(--text)" : "var(--text-muted)"
+					)
+					.passthrough();
+
+				break;
+			}
+		}
+	};
 
 	keydown = (
 		code: string,
