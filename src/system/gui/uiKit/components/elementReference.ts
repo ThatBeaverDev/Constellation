@@ -67,6 +67,10 @@ export class UiKitTextboxElement extends UiKitElement {
 
 		return this;
 	}
+
+	focus() {
+		this.#renderer.focusTextbox(this);
+	}
 }
 
 export class uikitProgressBarElement extends UiKitElement {
