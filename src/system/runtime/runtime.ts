@@ -15,6 +15,7 @@ import ApplicationVerifier from "../security/components/runtime/runtimeDefender.
 import { appName } from "./components/appName.js";
 import ImportResolver from "./components/resolver.js";
 import { isArrow } from "../security/components/testers/isArrow.js";
+import { MutexManager } from "./components/mutexes.js";
 
 const path = "/System/runtime.js";
 
@@ -100,6 +101,7 @@ export class ProgramRuntime {
 	 */
 	EnvironmentCreator: EnvironmentCreator & Terminatable;
 	Verifier: ApplicationVerifier & Terminatable;
+	Mutexes: MutexManager & Terminatable;
 	associations: PartialRecord<string, Process["id"]> = {};
 	id: number = nextProgramRuntimeId++;
 	#ConstellationKernel: ConstellationKernel;
@@ -116,6 +118,7 @@ export class ProgramRuntime {
 			this.#ConstellationKernel.lib.blobifier
 		);
 		this.Verifier = new ApplicationVerifier(ConstellationKernel);
+		this.Mutexes = new MutexManager();
 	}
 
 	documentKeyDown(event: KeyboardEvent) {
@@ -631,5 +634,6 @@ export class ProgramRuntime {
 		}
 
 		await this.importsRewriter.terminate();
+		this.Mutexes.terminate();
 	}
 }
