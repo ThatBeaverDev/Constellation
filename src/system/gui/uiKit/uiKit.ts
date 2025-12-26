@@ -37,7 +37,7 @@ import { isArrow } from "../../security/components/testers/isArrow.js";
 import { defaultConfig } from "./components/defaultConfig.js";
 import { proxyContext } from "./components/canvas/ctx.js";
 import UiKitAudioSystem from "./components/audio.js";
-import { setElementStyle } from "../html.js";
+import { setElementProperty, setElementStyle } from "../html.js";
 
 // type
 export type UiKitRenderer = UiKitRendererClass;
@@ -233,6 +233,10 @@ export class UiKitRendererClass {
 	}
 
 	clear = () => {
+		// reset scroll
+		setElementProperty(this.#window.body, "scrollLeft", 0);
+		setElementProperty(this.#window.body, "scrollTop", 0);
+
 		this.#steps.splice(0, this.#steps.length + 10);
 
 		// window dimensions
@@ -308,11 +312,12 @@ export class UiKitRendererClass {
 		y: number,
 		string: string,
 		fontSize: number = 15,
-		colour: string = ""
+		colour: string = "",
+		font?: string
 	) {
 		const obj: ConfigStep = {
 			type: "uikitText",
-			args: [x, y, string, fontSize, colour]
+			args: [x, y, string, fontSize, colour, font]
 		};
 
 		return new UiKitElement(this, this.#nextStep(obj));
@@ -498,7 +503,8 @@ export class UiKitRendererClass {
 			// assign data
 			const element = step.element;
 
-			element.classList.add("clickable");
+			if (otherConfig?.hoverEffect !== false)
+				element.classList.add("clickable");
 
 			const longPressHoldDuration = 500;
 
@@ -506,7 +512,6 @@ export class UiKitRendererClass {
 				"pointerdown",
 				(event: PointerEvent) => {
 					const start = Date.now();
-					event.preventDefault();
 
 					if (event.pointerType == "mouse") {
 						// this is handled on mouse UP
@@ -724,7 +729,7 @@ export class UiKitRendererClass {
 	readonly getTextHeight = getTextHeight;
 	readonly insertNewlines = insertNewlines;
 
-	setTextboxContent(id: number | UiKitElement, content: string) {
+	setTextboxContent(id: number | UiKitTextboxElement, content: string) {
 		const elemID = Number(id);
 
 		// insure there is actually a textbox
@@ -739,10 +744,21 @@ export class UiKitRendererClass {
 		}
 	}
 
-	getTextboxContent(id: number | UiKitElement) {
+	getTextboxContent(id: number | UiKitTextboxElement) {
 		const elemID = Number(id);
 
 		return this.#creators.textboxElems[elemID]?.value;
+	}
+
+	focusTextbox(id: number | UiKitTextboxElement) {
+		const elemID = Number(id);
+
+		const step = this.#steps[elemID];
+
+		// insure elemID is valid
+		if (elemID >= 0 && elemID < this.#steps.length && step) {
+			step.element.focus();
+		}
 	}
 
 	get darkmode() {

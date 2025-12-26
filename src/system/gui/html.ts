@@ -7,3 +7,13 @@ export function setElementStyle<
 		element.style[property] = value;
 	}
 }
+
+export function setElementProperty<
+	elementType extends HTMLElement,
+	propertyName extends keyof elementType,
+	V extends elementType[propertyName]
+>(element: elementType, property: propertyName, value: V) {
+	if (element[property] !== value) {
+		element[property] = value;
+	}
+}

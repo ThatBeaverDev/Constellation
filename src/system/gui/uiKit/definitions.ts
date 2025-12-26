@@ -11,7 +11,9 @@ export class uiKitInitialisationError extends Error {
 export type uikitCreatorName = Extract<keyof uiKitCreators, `uikit${string}`>;
 
 // onClick types
-export interface onClickOptions {}
+export interface onClickOptions {
+	hoverEffect: boolean;
+}
 export interface clickReference extends onClickOptions {
 	left?: (x: number, y: number) => Promise<any> | any;
 	right?: (x: number, y: number) => Promise<any> | any;
@@ -49,11 +51,13 @@ export type uikitTextboxConfig = {
 	isEmpty?: boolean;
 	fontSize?: number;
 	disableMobileAutocorrect?: boolean;
+	font?: string;
 };
 export type uikitTextareaConfig = {
 	isInvisible?: boolean;
 	isEmpty?: boolean;
 	disableMobileAutocorrect?: boolean;
+	font?: string;
 };
 export type uikitBoxConfig = {
 	borderRadius?:

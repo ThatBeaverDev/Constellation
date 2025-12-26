@@ -1,6 +1,6 @@
 import { GraphicalWindow } from "../../display/windowTypes.js";
-import { setElementStyle } from "../../html.js";
-import { ConfigStep } from "../definitions.js";
+import { setElementProperty, setElementStyle } from "../../html.js";
+import { ConfigStep, uikitTextareaConfig } from "../definitions.js";
 
 export default class UiKitTransitioners {
 	textboxElem: HTMLInputElement | HTMLTextAreaElement | undefined;
@@ -10,6 +10,52 @@ export default class UiKitTransitioners {
 	constructor(window?: GraphicalWindow) {
 		this.#window = window;
 	}
+
+	uikitText = (
+		element: HTMLElement,
+		oldStep: ConfigStep,
+		newStep: ConfigStep
+	): boolean => {
+		for (const i in newStep.args) {
+			const oldArg = oldStep.args[i];
+			const newArg = newStep.args[i];
+
+			if (oldArg == newArg) continue;
+
+			// x = 0, y = 0, name = "circle-help", scale = 1, colour: string
+
+			switch (Number(i)) {
+				case 0:
+					// X position
+					setElementStyle(element, "left", `${newArg}px`);
+					break;
+				case 1:
+					// Y position
+					setElementStyle(element, "top", `${newArg}px`);
+					break;
+				case 2:
+					// contents
+					setElementProperty(element, "innerText", newArg);
+					break;
+				case 3:
+					// fontSize
+					setElementStyle(element, "fontSize", `${newArg}px`);
+					break;
+				case 4:
+					// colour
+					setElementStyle(element, "color", newArg);
+					break;
+				case 5:
+					// font
+					setElementStyle(element, "fontFamily", newArg ?? "");
+					return false;
+				default:
+					throw new Error("Unknown key: " + i);
+			}
+		}
+
+		return true;
+	};
 
 	uikitIcon(
 		element: HTMLElement,
@@ -114,48 +160,6 @@ export default class UiKitTransitioners {
 		return true;
 	}
 
-	uikitText(
-		element: HTMLElement,
-		oldStep: ConfigStep,
-		newStep: ConfigStep
-	): boolean {
-		for (const i in newStep.args) {
-			const oldArg = oldStep.args[i];
-			const newArg = newStep.args[i];
-
-			if (oldArg == newArg) continue;
-
-			// x = 0, y = 0, string = "", fontSize: number, colour: string
-
-			switch (Number(i)) {
-				case 0:
-					// X position
-					setElementStyle(element, "left", `${newArg}px`);
-					break;
-				case 1:
-					// Y position
-					setElementStyle(element, "top", `${newArg}px`);
-					break;
-				case 2:
-					// string
-					element.innerText = newArg;
-					break;
-				case 3:
-					// fontSize
-					setElementStyle(element, "fontSize", `${newArg}px`);
-					break;
-				case 4:
-					// colour
-					setElementStyle(element, "color", newArg);
-					break;
-				default:
-					throw new Error("Unknown key: " + i);
-			}
-		}
-
-		return true;
-	}
-
 	uikitBox = (
 		element: HTMLElement,
 		oldStep: ConfigStep,
@@ -238,6 +242,109 @@ export default class UiKitTransitioners {
 					} else {
 						element.classList.remove("frosted");
 					}
+
+					break;
+				default:
+					throw new Error("Unknown key: " + i);
+			}
+		}
+
+		return true;
+	};
+
+	uikitTextbox = (
+		element: HTMLElement,
+		oldStep: ConfigStep,
+		newStep: ConfigStep
+	): boolean => {
+		for (const i in newStep.args) {
+			const oldArg = oldStep.args[i];
+			const newArg = newStep.args[i];
+
+			if (oldArg == newArg) continue;
+
+			switch (Number(i)) {
+				case 0:
+					// X position
+					setElementStyle(element, "left", `${newArg}px`);
+					break;
+				case 1:
+					// Y position
+					setElementStyle(element, "top", `${newArg}px`);
+					break;
+				case 2:
+					// width
+					setElementStyle(element, "width", `${newArg}px`);
+					break;
+				case 3:
+					// height
+					setElementStyle(element, "height", `${newArg}px`);
+					break;
+				case 4:
+					// callbacks
+					// don't care
+
+					break;
+				case 5:
+					// options
+
+					if (oldArg !== newArg) return false;
+
+					break;
+				default:
+					throw new Error("Unknown key: " + i);
+			}
+		}
+
+		return true;
+	};
+
+	uikitTextarea = (
+		element: HTMLElement,
+		oldStep: ConfigStep,
+		newStep: ConfigStep
+	): boolean => {
+		for (const i in newStep.args) {
+			const oldArg = oldStep.args[i];
+			const newArg = newStep.args[i];
+
+			if (oldArg == newArg) continue;
+
+			switch (Number(i)) {
+				case 0:
+					// X position
+					setElementStyle(element, "left", `${newArg}px`);
+					break;
+				case 1:
+					// Y position
+					setElementStyle(element, "top", `${newArg}px`);
+					break;
+				case 2:
+					// width
+					setElementStyle(element, "width", `${newArg}px`);
+					break;
+				case 3:
+					// height
+					setElementStyle(element, "height", `${newArg}px`);
+					break;
+				case 4:
+					// callbacks
+					// don't care
+
+					break;
+				case 5:
+					// options
+					const old: uikitTextareaConfig = oldArg;
+					const newer: uikitTextareaConfig = newArg;
+
+					if (
+						old.disableMobileAutocorrect !==
+						newer.disableMobileAutocorrect
+					)
+						return false;
+					if (old.font !== newer.font) return false;
+					if (old.isEmpty !== newer.isEmpty) return false;
+					if (old.isInvisible !== newer.isInvisible) return false;
 
 					break;
 				default:
