@@ -83,7 +83,7 @@ export class GraphicalInterface implements UserInterfaceBase {
 	async init() {
 		this.mainStyles.textContent =
 			(await (await fetch("/styles/styles.css")).text()) +
-			`\n\n* {\n\tfont-family: ${font} !important;\n}`;
+			`\n\n* {\n\tfont-family: ${font};\n}`;
 
 		this.bootStyles.textContent = await (
 			await fetch("/styles/boot.css")
