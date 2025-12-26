@@ -41,7 +41,7 @@ export default class dockAndDesktop extends Overlay {
 		if (!userinf) throw new Error("Executed with non-existent user?");
 
 		this.desktop = await this.env.exec(
-			"/System/CoreExecutables/desktop.appl",
+			"/System/CoreExecutables/Desktop.appl",
 			[userinf.directory + "/Desktop"]
 		);
 
