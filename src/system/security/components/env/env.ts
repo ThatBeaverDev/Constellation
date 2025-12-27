@@ -142,11 +142,20 @@ export class ApplicationAuthorisationAPI {
 		);
 	}
 
+	/**
+	 * The base directory of your program.
+	 */
 	readonly directory: string;
 	readonly #permissions: DirectoryPermissionStats;
+	/**
+	 * Your program's user ID (not usable in `env.processes.userinfo`.)
+	 */
 	readonly userID: string;
 	#user: string;
 	#password: string;
+	/**
+	 * Your process's user identifier (usable in `env.processes.userinfo`, no users permission required.)
+	 */
 	get user() {
 		return String(this.#user);
 	}
@@ -162,8 +171,28 @@ export class ApplicationAuthorisationAPI {
 		);
 	}
 
-	// shell
+	/**
+	 * A shell for the execution of CLI-like commands / subprograms
+	 */
 	shell: Shell;
+	/**
+	 * Interface to access Constellation's filesystem.
+	 */
+	fs: EnvFs;
+	/**
+	 * Functions related to the graphical window system.
+	 */
+	windows?: EnvWindows;
+
+	/**
+	 * Functions related to system users
+	 */
+	users: EnvUsers;
+
+	/**
+	 * Functions related to system processes
+	 */
+	processes: EnvProcesses;
 
 	/**
 	 * Sends an IPCMessage to another process as addressed by the Process ID.
@@ -286,8 +315,6 @@ export class ApplicationAuthorisationAPI {
 				throw new Error("Unknown domain: " + domainType);
 		}
 	}
-
-	fs: EnvFs;
 
 	/**
 	 * Starts a program from a given directory to a `.appl` or `.srvc` package
@@ -454,18 +481,6 @@ export class ApplicationAuthorisationAPI {
 				);
 		}
 	}
-
-	/**
-	 * Functions related to the graphical window system.
-	 */
-	windows?: EnvWindows;
-
-	/**
-	 * Functions related to system users
-	 */
-	users: EnvUsers;
-
-	processes: EnvProcesses;
 
 	get systemType() {
 		return this.#ConstellationKernel.ui.type == "GraphicalInterface"
