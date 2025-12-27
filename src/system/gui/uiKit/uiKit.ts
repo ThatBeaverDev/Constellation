@@ -21,7 +21,8 @@ import {
 	uikitTextareaConfig,
 	uikitTextboxConfig,
 	clickReference,
-	ConfigStep
+	ConfigStep,
+	Colour
 } from "./definitions.js";
 import uikitEventCreators from "./components/eventCreators.js";
 import UiKitTransitioners from "./components/transitioners.js";
@@ -30,6 +31,7 @@ import { GraphicalInterface } from "../gui.js";
 import {
 	UiKitElement,
 	uikitProgressBarElement,
+	UiKitTextareaElement,
 	UiKitTextboxElement
 } from "./components/elementReference.js";
 import { UiKitCanvasElement } from "./components/canvas/canvas.js";
@@ -38,6 +40,7 @@ import { defaultConfig } from "./components/defaultConfig.js";
 import { proxyContext } from "./components/canvas/ctx.js";
 import UiKitAudioSystem from "./components/audio.js";
 import { setElementProperty, setElementStyle } from "../html.js";
+import { StepStorage } from "./components/stepStorage.js";
 
 // type
 export type UiKitRenderer = UiKitRendererClass;
@@ -47,15 +50,19 @@ export class UiKitRendererClass {
 	#process?: Process;
 	#window: GraphicalWindow;
 
+	#nextID: number = 0;
 	#index: number = 0;
-	readonly #steps: step[] = [];
-	#displayedSteps: step[] = [];
-	#nextDisplayedSteps: step[] = [];
+	readonly #steps = new StepStorage<step | ConfigStep>();
 
 	// add abort controller to remove event listeners
 	#controller = new AbortController();
 	#signal: AbortSignal = this.#controller.signal;
 	#context?: ContextMenu;
+
+	readonly #creators: uiKitCreators;
+	readonly #eventCreators: uikitEventCreators;
+	readonly #transitioners: UiKitTransitioners;
+	readonly audio: UiKitAudioSystem;
 
 	// window stuff
 	windowWidth: number = 0;
@@ -237,7 +244,7 @@ export class UiKitRendererClass {
 		setElementProperty(this.#window.body, "scrollLeft", 0);
 		setElementProperty(this.#window.body, "scrollTop", 0);
 
-		this.#steps.splice(0, this.#steps.length + 10);
+		this.#steps.clear();
 
 		// window dimensions
 		this.windowWidth = this.#window.body.clientWidth;
@@ -246,8 +253,6 @@ export class UiKitRendererClass {
 		// window position
 		this.windowX = this.#window.position.left;
 		this.windowY = this.#window.position.top;
-
-		this.#nextDisplayedSteps = [];
 
 		// Abort all listeners, but keep the elements unless they are removed
 		this.#controller.abort();
@@ -272,6 +277,7 @@ export class UiKitRendererClass {
 			{ signal: this.#signal, passive: false }
 		);
 
+		this.#nextID = 0;
 		this.#index = 0;
 	};
 
@@ -288,7 +294,10 @@ export class UiKitRendererClass {
 			args: [x, y, iconName, iconScale, colour, options]
 		};
 
-		return new UiKitElement(this, this.#nextStep(obj));
+		const identifier = this.#nextID++;
+
+		this.#nextStep(identifier, obj);
+		return new UiKitElement(this, identifier);
 	}
 
 	image(
@@ -304,7 +313,10 @@ export class UiKitRendererClass {
 			args: [x, y, location, width, height, options]
 		};
 
-		return new UiKitElement(this, this.#nextStep(obj));
+		const identifier = this.#nextID++;
+
+		this.#nextStep(identifier, obj);
+		return new UiKitElement(this, identifier);
 	}
 
 	text(
@@ -312,7 +324,7 @@ export class UiKitRendererClass {
 		y: number,
 		string: string,
 		fontSize: number = 15,
-		colour: string = "",
+		colour?: Colour,
 		font?: string
 	) {
 		const obj: ConfigStep = {
@@ -320,7 +332,10 @@ export class UiKitRendererClass {
 			args: [x, y, string, fontSize, colour, font]
 		};
 
-		return new UiKitElement(this, this.#nextStep(obj));
+		const identifier = this.#nextID++;
+
+		this.#nextStep(identifier, obj);
+		return new UiKitElement(this, identifier);
 	}
 	button(
 		x: number,
@@ -338,7 +353,10 @@ export class UiKitRendererClass {
 			args: [x, y, string, leftClickCallback, rightClickCallback, size]
 		};
 
-		return new UiKitElement(this, this.#nextStep(obj));
+		const identifier = this.#nextID++;
+
+		this.#nextStep(identifier, obj);
+		return new UiKitElement(this, identifier);
 	}
 	textbox(
 		x: number,
@@ -347,25 +365,22 @@ export class UiKitRendererClass {
 		height: number = 20,
 		backtext: string,
 		callbacks: textboxCallbackObject,
-		options: uikitTextboxConfig = defaultConfig.uikitTextbox
+		options: uikitTextboxConfig = defaultConfig.uikitTextbox,
+		id?: string
 	) {
-		if (callbacks.update) isArrow(callbacks.update, true);
 		if (callbacks.enter) isArrow(callbacks.enter, true);
-
-		// insure all values are met. if not, apply the default
-		const opts = {};
-		for (const i in defaultConfig.uikitTextbox) {
-			// @ts-ignore
-			opts[i] =
-				// @ts-ignore
-				options[i] ?? defaultConfig.uikitTextbox[i];
-		}
+		if (callbacks.beforeUpdate) isArrow(callbacks.beforeUpdate, true);
+		if (callbacks.afterUpdate) isArrow(callbacks.afterUpdate, true);
 
 		const obj: ConfigStep = {
 			type: "uikitTextbox",
-			args: [x, y, width, height, backtext, callbacks, opts]
+			args: [x, y, width, height, backtext, callbacks, options]
 		};
-		return new UiKitTextboxElement(this, this.#nextStep(obj));
+
+		const identifier = id ?? this.#nextID++;
+
+		this.#nextStep(identifier, obj);
+		return new UiKitTextboxElement(this, identifier);
 	}
 
 	verticalLine(x: number, y: number, height: number) {
@@ -374,7 +389,10 @@ export class UiKitRendererClass {
 			args: [x, y, height]
 		};
 
-		return new UiKitElement(this, this.#nextStep(obj));
+		const identifier = this.#nextID++;
+
+		this.#nextStep(identifier, obj);
+		return new UiKitElement(this, identifier);
 	}
 
 	horizontalLine(x: number, y: number, width: number, colour: string) {
@@ -383,7 +401,10 @@ export class UiKitRendererClass {
 			args: [x, y, width, colour]
 		};
 
-		return new UiKitElement(this, this.#nextStep(obj));
+		const identifier = this.#nextID++;
+
+		this.#nextStep(identifier, obj);
+		return new UiKitElement(this, identifier);
 	}
 
 	progressBar(
@@ -400,7 +421,10 @@ export class UiKitRendererClass {
 			args: [x, y, width, height, progress, onDrag, colour]
 		};
 
-		return new uikitProgressBarElement(this, this.#nextStep(obj));
+		const identifier = this.#nextID++;
+
+		this.#nextStep(identifier, obj);
+		return new uikitProgressBarElement(this, identifier);
 	}
 
 	textarea(
@@ -409,17 +433,22 @@ export class UiKitRendererClass {
 		width: number,
 		height: number,
 		callbacks: textboxCallbackObject,
-		options: uikitTextareaConfig = defaultConfig.uikitTextarea
+		options: uikitTextareaConfig = defaultConfig.uikitTextarea,
+		id?: string
 	) {
 		if (callbacks.enter) isArrow(callbacks.enter, true);
-		if (callbacks.update) isArrow(callbacks.update, true);
+		if (callbacks.beforeUpdate) isArrow(callbacks.beforeUpdate, true);
+		if (callbacks.afterUpdate) isArrow(callbacks.afterUpdate, true);
 
 		const obj: ConfigStep = {
 			type: "uikitTextarea",
 			args: [x, y, width, height, callbacks, options]
 		};
 
-		return new UiKitTextboxElement(this, this.#nextStep(obj));
+		const identifier = id ?? this.#nextID++;
+
+		this.#nextStep(identifier, obj);
+		return new UiKitTextareaElement(this, identifier);
 	}
 
 	box(
@@ -434,7 +463,10 @@ export class UiKitRendererClass {
 			args: [x, y, width, height, config]
 		};
 
-		return new UiKitElement(this, this.#nextStep(obj));
+		const identifier = this.#nextID++;
+
+		this.#nextStep(identifier, obj);
+		return new UiKitElement(this, identifier);
 	}
 
 	canvas2D(x: number, y: number, width: number, height: number) {
@@ -443,16 +475,28 @@ export class UiKitRendererClass {
 			args: [x, y, width, height]
 		};
 
-		return new UiKitCanvasElement(this, obj, this.#nextStep(obj));
+		const identifier = this.#nextID++;
+
+		this.#nextStep(identifier, obj);
+		return new UiKitElement(this, identifier);
 	}
 
-	embeddedTui(x: number, y: number, width: number, height: number) {
+	embeddedTui(
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		id: string
+	) {
 		const obj: ConfigStep = {
 			type: "uikitEmbeddedTui",
 			args: [x, y, width, height]
 		};
 
-		return new UiKitElement(this, this.#nextStep(obj));
+		const identifier = id ?? this.#nextID++;
+
+		this.#nextStep(identifier, obj);
+		return new UiKitElement(this, identifier);
 	}
 
 	iframe(
@@ -462,18 +506,22 @@ export class UiKitRendererClass {
 		height: number,
 		URL: string,
 		onMessage: (data: any) => Promise<void> | void,
-		isTransparent: boolean = false
+		isTransparent: boolean = false,
+		id: string
 	) {
 		const obj: ConfigStep = {
 			type: "uikitIframe",
 			args: [x, y, width, height, URL, onMessage, isTransparent]
 		};
 
-		return new UiKitElement(this, this.#nextStep(obj));
+		const identifier = id ?? this.#nextID++;
+
+		this.#nextStep(identifier, obj);
+		return new UiKitElement(this, identifier);
 	}
 
 	onClick(
-		elementID: number | UiKitElement,
+		elementID: UiKitElement,
 		leftClickCallback?: clickReference["left"],
 		rightClickCallback?: clickReference["right"],
 		otherConfig?: onClickOptions
@@ -485,7 +533,7 @@ export class UiKitRendererClass {
 		if (leftClickCallback) isArrow(leftClickCallback, true);
 		if (rightClickCallback) isArrow(rightClickCallback, true);
 
-		const elemID = Number(elementID);
+		const elemID = elementID.id;
 
 		const left =
 			leftClickCallback == undefined
@@ -496,10 +544,10 @@ export class UiKitRendererClass {
 				? undefined
 				: rightClickCallback.bind(this.#process);
 
-		const step = this.#steps[elemID];
+		const step = this.#steps.get(elemID);
 
 		// insure elemID is valid
-		if (elemID >= 0 && elemID < this.#steps.length && step) {
+		if (step && "element" in step) {
 			// assign data
 			const element = step.element;
 
@@ -602,32 +650,31 @@ export class UiKitRendererClass {
 		}
 	}
 
-	setProgressbarDrag(id: number | uikitProgressBarElement, progress: number) {
-		const elemID = Number(id);
+	setProgressbarDrag(elementID: uikitProgressBarElement, progress: number) {
+		const elemID = elementID.id;
+		const step = this.#steps.get(elemID);
 
-		const step = this.#steps[elemID];
-
-		// insure elemID is valid
-		if (elemID >= 0 && elemID < this.#steps.length && step) {
+		// insure there is actually a progress bar
+		if (step?.type == "uikitProgressBar") {
 			step.args[5](progress);
 		}
 	}
 
 	setElementDragResult(
-		elementID: number | UiKitElement,
+		elementID: UiKitElement,
 		type: "file",
 		path: string
 	): void;
 	setElementDragResult(
-		elementID: number | UiKitElement,
+		elementID: UiKitElement,
 		type: onDragReference["type"],
 		data: string
 	) {
-		const elemID = Number(elementID);
-		const step = this.#steps[elemID];
+		const elemID = elementID.id;
+		const step = this.#steps.get(elemID);
 
 		// insure elemID is valid
-		if (elemID >= 0 && elemID < this.#steps.length && step) {
+		if (step && "element" in step) {
 			// Heya! can you finish implementing the drag stuff?
 
 			step.element.addEventListener("dragstart", (event) => {}, {
@@ -643,14 +690,14 @@ export class UiKitRendererClass {
 		}
 	}
 
-	onElementDrop(elementID?: number | UiKitElement, callback?: Function) {
+	onElementDrop(elementID: UiKitElement, callback: Function) {
 		if (callback) isArrow(callback, true);
 
-		const elemID = Number(elementID);
-		const step = this.#steps[elemID];
+		const elemID = elementID.id;
+		const step = this.#steps.get(elemID);
 
 		// insure elemID is valid
-		if (elemID >= 0 && elemID < this.#steps.length && step) {
+		if (step && "element" in step) {
 		} else {
 			throw new UIError(
 				`onElementDrop called with invalid elemID: ${elemID}`
@@ -662,12 +709,12 @@ export class UiKitRendererClass {
 	 * Makes an element invisible to clicks, allowing elements behind to be clicked.
 	 * @param elemID - the ID of the element. this is returned from the creator (eg: `this.renderer.icon()` is a creator.)
 	 */
-	passthrough(elementID: number | UiKitElement) {
-		const elemID = Number(elementID);
-		const step = this.#steps[elemID];
+	passthrough(elementID: UiKitElement) {
+		const elemID = elementID.id;
+		const step = this.#steps.get(elemID);
 
 		// insure elemID is valid
-		if (elemID >= 0 && elemID < this.#steps.length && step) {
+		if (step && "element" in step) {
 			// assign data
 			step.element.style.pointerEvents = "none";
 		} else {
@@ -682,14 +729,13 @@ export class UiKitRendererClass {
 		contextId: string,
 		options?: any
 	) {
-		const elemID = Number(elementID);
-		const step = this.#steps[elemID];
+		const elemID = elementID.id;
+		const step = this.#steps.get(elemID);
 
 		// insure elemID is valid
 		if (
-			elemID >= 0 &&
-			elemID < this.#steps.length &&
 			step &&
+			"element" in step &&
 			step.element instanceof HTMLCanvasElement
 		) {
 			// assign data
@@ -729,49 +775,111 @@ export class UiKitRendererClass {
 	readonly getTextHeight = getTextHeight;
 	readonly insertNewlines = insertNewlines;
 
-	setTextboxContent(id: number | UiKitTextboxElement, content: string) {
-		const elemID = Number(id);
+	setTextboxContent(elementID: UiKitTextboxElement, content: string) {
+		const elemID = elementID.id;
+		const step = this.#steps.get(elemID);
 
 		// insure there is actually a textbox
-		if (this.#creators.textboxElems !== undefined) {
+		if (
+			step &&
+			"element" in step &&
+			(step.element instanceof HTMLInputElement ||
+				step.element instanceof HTMLTextAreaElement)
+		) {
 			// set the value
-			const elem = this.#creators.textboxElems[elemID];
+			const elem = step.element;
 
 			if (elem == undefined)
-				throw new UIError(`Textbox by ID ${id} doesn't exist.`);
+				throw new UIError(`Textbox by ID ${elementID} doesn't exist.`);
 
 			elem.value = content;
 		}
 	}
 
-	getTextboxContent(id: number | UiKitTextboxElement) {
-		const elemID = Number(id);
+	getTextboxContent(elementID: UiKitTextboxElement) {
+		const elemID = elementID.id;
+		const step = this.#steps.get(elemID);
 
-		return this.#creators.textboxElems[elemID]?.value;
-	}
+		// insure there is actually a textbox
+		if (
+			step &&
+			"element" in step &&
+			(step.element instanceof HTMLInputElement ||
+				step.element instanceof HTMLTextAreaElement)
+		) {
+			// get the value
+			const elem = step.element;
 
-	focusTextbox(id: number | UiKitTextboxElement) {
-		const elemID = Number(id);
+			if (elem == undefined)
+				throw new UIError(`Textbox by ID ${elementID} doesn't exist.`);
 
-		const step = this.#steps[elemID];
-
-		// insure elemID is valid
-		if (elemID >= 0 && elemID < this.#steps.length && step) {
-			step.element.focus();
+			return elem.value;
 		}
 	}
 
-	get darkmode() {
-		return (
-			window.matchMedia &&
-			window.matchMedia("(prefers-color-scheme: dark)").matches
-		);
+	getTextareaScroll(elementID: UiKitTextareaElement) {
+		const elemID = elementID.id;
+		const step = this.#steps.get(elemID);
+
+		// insure there is actually a textbox
+		if (
+			step &&
+			"element" in step &&
+			step.element instanceof HTMLTextAreaElement
+		) {
+			// get the value
+			const elem = step.element;
+
+			if (elem == undefined)
+				throw new UIError(`Textarea by ID ${elementID} doesn't exist.`);
+
+			return 0 - elem.scrollTop;
+		}
 	}
 
-	readonly #creators: uiKitCreators;
-	readonly #eventCreators: uikitEventCreators;
-	readonly #transitioners: UiKitTransitioners;
-	readonly audio: UiKitAudioSystem;
+	getTextboxSelection(
+		elementID: UiKitTextboxElement | UiKitTextareaElement
+	): [number, number] | undefined {
+		const elemID = elementID.id;
+		const step = this.#steps.get(elemID);
+
+		// insure there is actually a textbox
+		if (
+			step &&
+			"element" in step &&
+			(step.element instanceof HTMLInputElement ||
+				step.element instanceof HTMLTextAreaElement)
+		) {
+			// get the value
+			const elem = step.element;
+
+			if (elem == undefined)
+				throw new UIError(`Textbox by ID ${elementID} doesn't exist.`);
+
+			return [elem.selectionStart ?? 0, elem.selectionEnd ?? 0];
+		}
+	}
+
+	focusTextbox(elementID: UiKitTextboxElement) {
+		const elemID = elementID.id;
+		const step = this.#steps.get(elemID);
+
+		// insure there is actually a textbox
+		if (
+			step &&
+			"element" in step &&
+			(step.element instanceof HTMLInputElement ||
+				step.element instanceof HTMLTextAreaElement)
+		) {
+			// set the value
+			const elem = step.element;
+
+			if (elem == undefined)
+				throw new UIError(`Textbox by ID ${elementID} doesn't exist.`);
+
+			elem.focus();
+		}
+	}
 
 	/**
 	 * Sets the displayed context menu of the window. use .removeContextMenu() to remove it.
@@ -883,8 +991,12 @@ export class UiKitRendererClass {
 		this.#eventCreators.setSignal(this.#signal);
 
 		// delete all the elements
-		for (const i in this.#displayedSteps) {
-			const item = this.#displayedSteps[i]?.element;
+		for (const i in this.#steps) {
+			const step = this.#steps.get(i);
+
+			if (!step || !("element" in step)) continue;
+
+			const item = step.element;
 
 			// just incase
 			if (item == null) {
@@ -927,19 +1039,23 @@ export class UiKitRendererClass {
 		element.remove();
 	};
 
-	#nextStep(configStep: ConfigStep, id?: number): number {
-		let identifier = id !== undefined ? id : this.#index++;
-
+	#nextStep(id: string | number, configStep: ConfigStep) {
 		const UserInterface = this.#ConstellationKernel.ui;
-		if (!(UserInterface.type == "GraphicalInterface")) return identifier;
+		if (!(UserInterface.type == "GraphicalInterface")) return;
 
-		const oldStep = this.#displayedSteps[identifier];
-		const oldElement = oldStep?.element;
+		this.#index++;
+
+		const oldStep = this.#steps.get(id);
+		const oldElement = oldStep
+			? "element" in oldStep
+				? oldStep.element
+				: undefined
+			: undefined;
 
 		// if the element has disappeared, simply remove the old one.
 		if (configStep == undefined) {
 			if (oldElement) this.#removeElement(oldElement);
-			return identifier;
+			return id;
 		}
 
 		let newStep: step;
@@ -957,22 +1073,16 @@ export class UiKitRendererClass {
 					this.#removeElement(oldElement);
 				}
 
-				const creator: (
-					id: number,
-					x: number,
-					y: number,
-					...args: any[]
-				) => HTMLElement = this.#creators[configStep.type].bind(
-					this.#creators
-				);
+				const creator: (id: number, ...args: any[]) => HTMLElement =
+					this.#creators[configStep.type].bind(this.#creators);
 				if (!creator) {
 					throw new UIError(
 						`Creator is not defined for ${configStep.type}`
 					);
 				}
 
-				// @ts-expect-error // run the creator
-				const element = creator(identifier, ...configStep.args);
+				// run the creator
+				const element = creator(this.#index, ...configStep.args);
 
 				return element;
 			};
@@ -1014,12 +1124,6 @@ export class UiKitRendererClass {
 			newStep = { ...configStep, element: oldElement! };
 		}
 
-		if (typeof id == "number") {
-			this.#steps.splice(id, 1, newStep);
-		} else {
-			this.#steps.push(newStep);
-		}
-
 		// add event listeners to the element
 		// the old element had all uiKit event listeners removed by the AbortController
 
@@ -1036,11 +1140,11 @@ export class UiKitRendererClass {
 			);
 
 		// prevent layering issues from lower elements being recreated.
-		newStep.element.style.zIndex = String(identifier);
+		setElementStyle(newStep.element, "zIndex", String(this.#index));
 
-		this.#nextDisplayedSteps.push(newStep);
+		this.#steps.set(id, newStep);
 
-		return identifier;
+		return id;
 	}
 
 	/**
@@ -1062,23 +1166,23 @@ export class UiKitRendererClass {
 		}
 
 		// remove extra elements
-		for (
-			let i = Number(this.#index);
-			i < Math.max(this.#steps.length, this.#displayedSteps.length);
-			i++
-		) {
-			const element = this.#displayedSteps[i]?.element;
-			if (element) this.#removeElement(element);
-		}
+		const unchanged = this.#steps.getUnchanged();
 
-		this.#displayedSteps = this.#nextDisplayedSteps;
+		for (const [id, step] of unchanged) {
+			this.#steps.delete(id);
+
+			if (!step || !("element" in step)) continue;
+
+			step.element.remove();
+		}
 
 		/* ---------- Make sure no 'rogue' elements are present that shouldn't be ---------- */
 
-		const windowBodyElements = this.#window.body.children;
-		const allowedElements: Element[] = this.#displayedSteps.map(
-			(item) => item.element
-		);
+		const windowBodyElements = Array.from(this.#window.body.children);
+		const allowedElements: Element[] = this.#steps
+			.toArray()
+			.map((item) => ("element" in item ? item.element : undefined))
+			.filter((item) => item !== undefined);
 
 		for (const el of windowBodyElements) {
 			if (!allowedElements.includes(el)) {

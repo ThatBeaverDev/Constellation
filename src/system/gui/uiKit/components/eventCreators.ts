@@ -1,6 +1,7 @@
 import { GraphicalWindow } from "../../display/windowTypes.js";
 import { GraphicalInterface } from "../../gui.js";
 import { defaultConfig } from "./defaultConfig.js";
+import { textboxCallbackObject } from "/System/gui/uiKit/definitions.js";
 
 export default class UIKitEventListeners {
 	#signal: AbortSignal;
@@ -61,24 +62,28 @@ export default class UIKitEventListeners {
 		width = 200,
 		height = 20,
 		backtext = "",
-		callbacks = {
-			update: (key: string, value: string) => {},
-			enter: (value: string) => {}
-		},
+		callbacks: textboxCallbackObject,
 		options = defaultConfig.uikitTextbox
 	) {
 		element.addEventListener(
 			"keydown",
 			(event) => {
 				const val = String(element.value);
+
 				if (event.code == "Enter") {
-					if (typeof callbacks.enter !== "function") return;
-
-					callbacks.enter(val);
+					if (typeof callbacks.enter == "function")
+						callbacks.enter(val);
 				} else {
-					if (typeof callbacks.update !== "function") return;
+					if (typeof callbacks.beforeUpdate == "function")
+						callbacks.beforeUpdate(event.key, val);
 
-					callbacks.update(event.key, val);
+					if (typeof callbacks.afterUpdate == "function") {
+						setTimeout(() => {
+							if (typeof callbacks.afterUpdate == "function") {
+								callbacks.afterUpdate(event.key, val);
+							}
+						}, 0);
+					}
 				}
 			},
 			{ signal: this.#signal }
@@ -144,7 +149,7 @@ export default class UIKitEventListeners {
 		y: number = 0,
 		width: number = 100,
 		height: number = 50,
-		callbacks: any,
+		callbacks: textboxCallbackObject,
 		options = defaultConfig.uikitTextarea
 	) {
 		element.addEventListener(
@@ -153,13 +158,19 @@ export default class UIKitEventListeners {
 				const val = String(element.value);
 
 				if (event.code == "Enter") {
-					if (typeof callbacks.enter !== "function") return;
-
-					callbacks.enter(val);
+					if (typeof callbacks.enter == "function")
+						callbacks.enter(val);
 				} else {
-					if (typeof callbacks.update !== "function") return;
+					if (typeof callbacks.beforeUpdate == "function")
+						callbacks.beforeUpdate(event.key, val);
 
-					callbacks.update(event.key, val);
+					if (typeof callbacks.afterUpdate == "function") {
+						setTimeout(() => {
+							if (typeof callbacks.afterUpdate == "function") {
+								callbacks.afterUpdate(event.key, val);
+							}
+						}, 0);
+					}
 				}
 			},
 			{ signal: this.#signal }

@@ -37,8 +37,9 @@ export interface step extends ConfigStep {
 }
 
 export interface textboxCallbackObject {
-	update?: (key: string, value: string) => void;
-	enter?: (value: string) => void;
+	beforeUpdate?: (key: string, value: string) => any;
+	afterUpdate?: (key: string, value: string) => any;
+	enter?: (value: string) => any;
 }
 export interface canvasRenderingStep {
 	type: "line" | "rectangle" | "text" | "image";
@@ -52,12 +53,14 @@ export type uikitTextboxConfig = {
 	fontSize?: number;
 	disableMobileAutocorrect?: boolean;
 	font?: string;
+	fontColour?: Colour;
 };
 export type uikitTextareaConfig = {
 	isInvisible?: boolean;
 	isEmpty?: boolean;
 	disableMobileAutocorrect?: boolean;
 	font?: string;
+	fontColour?: Colour;
 };
 export type uikitBoxConfig = {
 	borderRadius?:

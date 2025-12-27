@@ -48,7 +48,7 @@ export default class UiKitTransitioners {
 				case 5:
 					// font
 					setElementStyle(element, "fontFamily", newArg ?? "");
-					return false;
+					break;
 				default:
 					throw new Error("Unknown key: " + i);
 			}
@@ -287,9 +287,24 @@ export default class UiKitTransitioners {
 					break;
 				case 5:
 					// options
+					const old: uikitTextareaConfig = oldArg;
+					const newer: uikitTextareaConfig = newArg;
 
-					if (oldArg !== newArg) return false;
+					if (
+						old.disableMobileAutocorrect !==
+						newer.disableMobileAutocorrect
+					)
+						return false;
 
+					setElementStyle(element, "fontFamily", newArg.font);
+					if (old.font !== newer.font) return false;
+					if (old.isEmpty !== newer.isEmpty) return false;
+					if (old.isInvisible !== newer.isInvisible) return false;
+					setElementStyle(element, "color", newArg.fontColour);
+
+					break;
+				case 6:
+					// id which doesn't matter
 					break;
 				default:
 					throw new Error("Unknown key: " + i);
@@ -342,10 +357,16 @@ export default class UiKitTransitioners {
 						newer.disableMobileAutocorrect
 					)
 						return false;
+
+					setElementStyle(element, "fontFamily", newArg.font);
 					if (old.font !== newer.font) return false;
 					if (old.isEmpty !== newer.isEmpty) return false;
 					if (old.isInvisible !== newer.isInvisible) return false;
+					setElementStyle(element, "color", newArg.fontColour);
 
+					break;
+				case 6:
+					// id which doesn't matter
 					break;
 				default:
 					throw new Error("Unknown key: " + i);
@@ -469,6 +490,9 @@ export default class UiKitTransitioners {
 				case 3:
 					// height
 					setElementStyle(element, "height", `${newArg}px`);
+					break;
+				case 4:
+					// id which doesn't matter
 					break;
 				default:
 					throw new Error("Unknown key: " + i);

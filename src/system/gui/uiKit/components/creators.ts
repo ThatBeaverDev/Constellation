@@ -94,7 +94,7 @@ export default class uiKitCreators {
 		y = 0,
 		string = "",
 		fontSize: number,
-		colour: Colour,
+		colour?: Colour,
 		font?: string
 	) => {
 		const text = document.createElement("p");
@@ -105,7 +105,7 @@ export default class uiKitCreators {
 		text.style.left = `${x}px`;
 		text.style.top = `${y}px`;
 		text.style.fontSize = `${fontSize}px`;
-		text.style.color = colour;
+		if (colour) text.style.color = colour;
 		if (font) text.style.fontFamily = font;
 
 		if (this.#window) this.#window.body.appendChild(text);
@@ -158,7 +158,8 @@ export default class uiKitCreators {
 			textbox.autocapitalize = "off";
 			textbox.spellcheck = false;
 		}
-		if (options.font) textbox.style.fontFamily = options.font;
+		if (options.font) textbox.style.fontFamily = options.font ?? "";
+		if (options.fontColour) textbox.style.color = options.fontColour;
 
 		textbox.id = String(window.renderID++);
 		textbox.placeholder = backtext;
@@ -283,6 +284,7 @@ export default class uiKitCreators {
 			area.spellcheck = false;
 		}
 		if (options.font) area.style.fontFamily = options.font;
+		if (options.fontColour) area.style.color = options.fontColour;
 
 		if (this.#window) this.#window.body.appendChild(area);
 
