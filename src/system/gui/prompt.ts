@@ -203,7 +203,9 @@ export async function showUserPrompt(
 						popup.remove();
 						resolve(ui.getTextboxContent(textbox) || "");
 					}
-				}
+				},
+				undefined,
+				"input"
 			);
 			y += 25 + innerPadding;
 
