@@ -101,11 +101,13 @@ export default class KeystoneSearch extends Overlay {
 			40,
 			"Search for apps...",
 			{
-				update: () => {
+				beforeUpdate: () => {
 					this.panelkit.keyboardFocus = 1;
 					this.search(textbox.getContents() ?? "");
 				}
-			}
+			},
+			{},
+			"searchbox"
 		);
 
 		if (this.counter++ % 50 == 0) {
