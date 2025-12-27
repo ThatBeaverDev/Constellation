@@ -266,7 +266,9 @@ export default class systemLoginInterface extends GuiApplication {
 
 						await this.attemptUserPassword(this.user, value);
 					}
-				}
+				},
+				{},
+				"passwordBox"
 			);
 
 			const errorTextWidth = this.renderer.getTextWidth(this.errorText);

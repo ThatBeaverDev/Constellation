@@ -11,7 +11,8 @@ export default class TerminalUI extends GuiApplication {
 			0,
 			0,
 			this.renderer.windowWidth,
-			this.renderer.windowHeight
+			this.renderer.windowHeight,
+			"terminal"
 		);
 
 		this.renderer.commit();
