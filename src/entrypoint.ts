@@ -71,7 +71,7 @@ async function startupKernel(root: string, canInstall: boolean = true) {
 	console.debug("Starting kernel at ", root);
 
 	// get the needed libraries
-	const { fsApi, processor } = getRequiredLibraries(root);
+	const { fsApi, processor, blobifier } = getRequiredLibraries(root);
 
 	// wait for the installation index if it's a promise
 	if (installationIndexFile instanceof Promise) {
@@ -170,6 +170,10 @@ async function startupKernel(root: string, canInstall: boolean = true) {
 
 		await startupKernel(root, false);
 	}
+
+	/* -------------------- Terminate things -------------------- */
+
+	await blobifier.terminate();
 }
 
 /* -------------------- BootKeys -------------------- */
