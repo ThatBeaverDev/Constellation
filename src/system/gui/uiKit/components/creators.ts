@@ -257,6 +257,15 @@ export default class uiKitCreators {
 
 		bar.appendChild(progressBar);
 
+		if (this.#window) {
+			const ui = this.#ConstellationKernel.ui;
+			if (ui.type == "GraphicalInterface") {
+				ui.container.addEventListener("pointerup", (e) => {
+					progressBar.dataset.isDragging = "false";
+				});
+			}
+		}
+
 		if (this.#window) this.#window.body.appendChild(bar);
 
 		return bar;
