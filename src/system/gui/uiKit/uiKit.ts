@@ -365,7 +365,7 @@ export class UiKitRendererClass {
 		height: number = 20,
 		backtext: string,
 		callbacks: textboxCallbackObject,
-		options: uikitTextboxConfig = defaultConfig.uikitTextbox,
+		options?: uikitTextboxConfig,
 		id?: string
 	) {
 		if (callbacks.enter) isArrow(callbacks.enter, true);
@@ -635,16 +635,21 @@ export class UiKitRendererClass {
 				}
 			);
 
-			element.addEventListener(
-				"contextmenu",
-				(event: PointerEvent) => {
-					event.preventDefault();
-					if (!right) return;
+			if (right) {
+				element.addEventListener(
+					"contextmenu",
+					(event: PointerEvent) => {
+						event.preventDefault();
+						if (!right) return;
 
-					right(event.clientX / guiScale, event.clientY / guiScale);
-				},
-				{ signal: this.#signal }
-			);
+						right(
+							event.clientX / guiScale,
+							event.clientY / guiScale
+						);
+					},
+					{ signal: this.#signal }
+				);
+			}
 		} else {
 			throw new UIError(`onClick called with invalid elemID: ${elemID}`);
 		}

@@ -134,13 +134,7 @@ export default class UIKitEventListeners {
 			signal: this.#signal
 		});
 
-		this.#gui.container.addEventListener(
-			"pointerup",
-			(e) => {
-				element.dataset.isDragging = "false";
-			},
-			{ signal: this.#signal }
-		);
+		// pointerup is in the creator script since it's constant
 	}
 
 	uikitTextarea(
