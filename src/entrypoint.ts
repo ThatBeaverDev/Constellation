@@ -231,6 +231,8 @@ function detectKeyPresses(event: KeyboardEvent) {
 						const contents = await file.text();
 						const object = JSON.parse(contents);
 
+						input.remove();
+
 						resolve(object);
 					}
 				});
