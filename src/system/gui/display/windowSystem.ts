@@ -199,11 +199,6 @@ export default class WindowSystem {
 			{ passive: false }
 		);
 
-		document.addEventListener(
-			"keydown",
-			this.interactions.keydown.bind(this.interactions)
-		);
-
 		this.styleElem = document.createElement("style");
 		this.styleElem.id = String(window.renderID++);
 		this.styleElem.className = "windowsAnimationStyles";
@@ -263,10 +258,6 @@ export default class WindowSystem {
 		document.removeEventListener(
 			"touchmove",
 			this.interactions.documentTouchMove
-		);
-		document.removeEventListener(
-			"keydown",
-			this.interactions.keydown.bind(this.interactions)
 		);
 
 		// close windows
