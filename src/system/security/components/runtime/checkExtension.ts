@@ -19,7 +19,7 @@ export async function checkProgramClass(
 	});
 
 	return new Promise((resolve: Function) => {
-		worker.onmessage = (e) => {
+		worker.onmessage = (e: MessageEvent<boolean>) => {
 			resolve(e.data);
 			worker.terminate();
 		};

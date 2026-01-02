@@ -287,7 +287,7 @@ export class ProgramRuntime {
 		);
 
 		const isOk = await this.Verifier.verifyApplication(appdir);
-		if (!isOk.result)
+		if (isOk.result !== true)
 			throw new Error(
 				`Application at ${appdir} failed checks: ${isOk.reason}`
 			);
