@@ -63,9 +63,6 @@ compile() {
     # Package CoreServices directory
     ./scripts/tcpkg build/services build/indexes/services.idx -override=true
 
-    # Build languageRuntime
-    ./scripts/tcpkg build/apps/gui/crlRuntime build/indexes/com.constellation.crlRuntime.idx -override=true
-
     # Build previewer
     ./scripts/tcpkg build/apps/gui/preview build/indexes/com.constellation.preview.idx -override=true
 
