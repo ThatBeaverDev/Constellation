@@ -49,10 +49,10 @@
 
 .prompt > input {
 	height: var(--line-height);
-	
+
 	border: none;
 	outline: none;
 	background-color: transparent;
-	
+
 	font-family: monospace !important;
 }
