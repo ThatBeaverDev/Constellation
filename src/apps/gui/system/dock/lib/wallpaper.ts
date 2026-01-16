@@ -1,26 +1,17 @@
-//import TerminalAlias from "../../../lib/terminalAlias.js";
-//const windowsAPI = await env.include("/System/windows.js");
-//
-//export default async function wallpaper(
-//	parent: TerminalAlias,
-//	intent: string,
-//	...args: string[]
-//): Promise<string> {
-//	switch (intent) {
-//		case "set": {
-//			const dir = parent.env.fs.resolve(parent.path, args[0]);
-//
-//			const content = await parent.env.fs.readFile(dir);
-//
-//			const val = `url('${content.data}')`;
-//
-//			windowsAPI.setCSSVariable("wallpaper-url", val);
-//
-//			return "";
-//		}
-//		default:
-//			return "Wallpaper intents:\n  set - Sets the wallpaper\n  get - Gets the wallpaper";
-//	}
-//}
+import TerminalAlias from "/System/lib/terminalAlias";
 
-// TODO: Fix - broken since windows API is not available anymore
+export default function changeWallpaper(parent: TerminalAlias, path?: string) {
+	const cwm = parent.env.getPIDOfName("ConstellationWindowManager");
+	if (!cwm) {
+		parent.env.warn(
+			"Constellation Window Manager is not running. Cannot change wallpaper."
+		);
+		return;
+	}
+
+	parent.env.sendmessage(
+		cwm,
+		"changeWallpaper",
+		path ? parent.env.fs.resolve(parent.path, path) : undefined
+	);
+}

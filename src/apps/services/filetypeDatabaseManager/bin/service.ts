@@ -1,19 +1,21 @@
-import { appFindResult, fileInfo } from "../../../gui/keystone/lib/appfind.js";
-import { requiredAllocations } from "../lib/allocateFileTypeToApplication.js";
+import { appFindResult, fileInfo } from "../lib/appfind.js";
+import { IPCMessage } from "/System/runtime/components/messages.js";
 
 export interface filetypeDatabase {
-	/**
-	 * Filetype-to-directory mapping
-	 */
-	assignments: Record<string, string[]>;
+	/** All apps that support each filetype */
+	handlers: Record<string, string[]>;
+
+	/** User-chosen defaults */
+	defaults: Record<string, string>;
+
+	/** App metadata */
 	apps: fileInfo[];
 }
 
 let running: boolean = false;
-let extraAssignments: typeof requiredAllocations = [];
 export default class filetypeDatabaseManager extends Service {
 	databaseDirectory = "/System/ftypedb.json";
-	database?: filetypeDatabase;
+	database: filetypeDatabase = { apps: [], defaults: {}, handlers: {} };
 	lastIndex: number = 0;
 	/**
 	 * How often to reindex programs
@@ -22,41 +24,103 @@ export default class filetypeDatabaseManager extends Service {
 
 	indexLock: boolean = false;
 
-	buildAssignments(db: filetypeDatabase) {
-		db.assignments = {};
-		const assignments = db.assignments;
+	defaultRequests: {
+		filetype: string;
+		newApplication: string;
+		requestee: string;
+	}[] = [];
+	acceptedDefaultRequests: {
+		filetype: string;
+		newApplication: string;
+		requestee: string;
+	}[] = [];
+	isRequesting: boolean = false;
 
-		function assign(filetype: string, directory: string) {
-			if (assignments[filetype] == undefined) {
-				assignments[filetype] = [directory];
-			} else {
-				assignments[filetype].push(directory);
+	buildHandlers(db: filetypeDatabase) {
+		db.handlers = {};
+
+		function add(filetype: string, app: string) {
+			if (!db.handlers[filetype]) {
+				db.handlers[filetype] = [];
+			}
+			if (!db.handlers[filetype].includes(app)) {
+				db.handlers[filetype].push(app);
 			}
 		}
+		const setDefault = (
+			filetype: string,
+			app: string,
+			force: boolean = false
+		) => {
+			if (!db.defaults[filetype] || force == true) {
+				db.defaults[filetype] = app;
+				return true;
+			} else {
+				return false;
+			}
+		};
 
 		for (const program of db.apps) {
 			for (const filetype of program.filetypes) {
-				assign(filetype, program.directory);
+				add(filetype, program.directory);
 			}
 		}
 
-		extraAssignments = [...extraAssignments, ...requiredAllocations];
+		for (const request of this.defaultRequests) {
+			const passed = setDefault(request.filetype, request.newApplication);
 
-		for (const assignment of extraAssignments) {
-			assign(assignment.filetype, assignment.application);
+			const askUser = async () => {
+				// wait if we're already asking the user
+				if (this.isRequesting) {
+					await new Promise<void>((resolve) => {
+						setInterval(() => {
+							if (!this.isRequesting) {
+								resolve();
+							}
+						}, 250);
+					});
+				}
+				this.isRequesting = true;
+
+				const exec = await this.env.exec(
+					this.env.fs.resolve("./components/req.appl"),
+					[
+						request.requestee,
+						request.filetype,
+						this.database.defaults[request.filetype],
+						request.newApplication
+					]
+				);
+				const result: boolean = await exec.promise;
+
+				if (result) {
+					this.acceptedDefaultRequests.push(request);
+				}
+
+				this.isRequesting = false;
+			};
+
+			if (!passed) {
+				askUser();
+			}
 		}
+		this.defaultRequests = [];
+
+		for (const accepted of this.acceptedDefaultRequests) {
+			setDefault(accepted.filetype, accepted.newApplication, true);
+		}
+		this.acceptedDefaultRequests = [];
 
 		return db;
 	}
 
 	async index() {
 		// startup, prevent double indexing
-		this.env.debug("indexing...");
 		if (this.indexLock == true) return;
 		this.indexLock = true;
 
-		// init db
-		const db: typeof this.database = { apps: [], assignments: {} };
+		this.env.debug("indexing...");
+		this.lastIndex = Date.now();
 
 		// run appfind
 		const shellResult = await this.env.shell.exec("appfind");
@@ -67,13 +131,10 @@ export default class filetypeDatabaseManager extends Service {
 
 		// process appfind
 		const appfind = shellResult.result as appFindResult;
-		db.apps = appfind.files;
+		this.database.apps = appfind.files;
 
-		// build assignments
-		let finalDb = this.buildAssignments(db);
+		this.buildHandlers(this.database);
 
-		// commit to the main object and write to disk
-		this.database = finalDb;
 		await this.env.fs.writeFile(
 			this.databaseDirectory,
 			JSON.stringify(this.database)
@@ -91,10 +152,17 @@ export default class filetypeDatabaseManager extends Service {
 
 		// startup shell
 		await this.env.shell.index();
+		this.shout("ftypedbmgr");
 
 		this.env.debug("Initialising filetype database...");
 
-		this.database = { assignments: {}, apps: [] };
+		try {
+			this.database = JSON.parse(
+				await this.env.fs.readFile(this.databaseDirectory)
+			);
+		} catch (e) {
+			// just a JSON parse error because it's empty. make a new one.
+		}
 
 		this.env.debug("Storing initial filetype database...", this.database);
 
@@ -108,7 +176,35 @@ export default class filetypeDatabaseManager extends Service {
 		const now = Date.now();
 		if (now - this.lastIndex > this.indexingInterval) {
 			this.index();
-			this.lastIndex = now;
+		}
+	}
+
+	onmessage(msg: IPCMessage): void {
+		switch (msg.intent) {
+			case "setDefault":
+				const filetype = msg.data[0];
+				const application = msg.data[1];
+				if (typeof filetype !== "string") return;
+				if (typeof application !== "string") return;
+
+				if (filetype[0] !== ".") {
+					this.env.warn(
+						msg,
+						"Requested filetype must be '.filetype' rather than 'filetype'"
+					);
+					return;
+				}
+
+				this.defaultRequests.push({
+					filetype,
+					newApplication: application,
+					requestee: msg.originDirectory
+				});
+
+				// index so we're up to date
+				this.index();
+
+				break;
 		}
 	}
 

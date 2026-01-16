@@ -1,5 +1,4 @@
 // globals.d.ts
-import { ApplicationAuthorisationAPI } from "./system/security/env.js";
 import * as executables from "./system/runtime/components/executables.js";
 
 export {}; // mark as module to allow global augment
@@ -21,8 +20,7 @@ declare global {
 		Service: typeof executables.Service;
 		Overlay: typeof executables.Overlay;
 		Module: typeof executables.Module;
-		env: ApplicationAuthorisationAPI;
-		runtime: "nodejs" | "browser" | "deno";
+		constellation: true;
 	}
 
 	const GuiApplication: typeof executables.GuiApplication;
@@ -33,4 +31,9 @@ declare global {
 	const Module: typeof executables.Module;
 
 	type ApplicationManifest = executables.ProgramManifest;
+	type PartialRecord<A extends string | number | symbol, B> = Partial<
+		Record<A, B>
+	>;
+
+	const constellation: true;
 }

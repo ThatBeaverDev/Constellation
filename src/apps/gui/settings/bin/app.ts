@@ -30,7 +30,8 @@ export default class systemSettings extends PanelKitGuiApplication {
 				icon: "house",
 				callback: () => {
 					this.page = "Home";
-				}
+				},
+				focused: this.page == "Home"
 			},
 
 			{ type: "title", text: "Networking" },
@@ -40,7 +41,8 @@ export default class systemSettings extends PanelKitGuiApplication {
 				icon: "cloud-download",
 				callback: () => {
 					this.page = "Updates";
-				}
+				},
+				focused: this.page == "Updates"
 			},
 			{
 				type: "item",
@@ -48,7 +50,8 @@ export default class systemSettings extends PanelKitGuiApplication {
 				icon: "globe",
 				callback: () => {
 					this.page = "Network";
-				}
+				},
+				focused: this.page == "Network"
 			},
 			{
 				type: "item",
@@ -56,17 +59,19 @@ export default class systemSettings extends PanelKitGuiApplication {
 				icon: "cloud",
 				callback: () => {
 					this.page = "Cloud";
-				}
+				},
+				focused: this.page == "Cloud"
 			},
 
-			//{ type: "title", text: "Graphical Shell" },
+			{ type: "title", text: "Graphical Shell" },
 			//{
 			//	type: "item",
 			//	text: "Dock",
 			//	icon: "dock",
 			//	callback: () => {
 			//		this.page = "Dock";
-			//	}
+			//	},
+			//	focused: this.page == "Dock"
 			//},
 			//{
 			//	type: "item",
@@ -74,8 +79,18 @@ export default class systemSettings extends PanelKitGuiApplication {
 			//	icon: "panels-top-left",
 			//	callback: () => {
 			//		this.page = "Menubar";
-			//	}
+			//	},
+			//	focused: this.page == "Menubar"
 			//},
+			{
+				type: "item",
+				text: "Wallpaper",
+				icon: "wallpaper",
+				callback: () => {
+					this.page = "Wallpaper";
+				},
+				focused: this.page == "Wallpaper"
+			},
 
 			{ type: "title", text: "System" },
 			{
@@ -84,7 +99,8 @@ export default class systemSettings extends PanelKitGuiApplication {
 				icon: "users",
 				callback: () => {
 					this.page = "Users";
-				}
+				},
+				focused: this.page == "Users"
 			}
 		);
 

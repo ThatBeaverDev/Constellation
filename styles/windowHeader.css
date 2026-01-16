@@ -4,7 +4,8 @@
 }
 
 .windowHeader {
-	background-color: var(--headerColour);
+	/*background-color: var(--panelColour);*/
+	background-color: transparent;
 
 	width: 100%;
 	height: var(--window-header-height);

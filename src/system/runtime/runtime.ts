@@ -6,15 +6,16 @@ import ProcessWaitingObject from "./components/appWaitingObject.js";
 import {
 	ApplicationAuthorisationAPI,
 	EnvironmentCreator
-} from "../security/env.js";
+} from "../security/components/env/env.js";
 import ConstellationKernel, { Terminatable } from "../kernel.js";
 import { dump } from "./components/crashed.js";
 import { defaultConfiguration } from "../constellation.config.js";
 import { UserPromptConfig } from "../gui/display/definitions.js";
-import ApplicationVerifier from "../security/runtimeDefender.js";
+import ApplicationVerifier from "../security/components/runtime/runtimeDefender.js";
 import { appName } from "./components/appName.js";
 import ImportResolver from "./components/resolver.js";
-import { isArrow } from "../security/isArrow.js";
+import { isArrow } from "../security/components/testers/isArrow.js";
+import { MutexManager } from "./components/mutexes.js";
 
 const path = "/System/runtime.js";
 
@@ -61,7 +62,7 @@ export interface executionProcessResult extends executionResult {
 	info: ProcessInformation;
 }
 
-const crlDirectory = "/System/CoreExecutables/crlRuntime.appl";
+const crlDirectory = "/removed.appl";
 
 function generateTerminationCode(length: number) {
 	var result = "";
@@ -100,7 +101,8 @@ export class ProgramRuntime {
 	 */
 	EnvironmentCreator: EnvironmentCreator & Terminatable;
 	Verifier: ApplicationVerifier & Terminatable;
-	associations: Partial<Record<string, Process["id"]>> = {};
+	Mutexes: MutexManager & Terminatable;
+	associations: PartialRecord<string, Process["id"]> = {};
 	id: number = nextProgramRuntimeId++;
 	#ConstellationKernel: ConstellationKernel;
 	isTerminating: boolean = false;
@@ -116,6 +118,7 @@ export class ProgramRuntime {
 			this.#ConstellationKernel.lib.blobifier
 		);
 		this.Verifier = new ApplicationVerifier(ConstellationKernel);
+		this.Mutexes = new MutexManager();
 	}
 
 	documentKeyDown(event: KeyboardEvent) {
@@ -284,9 +287,9 @@ export class ProgramRuntime {
 		);
 
 		const isOk = await this.Verifier.verifyApplication(appdir);
-		if (!isOk)
+		if (isOk.result !== true)
 			throw new Error(
-				`Application at ${appdir} is damaged and can't be ran.`
+				`Application at ${appdir} failed checks: ${isOk.reason}`
 			);
 
 		/* ---------- Work out directory to import from ---------- */
@@ -587,7 +590,13 @@ export class ProgramRuntime {
 		if (proc instanceof GuiApplication) {
 			try {
 				proc?.renderer?.terminate();
-			} catch {}
+			} catch (e) {
+				this.#ConstellationKernel.lib.logging.warn(
+					path,
+					"Couldn't terminate process' renderer: ",
+					e
+				);
+			}
 		}
 
 		// remove the parent's child item
@@ -625,5 +634,6 @@ export class ProgramRuntime {
 		}
 
 		await this.importsRewriter.terminate();
+		this.Mutexes.terminate();
 	}
 }

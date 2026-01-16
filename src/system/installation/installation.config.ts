@@ -114,11 +114,6 @@ export const files: Record<
 		type: "application",
 		directory: "/System/CoreExecutables/systemLoginInterface.appl"
 	},
-	// Calculator
-	"/build/indexes/com.constellation.calculator.idx": {
-		type: "application",
-		directory: "/Applications/calculator.appl"
-	},
 	// Out of box experience
 	"/build/indexes/com.constellation.oobe.idx": {
 		type: "application",
@@ -134,12 +129,6 @@ export const files: Record<
 	"/build/indexes/services.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreServices"
-	},
-
-	// languageRunner
-	"/build/indexes/com.constellation.crlRuntime.idx": {
-		type: "application",
-		directory: "/System/CoreExecutables/crlRuntime.appl"
 	},
 
 	// preview
@@ -181,7 +170,7 @@ export const files: Record<
 	// desktop
 	"/build/indexes/com.constellation.desktop.idx": {
 		type: "application",
-		directory: "/System/CoreExecutables/desktop.appl"
+		directory: "/System/CoreExecutables/Desktop.appl"
 	},
 
 	// textedit

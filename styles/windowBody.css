@@ -1,6 +1,9 @@
 .windowContainer {
-	--headerColour: var(--bg-light);
+	--panelColour: rgba(255 255 255 / 10%);
 	--backgroundColour: var(--bg-dark);
+	--headerBlur: 15px;
+
+	white-space: break-spaces;
 
 	background-color: var(--backgroundColour);
 
@@ -45,10 +48,6 @@
 
 .windowContainer.focused {
 	border: var(--border) solid 2px;
-}
-
-.windowContainer:not(.focused) {
-	--headerColour: var(--bg);
 }
 
 .windowContainer.invisible {

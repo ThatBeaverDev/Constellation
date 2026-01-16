@@ -2,10 +2,15 @@ import { pathIcon } from "pathinf";
 import { Stats } from "../../../../fs/BrowserFsTypes.js";
 import PanelKit from "panelkit";
 import { openFile } from "gui";
-import { directoryPointType } from "../../../../system/security/definitions.js";
+import { directoryPointType } from "../../../../system/security/components/definitions.js";
 import { bytesToSize } from "../components/utils.js";
+import {
+	archiveTypeSupported,
+	getFilesystemInterface
+} from "/System/CoreLibraries/archives.js";
+import { FilesystemInterface } from "/System/security/components/env/components/fs.js";
 
-export interface listing {
+export interface Listing {
 	name: string;
 	path: string;
 	icon: string;
@@ -14,410 +19,542 @@ export interface listing {
 	hasAccess?: boolean;
 }
 
-export default class finder extends GuiApplication {
-	name: string = "Finder";
+export default class Finder extends GuiApplication {
+	name = "Finder";
 
-	path: string = "/";
-	selector: number = 0;
-	listing: listing[] = [];
+	path = "/";
+	selector = 0;
+	listing: Listing[] = [];
+	location?: Listing;
 	textDisplay?: string;
-	location?: listing;
-	icon: string = "folder";
-	ok: boolean = false;
-	sidebarWidth: number = 100;
+	ok = false;
+
+	sidebarWidth = 100;
 	counter = 0;
 
-	// submodules
 	panelkit = new PanelKit(this.renderer);
 
+	currentFS?: FilesystemInterface;
+	dialogueState:
+		| { isDialogue: false }
+		| { isDialogue: true; allow: string[] } = { isDialogue: false };
+
+	/* ───────────────────────────── Init ───────────────────────────── */
+
 	async init() {
-		const [initialDirectory = "/"] = this.args;
+		const [initialDirectory = "/", dialogueState = false] = this.args;
+
+		const isDialogue =
+			dialogueState == true || dialogueState?.dialogue == true;
+
+		this.dialogueState.isDialogue = isDialogue;
+		if (this.dialogueState.isDialogue == true) {
+			this.dialogueState.allow = dialogueState?.allow ?? ["*"];
+
+			const width = 650;
+			const height = 550;
+
+			this.renderer.resizeWindow(width, height);
+			this.renderer.moveWindow(
+				(this.renderer.displayWidth - width) / 2,
+				(this.renderer.displayHeight - height) / 2
+			);
+		}
 
 		await this.cd(initialDirectory, false);
 
-		this.renderer.setIcon(
-			this.env.fs.resolve(this.directory, "./resources/icon.svg")
-		);
-
-		this.renderer.windowName = "Finder";
-		this.renderer.windowShortName = "Finder";
+		this.renderer.windowName = isDialogue
+			? "Select a File to open"
+			: "Finder";
+		this.renderer.windowShortName = isDialogue ? "Select File" : "Finder";
 	}
+
+	/* ───────────────────────────── Input ───────────────────────────── */
 
 	async keydown(
 		code: string,
-		metaKey: boolean,
-		altKey: boolean,
-		ctrlKey: boolean,
-		shiftKey: boolean,
+		meta: boolean,
+		alt: boolean,
+		ctrl: boolean,
+		shift: boolean,
 		repeat: boolean
 	) {
-		this.panelkit.keydown(code, metaKey, altKey, ctrlKey, shiftKey, repeat);
+		this.panelkit.keydown(code, meta, alt, ctrl, shift, repeat);
 
-		switch (code) {
-			case "Escape":
-				this.cd("..", false);
-				break;
-			case "KeyG":
-				// cd to user-provided directory
-				const target = await this.renderer.askUserQuestion(
-					"Go to Folder",
-					"Enter a directory to view",
-					this.env.fs.resolve(this.directory, "./resources/icon.svg")
-				);
+		if (code === "Escape") {
+			await this.cd("..", false);
+			return;
+		}
 
-				this.cd(target == "" ? "." : target, false);
-				break;
+		if (code === "KeyG") {
+			const target = await this.renderer.askUserQuestion(
+				"Go to Folder",
+				"Enter a directory to view",
+				this.env.fs.resolve(this.directory, "./resources/icon.svg")
+			);
+
+			await this.cd(target || ".", false);
 		}
 	}
 
+	/* ───────────────────────────── Navigation ───────────────────────────── */
+
 	async cd(directory: string, isRefresh: boolean) {
+		this.#resetState(isRefresh);
+
+		const resolvedPath = this.env.fs.resolve(this.path, directory);
+
+		if (this.currentFS == undefined || !isRefresh) {
+			this.currentFS = await getFilesystemInterface(
+				this.env.fs,
+				resolvedPath
+			);
+		}
+		const fs = this.currentFS;
+
+		const oldPath = this.path;
+		this.path = fs.resolve(this.path, directory);
+
+		let contents: string[];
+		try {
+			contents = await fs.listDirectory(this.path);
+		} catch (e: unknown) {
+			this.#handleDirectoryError(e, oldPath);
+			return;
+		}
+
+		if (!contents) {
+			this.renderer.prompt(`Directory at ${this.path} doesn't exist.`);
+			this.path = oldPath;
+			this.ok = true;
+			return;
+		}
+
+		this.location = await this.#generateListing(fs, ".");
+		this.listing = await this.#buildListings(fs, contents);
+
+		await this.#updateIcon(fs);
+		this.ok = true;
+	}
+
+	#resetState(isRefresh: boolean) {
 		this.ok = false;
 		this.textDisplay = "";
 		this.listing = [];
 
-		if (!isRefresh) this.panelkit.keyboardFocus = 0;
-
-		const oldDir = String(this.path);
-		if (oldDir !== directory) {
+		if (!isRefresh) {
+			this.panelkit.keyboardFocus = 0;
 			this.selector = 0;
 		}
+	}
 
-		this.path = this.env.fs.resolve(this.path, directory);
-		const dir = this.path;
-
-		let directoryContents;
-		try {
-			directoryContents = await this.env.fs.listDirectory(dir);
-		} catch (e: any) {
-			if (e.constructor.name == "PermissionsError") {
-				// this is just a no permissions case
-				this.textDisplay = `You don't have permission to view '${this.path}'`;
-				this.ok = true;
-				return;
-			}
-			this.renderer.prompt(
-				`Directory at ${this.path} doesn't exist.`,
-				String(e)
-			);
-
-			this.path = oldDir;
+	#handleDirectoryError(error: unknown, fallback: string) {
+		if (error?.constructor?.name === "PermissionsError") {
+			this.textDisplay = `You don't have permission to view '${this.path}'`;
 			this.ok = true;
 			return;
 		}
 
-		if (directoryContents == undefined) {
-			this.renderer.prompt(`Directory at ${this.path} doesn't exist.`);
-			this.path = oldDir;
-			this.ok = true;
-			return;
-		}
+		this.renderer.prompt(
+			`Directory at ${this.path} doesn't exist.`,
+			String(error)
+		);
 
-		let list: string[] = directoryContents;
-
-		// sort the list
-		list.sort();
-
-		// add the ascent button if possible (not at root)
-		if (dir !== "/") {
-			list = ["..", ...list];
-		}
-
-		const generateListing = async (
-			directory: string
-		): Promise<listing | undefined> => {
-			const path = this.env.fs.resolve(this.path, directory);
-
-			// get the type
-			let type: directoryPointType;
-			try {
-				type = await this.env.fs.typeOfFile(path);
-			} catch (e: unknown) {
-				if (e?.constructor?.name == "PermissionsError") {
-					// deal with it?
-					type = "none";
-				} else {
-					throw e;
-				}
-			}
-
-			let stat = await this.env.fs.stat(path);
-
-			const lastModifiedDate: Date | undefined = stat.mtime;
-			const creationDate: Date | undefined = stat.atime;
-
-			let lastModified;
-			if (lastModifiedDate == undefined || creationDate == undefined) {
-				// one of them is bad, just leave it
-				lastModified = "Insufficient Permissions";
-			} else {
-				const dates = [lastModifiedDate, creationDate];
-				dates.sort();
-				const latestDate = dates[1];
-
-				const monthDay = latestDate.getDate();
-				const month = latestDate.getMonth() + 1;
-				const year = latestDate.getFullYear();
-
-				const hour = String(latestDate.getHours()).padStart(2, "0");
-				const minute = String(latestDate.getMinutes()).padStart(2, "0");
-
-				lastModified = `${monthDay}/${month}/${year} at ${hour}:${minute}`;
-			}
-
-			const lastModifiedText =
-				lastModified == "Insufficient Permissions"
-					? ""
-					: `, Last Modified ${lastModified}`;
-
-			const getDirectorySubtext = async () => {
-				let list: string[];
-				try {
-					list = await this.env.fs.listDirectory(path);
-				} catch {
-					return "Insufficient Permissions.";
-				}
-
-				return String(list.length) + " Items" + lastModifiedText;
-			};
-
-			const getFileSubtext = async () => {
-				let stat: Stats;
-				try {
-					stat = await this.env.fs.stat(path);
-				} catch {
-					return "Insufficient Permissions.";
-				}
-
-				return bytesToSize(stat.size) + lastModifiedText;
-			};
-
-			const obj: listing = {
-				name: directory,
-				path,
-				icon: await pathIcon(this.env, path),
-				type,
-				subtext:
-					type == "directory"
-						? await getDirectorySubtext()
-						: await getFileSubtext()
-			};
-
-			if (type == "directory") {
-				obj.hasAccess = obj.subtext == "Insufficient Permissions.";
-			}
-
-			return obj;
-		};
-
-		this.location = await generateListing(".");
-
-		let listings: listing[] = [];
-		for (const i in list) {
-			const listing = await generateListing(list[i]);
-
-			if (listing !== undefined) {
-				listings.push(listing);
-			}
-		}
-
-		this.listing = listings;
-
-		const newIcon = await pathIcon(this.env, this.path);
-		if (newIcon !== this.icon) {
-			this.icon = newIcon;
-		}
-
+		this.path = fallback;
 		this.ok = true;
 	}
 
-	isApplication(directory: string) {
-		return directory.endsWith(".appl") || directory.endsWith(".srvc");
+	/* ───────────────────────────── Listings ───────────────────────────── */
+
+	async #buildListings(
+		fs: FilesystemInterface,
+		contents: string[]
+	): Promise<Listing[]> {
+		const list = [...contents].sort();
+
+		const results: Listing[] = [];
+
+		if (this.path !== "/") {
+			const parentFS = await getFilesystemInterface(
+				this.env.fs,
+				fs.resolve(this.path, "..")
+			);
+
+			const entry = await this.#generateListing(parentFS, "..");
+			if (entry) results.push(entry);
+		}
+
+		for (const name of list) {
+			const entry = await this.#generateListing(fs, name);
+			if (entry) results.push(entry);
+		}
+
+		return results;
 	}
 
+	async #generateListing(
+		fs: FilesystemInterface,
+		name: string
+	): Promise<Listing | undefined> {
+		const path = fs.resolve(this.path, name);
+
+		let type: directoryPointType = "none";
+		try {
+			type = await fs.typeOfFile(path);
+		} catch (e: unknown) {
+			if (e?.constructor?.name !== "PermissionsError") {
+				throw e;
+			}
+		}
+
+		const stat = await fs.stat(path);
+		const lastModifiedText = this.#formatModified(stat);
+
+		const subtext =
+			type === "directory"
+				? await this.#directorySubtext(fs, path, lastModifiedText)
+				: await this.#fileSubtext(fs, path, lastModifiedText);
+
+		let icon = "";
+		try {
+			icon = await pathIcon(fs, path);
+		} catch (e) {
+			this.env.warn(e);
+		}
+
+		return {
+			name,
+			path,
+			type,
+			icon,
+			subtext,
+			hasAccess:
+				type === "directory" && subtext === "Insufficient Permissions."
+		};
+	}
+
+	#formatModified(stat: Stats): string {
+		if (!stat.mtime || !stat.atime) return "";
+
+		const date = stat.mtime > stat.atime ? stat.mtime : stat.atime;
+
+		const d = date.getDate();
+		const m = date.getMonth() + 1;
+		const y = date.getFullYear();
+		const h = String(date.getHours()).padStart(2, "0");
+		const min = String(date.getMinutes()).padStart(2, "0");
+
+		return `, Last Modified ${d}/${m}/${y} at ${h}:${min}`;
+	}
+
+	async #directorySubtext(
+		fs: FilesystemInterface,
+		path: string,
+		modified: string
+	) {
+		try {
+			const list = await fs.listDirectory(path);
+			return `${list.length} Items${modified}`;
+		} catch {
+			return "Insufficient Permissions.";
+		}
+	}
+
+	async #fileSubtext(
+		fs: FilesystemInterface,
+		path: string,
+		modified: string
+	) {
+		try {
+			const stat = await fs.stat(path);
+			return `${bytesToSize(stat.size)}${modified}`;
+		} catch {
+			return "Insufficient Permissions.";
+		}
+	}
+
+	async #updateIcon(fs: FilesystemInterface) {
+		try {
+			const icon = await pathIcon(fs, this.path);
+
+			this.renderer.setIcon(icon);
+		} catch (e) {
+			this.env.warn(e);
+		}
+	}
+
+	/* ───────────────────────────── Rendering ───────────────────────────── */
+
 	frame() {
-		if (this.location == undefined) return;
-		if (this.counter++ % 250 == 0) this.cd(this.path, true);
+		if (!this.location || !this.ok) return;
 
-		// insure we are ready to render
-		if (!this.ok) return;
-
-		this.renderer.clear();
-
-		// prevent drawing when the listing is blank
-		if (this.listing == undefined) {
+		if (this.counter++ % 1000 === 0) {
+			this.cd(this.path, true);
 			return;
 		}
 
+		this.renderer.clear();
+		this.#renderSidebar();
+		this.#renderContent();
+		this.renderer.commit();
+	}
+
+	#renderSidebar() {
 		const panels = this.panelkit;
 
-		// sidebar
+		const user = this.env.users.userInfo(this.env.user);
+
+		const jump = (dir: string) => {
+			this.cd(this.env.fs.resolve(user?.directory || "/", dir), false);
+		};
+
+		const isFocused = (dir: string) => {
+			return (
+				this.env.fs.resolve(user?.directory || "/", dir) == this.path
+			);
+		};
+
 		panels.sidebar(
 			{ type: "title", text: "Important" },
 			{
 				type: "item",
 				text: "Documents",
 				icon: "file-stack",
-				callback: () => {
-					const userinf = this.env.users.userInfo(this.env.user);
-
-					this.cd(
-						this.env.fs.resolve(
-							userinf?.directory || "/",
-							"./Documents"
-						),
-						false
-					);
-				}
+				callback: () => jump("Documents"),
+				focused: isFocused("Documents")
 			},
 			{
 				type: "item",
 				text: "Desktop",
 				icon: "dock",
-				callback: () => {
-					const userinf = this.env.users.userInfo(this.env.user);
-
-					this.cd(
-						this.env.fs.resolve(
-							userinf?.directory || "/",
-							"./Desktop"
-						),
-						false
-					);
-				}
+				callback: () => jump("Desktop"),
+				focused: isFocused("Desktop")
 			},
 			{
 				type: "item",
 				text: "Notes",
 				icon: "notebook",
-				callback: () => {
-					const userinf = this.env.users.userInfo(this.env.user);
-
-					this.cd(
-						this.env.fs.resolve(
-							userinf?.directory || "/",
-							"./Notes"
-						),
-						false
-					);
-				}
+				callback: () => jump("Notes"),
+				focused: isFocused("Notes")
 			},
 			{
 				type: "item",
 				text: "Home",
 				icon: "house",
-				callback: () => {
-					const userinf = this.env.users.userInfo(this.env.user);
+				callback: () => jump("."),
+				focused: isFocused(".")
+			},
 
-					this.cd(userinf?.directory || "/", false);
-				}
+			{ type: "title", text: "Key Locations" },
+			{
+				type: "item",
+				text: "Root",
+				icon: "hard-drive",
+				callback: () => jump("/"),
+				focused: isFocused("/")
+			},
+			{
+				type: "item",
+				text: "Applications",
+				icon: "square-function",
+				callback: () => jump("/Applications"),
+				focused: isFocused("/Applications")
+			},
+			{
+				type: "item",
+				text: "Users",
+				icon: "users-round",
+				callback: () => jump("/Users"),
+				focused: isFocused("/Users")
 			}
 		);
+	}
 
-		// body
+	#renderContent() {
+		const panels = this.panelkit;
+
 		panels.reset();
+		panels.doubleClickToInteract = true;
 
-		const showPropertiesOfPath = (path: string) => {
+		const properties = (path: string) =>
 			this.env.exec(
 				this.env.fs.resolve("./components/fileproperties.appl"),
 				[path]
 			);
-		};
 
-		const RightClick = (directory: string) => {
-			return (x: number, y: number) => {
-				this.renderer.setContextMenu(x, y, undefined, {
-					"Show Contents": this.isApplication(directory)
-						? async () => {
-								await this.cd(directory, false);
-							}
-						: undefined,
-					Properties: () => showPropertiesOfPath(directory),
-					Duplicate: async () => {
-						await this.env.fs.copy(directory, `${directory} copy`);
-						this.cd(this.path, false);
-					},
-					Rename: async () => {
-						const newName = await this.renderer.askUserQuestion(
-							"Rename Item",
-							"What should this item by named?",
-							"folder"
-						);
+		const contextMenu = (path: string) => (x: number, y: number) =>
+			this.renderer.setContextMenu(x, y, undefined, {
+				"Show Contents": this.isApplication(path)
+					? () => this.cd(path, false)
+					: undefined,
+				"Open With": () => {
+					this.openFile(path, {
+						forcePicker: true
+					});
+				},
+				Properties: () => properties(path),
+				Duplicate: async () => {
+					await this.env.fs.copy(path, `${path} copy`);
+					this.cd(this.path, false);
+				},
+				Rename: async () => {
+					const name = await this.renderer.askUserQuestion(
+						"Rename Item",
+						"What should this item be named?",
+						"folder"
+					);
 
-						let parentFolder = directory.textBeforeLast("/");
-						if (parentFolder == "") parentFolder = "/";
+					if (!name) return;
 
-						const newDirectory = this.env.fs.resolve(
-							parentFolder,
-							newName
-						);
+					let parent = path.textBeforeLast("/") || "/";
+					await this.env.fs.move(
+						path,
+						this.env.fs.resolve(parent, name)
+					);
 
-						await this.env.fs.move(directory, newDirectory);
-						this.cd(this.path, false);
-					},
-					Delete: async () => {
-						await this.env.shell.index();
-						await this.env.shell.exec("rm", directory);
-
-						this.cd(this.path, false);
-					}
-				});
-			};
-		};
+					this.cd(this.path, false);
+				},
+				Delete: async () => {
+					await this.env.shell.exec("rm", path);
+					this.cd(this.path, false);
+				}
+			});
 
 		panels.mediumCard(
-			`${this.location.path} - Current Location`,
-			this.location.subtext,
-			this.location.icon,
+			`${this.location?.path ?? "/"} - Current Location`,
+			this.location?.subtext ?? "",
+			this.location?.icon ?? "",
 			undefined,
-			RightClick(this.location.path),
+			contextMenu(this.location?.path ?? ""),
 			{
 				type: "button",
 				text: "Properties",
-				onClick: () => {
-					if (!this.location?.path) return;
-
-					showPropertiesOfPath(this.location.path);
-				}
+				onClick: () => properties(this.location!.path)
 			}
 		);
 
 		panels.title("Directory contents");
 
-		this.listing.forEach((item) => {
+		for (const item of this.listing) {
+			if (
+				this.dialogueState.isDialogue &&
+				item.type !== "directory" &&
+				!this.#dialogueCanSubmit(item)
+			) {
+				continue;
+			}
+
 			panels.mediumCard(
 				item.name,
 				item.subtext,
 				item.icon,
-				() => {
-					this.openFile(item.path);
-				},
-				RightClick(item.path),
+				() => this.openFile(item.path),
+				contextMenu(item.path),
 				{
 					type: "button",
 					text: "Properties",
-					onClick: () => {
-						showPropertiesOfPath(item.path);
-					}
+					onClick: () => properties(item.path)
 				}
 			);
-		});
+		}
 
-		this.renderer.commit();
+		if (this.dialogueState.isDialogue) {
+			const selection = this.listing[this.panelkit.keyboardFocus - 2];
+			const isAllowedSubmission = this.#dialogueCanSubmit(selection);
+
+			this.panelkit.bottomBar(
+				{
+					type: "string",
+					text: selection
+						? `'${selection?.path.textAfterAll("/")}' Selected.`
+						: "Nothing Selected."
+				},
+				{
+					type: "button",
+					text: "Done",
+					onclick: () => {
+						if (selection) this.#pickerSubmit(selection);
+					},
+					isPrimary: true,
+					allow: isAllowedSubmission
+				}
+			);
+		}
 	}
 
-	async openFile(path: string) {
-		const stats = await this.env.fs.stat(path);
+	/* ───────────────────────────── Utilities ───────────────────────────── */
 
-		const isDirectory = stats.isDirectory();
+	isApplication(path: string) {
+		return path.endsWith(".appl") || path.endsWith(".srvc");
+	}
 
-		if (isDirectory) {
-			if (this.isApplication(path)) {
-				this.env.exec(path);
-			} else {
-				await this.cd(path, false);
-			}
-		} else {
-			openFile(this.env, path);
+	async openFile(
+		path: string,
+		options?: {
+			program?: string;
+			allowPicker?: boolean;
+			forcePicker?: boolean;
 		}
+	) {
+		const fs = await getFilesystemInterface(this.env.fs, path);
+		const stat = await fs.stat(path);
+
+		const isDirectory = stat.isDirectory();
+		const isSupportedArchive = await archiveTypeSupported(
+			this.env.fs,
+			path
+		);
+
+		if (isDirectory || isSupportedArchive) {
+			this.isApplication(path)
+				? this.env.exec(path)
+				: this.cd(path, false);
+			return;
+		} else {
+			if (this.dialogueState.isDialogue) {
+				if (!this.currentFS) return;
+
+				const listing = await this.#generateListing(
+					this.currentFS,
+					path
+				);
+				if (!listing) return;
+
+				this.#pickerSubmit(listing);
+			} else {
+				openFile(this.env, path, options);
+			}
+		}
+	}
+
+	#pickerSubmit(file: Listing) {
+		const canSubmit = this.#dialogueCanSubmit(file);
+
+		if (canSubmit) {
+			this.exit(file.path);
+		} else {
+			this.env.warn("Dialogue submit attempted which is not valid.");
+		}
+	}
+
+	#dialogueCanSubmit(item?: Listing) {
+		if (item == undefined) return false;
+		if (this.dialogueState.isDialogue !== true) return false;
+		if (this.dialogueState.allow.includes("*")) return true;
+
+		if (item.type == "directory") {
+			// folders
+			const isApp = this.isApplication(item.path);
+
+			if (isApp) {
+				return this.dialogueState.allow.includes("applications");
+			} else {
+				return this.dialogueState.allow.includes("folders");
+			}
+		}
+
+		// files
+		const filetype = "." + item.path.textAfterAll(".");
+		return this.dialogueState.allow.includes(filetype);
 	}
 }

@@ -62,11 +62,9 @@ export default class menubar implements Terminatable {
 		}
 		this.counter++;
 
-		const menubarLeft = 10;
-		const menubarWidth = this.renderer.windowWidth - menubarLeft * 2;
-		this.renderer.box(menubarLeft, 0, menubarWidth, this.barHeight, {
+		this.renderer.box(0, 0, this.renderer.windowWidth, this.barHeight, {
 			background: "rgb(from var(--bg-dark) r g b / 0.5)",
-			borderRadius: "0px 0px 10px 10",
+			borderRadius: `0px 0px 10px 10`,
 			isFrosted: true
 		});
 
@@ -95,8 +93,7 @@ export default class menubar implements Terminatable {
 		}
 
 		const focusWidth = this.renderer.getTextWidth(focusName);
-		const focusLeft =
-			(menubarWidth - focusWidth) / 2 + (menubarLeft - textPadding);
+		const focusLeft = (this.renderer.windowWidth - focusWidth) / 2;
 		this.renderer.text(focusLeft, textPadding, focusName);
 
 		// ----- right -----

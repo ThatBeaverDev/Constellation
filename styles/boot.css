@@ -12,74 +12,40 @@ canvas {
 * {
 	font-family: monospace;
 	font-optical-sizing: auto;
-	white-space: pre;
 	line-height: 1.2;
 }
 
-@media (prefers-color-scheme: light) {
-	:host {
-		/* Background Colours */
-		--bg-dark: oklch(0.8 0 245);
-		--bg: oklch(0.85 0 245);
-		--bg-light: oklch(0.9 0 245);
+:host {
+	/* Background Colours */
+	--bg-dark: oklch(0.2 0 245);
+	--bg: oklch(0.35 0 245);
+	--bg-light: oklch(0.5 0 245);
 
-		/* Text colours */
-		--text: oklch(0.04 0 245);
-		--text-muted: oklch(0.24 0 245);
+	/* Text colours */
+	--text: oklch(0.96 0 245);
+	--text-muted: oklch(0.76 0 245);
 
-		/* Border colours */
-		--highlight: oklch(0.5 0 245);
-		--border: oklch(0.6 0 245);
-		--border-muted: oklch(0.7 0 245);
+	/* Border colours */
+	--highlight: oklch(0.5 0 245);
+	--border: oklch(0.4 0 245);
+	--border-muted: oklch(0.3 0 245);
 
-		/* Action colours */
-		--primary: oklch(0.76 0.1 245);
-		--secondary: oklch(0.76 0.1 65);
+	/* Action colours */
+	--primary: oklch(0.76 0.1 245);
+	--secondary: oklch(0.76 0.1 65);
 
-		/* Alert colours */
-		--danger: oklch(0.7 0.09 30);
-		--warning: oklch(0.7 0.09 100);
-		--success: oklch(0.7 0.09 160);
-		--info: oklch(0.7 0.09 260);
+	/* Alert colours */
+	--danger: oklch(0.7 0.09 30);
+	--warning: oklch(0.7 0.09 100);
+	--success: oklch(0.7 0.09 160);
+	--info: oklch(0.7 0.09 260);
 
-		/* Accent colour */
-		--accent: #9a55bf;
-	}
+	/* Accent colour */
+	--accent: #9a55bf;
 }
 
-@media (prefers-color-scheme: dark) {
-	:host {
-		/* Background Colours */
-		--bg-dark: oklch(0.1 0 245);
-		--bg: oklch(0.2 0 245);
-		--bg-light: oklch(0.3 0 245);
-
-		/* Text colours */
-		--text: oklch(0.96 0 245);
-		--text-muted: oklch(0.76 0 245);
-
-		/* Border colours */
-		--highlight: oklch(0.5 0 245);
-		--border: oklch(0.4 0 245);
-		--border-muted: oklch(0.3 0 245);
-
-		/* Action colours */
-		--primary: oklch(0.76 0.1 245);
-		--secondary: oklch(0.76 0.1 65);
-
-		/* Alert colours */
-		--danger: oklch(0.7 0.09 30);
-		--warning: oklch(0.7 0.09 100);
-		--success: oklch(0.7 0.09 160);
-		--info: oklch(0.7 0.09 260);
-
-		/* Accent colour */
-		--accent: #9a55bf;
-	}
-
-	.bootImage {
-		filter: invert(100%) brightness(10000%) !important;
-	}
+.bootImage {
+	filter: invert(100%) brightness(10000%) !important;
 }
 
 /* Boot stuff */

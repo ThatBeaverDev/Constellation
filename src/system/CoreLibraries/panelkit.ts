@@ -1,14 +1,17 @@
 import { UiKitRenderer } from "../gui/uiKit/uiKit.js";
+import { uikitProgressBarElement } from "/System/gui/uiKit/components/elementReference.js";
 
 export default class PanelKit {
 	#renderer: UiKitRenderer;
 
 	minorPadding = 5;
 	padding = 15;
+
 	sidebarWidth = 150;
+	viewWidth = 150;
 
 	keyboardFocus: number = 0;
-	#items: { trigger?: Function }[] = [];
+	#items: { trigger?: Function; left?: Function; right?: Function }[] = [];
 
 	x = this.sidebarWidth + this.padding;
 	y = this.padding;
@@ -19,6 +22,9 @@ export default class PanelKit {
 
 	itemScale = 1.5;
 	itemSize = 50 * this.itemScale;
+	doubleClickToInteract = false;
+
+	#lastClick = 0;
 
 	constructor(renderer: UiKitRenderer) {
 		this.#renderer = renderer;
@@ -40,8 +46,11 @@ export default class PanelKit {
 
 		this.#lastType = type;
 	}
-	#newItem(conf: { trigger?: Function }, height: number) {
-		this.#items.push(conf);
+	#newItem(
+		conf: { trigger?: Function; left?: Function; right?: Function },
+		height: number
+	): { id: number; isFocused: boolean } {
+		const id = this.#items.push(conf);
 
 		const isFocused = this.keyboardFocus == this.#items.length;
 
@@ -49,11 +58,32 @@ export default class PanelKit {
 		if (isFocused && lowestPoint > this.#renderer.windowHeight)
 			this.#renderer.scroll -= lowestPoint - this.#renderer.windowHeight;
 
-		return isFocused;
+		return { id, isFocused };
+	}
+	#considerOnclick(id: number, onclick?: (x: number, y: number) => any) {
+		if (!this.doubleClickToInteract) return onclick;
+		if (!onclick) return undefined;
+
+		return (x: number, y: number) => {
+			if (
+				this.keyboardFocus == id &&
+				Date.now() - this.#lastClick < 250
+			) {
+				this.keyboardFocus = id;
+				this.#lastClick = Date.now();
+				return onclick(x, y);
+			}
+
+			this.keyboardFocus = id;
+			this.#lastClick = Date.now();
+		};
 	}
 
-	reset() {
+	reset(sidebarWidth?: number, viewWidth?: number) {
 		this.#renderer.furthestScroll = this.y;
+		this.#renderer.windowBackgroundStyles = "glow";
+
+		if (sidebarWidth) this.sidebarWidth = sidebarWidth;
 
 		this.#items = [];
 		if (this.keyboardFocus > this.#items.length) {
@@ -67,11 +97,22 @@ export default class PanelKit {
 		this.x = this.sidebarWidth + this.padding;
 		this.y = this.padding + this.#renderer.scroll;
 		this.#lastType = undefined;
+
+		this.viewWidth =
+			viewWidth ?? this.#renderer.windowWidth - this.sidebarWidth;
 	}
 
+	/**
+	 * Renders a card on the application
+	 * @param name - The text of the card
+	 * @param icon - The icon of the card
+	 * @param onClick - The callback to be triggered when the card is clicked
+	 * @param onRightClick - The callback to be triggered when the card is right-clicked
+	 * @param feature - Optional feature for the right of the card such as a button
+	 */
 	card = (
 		name: string,
-		icon: string,
+		icon?: string,
 		onClick?: (x: number, y: number) => void,
 		onRightClick?: (x: number, y: number) => void,
 		feature?: {
@@ -79,13 +120,17 @@ export default class PanelKit {
 			text: string;
 			icon?: string;
 			onClick: () => Promise<void> | void;
-		}
+		},
+		allow: boolean = true
 	) => {
 		this.#typeChange("card");
 
 		/* -------------------- Keyboard support -------------------- */
 
-		const isFocused = this.#newItem({ trigger: onClick }, this.cardSize);
+		const { id, isFocused } = this.#newItem(
+			{ trigger: onClick },
+			this.cardSize
+		);
 
 		/* -------------------- Main rendering -------------------- */
 
@@ -94,29 +139,42 @@ export default class PanelKit {
 
 		this.#renderer
 			.box(this.x, this.y, cardWidth, this.cardSize, {
-				background: isFocused ? "var(--accent)" : "sidebar",
+				background: isFocused ? "var(--accent)" : "panel",
 				borderRadius: 10
 			})
-			.onClick(onClick, onRightClick, {});
+			.onClick(this.#considerOnclick(id, onClick), onRightClick);
 
 		// sizes
 		const iconScale = (this.cardSize - this.minorPadding * 2) / 24;
-		const iconSize = 24 * iconScale;
+		const iconSize = icon ? 24 * iconScale : 0;
 		const nameHeight = this.#renderer.getTextHeight(name);
 
 		// icon positions
-		const iconLeft = this.x + (this.cardSize - iconSize) / 2;
-		const iconTop = this.y + (this.cardSize - iconSize) / 2;
+		const iconLeft = icon
+			? this.x + (this.cardSize - iconSize) / 2
+			: this.x;
+		const iconTop = icon ? this.y + (this.cardSize - iconSize) / 2 : this.y;
 
 		// name positions
 		const nameLeft = iconLeft + (iconSize + this.minorPadding);
 		const nameTop = this.y + (this.cardSize - nameHeight) / 2;
 
 		// draw icon
-		this.#renderer.icon(iconLeft, iconTop, icon, iconScale).passthrough();
+		if (icon)
+			this.#renderer
+				.icon(iconLeft, iconTop, icon, iconScale)
+				.passthrough();
 
 		// draw name
-		this.#renderer.text(nameLeft, nameTop, name).passthrough();
+		this.#renderer
+			.text(
+				nameLeft,
+				nameTop,
+				name,
+				undefined,
+				allow ? "var(--text)" : "var(--text-muted)"
+			)
+			.passthrough();
 
 		if (feature) {
 			const textWidth = this.#renderer.getTextWidth(feature.text);
@@ -132,8 +190,8 @@ export default class PanelKit {
 
 			this.#renderer
 				.box(buttonLeft, this.y + 5, buttonWidth, this.cardSize - 10, {
-					background: "var(--bg-lighter)",
-					borderRadius: 5
+					background: "panel",
+					borderRadius: this.minorPadding
 				})
 				.onClick(feature.onClick);
 
@@ -164,7 +222,20 @@ export default class PanelKit {
 		this.#renderer.text(this.x, this.y, text, 17);
 
 		// calculate height
-		const titleHeight = this.#renderer.getTextHeight(text, 15);
+		const titleHeight = this.#renderer.getTextHeight(text, 17);
+
+		// next line
+		this.x = this.sidebarWidth + this.padding;
+		this.y += titleHeight + this.padding;
+	};
+	info = (text: string) => {
+		this.#typeChange("title");
+
+		// draw text
+		this.#renderer.text(this.x, this.y, text, 13);
+
+		// calculate height
+		const titleHeight = this.#renderer.getTextHeight(text, 13);
 
 		// next line
 		this.x = this.sidebarWidth + this.padding;
@@ -174,15 +245,16 @@ export default class PanelKit {
 	mediumCard = (
 		title: string,
 		subtext: string,
-		icon: string,
+		icon?: string,
 		onClick?: (x: number, y: number) => void,
 		onRightClick?: (x: number, y: number) => void,
 		feature?: {
 			type: "button";
 			text: string;
 			icon?: string;
-			onClick: () => Promise<void> | void;
-		}
+			onClick: () => any;
+		},
+		allow: boolean = true
 	) => {
 		this.#typeChange("card");
 		const doubleMinorPadding = this.minorPadding * 2;
@@ -211,29 +283,44 @@ export default class PanelKit {
 
 		/* -------------------- Keyboard support -------------------- */
 
-		const isFocused = this.#newItem({ trigger: onClick }, cardHeight);
+		const { isFocused, id } = this.#newItem(
+			{ trigger: onClick },
+			cardHeight
+		);
 
 		/* -------------------- Return to spaghetti -------------------- */
 
 		const iconScale = (cardHeight - tripleMinorPadding) / 24;
-		const iconSize = 24 * iconScale;
+		const iconSize = icon ? 24 * iconScale : 0;
 		const iconTop = this.y + (cardHeight - iconSize) / 2;
+		const iconLeft = icon
+			? this.x + tripleMinorPadding / 2
+			: this.x + this.minorPadding;
 
-		const textLeft = this.x + iconSize + tripleMinorPadding;
+		const textLeft = iconLeft + iconSize + (icon ? this.minorPadding : 0);
 
 		this.#renderer
 			.box(this.x, this.y, cardWidth, cardHeight, {
-				background: isFocused ? "var(--accent)" : "sidebar",
+				background: isFocused ? "var(--accent)" : "panel",
 				borderRadius: 10
 			})
-			.onClick(onClick, onRightClick);
+			.onClick(this.#considerOnclick(id, onClick), onRightClick);
 
-		this.#renderer
-			.icon(this.x + tripleMinorPadding / 2, iconTop, icon, iconScale)
-			.passthrough();
+		if (icon)
+			this.#renderer
+				.icon(iconLeft, iconTop, icon, iconScale)
+				.passthrough();
 
 		// title
-		this.#renderer.text(textLeft, textTop, name, 18).passthrough();
+		this.#renderer
+			.text(
+				textLeft,
+				textTop,
+				name,
+				18,
+				allow ? "var(--text)" : "var(--text-muted)"
+			)
+			.passthrough();
 		// subtext
 		this.#renderer
 			.text(textLeft, descriptionTop, description, 13)
@@ -260,22 +347,26 @@ export default class PanelKit {
 					buttonWidth,
 					buttonHeight,
 					{
-						background: "var(--bg-lighter)",
-						borderRadius: 5
+						background: "panel",
+						borderRadius: this.minorPadding
 					}
 				)
 				.onClick(feature.onClick);
 
 			if (feature.icon) {
+				const iconScale = (buttonHeight - this.minorPadding * 2) / 24;
+				const iconSize = feature.icon ? 24 * iconScale : 0;
+
 				this.#renderer
 					.icon(
 						buttonLeft + this.minorPadding,
 						this.y + doubleMinorPadding,
-						feature.icon
+						feature.icon,
+						iconScale
 					)
 					.passthrough();
 
-				const textLeft = buttonLeft + iconSize + this.minorPadding;
+				const textLeft = buttonLeft + iconSize + this.minorPadding * 2;
 
 				this.#renderer
 					.text(textLeft, textTop, feature.text)
@@ -323,12 +414,12 @@ export default class PanelKit {
 
 		/* -------------------- Keyboard support -------------------- */
 
-		const isFocused = this.#newItem({}, cardHeight);
+		const { isFocused } = this.#newItem({}, cardHeight);
 
 		/* -------------------- More spaghetti -------------------- */
 
 		this.#renderer.box(this.x, this.y, cardWidth, cardHeight, {
-			background: isFocused ? "var(--accent)" : "sidebar",
+			background: isFocused ? "var(--accent)" : "panel",
 			borderRadius: 10
 		});
 		this.#renderer
@@ -356,16 +447,19 @@ export default class PanelKit {
 
 		/* -------------------- Keyboard support -------------------- */
 
-		const isFocused = this.#newItem({ trigger: onClick }, this.itemSize);
+		const { isFocused, id } = this.#newItem(
+			{ trigger: onClick },
+			this.itemSize
+		);
 
 		/* -------------------- Main rendering -------------------- */
 
 		this.#renderer
 			.box(this.x, this.y, this.itemSize, this.itemSize, {
-				background: isFocused ? "var(--accent)" : "sidebar",
+				background: isFocused ? "var(--accent)" : "panel",
 				borderRadius: 4
 			})
-			.onClick(onClick, onRightClick);
+			.onClick(this.#considerOnclick(id, onClick), onRightClick);
 
 		// sizes
 		const iconSize = 24 * this.itemScale;
@@ -402,23 +496,23 @@ export default class PanelKit {
 	sidebar = (
 		...steps: (
 			| { type: "title"; text: string }
-			| { type: "item"; text: string; icon: string; callback: () => void }
+			| {
+					type: "item";
+					text: string;
+					icon: string;
+					callback: () => void;
+					focused: boolean;
+			  }
 		)[]
 	) => {
-		// draw sidebar
-		this.#renderer.box(
-			0,
-			0,
-			this.sidebarWidth,
-			this.#renderer.windowHeight + 100,
-			{
-				background: "sidebar"
-			}
-		);
-
 		// functions
 		let y = 4;
-		const button = (text: string, icon: string, callback: () => void) => {
+		const button = (
+			text: string,
+			icon: string,
+			callback: () => void,
+			isFocused: boolean
+		) => {
 			const textWidth = this.#renderer.getTextWidth(text);
 			const totalWidth =
 				this.minorPadding +
@@ -433,12 +527,20 @@ export default class PanelKit {
 
 			this.#renderer
 				.box(0, y, this.sidebarWidth, 25, {
-					background: "sidebar"
+					background: isFocused ? "panel" : "transparent",
+					borderRadius: 1000
 				})
 				.onClick(callback);
 
-			this.#renderer.icon(this.minorPadding, y, icon).passthrough();
-			this.#renderer.text(32, y + 3, text).passthrough();
+			const iconSize = 24;
+			const iconScale = iconSize / 24;
+
+			this.#renderer
+				.icon(this.minorPadding, y, icon, iconScale)
+				.passthrough();
+			this.#renderer
+				.text(iconSize + this.minorPadding, y + 3, text)
+				.passthrough();
 
 			y += 30;
 		};
@@ -454,7 +556,12 @@ export default class PanelKit {
 		steps.forEach((item) => {
 			switch (item.type) {
 				case "item":
-					button(item.text, item.icon, item.callback);
+					button(
+						item.text,
+						item.icon,
+						item.callback,
+						item.focused ?? false
+					);
 					break;
 				case "title":
 					title(item.text);
@@ -542,7 +649,7 @@ export default class PanelKit {
 		for (const row of contents) {
 			/* -------------------- Keyboard support -------------------- */
 
-			const isFocused = this.#newItem({}, this.cardSize);
+			const { isFocused } = this.#newItem({}, this.cardSize);
 
 			/* -------------------- Main rendering -------------------- */
 
@@ -551,8 +658,7 @@ export default class PanelKit {
 				this.sidebarWidth -
 				this.padding * 2;
 
-			let colour = "sidebar";
-			if (rowID++ % 2 !== 0) colour = "var(--bg)";
+			const colour = rowID++ % 2 == 0 ? "panel" : "transparent";
 
 			let borderRadius: number | [number, number, number, number] = 0;
 			if (rowID == 1) {
@@ -621,6 +727,299 @@ export default class PanelKit {
 		this.y += height + this.padding;
 	};
 
+	textInput = (
+		text: string,
+		backtext: string,
+		onEnter: (contents: string) => any
+	) => {
+		this.#typeChange("title");
+
+		// draw text
+		this.#renderer.text(this.x, this.y, text, 17);
+
+		// calculate dimensions
+		const titleWidth = this.#renderer.getTextWidth(text, 17);
+		const titleHeight = this.#renderer.getTextHeight(text, 17);
+
+		// textbox
+		const textboxLeft = Math.max(
+			this.#renderer.windowWidth / 2,
+			this.x + titleWidth + this.minorPadding
+		);
+		const textbox = this.#renderer.textbox(
+			textboxLeft,
+			this.y,
+			this.#renderer.windowWidth - (this.padding + textboxLeft),
+			titleHeight + 5,
+			backtext,
+			{
+				enter: (contents: string) => {
+					onEnter(contents);
+				}
+			}
+		);
+
+		// next line
+		this.x = this.sidebarWidth + this.padding;
+		this.y += titleHeight + this.padding;
+
+		return textbox.getContents();
+	};
+
+	/**
+	 * Renders a panelkit progress bar.
+	 * @param progression - Progression of progress as a percentage integer (eg 80% is 80)
+	 * @param onChange - Callback accepting a new progress for when the progression is changed either by user drag or keyboard
+	 * @param progressBarHeight - How tall the progress bar is
+	 * @param leftText - The text for the left side of the progress bar
+	 * @param rightText - The text for the right side of the progress bar
+	 * @param keyboardSkipInterval - How far keyboard should skip as a percentage integer, default 10%
+	 */
+	progressBar = (
+		progression: number,
+		onChange: (progress: number) => Promise<void> | void,
+		progressBarHeight: number = this.cardSize,
+		leftText?: string,
+		rightText?: string,
+		keyboardSkipInterval: number = 10
+	) => {
+		this.#typeChange("card");
+
+		/* -------------------- Keyboard support -------------------- */
+
+		let progress: uikitProgressBarElement;
+
+		const { isFocused } = this.#newItem(
+			{
+				left: () => {
+					const newProgression = progression - keyboardSkipInterval;
+
+					progress.dragTo(newProgression);
+				},
+				right: () => {
+					const newProgression = progression + keyboardSkipInterval;
+					progress.dragTo(newProgression);
+				}
+			},
+			this.cardSize
+		);
+
+		/* -------------------- Main rendering -------------------- */
+
+		const leftTextWidth = leftText
+			? this.#renderer.getTextWidth(leftText) + this.minorPadding
+			: 0;
+		const rightTextWidth = rightText
+			? this.#renderer.getTextWidth(rightText) + this.minorPadding
+			: 0;
+
+		const leftTextHeight = leftText
+			? this.#renderer.getTextHeight(leftText)
+			: 0;
+		const rightTextHeight = rightText
+			? this.#renderer.getTextHeight(rightText)
+			: 0;
+
+		const tallest = Math.max(
+			leftTextHeight,
+			progressBarHeight,
+			rightTextHeight
+		);
+
+		const barWidth =
+			this.#renderer.windowWidth -
+			this.sidebarWidth -
+			this.padding * 2 -
+			(leftTextWidth + rightTextWidth);
+
+		const barTop = this.y + (tallest - progressBarHeight) / 2;
+
+		progress = this.#renderer.progressBar(
+			this.x + leftTextWidth,
+			barTop,
+			barWidth,
+			progressBarHeight,
+			progression,
+			onChange,
+			isFocused ? "var(--accent)" : "panel"
+		);
+
+		if (leftText) {
+			const textTop = this.y + (tallest - leftTextHeight) / 2;
+
+			this.#renderer.text(this.x, textTop, leftText);
+		}
+		if (rightText) {
+			const textTop = this.y + (tallest - leftTextHeight) / 2;
+
+			this.#renderer.text(
+				this.x + leftTextWidth + barWidth + this.minorPadding,
+				textTop,
+				rightText
+			);
+		}
+
+		this.y += tallest + this.padding;
+	};
+
+	buttonCollection = () => {};
+
+	bottomBar = (
+		left:
+			| { type: "string"; text: string }
+			| {
+					type: "button";
+					text: string;
+					icon?: string;
+					onclick: () => any;
+					allow: boolean;
+					isPrimary?: boolean;
+			  },
+		right:
+			| { type: "string"; text: string }
+			| {
+					type: "button";
+					text: string;
+					icon?: string;
+					onclick: () => any;
+					allow: boolean;
+					isPrimary?: boolean;
+			  }
+	) => {
+		const barHeight = 25 + this.minorPadding * 2;
+		const barTop = this.#renderer.windowHeight - barHeight;
+		const windowWidth = this.#renderer.windowWidth;
+
+		this.#renderer.box(0, barTop, this.#renderer.windowWidth, barHeight, {
+			background: "panel"
+		});
+
+		switch (left.type) {
+			case "string": {
+				const textHeight = this.#renderer.getTextHeight(left.text);
+				const textTop = barTop + (barHeight - textHeight) / 2;
+
+				this.#renderer.text(this.minorPadding, textTop, left.text);
+
+				break;
+			}
+			case "button": {
+				const textWidth = this.#renderer.getTextWidth(left.text);
+
+				let buttonWidth =
+					this.minorPadding + textWidth + this.minorPadding;
+				const buttonHeight = barHeight - this.minorPadding * 2;
+
+				const iconSize = buttonHeight - this.minorPadding * 2;
+				const iconScale = iconSize / 24;
+
+				if (left.icon) {
+					buttonWidth += this.minorPadding; // gap between text and icon
+
+					buttonWidth += iconScale;
+				}
+
+				const buttonLeft = this.minorPadding;
+				const buttonTop = barTop + this.minorPadding;
+
+				this.#renderer
+					.box(buttonLeft, buttonTop, buttonWidth, buttonHeight, {
+						background:
+							left.isPrimary && left.allow
+								? "var(--accent)"
+								: "panel",
+						borderRadius: this.minorPadding
+					})
+					.onClick(left.onclick);
+
+				const textHeight = this.#renderer.getTextHeight(left.text);
+
+				const textLeft =
+					this.minorPadding +
+					buttonLeft +
+					(left.icon ? iconSize + this.minorPadding : 0);
+				const textTop = buttonTop + (buttonHeight - textHeight) / 2;
+
+				this.#renderer
+					.text(
+						textLeft,
+						textTop,
+						left.text,
+						undefined,
+						left.allow ? "var(--text)" : "var(--text-muted)"
+					)
+					.passthrough();
+
+				break;
+			}
+		}
+
+		switch (right.type) {
+			case "string": {
+				const textWidth = this.#renderer.getTextWidth(right.text);
+				const textHeight = this.#renderer.getTextHeight(right.text);
+
+				const textLeft =
+					windowWidth - (textWidth + 2 * this.minorPadding);
+				const textTop = barTop + (barHeight - textHeight) / 2;
+
+				this.#renderer.text(textLeft, textTop, left.text);
+				break;
+			}
+			case "button": {
+				const textWidth = this.#renderer.getTextWidth(right.text);
+
+				let buttonWidth =
+					this.minorPadding + textWidth + this.minorPadding;
+				const buttonHeight = barHeight - this.minorPadding * 2;
+
+				const iconSize = buttonHeight - this.minorPadding * 2;
+				const iconScale = iconSize / 24;
+
+				if (right.icon) {
+					buttonWidth += this.minorPadding; // gap between text and icon
+
+					buttonWidth += iconScale;
+				}
+
+				const buttonLeft =
+					this.#renderer.windowWidth -
+					(buttonWidth + this.minorPadding);
+				const buttonTop = barTop + this.minorPadding;
+
+				this.#renderer
+					.box(buttonLeft, buttonTop, buttonWidth, buttonHeight, {
+						background:
+							right.isPrimary && right.allow
+								? "var(--accent)"
+								: "panel",
+						borderRadius: this.minorPadding
+					})
+					.onClick(right.onclick);
+
+				const textHeight = this.#renderer.getTextHeight(right.text);
+
+				const textLeft =
+					this.minorPadding +
+					buttonLeft +
+					(right.icon ? iconSize + this.minorPadding : 0);
+				const textTop = buttonTop + (buttonHeight - textHeight) / 2;
+
+				this.#renderer
+					.text(
+						textLeft,
+						textTop,
+						right.text,
+						undefined,
+						right.allow ? "var(--text)" : "var(--text-muted)"
+					)
+					.passthrough();
+
+				break;
+			}
+		}
+	};
+
 	keydown = (
 		code: string,
 		metaKey: boolean,
@@ -630,14 +1029,36 @@ export default class PanelKit {
 		repeat: boolean
 	) => {
 		switch (code) {
-			case "Enter":
-				if (metaKey || altKey || ctrlKey || shiftKey || repeat) break;
+			case "Enter": {
+				if (metaKey || altKey || ctrlKey || shiftKey) break;
 
 				const trigger = this.#items[this.keyboardFocus - 1]?.trigger;
-
 				if (trigger) trigger();
 
 				break;
+			}
+
+			case "ArrowLeft": {
+				if (metaKey || altKey || ctrlKey || shiftKey) break;
+
+				const trigger = this.#items[this.keyboardFocus - 1]?.left;
+				if (trigger) {
+					trigger();
+				}
+
+				break;
+			}
+
+			case "ArrowRight": {
+				if (metaKey || altKey || ctrlKey || shiftKey) break;
+
+				const trigger = this.#items[this.keyboardFocus - 1]?.right;
+				if (trigger) {
+					trigger();
+				}
+
+				break;
+			}
 
 			case "ArrowDown":
 				if (metaKey || altKey || ctrlKey || shiftKey) break;

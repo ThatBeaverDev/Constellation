@@ -1,35 +1,17 @@
 import ConstellationKernel from "../..//kernel.js";
-import { ConstellationFileIndex } from "./definitions.js";
-import mimes from "../../CoreLibraries/mimes/mimes.js";
-
-function getMimeType(extension: string): string | null {
-	for (const type in mimes) {
-		const extensions = mimes[type];
-		if (extensions.includes(extension)) {
-			return type;
-		}
-	}
-
-	return null;
-}
+import { LatestFileIndex } from "./definitions.js";
+import { userspaceFstoKernelFs } from "../fstranslate.js";
+import { FilesystemInterface } from "/System/security/components/env/components/fs.js";
 
 export async function tcpkg(
-	ConstellationKernel: ConstellationKernel,
+	fs: ConstellationKernel["fs"],
 	packageDirectory: string
-) {
-	// filesystem library so it's easy to port tcpkg.
-	const fs = {
-		readdir: ConstellationKernel.fs.readdir.bind(ConstellationKernel.fs),
-		resolve: ConstellationKernel.fs.resolve.bind(ConstellationKernel.fs),
-		stat: ConstellationKernel.fs.stat.bind(ConstellationKernel.fs),
-		relative: ConstellationKernel.fs.relative.bind(ConstellationKernel.fs),
-		readFile: ConstellationKernel.fs.readFile.bind(ConstellationKernel.fs)
-	};
-
+): Promise<LatestFileIndex> {
 	// package info
-	const pkg: ConstellationFileIndex = {
+	const pkg: LatestFileIndex = {
 		files: {},
-		directories: []
+		directories: [],
+		version: 2
 	};
 
 	// walk the folder
@@ -60,43 +42,22 @@ export async function tcpkg(
 				// files require MIME-type to determine if they are binary or not, because binary images are managed as DATA-URIs.
 
 				try {
-					// guess the mime type from the file extension
-					const type =
-						getMimeType(dir.textAfterAll(".")) ?? "text/plain";
+					const content = await fs.readFile(dir);
+					const stats = await fs.stat(dir);
 
-					const isText =
-						type.startsWith("text/") ||
-						type.includes("xml") ||
-						type.includes("javascript") ||
-						type.includes("typescript") ||
-						type.includes("json");
+					if (!content || !stats)
+						throw new Error(
+							`"Unexpected undefined when reading/statting file at ${dir}`
+						);
 
-					if (isText) {
-						const content = await fs.readFile(dir);
+					pkg.files[relative] = {
+						contents: content,
 
-						if (content == undefined)
-							throw new Error(
-								`"Unexpected undefined when reading file at ${dir}`
-							);
+						created: stats.ctime,
+						modified: stats.mtime,
 
-						pkg.files[relative] = content;
-					} else {
-						// encode to dataURI
-						const content = await fs.readFile(dir);
-
-						if (content == undefined)
-							throw new Error(
-								`"Unexpected undefined when reading file at ${dir}`
-							);
-
-						const b64 = btoa(content);
-						const uri = `data:${type};base64,${b64}`;
-
-						pkg.files[relative] = {
-							type: "binary",
-							data: uri
-						};
-					}
+						size: stats.size
+					};
 				} catch (e) {
 					throw new Error(
 						`Error ${e} occurred when packaging ${dir}. it has not been included in the index.`
@@ -113,4 +74,11 @@ export async function tcpkg(
 	}
 
 	return pkg;
+}
+
+export async function userspacePackage(
+	fs: FilesystemInterface,
+	directory: string
+) {
+	return await tcpkg(userspaceFstoKernelFs(fs), directory);
 }

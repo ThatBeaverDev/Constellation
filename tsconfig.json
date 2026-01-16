@@ -13,36 +13,15 @@
 		"outDir": "./build",
 		"strict": true,
 		// libraries
-		"lib": [
-			"esnext",
-			"ES2022",
-			"DOM",
-			"DOM.Iterable",
-			"ES5",
-			"ES6"
-		],
+		"lib": ["esnext", "ES2022", "DOM", "DOM.Iterable", "ES5", "ES6"],
 		"paths": {
-			"/System/CoreLibraries/*": [
-				"./src/system/CoreLibraries/*"
-			],
-			"pathinf": [
-				"./src/system/CoreLibraries/pathinf.ts"
-			],
-			"blob": [
-				"./src/system/CoreLibraries/blob.ts"
-			],
-			"mime": [
-				"./src/system/CoreLibraries/mime.ts"
-			],
-			"gui": [
-				"./src/system/CoreLibraries/gui.ts"
-			],
-			"fzf": [
-				"./src/system/CoreLibraries/fzf.ts"
-			],
-			"panelkit": [
-				"./src/system/CoreLibraries/panelkit.ts"
-			],
+			"/System/*": ["./src/system/*"],
+			"pathinf": ["./src/system/CoreLibraries/pathinf.ts"],
+			"blob": ["./src/system/CoreLibraries/blob.ts"],
+			"mime": ["./src/system/CoreLibraries/mime.ts"],
+			"gui": ["./src/system/CoreLibraries/gui.ts"],
+			"fzf": ["./src/system/CoreLibraries/fzf.ts"],
+			"panelkit": ["./src/system/CoreLibraries/panelkit.ts"]
 		},
 		"noUnusedLocals": true,
 		// types
@@ -57,16 +36,14 @@
 		"composite": true,
 		"noEmit": false
 	},
-	"include": [
-		"./src",
-		"./src/global.d.ts"
-	],
+	"include": ["./src", "./src/global.d.ts"],
 	"exclude": [
 		"./build",
 		"./src/apps/app-template",
 		"./src/apps/types",
 		"./node_modules",
-		"*.ignore"
+		"*.ignore",
+		"./src/system/CoreLibraries/JSZip.js"
 	],
 	"watchOptions": {
 		"watchFile": "useFsEvents",

@@ -1,4 +1,4 @@
-import { FilesystemAPI } from "../../../fs/fs.js";
+import { SystemFilesystemDriver } from "../../../fs/fs.js";
 import blobifier from "../../lib/blobify.js";
 
 interface FileData {
@@ -19,9 +19,9 @@ type ImportStructure = Record<string, FileData>;
 type ResolvedStructure = Record<string, ResolvedFile>;
 
 export default class ImportResolver {
-	#fs: FilesystemAPI;
+	#fs: SystemFilesystemDriver;
 	#blobLib: blobifier;
-	constructor(fs: FilesystemAPI, blobLib: blobifier) {
+	constructor(fs: SystemFilesystemDriver, blobLib: blobifier) {
 		this.#fs = fs;
 		this.#blobLib = blobLib;
 	}

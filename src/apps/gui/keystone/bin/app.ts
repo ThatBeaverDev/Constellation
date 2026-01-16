@@ -1,4 +1,4 @@
-import { fileInfo } from "../lib/appfind.js";
+import { fileInfo } from "../../../services/filetypeDatabaseManager/lib/appfind.js";
 import { Fzf } from "fzf";
 import PanelKit from "/System/CoreLibraries/panelkit.js";
 
@@ -9,7 +9,6 @@ export default class KeystoneSearch extends Overlay {
 	files: string[] = [];
 	fileInfo: fileInfo[] = [];
 	ok: boolean = true;
-	entries: any;
 	rendering: fileInfo[] = [];
 	counter: number = 0;
 
@@ -92,6 +91,7 @@ export default class KeystoneSearch extends Overlay {
 
 		this.renderer.clear();
 		this.panelkit.reset();
+		this.renderer.windowBackgroundStyles = "";
 		this.panelkit.sidebarWidth = 0;
 
 		const textbox = this.renderer.textbox(
@@ -101,11 +101,13 @@ export default class KeystoneSearch extends Overlay {
 			40,
 			"Search for apps...",
 			{
-				update: () => {
+				beforeUpdate: () => {
 					this.panelkit.keyboardFocus = 1;
 					this.search(textbox.getContents() ?? "");
 				}
-			}
+			},
+			{},
+			"searchbox"
 		);
 
 		if (this.counter++ % 50 == 0) {

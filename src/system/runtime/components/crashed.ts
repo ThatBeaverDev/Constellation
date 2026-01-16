@@ -60,7 +60,7 @@ function trueStringifier(value: any, space?: number): string {
 }
 
 export default function createCoreDump(crashedProgram: ProcessInformation) {
-	console.warn("Creating core dump...");
+	console.warn("Creating core dump of program", crashedProgram);
 
 	const state = trueStringifier(crashedProgram.program, 4);
 

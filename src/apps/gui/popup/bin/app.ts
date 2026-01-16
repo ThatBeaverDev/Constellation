@@ -7,7 +7,7 @@ export default class Dialogue extends Overlay {
 		options: string[];
 	};
 	icon: string = "circle-question-mark";
-	pipe: any[] = [];
+	pipe: unknown[] = [];
 
 	async init() {
 		this.renderer.windowName = this.args[1] || "Popup";

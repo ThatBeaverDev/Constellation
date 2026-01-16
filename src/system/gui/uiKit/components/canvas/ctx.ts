@@ -4,7 +4,6 @@ export function proxyContext(
 	canvas: UiKitCanvasElement,
 	ctx: RenderingContext
 ) {
-	console.trace(ctx);
 	if (ctx == null) return null;
 
 	const handler: ProxyHandler<RenderingContext> = {

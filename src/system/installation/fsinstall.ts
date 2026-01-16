@@ -5,14 +5,14 @@ import {
 	installerFileEntryType
 } from "./installation.config.js";
 import ConstellationKernel from "..//kernel.js";
-import { FilesystemAPI } from "../../fs/fs.js";
+import { SystemFilesystemDriver } from "../../fs/fs.js";
 import { isCommandLine } from "../getPlatform.js";
 import { tcupkg } from "../lib/packaging/tcupkg.js";
 
 const path = "/System/installer/fsinstall.js";
 
 export class FilesystemInstaller {
-	fs: FilesystemAPI;
+	fs: SystemFilesystemDriver;
 	#ConstellationKernel: ConstellationKernel;
 
 	constructor(ConstellationKernel: ConstellationKernel) {
@@ -99,7 +99,7 @@ export class FilesystemInstaller {
 
 	async downloadAndConvert(URL: string) {
 		try {
-			const response = await fetch(URL);
+			const response = await fetch(`${URL}?dt=${Date.now()}`);
 			if (!response.ok) {
 				throw new InstallationError("Failed to download the file.");
 			}
@@ -128,7 +128,7 @@ export class FilesystemInstaller {
 					return fs.readFile(path, { encoding: "utf8" });
 				}
 			: async (location: string): Promise<string> => {
-					const req = await fetch(location);
+					const req = await fetch(`${location}?dt=${Date.now()}`);
 					if (!req.ok) {
 						throw new InstallationError(
 							`Failed to fetch file from location ${location}`
@@ -200,7 +200,11 @@ export class FilesystemInstaller {
 
 					// unpackage it using the kernel unpackager
 					//writingWaitlist.push(
-					await tcupkg(this.#ConstellationKernel, content, directory);
+					await tcupkg(
+						this.#ConstellationKernel.fs,
+						content,
+						directory
+					);
 					//);
 
 					break;

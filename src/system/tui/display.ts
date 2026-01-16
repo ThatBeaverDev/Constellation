@@ -71,6 +71,7 @@ export class DOMHandler implements Handler {
 		const text = document.createElement("p");
 		text.innerText = string;
 		text.className = "logline";
+		text.style.fontFamily = "monospace";
 
 		line.appendChild(text);
 
@@ -98,6 +99,8 @@ export class DOMHandler implements Handler {
 			// add shadowDOM to screen
 			document.body.appendChild(this.#shadowDomHost);
 		}
+
+		this.container.style.fontFamily = "monospace";
 	}
 
 	async init() {
@@ -110,7 +113,7 @@ export class DOMHandler implements Handler {
 	}
 
 	post = (text: string) => {
-		const lines = text.split("\n").filter((item) => item !== "");
+		const lines = text.split("\n");
 
 		for (const line of lines) {
 			this.#newLine(line);

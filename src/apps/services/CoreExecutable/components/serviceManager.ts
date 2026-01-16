@@ -56,7 +56,7 @@ export default class ServiceManager {
 			// get the data
 			const absolutePath = "/System/CoreServices/" + file;
 
-			const exports = (await this.env.include(absolutePath)) as {
+			const exports = (await this.env.fs.include(absolutePath)) as {
 				default: ServiceManifest;
 			};
 			const manifest = exports.default;

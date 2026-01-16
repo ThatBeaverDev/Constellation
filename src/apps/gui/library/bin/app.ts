@@ -1,4 +1,7 @@
-import { appFindResult, fileInfo } from "../../keystone/lib/appfind.js";
+import {
+	appFindResult,
+	fileInfo
+} from "../../../services/filetypeDatabaseManager/lib/appfind.js";
 
 export default class library extends GuiApplication {
 	index: { files: fileInfo[]; names: string[] } = { files: [], names: [] };

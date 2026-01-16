@@ -2,7 +2,7 @@ import ConstellationKernel from "../../../kernel.js";
 import { DOMHandler } from "../../../tui/display.js";
 import { TextInterface } from "../../../tui/tui.js";
 import { type GraphicalWindow } from "../../display/windowTypes.js";
-import { uikitBoxConfig, uikitIconOptions } from "../definitions.js";
+import { Colour, uikitBoxConfig, uikitIconOptions } from "../definitions.js";
 import { defaultConfig } from "./defaultConfig.js";
 
 export default class uiKitCreators {
@@ -29,7 +29,7 @@ export default class uiKitCreators {
 		y = 0,
 		name = "circle-help",
 		scale = 1,
-		colour: string,
+		colour: Colour,
 		options: uikitIconOptions
 	) => {
 		const kernel = this.#ConstellationKernel;
@@ -47,13 +47,45 @@ export default class uiKitCreators {
 		icon.style.height = `${scale * 24}px`;
 		icon.style.color = colour;
 
-		if (options.noProcess) {
-			icon.classList.add("darkmode");
+		if (options.borderRadius) {
+			icon.style.borderRadius = `${options.borderRadius}px`;
 		}
 
 		if (this.#window) this.#window.body.appendChild(icon);
 
 		return icon;
+	};
+
+	uikitImage = (
+		id: number,
+		x: number,
+		y: number,
+		location: string,
+		width: number,
+		height: number,
+		options: uikitIconOptions
+	) => {
+		const kernel = this.#ConstellationKernel;
+
+		let image;
+		if (!(kernel.ui.type == "GraphicalInterface")) {
+			image = document.createElement("img");
+		} else {
+			image = kernel.ui.getImage(location);
+		}
+
+		image.style.left = `${x}px`;
+		image.style.top = `${y}px`;
+		image.style.width = `${width}px`;
+		image.style.height = `${height}px`;
+
+		if (options.borderRadius) {
+			image.style.borderRadius = `${options.borderRadius}px`;
+		}
+
+		if (this.#window) this.#window.body.appendChild(image);
+
+		return image;
 	};
 
 	uikitText = (
@@ -62,7 +94,8 @@ export default class uiKitCreators {
 		y = 0,
 		string = "",
 		fontSize: number,
-		colour: string
+		colour?: Colour,
+		font?: string
 	) => {
 		const text = document.createElement("p");
 		text.className = "uikitText";
@@ -72,7 +105,8 @@ export default class uiKitCreators {
 		text.style.left = `${x}px`;
 		text.style.top = `${y}px`;
 		text.style.fontSize = `${fontSize}px`;
-		text.style.color = colour;
+		if (colour) text.style.color = colour;
+		if (font) text.style.fontFamily = font;
 
 		if (this.#window) this.#window.body.appendChild(text);
 
@@ -124,6 +158,8 @@ export default class uiKitCreators {
 			textbox.autocapitalize = "off";
 			textbox.spellcheck = false;
 		}
+		if (options.font) textbox.style.fontFamily = options.font ?? "";
+		if (options.fontColour) textbox.style.color = options.fontColour;
 
 		textbox.id = String(window.renderID++);
 		textbox.placeholder = backtext;
@@ -141,7 +177,7 @@ export default class uiKitCreators {
 		this.textboxElems[id] = textbox;
 		if (this.focusedTextbox == undefined) this.focusedTextbox = textbox;
 
-		textbox.addEventListener("pointerdown", () => {
+		textbox.addEventListener("focus", () => {
 			this.focusedTextbox = textbox;
 		});
 
@@ -160,12 +196,21 @@ export default class uiKitCreators {
 		return line;
 	};
 
-	uikitHorizontalLine = (id: number, x: number, y: number, width: number) => {
+	uikitHorizontalLine = (
+		id: number,
+		x: number,
+		y: number,
+		width: number,
+		colour: Colour
+	) => {
 		const line = document.createElement("div");
 		line.className = "uikitHorizontalLine";
 
 		line.id = String(window.renderID++);
-		line.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px;`;
+		line.style.left = `${x}px`;
+		line.style.top = `${y}px`;
+		line.style.width = `${width}px`;
+		line.style.borderColor = colour;
 
 		if (this.#window) this.#window.body.appendChild(line);
 
@@ -178,21 +223,48 @@ export default class uiKitCreators {
 		y: number,
 		width: number,
 		height: number,
-		progress: number | "throb"
+		progress: number | "throb",
+		onDrag: (progress: number) => Promise<void> | void,
+		colour: string = "panel"
 	) => {
 		const bar = document.createElement("div");
-		bar.style.cssText = `left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;`;
+		bar.style.left = `${x}px`;
+		bar.style.top = `${y}px`;
+
+		bar.style.width = `${width}px`;
+		bar.style.height = `${height}px`;
+
 		bar.id = String(window.renderID++);
 		bar.className = "uikitProgressBar";
 
-		const progressor = document.createElement("div");
+		const progressBar = document.createElement("div");
 
-		progressor.style.width = progress + "%";
+		progressBar.style.width = progress + "%";
+		progressBar.id = String(window.renderID++);
+		progressBar.className = "uikitProgressBarInner";
 
-		progressor.id = String(window.renderID++);
-		progressor.className = "uikitProgressBarInner";
+		if (colour == "panel") {
+			if (this.#window?.container.classList.contains("frosted")) {
+				progressBar.style.background = "";
+				progressBar.classList.add("glass");
+			} else {
+				progressBar.style.background = `var(--panelColour)`;
+				progressBar.style.backdropFilter = `blur(var(--headerBlur))`;
+			}
+		} else {
+			progressBar.style.background = `${colour || "var(--bg-light)"}`;
+		}
 
-		bar.innerHTML = progressor.outerHTML;
+		bar.appendChild(progressBar);
+
+		if (this.#window) {
+			const ui = this.#ConstellationKernel.ui;
+			if (ui.type == "GraphicalInterface") {
+				ui.container.addEventListener("pointerup", (e) => {
+					progressBar.dataset.isDragging = "false";
+				});
+			}
+		}
 
 		if (this.#window) this.#window.body.appendChild(bar);
 
@@ -220,6 +292,8 @@ export default class uiKitCreators {
 			area.autocapitalize = "off";
 			area.spellcheck = false;
 		}
+		if (options.font) area.style.fontFamily = options.font;
+		if (options.fontColour) area.style.color = options.fontColour;
 
 		if (this.#window) this.#window.body.appendChild(area);
 
@@ -236,7 +310,7 @@ export default class uiKitCreators {
 
 		if (this.focusedTextbox == undefined) this.focusedTextbox = area;
 
-		area.addEventListener("pointerdown", () => {
+		area.addEventListener("focus", () => {
 			this.focusedTextbox = area;
 		});
 
@@ -260,12 +334,13 @@ export default class uiKitCreators {
 		box.style.width = `${width}px`;
 		box.style.height = `${height}px`;
 
-		if (config?.background == "sidebar") {
+		if (config?.background == "panel") {
 			if (this.#window?.container.classList.contains("frosted")) {
 				box.style.background = "";
 				box.classList.add("glass");
 			} else {
-				box.style.background = `var(--headerColour)`;
+				box.style.background = `var(--panelColour)`;
+				box.style.backdropFilter = `blur(var(--headerBlur))`;
 			}
 		} else {
 			box.style.background = `${config?.background || "var(--bg-light)"}`;
@@ -351,7 +426,8 @@ export default class uiKitCreators {
 		width: number,
 		height: number,
 		url: string,
-		onMessage: (data: any) => Promise<void> | void
+		onMessage: (data: any) => Promise<void> | void,
+		isTransparent: boolean
 	) => {
 		const iframe = document.createElement("iframe");
 		iframe.id = String(window.renderID++);
@@ -361,6 +437,11 @@ export default class uiKitCreators {
 		iframe.style.top = `${y}px`;
 		iframe.style.width = `${width}px`;
 		iframe.style.height = `${height}px`;
+		iframe.style.border = "none";
+		if (isTransparent) {
+			iframe.style.background = "transparent";
+			iframe.setAttribute("allowtransparency", "true");
+		}
 
 		iframe.src = url;
 

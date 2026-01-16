@@ -30,6 +30,7 @@ export default class dockAndDesktop extends Overlay {
 	desktop?: executionResult;
 
 	async init() {
+		this.renderer.windowBackgroundStyles = "";
 		this.renderer.makeWindowInvisible();
 		this.renderer.hideWindowHeader();
 		this.renderer.hideWindowCorners();
@@ -40,7 +41,7 @@ export default class dockAndDesktop extends Overlay {
 		if (!userinf) throw new Error("Executed with non-existent user?");
 
 		this.desktop = await this.env.exec(
-			"/System/CoreExecutables/desktop.appl",
+			"/System/CoreExecutables/Desktop.appl",
 			[userinf.directory + "/Desktop"]
 		);
 
@@ -81,16 +82,9 @@ export default class dockAndDesktop extends Overlay {
 		};
 	}
 
-	changeWallpaper(path?: string) {
-		const cwm = this.env.getPIDOfName("ConstellationWindowManager");
-		if (!cwm) {
-			this.env.warn(
-				"Constellation Window Manager is not running. Cannot change wallpaper."
-			);
-			return;
-		}
-
-		this.env.sendmessage(cwm, "changeWallpaper", path);
+	async changeWallpaper(path?: string) {
+		await this.env.shell.index();
+		await this.env.shell.exec("wallpaper", path);
 	}
 
 	async loadConfig() {
@@ -133,7 +127,7 @@ export default class dockAndDesktop extends Overlay {
 
 	frame() {
 		if (this.desktop?.hasExited !== false) {
-			console.error("Desktop was terminated. Exiting dock.");
+			this.env.error("Desktop was terminated. Exiting dock.");
 			this.exit();
 		}
 

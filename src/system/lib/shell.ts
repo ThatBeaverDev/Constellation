@@ -1,10 +1,10 @@
 import TerminalAlias from "./terminalAlias.js";
-import { ApplicationAuthorisationAPI } from "../security/env.js";
+import { ApplicationAuthorisationAPI } from "../security/components/env/env.js";
 
-type shellResult = {
-	result: any;
+export interface shellResult<T = any> {
+	result: T;
 	ref: TerminalAlias;
-};
+}
 
 export default class Shell {
 	readonly #directory: string;
@@ -117,7 +117,7 @@ export default class Shell {
 
 					if (filename == name) {
 						// this is the one
-						const include = await this.#env.include(item);
+						const include = await this.#env.fs.include(item);
 
 						if (include == undefined)
 							throw new Error("File at include does not exist");
@@ -133,7 +133,7 @@ export default class Shell {
 					}
 				}
 
-				throw new Error("No such utility found.");
+				throw new Error(`No utility found by name ${name}.`);
 		}
 	}
 
