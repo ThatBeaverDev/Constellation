@@ -1,4 +1,4 @@
-// I stole this from crlRuntime hehe
+// Borrowed from the old CRL runtime.
 
 function removeBlanks(array: string[]): string[] {
 	return array.filter((item) => !["", " ", "\t", "\n"].includes(item.trim()));

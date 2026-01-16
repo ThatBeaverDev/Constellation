@@ -131,12 +131,6 @@ export const files: Record<
 		directory: "/System/CoreServices"
 	},
 
-	// languageRunner
-	"/build/indexes/com.constellation.crlRuntime.idx": {
-		type: "application",
-		directory: "/System/CoreExecutables/crlRuntime.appl"
-	},
-
 	// preview
 	"/build/indexes/com.constellation.preview.idx": {
 		type: "application",
