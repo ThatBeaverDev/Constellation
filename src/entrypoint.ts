@@ -8,6 +8,7 @@ import ImportResolver from "./system/runtime/components/resolver.js";
 import { getFlagValue } from "./system/lib/flags.js";
 
 applyStringPrototypes();
+window.constellation = true;
 
 const { SystemFilesystemDriver } = await import("./fs/fs.js");
 
