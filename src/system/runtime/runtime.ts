@@ -62,7 +62,7 @@ export interface executionProcessResult extends executionResult {
 	info: ProcessInformation;
 }
 
-const crlDirectory = "/System/CoreExecutables/crlRuntime.appl";
+const crlDirectory = "/removed.appl";
 
 function generateTerminationCode(length: number) {
 	var result = "";
