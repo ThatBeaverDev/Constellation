@@ -3,8 +3,7 @@ import ConstellationWindowManager from "../bin/app.js";
 export class ConstellationWindowManagerWallpaper {
 	env: ConstellationWindowManager["env"];
 	renderer: ConstellationWindowManager["renderer"];
-	static defaultWallpaper =
-		"/System/CoreAssets/Wallpapers/Bailey Zindel - Yosemite Valley.jpg";
+	static defaultWallpaper = "/System/CoreAssets/Wallpapers/Mars.jpg";
 	wallpaperPath: string =
 		ConstellationWindowManagerWallpaper.defaultWallpaper;
 
