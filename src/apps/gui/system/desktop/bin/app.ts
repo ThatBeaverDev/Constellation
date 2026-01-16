@@ -39,7 +39,7 @@ export default class ConstellationDesktop extends GuiApplication {
 				return {
 					name: path.textAfterAll("/"),
 					icon: await pathIcon(
-						this.env,
+						this.env.fs,
 						this.env.fs.resolve(this.path, path)
 					),
 					path
@@ -56,6 +56,7 @@ export default class ConstellationDesktop extends GuiApplication {
 
 		this.renderer.clear();
 		this.panelkit.reset();
+		this.renderer.windowBackgroundStyles = "";
 		this.panelkit.sidebarWidth = 0;
 
 		let x = this.env.windows.leftBound + this.padding;

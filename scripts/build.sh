@@ -21,7 +21,7 @@ build_tsc() {
 
     build_apps_d_ts
 
-    node build/system/security/hash/secureHash.js
+    node build/system/security/components/hashing/secureHash.js
 }
 
 build_apps_d_ts() {    

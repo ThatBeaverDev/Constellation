@@ -1,13 +1,24 @@
+import { GraphicalWindow } from "../../display/windowTypes.js";
+import { GraphicalInterface } from "../../gui.js";
 import { defaultConfig } from "./defaultConfig.js";
+import { textboxCallbackObject } from "/System/gui/uiKit/definitions.js";
 
 export default class UIKitEventListeners {
 	#signal: AbortSignal;
+	#gui: GraphicalInterface;
+	#window: GraphicalWindow;
 	setSignal(signal: AbortSignal) {
 		this.#signal = signal;
 	}
 
-	constructor(signal: AbortSignal) {
+	constructor(
+		GraphicalInterface: GraphicalInterface,
+		signal: AbortSignal,
+		window: GraphicalWindow
+	) {
+		this.#gui = GraphicalInterface;
 		this.#signal = signal;
+		this.#window = window;
 	}
 
 	uikitButton(
@@ -51,28 +62,79 @@ export default class UIKitEventListeners {
 		width = 200,
 		height = 20,
 		backtext = "",
-		callbacks = {
-			update: (key: string, value: string) => {},
-			enter: (value: string) => {}
-		},
+		callbacks: textboxCallbackObject,
 		options = defaultConfig.uikitTextbox
 	) {
 		element.addEventListener(
 			"keydown",
 			(event) => {
 				const val = String(element.value);
+
 				if (event.code == "Enter") {
-					if (typeof callbacks.enter !== "function") return;
-
-					callbacks.enter(val);
+					if (typeof callbacks.enter == "function")
+						callbacks.enter(val);
 				} else {
-					if (typeof callbacks.update !== "function") return;
+					if (typeof callbacks.beforeUpdate == "function")
+						callbacks.beforeUpdate(event.key, val);
 
-					callbacks.update(event.key, val);
+					if (typeof callbacks.afterUpdate == "function") {
+						setTimeout(() => {
+							if (typeof callbacks.afterUpdate == "function") {
+								callbacks.afterUpdate(event.key, val);
+							}
+						}, 0);
+					}
 				}
 			},
 			{ signal: this.#signal }
 		);
+	}
+
+	uikitProgressBar(
+		element: HTMLDivElement,
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		progress: number | "throb",
+		onDrag: (progress: number) => Promise<void> | void
+	) {
+		if (!onDrag) return;
+		if (!element.dataset.isDragging) element.dataset.isDragging = "false";
+
+		element.addEventListener(
+			"pointerdown",
+			(e) => {
+				element.dataset.isDragging = "true";
+
+				moveProgress(e);
+			},
+			{ signal: this.#signal }
+		);
+
+		const moveProgress = (e: PointerEvent) => {
+			if (element.dataset.isDragging !== "true") return;
+
+			function clamp(n: number, min: number, max: number) {
+				if (n < min) return min;
+				if (n > max) return max;
+
+				return n;
+			}
+
+			const mouseX = e.clientX - this.#window.position.left;
+			const progressX = clamp(mouseX - x, 0, width);
+
+			const newProgress = (progressX / width) * 100;
+
+			onDrag(newProgress);
+		};
+
+		this.#gui.container.addEventListener("pointermove", moveProgress, {
+			signal: this.#signal
+		});
+
+		// pointerup is in the creator script since it's constant
 	}
 
 	uikitTextarea(
@@ -81,7 +143,7 @@ export default class UIKitEventListeners {
 		y: number = 0,
 		width: number = 100,
 		height: number = 50,
-		callbacks: any,
+		callbacks: textboxCallbackObject,
 		options = defaultConfig.uikitTextarea
 	) {
 		element.addEventListener(
@@ -90,13 +152,19 @@ export default class UIKitEventListeners {
 				const val = String(element.value);
 
 				if (event.code == "Enter") {
-					if (typeof callbacks.enter !== "function") return;
-
-					callbacks.enter(val);
+					if (typeof callbacks.enter == "function")
+						callbacks.enter(val);
 				} else {
-					if (typeof callbacks.update !== "function") return;
+					if (typeof callbacks.beforeUpdate == "function")
+						callbacks.beforeUpdate(event.key, val);
 
-					callbacks.update(event.key, val);
+					if (typeof callbacks.afterUpdate == "function") {
+						setTimeout(() => {
+							if (typeof callbacks.afterUpdate == "function") {
+								callbacks.afterUpdate(event.key, val);
+							}
+						}, 0);
+					}
 				}
 			},
 			{ signal: this.#signal }

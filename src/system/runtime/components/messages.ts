@@ -10,7 +10,7 @@ export default class IPCMessageSender {
 		originID: number,
 		target: Process | number,
 		intent: string,
-		data: any = {},
+		data: any,
 		replyCallback?: replyCallback
 	) {
 		let targetProcess;

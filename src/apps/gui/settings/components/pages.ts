@@ -1,5 +1,7 @@
 import systemSettings from "../bin/app.js";
 import { softwareupdateResult } from "../../../services/SoftwareUpdateHandler/lib/softwareupdate.js";
+// @ts-expect-error
+import { ConstellationWindowManagerWallpaper } from "/System/CoreExecutables/guiManager.appl/components/wallpaper.js";
 
 export const pages = [
 	"Updates",
@@ -43,10 +45,14 @@ export class SettingsPages {
 		});
 
 		// system components
-		//title("Shell & System");
-		title("System");
+		title("Graphical Shell");
 		//item("Dock", "dock");
 		//item("Menubar", "panels-top-left");
+		item("Wallpaper", "wallpaper", () => {
+			this.#setPage("Wallpaper");
+		});
+
+		title("System");
 		item("Users", "users", () => {
 			this.#setPage("Users");
 		});
@@ -67,9 +73,9 @@ export class SettingsPages {
 
 		if (this.#updateStatus == undefined) {
 			this.#updateStatus = {
-				sysver: (await this.#env.include("/System/manifest.js"))
+				sysver: (await this.#env.fs.include("/System/manifest.js"))
 					.version,
-				sysbuild: (await this.#env.include("/System/buildver.js"))
+				sysbuild: (await this.#env.fs.include("/System/buildver.js"))
 					.buildNumber
 			};
 		}
@@ -115,9 +121,7 @@ export class SettingsPages {
 						text: "Install",
 						icon: "hard-drive-download",
 						onClick: () => {
-							this.#env.exec(
-								"/System/CoreExecutables/SoftwareUpdateInstaller.srvc"
-							);
+							this.#env.shell.exec("softwareupdate", "install");
 						}
 					}
 				);
@@ -165,6 +169,89 @@ export class SettingsPages {
 	// GUI shell
 	//Dock() {}
 	//Menubar() {}
+
+	#wallpaperDirectories = ["/System/CoreAssets/Wallpapers"];
+	#wallpapers?: string[];
+	async Wallpaper() {
+		this.#parent.panelkit.reset();
+
+		const panelKit = this.#parent.panelkit;
+
+		panelKit.title("Wallpaper");
+
+		if (!this.#wallpapers) {
+			const wallpapers = [];
+
+			for (const directory of this.#wallpaperDirectories) {
+				const contents = await this.#env.fs.listDirectory(directory);
+				const images = contents.filter(
+					(item) =>
+						item.endsWith(".png") ||
+						item.endsWith(".jpg") ||
+						item.endsWith(".jpeg") ||
+						item.endsWith(".webp")
+				);
+
+				const paths = images.map((item) =>
+					this.#env.fs.resolve(directory, item)
+				);
+
+				wallpapers.push(...paths);
+			}
+
+			this.#wallpapers = wallpapers;
+		}
+
+		const userinfo = this.#env.users.userInfo(this.#env.user);
+		if (!userinfo) return;
+
+		panelKit.card(
+			`Current Wallpaper: ${userinfo.pictures.wallpaper ?? `${ConstellationWindowManagerWallpaper.defaultWallpaper} (default)`}`,
+			userinfo.pictures.wallpaper ??
+				ConstellationWindowManagerWallpaper.defaultWallpaper
+		);
+
+		panelKit.title("Choices");
+
+		panelKit.mediumCard(
+			"Default",
+			"The default wallpaper of Constellation. Changes occassionally.",
+			ConstellationWindowManagerWallpaper.defaultWallpaper,
+			() => {
+				this.#changeWallpaper(
+					ConstellationWindowManagerWallpaper.defaultWallpaper
+				);
+			}
+		);
+		for (const path of this.#wallpapers) {
+			panelKit.mediumCard(
+				path.textAfterAll("/").textBeforeLast("."),
+				path,
+				path,
+				() => {
+					this.#changeWallpaper(path);
+				}
+			);
+		}
+	}
+	async #changeWallpaper(path: string) {
+		const isOk = await this.#renderer.showUserPrompt(
+			"Are you sure you want to change your wallpaper?",
+			"",
+			"Change it",
+			"Leave it"
+		);
+
+		if (isOk == "secondary") return;
+
+		await this.#env.shell.index();
+		await this.#env.shell.exec("wallpaper", path);
+
+		const userInfo = this.#parent.env.users.userInfo(this.#parent.env.user);
+		if (!userInfo) return;
+
+		userInfo.pictures.changeWallpaper(path);
+	}
 
 	// system
 	#usersState: { tab: "default" } | { tab: "viewUser"; user: string } = {

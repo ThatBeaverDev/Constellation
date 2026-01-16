@@ -1,4 +1,4 @@
-const manifest = {
+const manifest: ApplicationManifest = {
 	name: "Installer",
 	description:
 		"the Out of Box Experience for Constellation, guiding the user through basic setup tasks like creating a user.",

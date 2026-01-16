@@ -1,3 +1,3 @@
 export const name = "Constellation";
-export const version = "25.12";
-export const keyword = "Sahara";
+export const version = "26.1";
+export const keyword = "Ares";

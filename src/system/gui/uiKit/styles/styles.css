@@ -48,6 +48,21 @@ body {
 	-webkit-user-select: all !important;
 }
 
+.uikitImage {
+	position: absolute;
+	user-select: none;
+	-webkit-user-drag: none;
+	-webkit-user-select: none;
+
+	object-fit: cover;
+}
+
+.uikitImage.clickable {
+	user-select: all !important;
+	-webkit-user-drag: all !important;
+	-webkit-user-select: all !important;
+}
+
 .uikitText,
 .uikitButton {
 	padding: 0px;
@@ -81,7 +96,7 @@ body {
 .uiKitIframe {
 	padding: 0px;
 
-	border: 0;
+	border: none;
 	border-radius: 3px;
 	outline: none;
 
@@ -120,6 +135,8 @@ body {
 }
 
 .uikitProgressBar {
+	position: absolute;
+
 	background-color: var(--bg);
 
 	overflow: hidden;
@@ -156,7 +173,7 @@ body {
 	border-radius: var(--window-border-radius);
 	z-index: 1000000;
 
-	background-color: var(--bg-light);
+	background-color: var(--bg-dark);
 }
 
 .uikitContextContainer > .uiKitButton {

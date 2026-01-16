@@ -1,4 +1,5 @@
 import { PostInstallOptions } from "../../installation.config.js";
+import PanelKit from "/System/CoreLibraries/panelkit.js";
 
 type OOBEScreenName =
 	| "welcome"
@@ -6,16 +7,9 @@ type OOBEScreenName =
 	| "customiseUser"
 	| "configuring";
 
-interface OOBEScreen {
-	icon: string;
-	title: string;
-	subtext?: string;
-	extras?: (baseY: number, spacing: number) => void;
-	extraRequiredHeight?: number;
-}
-
 export default class GuiOutOfBoxInstaller extends GuiApplication {
-	screen: OOBEScreenName = "welcome";
+	panelkit = new PanelKit(this.renderer);
+	page: OOBEScreenName = "welcome";
 	returnValue: PostInstallOptions = {
 		user: {
 			username: "unset",
@@ -25,6 +19,15 @@ export default class GuiOutOfBoxInstaller extends GuiApplication {
 		}
 	};
 	pipe: any[] = [];
+	#message?: string;
+
+	showMessage(text: string) {
+		this.#message = text;
+
+		setTimeout(() => {
+			this.#message = undefined;
+		}, 5000);
+	}
 
 	async init(args: any[]) {
 		this.renderer.setIcon("hard-drive-download");
@@ -49,219 +52,151 @@ export default class GuiOutOfBoxInstaller extends GuiApplication {
 
 	frame() {
 		this.renderer.clear();
+		this.panelkit.reset();
+		this.panelkit.sidebarWidth = 0;
 
-		this.renderScreen(this.screens[this.screen]);
+		if (this.#message) {
+			const message = this.#message;
 
-		this.renderer.commit();
-	}
+			const messageWidth = this.renderer.getTextWidth(message);
+			const messageLeft = (this.renderer.windowWidth - messageWidth) / 2;
 
-	persistentScreenMemory: string = "";
-	changeScreen(screenName: OOBEScreenName) {
-		this.screen = screenName;
+			this.renderer.text(
+				messageLeft,
+				this.renderer.windowHeight - 25,
+				message
+			);
+		}
 
-		this.renderer.clear();
-		this.renderScreen(this.screens[this.screen]);
+		const bottomRightButton = (text: string, onClick: () => any) => {
+			const textWidth = this.renderer.getTextWidth(text);
+			const textHeight = this.renderer.getTextHeight(text);
 
-		this.renderer.clear();
-		this.renderScreen(this.screens[this.screen]);
-		this.renderer.commit();
-	}
-	screens: Record<OOBEScreenName, OOBEScreen> = {
-		welcome: {
-			icon: "handshake",
-			title: "Welcome to Constellation!",
-			extras: (y: number) => {
-				const iconScale = 1.5;
-				const iconDimensions = 24 * iconScale;
-				const iconLeft = this.findCenterOfWidth(iconDimensions);
+			const boxWidth =
+				this.panelkit.padding + textWidth + this.panelkit.padding;
+			const boxHeight =
+				this.panelkit.padding + textHeight + this.panelkit.padding;
 
-				const icon = this.renderer.icon(
-					iconLeft,
-					y,
-					"circle-arrow-right",
-					iconScale
+			const boxLeft =
+				this.renderer.windowWidth - (boxWidth + this.panelkit.padding);
+			const boxTop =
+				this.renderer.windowHeight -
+				(boxHeight + this.panelkit.padding);
+
+			this.renderer
+				.box(boxLeft, boxTop, boxWidth, boxHeight, {
+					borderRadius: 5,
+					background: "surface-2"
+				})
+				.onClick(onClick);
+
+			this.renderer
+				.text(
+					boxLeft + this.panelkit.padding,
+					boxTop + this.panelkit.padding,
+					text
+				)
+				.passthrough();
+		};
+		const bottomLeftText = (text: string) => {
+			const textHeight = this.renderer.getTextHeight(text);
+
+			const textLeft = this.panelkit.padding;
+			const textTop =
+				this.renderer.windowHeight -
+				(textHeight + this.panelkit.padding);
+
+			this.renderer.text(textLeft, textTop, text).passthrough();
+		};
+
+		switch (this.page) {
+			case "welcome":
+				this.panelkit.mediumCard(
+					"Welcome to Constellation!",
+					"Constellation is an entire OS - just in the browser!\n\nThis setup won't take long.",
+					"handshake",
+					undefined,
+					undefined
 				);
 
-				this.screens.welcome.extraRequiredHeight = iconDimensions;
-
-				this.renderer.onClick(icon, () => {
-					this.persistentScreenMemory = "";
-					this.changeScreen("createUser");
+				bottomRightButton("Continue", () => {
+					this.page = "createUser";
 				});
-			},
-			extraRequiredHeight: 0
-		},
-		createUser: {
-			icon: "circle-user-round",
-			title: "Create your user account",
-			subtext: "Enter your details to create your user account.",
-			extras: (y: number, spacing: number) => {
-				const left = this.findCenterOfWidth(150);
-				let yPos = Number(y);
 
-				const displayName = this.renderer.textbox(
-					left,
-					y,
-					150,
-					25,
-					"Username",
-					{}
+				break;
+
+			case "createUser":
+				this.panelkit.mediumCard(
+					"Create your user account",
+					"Enter your details to create your user account.",
+					"circle-user-round"
 				);
-				yPos += 25 + spacing;
 
-				// display home folder name
-				const usernameFetch =
-					this.renderer.getTextboxContent(displayName);
-				let technicalName: string;
-				if (usernameFetch == undefined) {
-					technicalName = "";
-				} else {
-					technicalName = usernameFetch
+				bottomRightButton("Create Account", () => {
+					if (
+						this.returnValue.user.displayName !== "" &&
+						this.returnValue.user.username !== "" &&
+						this.returnValue.user.password !== ""
+					) {
+						this.page = "customiseUser";
+					} else {
+						this.showMessage(
+							"You need to enter a username and password!"
+						);
+					}
+				});
+
+				const username = this.panelkit.textInput(
+					"Username",
+					"",
+					(contents: string) => {}
+				);
+				const password = this.panelkit.textInput(
+					"Password",
+					"",
+					(contents: string) => {}
+				);
+
+				if (password) this.returnValue.user.password = password;
+				if (username) {
+					this.returnValue.user.displayName = username;
+
+					const technicalName = username
 						.trim()
 						.replaceAll(" ", "_")
 						.toLocaleLowerCase();
+
+					this.returnValue.user.username = technicalName;
+
+					this.panelkit.info(`Home Folder: /Users/${technicalName}`);
 				}
-				const technicalNameDisplay = "Home Folder: " + technicalName;
 
-				const usernameFontSize = 10;
-				const usernameWidth = this.renderer.getTextWidth(
-					technicalNameDisplay,
-					usernameFontSize
-				);
-				const usernameHeight = this.renderer.getTextHeight(
-					technicalNameDisplay,
-					usernameFontSize
-				);
-				const usernameLeft = this.findCenterOfWidth(usernameWidth);
-				this.renderer.text(
-					usernameLeft,
-					this.renderer.windowHeight - (spacing + usernameHeight),
-					technicalNameDisplay,
-					usernameFontSize
+				bottomLeftText("Welcome -> Create User (2/2)");
+
+				break;
+
+			case "customiseUser":
+				this.page = "configuring";
+				break;
+
+			case "configuring":
+				this.panelkit.mediumCard(
+					"Working...",
+					"Constellation is configuring itself. Please wait.",
+					"hammer"
 				);
 
-				const pass = this.renderer.textbox(
-					left,
-					yPos,
-					150,
-					25,
-					"Password",
-					{}
-				);
-				yPos += 25 + spacing;
-
-				const buttonText = "Create account";
-				const buttonWidth = this.renderer.getTextWidth(buttonText);
-				const buttonLeft = this.findCenterOfWidth(buttonWidth);
-
-				this.renderer.box(left, yPos, 150, 25, {
-					background: "var(--bg-light)"
-				});
-				const text = this.renderer.text(
-					buttonLeft,
-					yPos,
-					"Create account",
-					15
-				);
-
-				this.renderer.onClick(text, () => {
-					const name = this.renderer.getTextboxContent(displayName);
-					const password = this.renderer.getTextboxContent(pass);
-
-					if (name) this.returnValue.user.displayName = name;
-					if (technicalName)
-						this.returnValue.user.username = technicalName;
-					if (password) this.returnValue.user.password = password;
-
-					this.persistentScreenMemory = "";
-					//this.changeScreen("customiseUser");
-					this.changeScreen("configuring");
-				});
-
-				this.screens.createUser.extraRequiredHeight = yPos - y + 25;
-			},
-			extraRequiredHeight: 0
-		},
-		customiseUser: {
-			title: "Customise your user account",
-			subtext: "Select your accent colour and profile picture.",
-			icon: "paintbrush",
-			extras: () => {}
-		},
-		configuring: {
-			title: "Setting up Constellation...",
-			subtext: "This shouldn't take very long...",
-			icon: "loader-circle",
-			// @ts-expect-error
-			iconAnimation: "spin",
-			extras: () => {
 				this.pipe.push(this.returnValue);
+				// now we wait to be terminated
 
-				// now we wait to be terminated.
+				break;
 
-				return;
-			}
-		}
-	};
-
-	findCenterOfWidth(width: number) {
-		return (this.renderer.windowWidth - width) / 2;
-	}
-
-	renderScreen(screen: OOBEScreen) {
-		const iconScale = 3;
-		const iconDimensions = 24 * iconScale;
-		const iconLeft = this.findCenterOfWidth(iconDimensions);
-
-		const titleSize = 25;
-		const subtextSize = 15;
-
-		const spacing = 15;
-
-		// title
-		const titleWidth = this.renderer.getTextWidth(screen.title, titleSize);
-		const titleHeight = this.renderer.getTextHeight(
-			screen.title,
-			titleSize
-		);
-
-		const titleLeft = this.findCenterOfWidth(titleWidth);
-
-		let subtextWidth = 0;
-		let subtextHeight = 0;
-
-		if (screen.subtext) {
-			// subtext
-			subtextWidth = this.renderer.getTextWidth(
-				screen.subtext,
-				subtextSize
-			);
-			subtextHeight = this.renderer.getTextHeight(
-				screen.subtext,
-				subtextSize
-			);
-		}
-		const subtextLeft = this.findCenterOfWidth(subtextWidth);
-
-		const totalHeight =
-			iconDimensions +
-			spacing +
-			titleHeight +
-			spacing +
-			(subtextHeight == 0 ? 0 : subtextHeight + spacing) +
-			(this.screens[this.screen].extraRequiredHeight || 0);
-
-		let y = (this.renderer.windowHeight - totalHeight) / 2;
-
-		this.renderer.icon(iconLeft, y, screen.icon, iconScale);
-		y += iconDimensions + spacing;
-		this.renderer.text(titleLeft, y, screen.title, titleSize);
-		y += titleHeight + spacing;
-		if (screen.subtext) {
-			this.renderer.text(subtextLeft, y, screen.subtext, subtextSize);
-			y += subtextHeight + spacing;
+			default:
+				throw new Error(
+					`OOBEScreen '${this.page}' is not implemented.`
+				);
 		}
 
-		if (screen.extras) screen.extras(y, spacing);
+		this.renderer.commit();
 	}
 }

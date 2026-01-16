@@ -1,4 +1,4 @@
-import { UserAlias } from "../../../../../system/security/definitions.js";
+import { UserAlias } from "../../../../../system/security/components/definitions.js";
 
 export default class systemLoginInterface extends GuiApplication {
 	users: Record<UserAlias["name"], UserAlias> = {};
@@ -7,6 +7,7 @@ export default class systemLoginInterface extends GuiApplication {
 	sideglassSize: number = 200;
 
 	async init() {
+		this.renderer.windowBackgroundStyles = "";
 		this.renderer.hideWindowHeader();
 		this.renderer.hideWindowCorners();
 		this.renderer.makeWindowInvisible();
@@ -265,7 +266,9 @@ export default class systemLoginInterface extends GuiApplication {
 
 						await this.attemptUserPassword(this.user, value);
 					}
-				}
+				},
+				{},
+				"passwordBox"
 			);
 
 			const errorTextWidth = this.renderer.getTextWidth(this.errorText);

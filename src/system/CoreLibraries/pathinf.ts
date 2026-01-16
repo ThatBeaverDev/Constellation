@@ -1,15 +1,12 @@
-import { ApplicationAuthorisationAPI } from "../security/env.js";
+import { FilesystemInterface } from "../security/components/env/components/fs.js";
+import { ApplicationAuthorisationAPI } from "../security/components/env/env.js";
+import { fileCover } from "/System/CoreLibraries/music-metadata.js";
 
 const applicationExtensions = ["appl", "srvc"];
 
-export async function getAppConfig(
-	env: ApplicationAuthorisationAPI,
-	directory: string
-) {
+export async function getAppConfig(fs: FilesystemInterface, directory: string) {
 	try {
-		const appConf = await env.include(
-			env.fs.resolve(directory, "config.js")
-		);
+		const appConf = await fs.include(fs.resolve(directory, "config.js"));
 
 		// get the real data
 		return appConf?.default as ApplicationManifest | undefined;
@@ -19,14 +16,14 @@ export async function getAppConfig(
 }
 
 export async function pathIcon(
-	env: ApplicationAuthorisationAPI,
+	fs: FilesystemInterface,
 	directory: string
 ): Promise<string | never> {
 	if (!directory.startsWith("/")) {
 		throw new Error("Pathicon requires an absolute path.");
 	}
 
-	const stats = await env.fs.stat(directory);
+	const stats = await fs.stat(directory);
 
 	const extension = directory.textAfterAll(".");
 
@@ -42,7 +39,7 @@ export async function pathIcon(
 					// let's try and extract the app's own icon
 
 					try {
-						const config = await getAppConfig(env, directory);
+						const config = await getAppConfig(fs, directory);
 						// get the icon
 						const icon = config?.icon;
 
@@ -50,7 +47,7 @@ export async function pathIcon(
 							const isDir = [".", "/"].includes(icon[0]);
 
 							if (isDir) {
-								const dir = env.fs.resolve(directory, icon);
+								const dir = fs.resolve(directory, icon);
 								return dir;
 							} else {
 								return icon;
@@ -657,9 +654,12 @@ export async function pathIcon(
 			return "/System/CoreAssets/Vectors/files/file-database-json.svg";
 
 		case "mp3":
+			return await fileCover(fs, directory);
+
 		case "ogg":
 		case "m4a":
 		case "flac":
+		case "opus":
 			return "/System/CoreAssets/Vectors/files/file-media-audio.svg";
 
 		case "mp4":
@@ -672,15 +672,12 @@ export async function pathIcon(
 	}
 }
 
-export async function pathName(
-	env: ApplicationAuthorisationAPI,
-	directory: string
-) {
+export async function pathName(fs: FilesystemInterface, directory: string) {
 	const ext = directory.textAfterAll(".");
 
 	if (applicationExtensions.includes(ext)) {
 		// app
-		const config = await getAppConfig(env, directory);
+		const config = await getAppConfig(fs, directory);
 		const name = config?.name;
 
 		if (name !== undefined) {
@@ -692,14 +689,14 @@ export async function pathName(
 }
 
 export async function pathVisible(
-	env: ApplicationAuthorisationAPI,
+	fs: FilesystemInterface,
 	directory: string
 ): Promise<boolean> {
 	const ext = directory.textAfterAll(".");
 
 	if (applicationExtensions.includes(ext)) {
 		// app
-		const config = await getAppConfig(env, directory);
+		const config = await getAppConfig(fs, directory);
 		const show = config?.userspace;
 
 		if (show == false) return false;
@@ -708,11 +705,8 @@ export async function pathVisible(
 	return !directory.textAfterAll("/").startsWith(".");
 }
 
-export async function pathMime(
-	env: ApplicationAuthorisationAPI,
-	directory: string
-) {
-	const stats = await env.fs.stat(directory);
+export async function pathMime(fs: FilesystemInterface, directory: string) {
+	const stats = await fs.stat(directory);
 
 	const isDir = await stats.isDirectory();
 

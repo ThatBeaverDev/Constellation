@@ -1,14 +1,24 @@
+import manifest from "../config";
+import { userSelectFile } from "/System/CoreLibraries/gui";
+
 export default class FilePreview extends GuiApplication {
 	targetFile: string = "./resources/default.jpg";
 
 	async init(args: (string | undefined)[]) {
-		const targetFile = args[0];
+		this.renderer.windowName = `Preview`;
+		this.renderer.setIcon("image");
+
+		const targetFile =
+			args?.[0] ??
+			(await userSelectFile(
+				this.env,
+				manifest.filetypes as `.${string}`[]
+			));
 		if (targetFile == undefined) throw new Error("A file must be opened!");
 
 		this.targetFile = targetFile;
 
 		this.renderer.windowName = `Preview: ${targetFile.textAfterAll("/")}`;
-		this.renderer.setIcon("image");
 	}
 
 	frame() {

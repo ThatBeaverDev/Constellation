@@ -2,7 +2,7 @@ import { pathIcon } from "pathinf";
 import { Stats } from "../../../../../../fs/BrowserFsTypes.js";
 import PanelKit from "panelkit";
 import { bytesToSize } from "../../utils.js";
-import { ApplicationAuthorisationAPI } from "../../../../../../system/security/env.js";
+import { ApplicationAuthorisationAPI } from "../../../../../../system/security/components/env/env.js";
 
 async function recursiveInfo(
 	env: ApplicationAuthorisationAPI,
@@ -61,7 +61,7 @@ export default class FinderFileProperties extends GuiApplication {
 	panelkit = new PanelKit(this.renderer);
 	counter = 0;
 
-	async init(args: any[]) {
+	async init(args: unknown[]) {
 		this.path = String(args[0]);
 		this.filename = this.path.textAfterAll("/");
 		if (this.filename == "") {
@@ -78,7 +78,7 @@ export default class FinderFileProperties extends GuiApplication {
 	}
 
 	async refresh() {
-		this.icon = await pathIcon(this.env, this.path);
+		this.icon = await pathIcon(this.env.fs, this.path);
 		this.renderer.setIcon(this.icon);
 
 		this.stats = await this.env.fs.stat(this.path);

@@ -8,8 +8,9 @@ import ImportResolver from "./system/runtime/components/resolver.js";
 import { getFlagValue } from "./system/lib/flags.js";
 
 applyStringPrototypes();
+window.constellation = true;
 
-const { FilesystemAPI } = await import("./fs/fs.js");
+const { SystemFilesystemDriver } = await import("./fs/fs.js");
 
 if (isNode) {
 	console.log(
@@ -53,7 +54,7 @@ if (isCommandLine) {
 const isDevmode = Boolean(getFlagValue("dev"));
 
 function getRequiredLibraries(root: string) {
-	const fsApi = new FilesystemAPI(root);
+	const fsApi = new SystemFilesystemDriver(root);
 	const blobifier = new Blobifier(fsApi);
 	const processor = new ImportResolver(fsApi, blobifier);
 
@@ -71,7 +72,7 @@ async function startupKernel(root: string, canInstall: boolean = true) {
 	console.debug("Starting kernel at ", root);
 
 	// get the needed libraries
-	const { fsApi, processor } = getRequiredLibraries(root);
+	const { fsApi, processor, blobifier } = getRequiredLibraries(root);
 
 	// wait for the installation index if it's a promise
 	if (installationIndexFile instanceof Promise) {
@@ -170,6 +171,10 @@ async function startupKernel(root: string, canInstall: boolean = true) {
 
 		await startupKernel(root, false);
 	}
+
+	/* -------------------- Terminate things -------------------- */
+
+	await blobifier.terminate();
 }
 
 /* -------------------- BootKeys -------------------- */
@@ -226,6 +231,8 @@ function detectKeyPresses(event: KeyboardEvent) {
 						const file = input.files[0];
 						const contents = await file.text();
 						const object = JSON.parse(contents);
+
+						input.remove();
 
 						resolve(object);
 					}

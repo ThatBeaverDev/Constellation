@@ -1,18 +1,16 @@
 import { clickReference, onClickOptions } from "../definitions.js";
 import { UiKitRenderer } from "../uiKit.js";
 
-export class UiKitElement extends Number {
+export class UiKitElement {
 	#renderer: UiKitRenderer;
-	#id: number;
-	constructor(renderer: UiKitRenderer, id: number) {
-		super(id);
-
+	id: string | number;
+	constructor(renderer: UiKitRenderer, id: string | number) {
 		this.#renderer = renderer;
-		this.#id = id;
+		this.id = id;
 	}
 
 	toString() {
-		return String(this.#id);
+		return String(this.id);
 	}
 
 	onClick(
@@ -21,7 +19,7 @@ export class UiKitElement extends Number {
 		otherConfig?: onClickOptions
 	) {
 		this.#renderer.onClick(
-			this.#id,
+			this,
 			leftClickCallback,
 			rightClickCallback,
 			otherConfig
@@ -37,13 +35,13 @@ export class UiKitElement extends Number {
 	}
 
 	dragResult(type: "file", path: string) {
-		this.#renderer.setElementDragResult(this.#id, type, path);
+		this.#renderer.setElementDragResult(this, type, path);
 
 		return this;
 	}
 
-	onDrop(callback?: Function) {
-		this.#renderer.onElementDrop(this.#id, callback);
+	onDrop(callback: Function) {
+		this.#renderer.onElementDrop(this, callback);
 
 		return this;
 	}
@@ -52,7 +50,7 @@ export class UiKitElement extends Number {
 export class UiKitTextboxElement extends UiKitElement {
 	#renderer: UiKitRenderer;
 
-	constructor(renderer: UiKitRenderer, id: number) {
+	constructor(renderer: UiKitRenderer, id: string | number) {
 		super(renderer, id);
 
 		this.#renderer = renderer;
@@ -66,5 +64,41 @@ export class UiKitTextboxElement extends UiKitElement {
 		this.#renderer.setTextboxContent(this, value);
 
 		return this;
+	}
+
+	focus() {
+		this.#renderer.focusTextbox(this);
+	}
+
+	getSelection() {
+		return this.#renderer.getTextboxSelection(this);
+	}
+}
+
+export class UiKitTextareaElement extends UiKitTextboxElement {
+	#renderer: UiKitRenderer;
+
+	constructor(renderer: UiKitRenderer, id: string | number) {
+		super(renderer, id);
+
+		this.#renderer = renderer;
+	}
+
+	getScroll() {
+		return this.#renderer.getTextareaScroll(this);
+	}
+}
+
+export class uikitProgressBarElement extends UiKitElement {
+	#renderer: UiKitRenderer;
+
+	constructor(renderer: UiKitRenderer, id: string | number) {
+		super(renderer, id);
+
+		this.#renderer = renderer;
+	}
+
+	dragTo(progress: number) {
+		this.#renderer.setProgressbarDrag(this, progress);
 	}
 }

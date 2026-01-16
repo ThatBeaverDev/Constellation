@@ -14,7 +14,7 @@ export default class ConstellationWindowManager
 	constructor(
 		ConstellationKernel: ConstellationKernel,
 		directory: string,
-		args: any[],
+		args: unknown[],
 		user: string,
 		password: string,
 		processInfo: ProcessInformation
@@ -49,6 +49,7 @@ export default class ConstellationWindowManager
 		window.square();
 
 		this.renderer = gui.uiKit.newRenderer(this, window);
+		this.renderer.windowBackgroundStyles = "";
 	}
 
 	async init() {
@@ -60,6 +61,7 @@ export default class ConstellationWindowManager
 
 	frame() {
 		this.renderer.resizeWindow(window.innerWidth, window.innerHeight);
+		this.renderer.moveWindow(0, 0);
 
 		this.renderer.clear();
 
@@ -68,14 +70,40 @@ export default class ConstellationWindowManager
 		this.renderer.commit();
 	}
 
-	onmessage(msg: IPCMessage): void {
-		if (!msg.originDirectory.startsWith("/System/CoreExecutables")) return;
-
+	async onmessage(msg: IPCMessage): Promise<void> {
 		switch (msg.intent) {
 			case "changeWallpaper":
-				this.wallpaper.wallpaperPath = String(
-					msg.data ?? this.wallpaper.defaultWallpaper
+				const wallpaperPath: any =
+					msg.data ??
+					ConstellationWindowManagerWallpaper.defaultWallpaper;
+
+				if (
+					typeof wallpaperPath !== "string" &&
+					typeof wallpaperPath !== "undefined"
+				) {
+					this.env.warn(
+						"Wallpaper could not be changed because requested path",
+						wallpaperPath,
+						"is not a string."
+					);
+					return;
+				}
+
+				const contents = await this.env.fs.readFile(
+					wallpaperPath ??
+						ConstellationWindowManagerWallpaper.defaultWallpaper
 				);
+
+				if (contents == undefined) {
+					this.env.warn(
+						`File at ${JSON.stringify(wallpaperPath)} does not exist!`
+					);
+					return;
+				}
+
+				this.wallpaper.wallpaperPath =
+					wallpaperPath ??
+					ConstellationWindowManagerWallpaper.defaultWallpaper;
 
 				break;
 			default:
