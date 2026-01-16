@@ -247,7 +247,7 @@ export class SettingsPages {
 		await this.#env.shell.index();
 		await this.#env.shell.exec("wallpaper", path);
 
-		const userInfo = parent.env.users.userInfo(parent.env.user);
+		const userInfo = this.#parent.env.users.userInfo(this.#parent.env.user);
 		if (!userInfo) return;
 
 		userInfo.pictures.changeWallpaper(path);
