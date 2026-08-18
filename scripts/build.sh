@@ -46,6 +46,8 @@ date_file() {
 }
 
 clean
+# insure submodules are cloned
+git submodule update --init --recursive
 if [[ $1 != "--no-fix" ]]
 then
     fix
