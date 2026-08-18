@@ -34,8 +34,8 @@ export class GraphicalInterface implements UserInterfaceBase {
 		this.container = container;
 
 		// styles ID
-		this.mainStyles.id = "/styles/styles.css";
-		this.bootStyles.id = "/styles/boot.css";
+		this.mainStyles.id = "/Constellation-Sahara-Ares/styles/styles.css";
+		this.bootStyles.id = "/Constellation-Sahara-Ares/styles/boot.css";
 
 		// add styles to shadowDOM
 		this.container.appendChild(this.bootStyles);
@@ -82,11 +82,12 @@ export class GraphicalInterface implements UserInterfaceBase {
 
 	async init() {
 		this.mainStyles.textContent =
-			(await (await fetch("/styles/styles.css")).text()) +
-			`\n\n* {\n\tfont-family: ${font};\n}`;
+			(await (
+				await fetch("/Constellation-Sahara-Ares/styles/styles.css")
+			).text()) + `\n\n* {\n\tfont-family: ${font};\n}`;
 
 		this.bootStyles.textContent = await (
-			await fetch("/styles/boot.css")
+			await fetch("/Constellation-Sahara-Ares/styles/boot.css")
 		).text();
 
 		await this.uiKit.init();

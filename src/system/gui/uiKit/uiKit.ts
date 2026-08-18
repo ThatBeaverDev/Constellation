@@ -1222,7 +1222,9 @@ export default class UiKitInstanceCreator {
 
 	async init() {
 		const styles = await (
-			await fetch("/src/system/gui/uiKit/styles/styles.css")
+			await fetch(
+				"/Constellation-Sahara-Ares/src/system/gui/uiKit/styles/styles.css"
+			)
 		).text();
 		this.style.textContent = styles;
 	}

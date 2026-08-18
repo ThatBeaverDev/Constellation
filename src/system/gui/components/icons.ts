@@ -44,11 +44,13 @@ export class IconGenerator {
 		}
 	}
 
-	get iconsPath(): "/assets/icons/dark/" | "/assets/icons/light/" {
+	get iconsPath():
+		| "/Constellation-Sahara-Ares/assets/icons/dark/"
+		| "/Constellation-Sahara-Ares/assets/icons/light/" {
 		if (this.isDarkMode) {
-			return "/assets/icons/dark/";
+			return "/Constellation-Sahara-Ares/assets/icons/dark/";
 		} else {
-			return "/assets/icons/light/";
+			return "/Constellation-Sahara-Ares/assets/icons/light/";
 		}
 	}
 

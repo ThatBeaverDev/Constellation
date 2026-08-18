@@ -41,140 +41,151 @@ export const files: Record<
 	  }
 > = {
 	// system IDX
-	"/build/indexes/system.idx": {
+	"/Constellation-Sahara-Ares/build/indexes/system.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System"
 	},
 
 	// finder app
-	"/build/indexes/com.constellation.finder.idx": {
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.finder.idx": {
 		type: "application",
 		directory: "/Applications/Finder.appl"
 	},
 
 	// logos
-	"/logos/Constellation.svg": "/System/CoreAssets/Logos/Constellation.svg",
-	"/logos/Lucide.svg": "/System/CoreAssets/Logos/Constellation-lucide.svg",
-	"/logos/Web.svg": "/System/CoreAssets/Logos/Constellation-Web.svg",
+	"/Constellation-Sahara-Ares/logos/Constellation.svg":
+		"/System/CoreAssets/Logos/Constellation.svg",
+	"/Constellation-Sahara-Ares/logos/Lucide.svg":
+		"/System/CoreAssets/Logos/Constellation-lucide.svg",
+	"/Constellation-Sahara-Ares/logos/Web.svg":
+		"/System/CoreAssets/Logos/Constellation-Web.svg",
 
 	// init system
-	"/build/indexes/com.constellation.CoreExecutable.idx": {
-		type: "application",
-		directory: "/System/CoreExecutables/CoreExecutable.srvc"
-	},
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.CoreExecutable.idx":
+		{
+			type: "application",
+			directory: "/System/CoreExecutables/CoreExecutable.srvc"
+		},
 
 	// terminal
-	"/build/indexes/com.constellation.terminal.idx": {
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.terminal.idx": {
 		type: "application",
 		directory: "/Applications/Terminal.appl"
 	},
 
 	// Popup
-	"/build/indexes/com.constellation.popup.idx": {
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.popup.idx": {
 		type: "application",
 		directory: "/System/CoreExecutables/Popup.appl"
 	},
 	// Settings
-	"/build/indexes/com.constellation.settings.idx": {
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.settings.idx": {
 		type: "application",
 		directory: "/Applications/Settings.appl"
 	},
 	// Search
-	"/build/indexes/com.constellation.search.idx": {
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.search.idx": {
 		type: "application",
 		directory: "/Applications/Search.appl"
 	},
 	// Dock & Desktop
-	"/build/indexes/com.constellation.dock.idx": {
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.dock.idx": {
 		type: "application",
 		directory: "/System/CoreExecutables/Dock.appl"
 	},
 	// Library
-	"/build/indexes/com.constellation.library.idx": {
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.library.idx": {
 		type: "application",
 		directory: "/System/CoreExecutables/Library.appl"
 	},
 
 	// assets
-	"/build/indexes/sounds.idx": {
+	"/Constellation-Sahara-Ares/build/indexes/sounds.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreAssets/Sounds"
 	},
-	"/build/indexes/vectors.idx": {
+	"/Constellation-Sahara-Ares/build/indexes/vectors.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreAssets/Vectors"
 	},
-	"/build/indexes/wallpapers.idx": {
+	"/Constellation-Sahara-Ares/build/indexes/wallpapers.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreAssets/Wallpapers"
 	},
 
 	// LoginUI
-	"/build/indexes/com.constellation.systemLoginInterface.idx": {
-		type: "application",
-		directory: "/System/CoreExecutables/systemLoginInterface.appl"
-	},
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.systemLoginInterface.idx":
+		{
+			type: "application",
+			directory: "/System/CoreExecutables/systemLoginInterface.appl"
+		},
 	// Out of box experience
-	"/build/indexes/com.constellation.oobe.idx": {
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.oobe.idx": {
 		type: "application",
 		directory: "/System/CoreExecutables/OOBEInstaller.appl"
 	},
 
 	// Filetype database manager
-	"/build/indexes/com.constellation.fTypeDbMgr.idx": {
-		type: "application",
-		directory: "/System/CoreExecutables/filetypeDatabaseManager.srvc"
-	},
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.fTypeDbMgr.idx":
+		{
+			type: "application",
+			directory: "/System/CoreExecutables/filetypeDatabaseManager.srvc"
+		},
 
-	"/build/indexes/services.idx": {
+	"/Constellation-Sahara-Ares/build/indexes/services.idx": {
 		type: "jsonFilesIndex",
 		directory: "/System/CoreServices"
 	},
 
 	// preview
-	"/build/indexes/com.constellation.preview.idx": {
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.preview.idx": {
 		type: "application",
 		directory: "/Applications/Preview.appl"
 	},
 
 	// gui manager
-	"/build/indexes/com.constellation.guiManager.idx": {
-		type: "application",
-		directory: "/System/CoreExecutables/guiManager.appl"
-	},
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.guiManager.idx":
+		{
+			type: "application",
+			directory: "/System/CoreExecutables/guiManager.appl"
+		},
 
 	// User shell
-	"/build/indexes/com.constellation.usershell.idx": {
-		type: "application",
-		directory: "/System/CoreExecutables/Shell.appl"
-	},
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.usershell.idx":
+		{
+			type: "application",
+			directory: "/System/CoreExecutables/Shell.appl"
+		},
 
 	// updater
-	"/build/indexes/com.constellation.updateinstaller.idx": {
-		type: "application",
-		directory: "/System/CoreExecutables/SoftwareUpdateInstaller.srvc"
-	},
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.updateinstaller.idx":
+		{
+			type: "application",
+			directory: "/System/CoreExecutables/SoftwareUpdateInstaller.srvc"
+		},
 
 	// application installer
-	"/build/indexes/com.constellation.applicationInstaller.idx": {
-		type: "application",
-		directory: "/System/CoreExecutables/applicationInstaller.appl"
-	},
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.applicationInstaller.idx":
+		{
+			type: "application",
+			directory: "/System/CoreExecutables/applicationInstaller.appl"
+		},
 
 	// process manager
-	"/build/indexes/com.constellation.systemMonitor.idx": {
-		type: "application",
-		directory: "/System/CoreExecutables/processManager.appl"
-	},
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.systemMonitor.idx":
+		{
+			type: "application",
+			directory: "/System/CoreExecutables/processManager.appl"
+		},
 
 	// desktop
-	"/build/indexes/com.constellation.desktop.idx": {
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.desktop.idx": {
 		type: "application",
 		directory: "/System/CoreExecutables/Desktop.appl"
 	},
 
 	// textedit
-	"/build/indexes/com.constellation.textedit.idx": {
+	"/Constellation-Sahara-Ares/build/indexes/com.constellation.textedit.idx": {
 		type: "application",
 		directory: "/Applications/Text.appl"
 	}

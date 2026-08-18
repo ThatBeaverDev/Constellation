@@ -45,9 +45,9 @@ export default class cssVariables {
 	#elements: HTMLStyleElement[] = [];
 	async applyWindowCSS() {
 		const files = [
-			"/styles/windowSnapping.css",
-			"/styles/windowHeader.css",
-			"/styles/windowBody.css"
+			"/Constellation-Sahara-Ares/styles/windowSnapping.css",
+			"/Constellation-Sahara-Ares/styles/windowHeader.css",
+			"/Constellation-Sahara-Ares/styles/windowBody.css"
 		];
 
 		const elems: HTMLStyleElement[] = [];

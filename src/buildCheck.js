@@ -2,7 +2,7 @@
 // made to inform the user the system is not built yet and needs to be built to prevent an error.
 
 async function check() {
-	const src = await fetch("/build/date.txt");
+	const src = await fetch("/Constellation-Sahara-Ares/build/date.txt");
 
 	if (src.status !== 200) {
 		// remove boot screen
@@ -50,7 +50,7 @@ async function check() {
 	} else {
 		const main = document.createElement("script");
 		main.type = "module";
-		main.src = "/build/entrypoint.js";
+		main.src = "/Constellation-Sahara-Ares/build/entrypoint.js";
 		main.defer = "true";
 
 		document.body.appendChild(main);
