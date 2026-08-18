@@ -1,6 +1,6 @@
 [submodule "icons"]
 	path = assets/icons
-	url = https://github.com/ThatBeaverDev/ConstellationIcons
+	url = https://github.com/ThatBeaverDev/Constellation-Sahara-Ares-Icons
 
 [submodule "app-template"]
 	path = src/apps/app-template

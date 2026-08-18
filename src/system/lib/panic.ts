@@ -231,7 +231,7 @@ export default async function panic(
 //	const description =
 //		"```" + ascii + txt + "```\nSystem Configuration:" + json;
 //	const githubReportLink =
-//		"https://github.com/ThatBeaverDev/Constellation/issues/new?title=" +
+//		"https://github.com/ThatBeaverDev/Constellation-Sahara-Ares/issues/new?title=" +
 //		encodeURIComponent(title) +
 //		"&body=" +
 //		encodeURIComponent(description);

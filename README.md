@@ -1,12 +1,21 @@
-# Constellation
+# Constellation Sahara/Ares
 
-<img src="https://raw.githubusercontent.com/ThatBeaverDev/Constellation/refs/heads/dev/logos/Banner.svg" alt="Constellation banner logo" width="100%"/>
+Constellation Sahara/Ares was the first and last version of Constellation to use
+app bundles, allowing apps to ship multiple files and import dynamically between
+them at runtime. It used a macOS-inspired structure for the filesystem, though
+never progressed far enough to be provided a package manager, making it unlike
+the [prior](https://github.com/ThatBeaverDev/Constellation-Castorea) and
+[following](https://github.com/ThatBeaverDev/Constellation-epoch3) versions
+
+## Old README.md:
+
+<img src="https://raw.githubusercontent.com/ThatBeaverDev/Constellation-Sahara-Ares/refs/heads/dev/logos/Banner.svg" alt="Constellation banner logo" width="100%"/>
 <br>
 <br>
 
-[![GitHub release](https://img.shields.io/github/release/ThatBeaverDev/Constellation.svg)](https://github.com/ThatBeaverDev/Constellation/releases)
-[![License](https://img.shields.io/github/license/ThatBeaverDev/Constellation)](https://github.com/ThatBeaverDev/Constellation/blob/main/LICENSE)
-[![Latest Version](https://img.shields.io/github/package-json/v/ThatBeaverDev/Constellation)](https://github.com/ThatBeaverDev/Constellation)
+[![GitHub release](https://img.shields.io/github/release/ThatBeaverDev/Constellation-Sahara-Ares.svg)](https://github.com/ThatBeaverDev/Constellation-Sahara-Ares/releases)
+[![License](https://img.shields.io/github/license/ThatBeaverDev/Constellation-Sahara-Ares)](https://github.com/ThatBeaverDev/Constellation-Sahara-Ares/blob/main/LICENSE)
+[![Latest Version](https://img.shields.io/github/package-json/v/ThatBeaverDev/Constellation-Sahara-Ares)](https://github.com/ThatBeaverDev/Constellation-Sahara-Ares)
 
 Constellation is an environment for JavaScript (Or TypeScript) based apps to run
 inside.
@@ -39,7 +48,7 @@ To get the source code, simply use `git` - but it is important to pass
 `--recursive` to clone the submodules.
 
 ```sh
-git clone https://github.com/ThatBeaverDev/Constellation --recursive
+git clone https://github.com/ThatBeaverDev/Constellation-Sahara-Ares --recursive
 ```
 
 If you are trying to run the development branch:
